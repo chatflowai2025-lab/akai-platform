@@ -1,0 +1,722 @@
+/* ============================================================
+   AKAI Global Styles — Tailwind-compatible
+   Brand: Deep black, Gold, White, Accent green
+   Fonts: Playfair Display (headings), Inter (body)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================================
+   CSS Custom Properties (Design Tokens)
+   ============================================================ */
+
+:root {
+  /* Core Colours */
+  --akai-black:        #0a0a0a;
+  --akai-black-soft:   #111111;
+  --akai-black-muted:  #1a1a1a;
+  --akai-gold:         #C9A96E;
+  --akai-gold-light:   #E0C99A;
+  --akai-gold-dark:    #A6854A;
+  --akai-white:        #F5F5F5;
+  --akai-white-pure:   #FFFFFF;
+  --akai-white-dim:    #E0E0E0;
+  --akai-green:        #22C55E;
+  --akai-green-light:  #4ADE80;
+  --akai-green-dark:   #16A34A;
+
+  /* Semantic Colours */
+  --akai-surface:      #111111;
+  --akai-surface-2:    #181818;
+  --akai-surface-3:    #222222;
+  --akai-border:       rgba(201, 169, 110, 0.2);
+  --akai-border-subtle:rgba(255, 255, 255, 0.08);
+  --akai-text-primary: #F5F5F5;
+  --akai-text-secondary: rgba(245, 245, 245, 0.6);
+  --akai-text-muted:   rgba(245, 245, 245, 0.35);
+
+  /* Typography */
+  --font-display:      'Playfair Display', Georgia, serif;
+  --font-body:         'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Type Scale */
+  --text-xs:    0.75rem;    /* 12px */
+  --text-sm:    0.875rem;   /* 14px */
+  --text-base:  1rem;       /* 16px */
+  --text-lg:    1.125rem;   /* 18px */
+  --text-xl:    1.25rem;    /* 20px */
+  --text-2xl:   1.5rem;     /* 24px */
+  --text-3xl:   1.875rem;   /* 30px */
+  --text-4xl:   2.25rem;    /* 36px */
+  --text-5xl:   3rem;       /* 48px */
+  --text-6xl:   3.75rem;    /* 60px */
+  --text-7xl:   4.5rem;     /* 72px */
+  --text-hero:  5.5rem;     /* 88px */
+
+  /* Spacing */
+  --space-1:   0.25rem;
+  --space-2:   0.5rem;
+  --space-3:   0.75rem;
+  --space-4:   1rem;
+  --space-5:   1.25rem;
+  --space-6:   1.5rem;
+  --space-8:   2rem;
+  --space-10:  2.5rem;
+  --space-12:  3rem;
+  --space-16:  4rem;
+  --space-20:  5rem;
+  --space-24:  6rem;
+
+  /* Border Radius */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-gold:   0 0 40px rgba(201, 169, 110, 0.15);
+  --shadow-gold-sm:0 0 20px rgba(201, 169, 110, 0.1);
+  --shadow-green:  0 0 30px rgba(34, 197, 94, 0.2);
+  --shadow-card:   0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-elevated:0 8px 48px rgba(0, 0, 0, 0.6);
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+
+@keyframes akai-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes akai-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes akai-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes akai-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes akai-pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(201, 169, 110, 0);
+  }
+}
+
+@keyframes akai-pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+}
+
+@keyframes akai-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes akai-glow-breathe {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes akai-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes akai-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* Animation utility classes */
+.akai-fade-in {
+  animation: akai-fade-in var(--transition-base) both;
+}
+
+.akai-slide-up {
+  animation: akai-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.akai-slide-up-delay-1 { animation-delay: 0.1s; }
+.akai-slide-up-delay-2 { animation-delay: 0.2s; }
+.akai-slide-up-delay-3 { animation-delay: 0.3s; }
+.akai-slide-up-delay-4 { animation-delay: 0.4s; }
+.akai-slide-up-delay-5 { animation-delay: 0.5s; }
+
+.akai-scale-in {
+  animation: akai-scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.akai-pulse-gold {
+  animation: akai-pulse-gold 2s infinite;
+}
+
+.akai-pulse-green {
+  animation: akai-pulse-green 2s infinite;
+}
+
+.akai-float {
+  animation: akai-float 3s ease-in-out infinite;
+}
+
+.akai-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 169, 110, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: akai-shimmer 2s infinite;
+}
+
+/* ============================================================
+   Base Reset & Foundation
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--akai-black);
+  color: var(--akai-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Typography Base Styles
+   ============================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--akai-white);
+}
+
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-4xl); }
+h3 { font-size: var(--text-3xl); }
+h4 { font-size: var(--text-2xl); }
+h5 { font-size: var(--text-xl); }
+h6 { font-size: var(--text-lg); }
+
+p {
+  font-family: var(--font-body);
+  color: var(--akai-text-secondary);
+  line-height: 1.7;
+}
+
+.akai-display {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.akai-headline {
+  font-family: var(--font-display);
+  font-size: var(--text-6xl);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.akai-title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.akai-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--akai-text-secondary);
+  line-height: 1.6;
+}
+
+.akai-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--akai-gold);
+}
+
+.akai-caption {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--akai-text-muted);
+}
+
+/* Gold text utility */
+.text-gold { color: var(--akai-gold); }
+.text-green { color: var(--akai-green); }
+.text-muted { color: var(--akai-text-muted); }
+
+/* ============================================================
+   Button Components
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Primary: Gold CTA */
+.btn-primary {
+  background: linear-gradient(135deg, var(--akai-gold) 0%, var(--akai-gold-dark) 100%);
+  color: var(--akai-black);
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  box-shadow: 0 4px 24px rgba(201, 169, 110, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--akai-gold-light) 0%, var(--akai-gold) 100%);
+  box-shadow: 0 6px 32px rgba(201, 169, 110, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 12px rgba(201, 169, 110, 0.2);
+}
+
+/* Secondary: Outlined gold */
+.btn-secondary {
+  background: transparent;
+  color: var(--akai-gold);
+  border: 1.5px solid var(--akai-gold);
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+}
+
+.btn-secondary:hover {
+  background: rgba(201, 169, 110, 0.08);
+  box-shadow: var(--shadow-gold-sm);
+  transform: translateY(-1px);
+}
+
+/* Ghost: Text only */
+.btn-ghost {
+  background: transparent;
+  color: var(--akai-text-secondary);
+  padding: var(--space-3) var(--space-5);
+}
+
+.btn-ghost:hover {
+  color: var(--akai-white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Success: Green CTA */
+.btn-success {
+  background: linear-gradient(135deg, var(--akai-green) 0%, var(--akai-green-dark) 100%);
+  color: #fff;
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  box-shadow: 0 4px 24px rgba(34, 197, 94, 0.2);
+}
+
+.btn-success:hover {
+  box-shadow: 0 6px 32px rgba(34, 197, 94, 0.35);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* Button sizes */
+.btn-sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+}
+
+.btn-lg {
+  padding: var(--space-5) var(--space-10);
+  font-size: var(--text-lg);
+  border-radius: var(--radius-xl);
+}
+
+/* ============================================================
+   Card Components
+   ============================================================ */
+
+.card {
+  background: var(--akai-surface);
+  border: 1px solid var(--akai-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  transition: all var(--transition-base);
+}
+
+.card:hover {
+  border-color: var(--akai-border);
+  box-shadow: var(--shadow-gold-sm);
+  transform: translateY(-2px);
+}
+
+.card-elevated {
+  background: var(--akai-surface-2);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  box-shadow: var(--shadow-card);
+}
+
+.card-glass {
+  background: rgba(17, 17, 17, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 169, 110, 0.1);
+}
+
+.card-gold {
+  background: linear-gradient(135deg, rgba(201, 169, 110, 0.1) 0%, rgba(201, 169, 110, 0.03) 100%);
+  border: 1px solid rgba(201, 169, 110, 0.25);
+}
+
+/* Stat card */
+.stat-card {
+  background: var(--akai-surface);
+  border: 1px solid var(--akai-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stat-card .stat-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--akai-text-muted);
+}
+
+.stat-card .stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: var(--akai-gold);
+  line-height: 1;
+}
+
+.stat-card .stat-delta {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--akai-green);
+}
+
+/* ============================================================
+   Chat Bubble Components
+   ============================================================ */
+
+.chat-bubble {
+  max-width: 80%;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  position: relative;
+}
+
+.chat-bubble-user {
+  background: linear-gradient(135deg, var(--akai-gold) 0%, var(--akai-gold-dark) 100%);
+  color: var(--akai-black);
+  margin-left: auto;
+  border-bottom-right-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.chat-bubble-ai {
+  background: var(--akai-surface-2);
+  border: 1px solid var(--akai-border-subtle);
+  color: var(--akai-text-primary);
+  margin-right: auto;
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.chat-bubble-ai::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--akai-gold);
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================
+   Module Badge / Icon
+   ============================================================ */
+
+.module-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.module-icon-sales   { background: rgba(201, 169, 110, 0.15); border: 1px solid rgba(201, 169, 110, 0.3); }
+.module-icon-recruit { background: rgba(34, 197, 94, 0.12);   border: 1px solid rgba(34, 197, 94, 0.25); }
+.module-icon-web     { background: rgba(99, 179, 237, 0.12);  border: 1px solid rgba(99, 179, 237, 0.25); }
+.module-icon-ads     { background: rgba(244, 114, 182, 0.12); border: 1px solid rgba(244, 114, 182, 0.25); }
+.module-icon-social  { background: rgba(167, 139, 250, 0.12); border: 1px solid rgba(167, 139, 250, 0.25); }
+
+/* ============================================================
+   Form Elements
+   ============================================================ */
+
+.input {
+  width: 100%;
+  background: var(--akai-surface);
+  border: 1.5px solid var(--akai-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--akai-text-primary);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--akai-text-muted);
+}
+
+.input:focus {
+  border-color: var(--akai-gold);
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
+}
+
+/* ============================================================
+   Badge / Tag Components
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.badge-gold {
+  background: rgba(201, 169, 110, 0.15);
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  color: var(--akai-gold);
+}
+
+.badge-green {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: var(--akai-green);
+}
+
+.badge-outline {
+  background: transparent;
+  border: 1px solid var(--akai-border-subtle);
+  color: var(--akai-text-secondary);
+}
+
+/* ============================================================
+   Section / Layout Utilities
+   ============================================================ */
+
+.section {
+  padding: var(--space-24) var(--space-6);
+}
+
+.section-sm {
+  padding: var(--space-16) var(--space-6);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.container-sm {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--akai-border), transparent);
+  margin: var(--space-12) 0;
+}
+
+/* ============================================================
+   Tailwind @layer overrides (if using Tailwind)
+   ============================================================ */
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  .bg-akai-black       { background-color: var(--akai-black); }
+  .bg-akai-surface     { background-color: var(--akai-surface); }
+  .bg-akai-surface-2   { background-color: var(--akai-surface-2); }
+  .text-akai-gold      { color: var(--akai-gold); }
+  .text-akai-green     { color: var(--akai-green); }
+  .text-akai-white     { color: var(--akai-white); }
+  .border-akai-gold    { border-color: var(--akai-border); }
+  .font-display        { font-family: var(--font-display); }
+  .font-body           { font-family: var(--font-body); }
+}
+
+/* ============================================================
+   Responsive Typography
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .akai-display  { font-size: var(--text-5xl); }
+  .akai-headline { font-size: var(--text-4xl); }
+  .akai-title    { font-size: var(--text-3xl); }
+
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-3xl); }
+  h3 { font-size: var(--text-2xl); }
+}
+
+@media (max-width: 480px) {
+  .akai-display  { font-size: var(--text-4xl); }
+  .akai-headline { font-size: var(--text-3xl); }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-success {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   Scrollbar Styling
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--akai-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 169, 110, 0.5);
+}
+
+/* ============================================================
+   Selection
+   ============================================================ */
+
+::selection {
+  background: rgba(201, 169, 110, 0.25);
+  color: var(--akai-white);
+}

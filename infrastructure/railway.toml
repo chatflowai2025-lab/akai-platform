@@ -1,0 +1,16 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install && pnpm --filter @akai/api build"
+
+[deploy]
+startCommand = "node apps/api/dist/index.js"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[environments]
+  [environments.production]
+    [environments.production.variables]
+    NODE_ENV = "production"
+    PORT = "3001"

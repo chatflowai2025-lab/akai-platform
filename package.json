@@ -1,0 +1,19 @@
+{
+  "name": "akai-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm --filter './apps/*' build",
+    "lint": "pnpm --filter './apps/*' lint",
+    "type-check": "pnpm --filter './apps/*' type-check",
+    "clean": "pnpm --filter './apps/*' clean && pnpm --filter './packages/*' clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
