@@ -88,7 +88,7 @@ export default function Pricing() {
 
         <p className="text-center text-gray-500 text-sm mt-8">
           Enterprise pricing available.{' '}
-          <a href="mailto:hello@akai.ai" className="text-[#D4AF37] hover:underline">
+          <a href="mailto:hello@getakai.ai" className="text-[#D4AF37] hover:underline">
             Contact us →
           </a>
         </p>
