@@ -34,9 +34,6 @@ export default function HowItWorks() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs text-white/40 uppercase tracking-widest mb-6">
-            How it works
-          </div>
           <h2 className="text-4xl md:text-5xl font-black mb-5 leading-tight">
             From zero to running{' '}
             <span className="gradient-text">in 2 minutes</span>
@@ -56,15 +53,10 @@ export default function HowItWorks() {
               {/* Background accent */}
               <div className={`absolute inset-0 bg-gradient-to-br ${step.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
 
-              {/* Step number */}
-              <div className="text-[80px] font-black text-white/[0.04] font-mono leading-none absolute -top-2 -right-2 select-none">
-                {step.number}
-              </div>
-
               {/* Content */}
               <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center mb-5">
-                  <span className="text-[#D4AF37] font-black text-sm">{i + 1}</span>
+                <div className="text-[11px] font-black text-[#D4AF37]/50 tracking-[0.2em] uppercase mb-4">
+                  Step {step.number}
                 </div>
                 <h3 className="font-bold text-lg mb-2 text-white">{step.title}</h3>
                 <p className="text-white/40 leading-relaxed text-sm">{step.description}</p>

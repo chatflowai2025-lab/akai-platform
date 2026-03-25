@@ -56,9 +56,6 @@ export default function Pricing() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs text-white/40 uppercase tracking-widest mb-6">
-            Pricing
-          </div>
           <h2 className="text-4xl md:text-5xl font-black mb-5 leading-tight">
             Simple pricing.{' '}
             <span className="gradient-text">Serious ROI.</span>
