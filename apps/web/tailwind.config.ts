@@ -6,6 +6,11 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    'gradient-text', 'glass', 'glow-gold', 'glow-gold-sm',
+    'dot-grid', 'card-hover', 'border-gradient',
+    'pulse-ring', 'fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4',
+  ],
   theme: {
     extend: {
       colors: {
