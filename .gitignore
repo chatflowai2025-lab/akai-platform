@@ -1,0 +1,12 @@
+node_modules/
+packages/
+apps/
+.github/
+.pnpm-debug.log
+pnpm-lock.yaml
+pnpm-workspace.yaml
+tsconfig.json
+package.json
+README.md
+GTM-STRATEGY.md
+.deploy-trigger
