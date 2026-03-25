@@ -1,7 +1,6 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
-  transpilePackages: ['@akai/shared-types', '@akai/ui'],
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  transpilePackages: ['@akai/shared-types'],
   images: {
     domains: ['firebasestorage.googleapis.com'],
   },

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AKAI — Your AI Business Partner</title>
+  <meta name="description" content="AKAI is the world's first agentic organisation platform for SMBs. An AI team that actually runs your business. 24/7. While you sleep." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#C9A96E',
+            'gold-light': '#DFC08A',
+            'gold-dark': '#A8884E',
+            'dark': '#111111',
+            'dark-2': '#1A1A1A',
+            'dark-3': '#222222',
+            'dark-4': '#2A2A2A',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease-out forwards',
+            'fade-in': 'fadeIn 0.8s ease-out forwards',
+            'gold-pulse': 'goldPulse 3s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            goldPulse: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; }
+
+    body {
+      background-color: #111111;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Gold gradient text */
+    .text-gold-gradient {
+      background: linear-gradient(135deg, #C9A96E 0%, #DFC08A 50%, #C9A96E 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Gold border glow */
+    .gold-glow {
+      box-shadow: 0 0 30px rgba(201, 169, 110, 0.15);
+    }
+
+    .gold-glow-hover:hover {
+      box-shadow: 0 0 40px rgba(201, 169, 110, 0.25);
+      transition: box-shadow 0.3s ease;
+    }
+
+    /* Subtle grid background */
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(201, 169, 110, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201, 169, 110, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* Card hover effect */
+    .module-card {
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .module-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(201, 169, 110, 0.5) !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(201, 169, 110, 0.1);
+    }
+
+    /* Pricing card */
+    .pricing-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-6px);
+    }
+
+    /* CTA button */
+    .btn-gold {
+      background: linear-gradient(135deg, #C9A96E, #DFC08A);
+      transition: all 0.2s ease;
+    }
+
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #DFC08A, #C9A96E);
+      box-shadow: 0 8px 30px rgba(201, 169, 110, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline-gold {
+      border: 1.5px solid #C9A96E;
+      color: #C9A96E;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline-gold:hover {
+      background: rgba(201, 169, 110, 0.1);
+      box-shadow: 0 4px 20px rgba(201, 169, 110, 0.2);
+    }
+
+    /* Divider */
+    .gold-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.4), transparent);
+    }
+
+    /* Scroll-triggered animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+    .reveal-delay-6 { transition-delay: 0.6s; }
+
+    /* Nav blur */
+    nav {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Noise texture overlay on hero */
+    .hero-noise::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    /* Logo mark */
+    .logo-mark {
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    /* Step number */
+    .step-number {
+      font-size: 4rem;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, #C9A96E 0%, #DFC08A 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Quote marks */
+    .quote-mark {
+      font-size: 5rem;
+      line-height: 0.5;
+      font-family: Georgia, serif;
+      color: rgba(201, 169, 110, 0.3);
+    }
+
+    /* Checkmark list */
+    .check-item::before {
+      content: '✓';
+      color: #C9A96E;
+      font-weight: 700;
+      margin-right: 0.5rem;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #C9A96E; }
+  </style>
+</head>
+<body class="bg-dark">
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/80 border-b border-white/5">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="logo-mark text-xl text-white tracking-tight">
+        <span class="text-gold-gradient">AKAI</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-white/60">
+        <a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a>
+        <a href="#modules" class="hover:text-white transition-colors">Modules</a>
+        <a href="#pricing" class="hover:text-white transition-colors">Pricing</a>
+      </div>
+      <a href="https://aiclozr.vercel.app" target="_blank" class="btn-gold text-dark font-700 text-sm px-5 py-2.5 rounded-lg font-semibold">
+        Get Started →
+      </a>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 hero-noise grid-bg overflow-hidden">
+
+    <!-- Radial glow behind headline -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] rounded-full bg-gold/5 blur-[120px] pointer-events-none"></div>
+
+    <!-- Live badge -->
+    <div class="relative reveal mb-8 inline-flex items-center gap-2 bg-dark-3 border border-gold/20 rounded-full px-4 py-2 text-sm text-gold/80">
+      <span class="w-2 h-2 rounded-full bg-gold animate-pulse inline-block"></span>
+      World's First Agentic Organisation Platform for SMBs
+    </div>
+
+    <!-- Headline -->
+    <h1 class="reveal reveal-delay-1 relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.0] mb-6 max-w-5xl">
+      Your AI<br/>
+      <span class="text-gold-gradient">Business Partner.</span>
+    </h1>
+
+    <!-- Sub-headline -->
+    <p class="reveal reveal-delay-2 relative text-xl sm:text-2xl text-white/60 font-light max-w-2xl mb-10 leading-relaxed">
+      Describe your business.<br class="hidden sm:block"/>
+      We build it, run it, and grow it.
+    </p>
+
+    <!-- CTAs -->
+    <div class="reveal reveal-delay-3 relative flex flex-col sm:flex-row gap-4 items-center">
+      <a href="https://aiclozr.vercel.app" target="_blank" class="btn-gold text-dark font-bold text-lg px-8 py-4 rounded-xl">
+        Get Started →
+      </a>
+      <a href="#how-it-works" class="btn-outline-gold text-base px-8 py-4 rounded-xl font-medium">
+        See How It Works
+      </a>
+    </div>
+
+    <!-- Trust line -->
+    <p class="reveal reveal-delay-4 relative mt-12 text-sm text-white/30">
+      Trusted by Sydney's fastest-growing SMBs · Running 24/7 · No setup fees
+    </p>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20 text-xs">
+      <span>Scroll</span>
+      <div class="w-px h-8 bg-gradient-to-b from-white/20 to-transparent"></div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ===================== THE PROBLEM ===================== -->
+  <section class="py-24 px-6 bg-dark">
+    <div class="max-w-5xl mx-auto">
+
+      <div class="reveal text-center mb-16">
+        <p class="text-gold/70 text-sm font-semibold uppercase tracking-widest mb-4">The Reality</p>
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-6">
+          Most SMBs are stuck<br/>between bad options.
+        </h2>
+        <p class="text-xl text-white/50 max-w-2xl mx-auto">
+          Agencies are expensive. DIY tools take time. Most SMBs get neither right.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="reveal reveal-delay-1 module-card bg-dark-2 border border-white/8 rounded-2xl p-8">
+          <div class="text-3xl mb-4">💸</div>
+          <h3 class="text-xl font-bold mb-3">Agencies bleed you dry</h3>
+          <p class="text-white/50 leading-relaxed">
+            $5K/month retainers for mediocre results. Monthly reports that say a lot and do nothing. You're funding their overhead.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-2 module-card bg-dark-2 border border-white/8 rounded-2xl p-8">
+          <div class="text-3xl mb-4">⏳</div>
+          <h3 class="text-xl font-bold mb-3">DIY tools eat your time</h3>
+          <p class="text-white/50 leading-relaxed">
+            You didn't start a business to become a marketer, recruiter, and web developer. Every hour in a tool is an hour not in your business.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-3 module-card bg-dark-2 border border-white/8 rounded-2xl p-8">
+          <div class="text-3xl mb-4">📉</div>
+          <h3 class="text-xl font-bold mb-3">Growth stalls without a team</h3>
+          <p class="text-white/50 leading-relaxed">
+            Hiring is expensive and slow. Most SMBs can't afford the team they need to grow. So they stay small. Stuck.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Separator callout -->
+      <div class="reveal mt-16 text-center">
+        <p class="text-2xl sm:text-3xl font-bold text-white/80">
+          There's a third option now.
+        </p>
+        <p class="mt-3 text-lg text-gold font-semibold">An AI team that actually works.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how-it-works" class="py-24 px-6 bg-dark-2 grid-bg">
+    <div class="max-w-5xl mx-auto">
+
+      <div class="reveal text-center mb-20">
+        <p class="text-gold/70 text-sm font-semibold uppercase tracking-widest mb-4">The Process</p>
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight">
+          Up and running in<br/>
+          <span class="text-gold-gradient">under 24 hours.</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+        <div class="reveal reveal-delay-1 text-center">
+          <div class="step-number mb-4">01</div>
+          <div class="text-4xl mb-6">🗣️</div>
+          <h3 class="text-2xl font-bold mb-4">Describe your business</h3>
+          <p class="text-white/50 leading-relaxed">
+            Tell AKAI what you do, who your customers are, and what you want. That's it. Five minutes. No forms, no onboarding decks.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-2 text-center relative">
+          <!-- Connector lines on desktop -->
+          <div class="hidden md:block absolute top-8 -left-5 w-10 h-px bg-gradient-to-r from-transparent to-gold/20"></div>
+          <div class="hidden md:block absolute top-8 -right-5 w-10 h-px bg-gradient-to-l from-transparent to-gold/20"></div>
+          <div class="step-number mb-4">02</div>
+          <div class="text-4xl mb-6">⚡</div>
+          <h3 class="text-2xl font-bold mb-4">AKAI deploys your team</h3>
+          <p class="text-white/50 leading-relaxed">
+            We activate the modules you need. Sales agents, mail handlers, recruiters, content writers — your AI team is live.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-3 text-center">
+          <div class="step-number mb-4">03</div>
+          <div class="text-4xl mb-6">📈</div>
+          <h3 class="text-2xl font-bold mb-4">Watch it run</h3>
+          <p class="text-white/50 leading-relaxed">
+            Your business runs itself. Leads get called. Emails get handled. Content gets posted. You get weekly reports. And sleep.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ===================== MODULES ===================== -->
+  <section id="modules" class="py-24 px-6 bg-dark">
+    <div class="max-w-5xl mx-auto">
+
+      <div class="reveal text-center mb-16">
+        <p class="text-gold/70 text-sm font-semibold uppercase tracking-widest mb-4">The Platform</p>
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight mb-4">
+          Six modules.<br/>
+          <span class="text-gold-gradient">One AI team.</span>
+        </h2>
+        <p class="text-lg text-white/50 max-w-xl mx-auto">
+          Pick what you need. Stack as you grow. Each module is a specialist AI agent — not a tool. It does the work.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        <div class="reveal reveal-delay-1 module-card bg-dark-2 border border-white/8 rounded-2xl p-7">
+          <div class="text-3xl mb-4">🎯</div>
+          <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-2">Sales · AI Clozr</div>
+          <h3 class="text-lg font-bold mb-3">Never miss a hot lead</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Finds qualified leads, calls them within 5 minutes, and books appointments directly into your calendar. While you're doing anything else.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-2 module-card bg-dark-2 border border-white/8 rounded-2xl p-7">
+          <div class="text-3xl mb-4">📧</div>
+          <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-2">Mail Guard</div>
+          <h3 class="text-lg font-bold mb-3">Inbox under control</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Reads your inbox, drafts smart responses, flags what needs you, and routes the rest for one-click approval. Zero inbox anxiety.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-3 module-card bg-dark-2 border border-white/8 rounded-2xl p-7">
+          <div class="text-3xl mb-4">👥</div>
+          <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-2">Recruit</div>
+          <h3 class="text-lg font-bold mb-3">Hire without the hassle</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Screens every application, ranks candidates, handles initial comms, and delivers a ready-to-interview shortlist. You just pick.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-4 module-card bg-dark-2 border border-white/8 rounded-2xl p-7">
+          <div class="text-3xl mb-4">🌐</div>
+          <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-2">Web</div>
+          <h3 class="text-lg font-bold mb-3">Your site, always optimised</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Audits your SEO, builds new landing pages, fixes performance issues. Your website works harder so you don't have to.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-5 module-card bg-dark-2 border border-white/8 rounded-2xl p-7">
+          <div class="text-3xl mb-4">📊</div>
+          <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-2">Ads</div>
+          <h3 class="text-lg font-bold mb-3">Ad spend that actually works</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Manages your Google Ads campaigns end-to-end. Optimises for conversions, not vanity metrics. Weekly performance reports, plain English.
+          </p>
+        </div>
+
+        <div class="reveal reveal-delay-6 module-card bg-dark-2 border border-white/8 rounded-2xl p-7">
+          <div class="text-3xl mb-4">📱</div>
+          <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-2">Social</div>
+          <h3 class="text-lg font-bold mb-3">Content on autopilot</h3>
+          <p class="text-white/50 text-sm leading-relaxed">
+            Writes, designs, and schedules posts across platforms. Grows your following with content that sounds like you — because it's trained on you.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ===================== SOCIAL PROOF ===================== -->
+  <section class="py-24 px-6 bg-dark-2">
+    <div class="max-w-4xl mx-auto">
+
+      <div class="reveal text-center mb-16">
+        <p class="text-gold/70 text-sm font-semibold uppercase tracking-widest mb-4">Client Results</p>
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight">
+          Real businesses.<br/>
+          <span class="text-gold-gradient">Real results.</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- Quote 1 -->
+        <div class="reveal reveal-delay-1 bg-dark border border-gold/15 rounded-2xl p-8 gold-glow relative">
+          <div class="quote-mark mb-2">"</div>
+          <p class="text-lg text-white/80 leading-relaxed mb-6 italic">
+            We were turning away charter enquiries because we couldn't keep up with the inbox. AKAI's Mail Guard changed everything. Responses go out within minutes, my calendar fills itself, and I'm back on the water instead of glued to a laptop.
+          </p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-dark-3 border border-gold/20 flex items-center justify-center text-gold font-bold text-lg">W</div>
+            <div>
+              <div class="font-bold text-white">Will Hartley</div>
+              <div class="text-sm text-white/40">Founder · Sydney Harbour Exclusive</div>
+              <div class="text-xs text-gold/60 mt-0.5">Luxury Yacht Charters, Sydney</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quote 2 -->
+        <div class="reveal reveal-delay-2 bg-dark border border-gold/15 rounded-2xl p-8 gold-glow relative">
+          <div class="quote-mark mb-2">"</div>
+          <p class="text-lg text-white/80 leading-relaxed mb-6 italic">
+            Italian kitchen showrooms live and die by leads. Before AKAI, we were losing half of them to slow follow-up. Now AI Clozr calls every new enquiry in under five minutes and books the consultation. Our conversion rate is up 60% and I haven't hired a single salesperson.
+          </p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-dark-3 border border-gold/20 flex items-center justify-center text-gold font-bold text-lg">M</div>
+            <div>
+              <div class="font-bold text-white">Marco Pellegrini</div>
+              <div class="text-sm text-white/40">Director · AP Heritage Interior</div>
+              <div class="text-xs text-gold/60 mt-0.5">Luxury Italian Kitchens, Alexandria Sydney</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Stats bar -->
+      <div class="reveal mt-12 grid grid-cols-3 gap-px bg-white/5 rounded-2xl overflow-hidden">
+        <div class="bg-dark-2 text-center py-8 px-4">
+          <div class="text-3xl sm:text-4xl font-black text-gold-gradient mb-1">5 min</div>
+          <div class="text-xs text-white/40 uppercase tracking-wider">Lead response time</div>
+        </div>
+        <div class="bg-dark-2 text-center py-8 px-4">
+          <div class="text-3xl sm:text-4xl font-black text-gold-gradient mb-1">24/7</div>
+          <div class="text-xs text-white/40 uppercase tracking-wider">Always on</div>
+        </div>
+        <div class="bg-dark-2 text-center py-8 px-4">
+          <div class="text-3xl sm:text-4xl font-black text-gold-gradient mb-1">60%+</div>
+          <div class="text-xs text-white/40 uppercase tracking-wider">Conversion lift</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ===================== PRICING ===================== -->
+  <section id="pricing" class="py-24 px-6 bg-dark grid-bg">
+    <div class="max-w-5xl mx-auto">
+
+      <div class="reveal text-center mb-16">
+        <p class="text-gold/70 text-sm font-semibold uppercase tracking-widest mb-4">Pricing</p>
+        <h2 class="text-4xl sm:text-5xl font-black tracking-tight mb-4">
+          Less than one employee.<br/>
+          <span class="text-gold-gradient">More than a full team.</span>
+        </h2>
+        <p class="text-white/50 text-lg">No lock-in. Cancel anytime. Results from day one.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Starter -->
+        <div class="reveal reveal-delay-1 pricing-card bg-dark-2 border border-white/10 rounded-2xl p-8 flex flex-col">
+          <div class="mb-6">
+            <div class="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">Starter</div>
+            <div class="flex items-end gap-1 mb-2">
+              <span class="text-4xl font-black text-white">$299</span>
+              <span class="text-white/40 mb-1">/mo</span>
+            </div>
+            <p class="text-white/50 text-sm">One focused module. One serious result.</p>
+          </div>
+          <div class="gold-divider mb-6"></div>
+          <ul class="space-y-3 flex-1 mb-8">
+            <li class="text-sm text-white/70 check-item">1 AKAI module of your choice</li>
+            <li class="text-sm text-white/70 check-item">Onboarding call included</li>
+            <li class="text-sm text-white/70 check-item">Weekly performance report</li>
+            <li class="text-sm text-white/70 check-item">Email support</li>
+          </ul>
+          <a href="https://aiclozr.vercel.app" target="_blank" class="btn-outline-gold text-center py-3.5 rounded-xl text-sm font-semibold">
+            Get Started →
+          </a>
+        </div>
+
+        <!-- Growth — featured -->
+        <div class="reveal reveal-delay-2 pricing-card relative bg-dark-2 border-2 border-gold rounded-2xl p-8 flex flex-col gold-glow">
+          <!-- Popular badge -->
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gold text-dark text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+            Most Popular
+          </div>
+          <div class="mb-6">
+            <div class="text-xs font-bold text-gold/70 uppercase tracking-widest mb-3">Growth</div>
+            <div class="flex items-end gap-1 mb-2">
+              <span class="text-4xl font-black text-white">$599</span>
+              <span class="text-white/40 mb-1">/mo</span>
+            </div>
+            <p class="text-white/50 text-sm">Three modules working together. Serious momentum.</p>
+          </div>
+          <div class="gold-divider mb-6"></div>
+          <ul class="space-y-3 flex-1 mb-8">
+            <li class="text-sm text-white/70 check-item">3 AKAI modules of your choice</li>
+            <li class="text-sm text-white/70 check-item">Priority onboarding</li>
+            <li class="text-sm text-white/70 check-item">Weekly performance reports</li>
+            <li class="text-sm text-white/70 check-item">Slack/WhatsApp support</li>
+            <li class="text-sm text-white/70 check-item">Monthly strategy review</li>
+          </ul>
+          <a href="https://aiclozr.vercel.app" target="_blank" class="btn-gold text-dark text-center py-3.5 rounded-xl text-sm font-bold">
+            Get Started →
+          </a>
+        </div>
+
+        <!-- Scale -->
+        <div class="reveal reveal-delay-3 pricing-card bg-dark-2 border border-white/10 rounded-2xl p-8 flex flex-col">
+          <div class="mb-6">
+            <div class="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">Scale</div>
+            <div class="flex items-end gap-1 mb-2">
+              <span class="text-4xl font-black text-white">$1,200</span>
+              <span class="text-white/40 mb-1">/mo</span>
+            </div>
+            <p class="text-white/50 text-sm">All modules. Dedicated agent. Fully hands-off.</p>
+          </div>
+          <div class="gold-divider mb-6"></div>
+          <ul class="space-y-3 flex-1 mb-8">
+            <li class="text-sm text-white/70 check-item">All 6 AKAI modules</li>
+            <li class="text-sm text-white/70 check-item">Dedicated AI agent</li>
+            <li class="text-sm text-white/70 check-item">Daily performance reports</li>
+            <li class="text-sm text-white/70 check-item">Direct line to your agent 24/7</li>
+            <li class="text-sm text-white/70 check-item">Quarterly growth strategy</li>
+            <li class="text-sm text-white/70 check-item">Custom integrations</li>
+          </ul>
+          <a href="https://aiclozr.vercel.app" target="_blank" class="btn-outline-gold text-center py-3.5 rounded-xl text-sm font-semibold">
+            Get Started →
+          </a>
+        </div>
+
+      </div>
+
+      <div class="reveal mt-10 text-center text-sm text-white/30">
+        All prices in AUD · No setup fees · No lock-in contracts · Cancel anytime
+      </div>
+
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ===================== FINAL CTA ===================== -->
+  <section class="py-32 px-6 bg-dark-2 relative overflow-hidden">
+
+    <!-- Glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gold/8 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="relative max-w-3xl mx-auto text-center">
+
+      <div class="reveal mb-4">
+        <p class="text-gold/70 text-sm font-semibold uppercase tracking-widest">Make The Move</p>
+      </div>
+
+      <h2 class="reveal reveal-delay-1 text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6">
+        Ready to hand it over?
+      </h2>
+
+      <p class="reveal reveal-delay-2 text-xl text-white/50 mb-12 max-w-xl mx-auto leading-relaxed">
+        Your competitors are still doing it manually. You don't have to be.
+        AKAI runs 24/7 so you can focus on what actually matters.
+      </p>
+
+      <div class="reveal reveal-delay-3 flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="https://aiclozr.vercel.app" target="_blank" class="btn-gold text-dark font-bold text-xl px-12 py-5 rounded-2xl inline-block">
+          Get Started →
+        </a>
+      </div>
+
+      <p class="reveal reveal-delay-4 mt-8 text-sm text-white/25">
+        Onboarding call included. Up and running in 24 hours.
+      </p>
+
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="py-10 px-6 bg-dark border-t border-white/5">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="logo-mark text-xl text-gold-gradient">AKAI</div>
+      <p class="text-white/30 text-sm text-center">Your AI Business Partner · Running 24/7</p>
+      <p class="text-white/20 text-xs">© 2026 AKAI · Sydney, Australia</p>
+    </div>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script>
+    // Intersection Observer for reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          const offset = 80;
+          const top = target.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Nav scroll effect
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        nav.style.borderBottomColor = 'rgba(255,255,255,0.08)';
+      } else {
+        nav.style.borderBottomColor = 'rgba(255,255,255,0.05)';
+      }
+    });
+  </script>
+
+</body>
+</html>
