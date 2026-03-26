@@ -81,7 +81,7 @@ const AGENTS = [
     color: 'from-teal-500/20 to-cyan-500/20',
     border: 'border-teal-500/20',
     accent: 'text-teal-400',
-    what: 'Manages client relationships, sends updates, and makes sure everyone's happy.',
+    what: "Manages client relationships, sends updates, and makes sure everyone's happy.",
     does: ['Client communications', 'Proposal generation', 'Relationship tracking'],
   },
 ];
