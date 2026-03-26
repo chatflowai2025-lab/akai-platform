@@ -25,25 +25,25 @@ interface ChatState { step: string; data: Record<string, string>; }
 
 // ── Chat panel ────────────────────────────────────────────────────────────────
 function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { externalMessage: string | null; onExternalMessageHandled: () => void }) {
+  // ── All hooks must be declared before any effects ──────────────────────────
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
   const [userContext, setUserContext] = useState<Record<string, string>>({});
-
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { user } = useAuth();
 
-  // Handle messages injected from page buttons
+  // Handle messages injected from page buttons (e.g. quick-action buttons)
   useEffect(() => {
     if (externalMessage) {
       sendRaw(externalMessage);
       onExternalMessageHandled();
     }
   }, [externalMessage]); // eslint-disable-line
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-  const { user } = useAuth();
 
   // Persist chat to Firestore
   useEffect(() => {
