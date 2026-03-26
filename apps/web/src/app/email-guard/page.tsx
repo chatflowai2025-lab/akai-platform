@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +41,7 @@ function HowItWorksStep({ step, icon, title, description }: { step: number; icon
   );
 }
 
-export default function EmailGuardPage() {
+function EmailGuardInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
@@ -256,5 +256,17 @@ export default function EmailGuardPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function EmailGuardPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <EmailGuardInner />
+    </Suspense>
   );
 }
