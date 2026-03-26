@@ -633,7 +633,7 @@ function ProspectsSection() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{p.name}</p>
                     <div className="flex items-center gap-3 mt-0.5">
-                      {p.email && <a href={`mailto:${p.email}`} className="text-xs text-gray-500 hover:text-[#D4AF37] transition truncate max-w-[200px]">{p.email}</a>}
+                      {p.email && <a href={`mailto:${p.email}`} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-[#D4AF37] transition truncate max-w-[200px]">{p.email}</a>}
                       {p.phone && <span className="text-xs text-gray-600">{p.phone}</span>}
                       {p.website && <a href={`https://${p.website}`} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-600 hover:text-white transition">{p.website}</a>}
                     </div>
@@ -649,7 +649,13 @@ function ProspectsSection() {
                       {Object.entries(STATUS_STYLES).map(([val, info]) => <option key={val} value={val}>{info.label}</option>)}
                     </select>
                     {p.email && (
-                      <a href={`mailto:${p.email}?subject=${encodeURIComponent(p.subject || 'Introduction')}`} className="text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition opacity-0 group-hover:opacity-100 font-semibold">
+                      <a
+                        href={`mailto:${p.email}?subject=${encodeURIComponent(p.subject || `Introduction — AKAI for ${p.name}`)}&body=${encodeURIComponent(`Hi,\n\nI wanted to reach out about AKAI — an AI system that helps ${p.name} capture more leads automatically, even when you're busy or closed.\n\nWould you have 10 minutes this week for a quick call?\n\nBest,\nAaron\nAKAI — getakai.ai`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => updateStatus(p.id, 'contacted')}
+                        className="text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition opacity-0 group-hover:opacity-100 font-semibold"
+                      >
                         Email →
                       </a>
                     )}
