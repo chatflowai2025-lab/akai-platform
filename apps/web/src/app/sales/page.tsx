@@ -215,6 +215,8 @@ function LeadUploadSection({ userId, businessName, plan = 'starter' }: { userId:
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
   const [campaignName, setCampaignName] = useState('Campaign 1');
   const [launching, setLaunching] = useState(false);
+  const [dncResult, setDncResult] = useState<{ safe: string[]; blocked: string[] } | null>(null);
+  const [dncChecking, setDncChecking] = useState(false);
   const [launchResult, setLaunchResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const leadLimit = PLAN_LEAD_LIMITS[plan] ?? 50;
@@ -274,12 +276,42 @@ function LeadUploadSection({ userId, businessName, plan = 'starter' }: { userId:
     e.target.value = '';
   };
 
+  const checkDNC = async () => {
+    const phones = uploadedLeads.map(l => l.phone).filter(Boolean);
+    if (!phones.length) return;
+    setDncChecking(true);
+    try {
+      const res = await fetch(`${RAILWAY_API}/api/dncr/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+        body: JSON.stringify({ numbers: phones }),
+      });
+      const data = await res.json();
+      setDncResult({ safe: data.safe || [], blocked: data.blocked || [] });
+    } catch {
+      setDncResult(null);
+    } finally {
+      setDncChecking(false);
+    }
+  };
+
   const launchCampaign = async () => {
     if (uploadedLeads.length === 0 || launching) return;
     setLaunching(true);
     setLaunchResult(null);
 
-    // Mark all as calling
+    // Filter out DNC numbers if check was run
+    const safeLeads = dncResult
+      ? uploadedLeads.filter(l => l.phone && !dncResult.blocked.includes(l.phone))
+      : uploadedLeads;
+
+    if (safeLeads.length === 0) {
+      setLaunchResult({ success: false, message: 'All numbers are on the Do Not Call register — no leads to call.' });
+      setLaunching(false);
+      return;
+    }
+
+    // Mark as calling
     setUploadedLeads(prev => prev.map(l => ({ ...l, callStatus: 'calling' as const })));
 
     const script = `Hi {{name}}, this is Sophie from ${businessName || '[businessName]'}. I'm reaching out because we help businesses like yours generate more leads and close more deals using AI. Do you have 2 minutes to chat?`;
@@ -292,7 +324,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter' }: { userId:
           'x-api-key': RAILWAY_API_KEY,
         },
         body: JSON.stringify({
-          leads: uploadedLeads.map(l => ({
+          leads: safeLeads.map(l => ({
             name: l.name || '',
             phone: l.phone || '',
             email: l.email || '',
