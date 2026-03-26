@@ -176,12 +176,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4">
-      <a href="/" className="flex items-center mb-10">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 overflow-hidden">
+      <a href="/" className="flex items-center mb-8">
         <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
       </a>
 
-      <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-8">
+      <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8">
         <div className="flex mb-8 bg-[#0a0a0a] rounded-xl p-1">
           {(['signin', 'signup'] as Tab[]).map(t => (
             <button key={t} onClick={() => { setTab(t); setError(''); }}

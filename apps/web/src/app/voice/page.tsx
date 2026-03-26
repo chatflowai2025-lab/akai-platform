@@ -890,12 +890,16 @@ function VoicePageInner() {
         const db = getFirebaseDb();
         if (!db) { setConfigLoading(false); return; }
         const ref = doc(db, 'users', user!.uid, 'voiceConfig', 'config');
-        const snap = await getDoc(ref);
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Firestore timeout')), 5000)
+        );
+        const snap = await Promise.race([getDoc(ref), timeout]);
         if (snap.exists()) {
           setConfig({ ...DEFAULT_CONFIG, ...(snap.data() as VoiceConfig) });
         }
       } catch (err) {
-        console.error('[voice] Failed to load config', err);
+        console.error('[voice] Failed to load config, using defaults', err);
+        // Use DEFAULT_CONFIG — already set as initial state
       } finally {
         setConfigLoading(false);
       }

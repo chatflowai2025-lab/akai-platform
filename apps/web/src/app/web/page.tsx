@@ -816,9 +816,7 @@ export default function WebPage() {
           <h1 className="text-lg font-black text-white">Web</h1>
           <p className="text-xs text-gray-500 mt-0.5">AI-powered website manager</p>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-medium">
-          Beta
-        </span>
+
       </header>
 
       <div className="flex flex-col flex-1 overflow-hidden min-h-0">

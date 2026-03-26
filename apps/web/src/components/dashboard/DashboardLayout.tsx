@@ -256,7 +256,7 @@ function DashboardLayoutInner({
     <ChatContext.Provider value={{ sendMessage: injectMessage }}>
       <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
         <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0 pb-16 md:pb-0">
           {userEmail && isSafeMode(userEmail) && (
             <div className="flex-shrink-0 bg-yellow-500/10 border-b border-yellow-500/20 px-6 py-2 flex items-center gap-2">
               <span className="text-yellow-400 text-xs font-semibold">🧪 Beta / Safe Mode — Full experience. No live calls or emails will be sent.</span>

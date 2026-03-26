@@ -57,6 +57,7 @@ export default function SettingsPage() {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [bizSaving, setBizSaving] = useState(false);
   const [bizSaved, setBizSaved] = useState(false);
+  const [bizError, setBizError] = useState<string | null>(null);
 
   // Notifications
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>({
@@ -170,10 +171,12 @@ export default function SettingsPage() {
       const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 8000));
       await Promise.race([savePromise, timeout]);
       setBizSaved(true);
+      setBizError(null);
       setTimeout(() => setBizSaved(false), 2500);
     } catch (err) {
       console.error('[SETTINGS] save biz error', err);
-      alert('Save failed — please refresh and try again.');
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setBizError(`Save failed: ${msg}. Please try again.`);
     } finally {
       setBizSaving(false);
     }
@@ -242,7 +245,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout noChat>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <h1 className="text-xl font-black text-white">Settings</h1>
@@ -302,6 +305,11 @@ export default function SettingsPage() {
               />
             </FieldRow>
           </div>
+          {bizError && (
+            <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-2">
+              {bizError}
+            </div>
+          )}
           <button
             onClick={saveBizProfile}
             disabled={bizSaving}

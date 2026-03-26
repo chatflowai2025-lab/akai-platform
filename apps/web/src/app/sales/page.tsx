@@ -560,6 +560,115 @@ function CTASection() {
   );
 }
 
+// ── AKAI Prospects Section ────────────────────────────────────────────────
+
+interface Prospect { id: number; name: string; email: string; phone: string; website: string; status: string; subject: string; }
+
+const STATUS_STYLES: Record<string, { label: string; style: string }> = {
+  not_contacted:  { label: 'Not contacted', style: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
+  contacted:      { label: 'Contacted',     style: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  replied:        { label: 'Replied',       style: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  qualified:      { label: 'Qualified',     style: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  closed:         { label: 'Closed',        style: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  not_interested: { label: 'Not interested',style: 'bg-red-500/10 text-red-400 border-red-500/20' },
+};
+
+function ProspectsSection() {
+  const [prospects, setProspects] = useState<Prospect[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
+  const [updating, setUpdating] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('/api/prospects').then(r => r.json()).then(d => {
+      setProspects(d.prospects ?? []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const updateStatus = async (id: number, status: string) => {
+    setUpdating(id);
+    setProspects(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+    await fetch('/api/prospects', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) }).catch(() => {});
+    setUpdating(null);
+  };
+
+  const filtered = prospects.filter(p => {
+    const matchFilter = filter === 'all' || p.status === filter;
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+
+  const counts = { total: prospects.length, not_contacted: prospects.filter(p => p.status === 'not_contacted').length, contacted: prospects.filter(p => p.status === 'contacted').length, qualified: prospects.filter(p => p.status === 'qualified').length };
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">AKAI Prospects</h2>
+          <p className="text-xs text-gray-600 mt-0.5">{counts.total} prospects · {counts.not_contacted} not contacted · {counts.contacted} contacted · {counts.qualified} qualified</p>
+        </div>
+      </div>
+
+      {/* Filter + Search */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search prospects..." className="bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition w-48" />
+        {['all', 'not_contacted', 'contacted', 'replied', 'qualified', 'closed'].map(f => (
+          <button key={f} onClick={() => setFilter(f)} className={`text-xs px-3 py-1.5 rounded-lg border transition font-medium ${filter === f ? 'bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500 hover:text-white hover:border-[#3a3a3a]'}`}>
+            {f === 'all' ? 'All' : STATUS_STYLES[f]?.label ?? f}
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12"><div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 text-gray-600 text-sm">No prospects match your filter.</div>
+        ) : (
+          <div className="divide-y divide-[#1a1a1a]">
+            {filtered.map(p => {
+              const statusInfo = STATUS_STYLES[p.status] ?? STATUS_STYLES.not_contacted;
+              return (
+                <div key={p.id} className="flex items-center gap-4 px-4 py-3 hover:bg-[#141414] transition-colors group">
+                  <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">
+                    {p.id}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{p.name}</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      {p.email && <a href={`mailto:${p.email}`} className="text-xs text-gray-500 hover:text-[#D4AF37] transition truncate max-w-[200px]">{p.email}</a>}
+                      {p.phone && <span className="text-xs text-gray-600">{p.phone}</span>}
+                      {p.website && <a href={`https://${p.website}`} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-600 hover:text-white transition">{p.website}</a>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusInfo.style}`}>{statusInfo.label}</span>
+                    <select
+                      value={p.status}
+                      onChange={e => updateStatus(p.id, e.target.value)}
+                      disabled={updating === p.id}
+                      className="text-xs bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-2 py-1 text-gray-400 focus:outline-none focus:border-[#D4AF37] transition opacity-0 group-hover:opacity-100 cursor-pointer"
+                    >
+                      {Object.entries(STATUS_STYLES).map(([val, info]) => <option key={val} value={val}>{info.label}</option>)}
+                    </select>
+                    {p.email && (
+                      <a href={`mailto:${p.email}?subject=${encodeURIComponent(p.subject || 'Introduction')}`} className="text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition opacity-0 group-hover:opacity-100 font-semibold">
+                        Email →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────
 
 export default function SalesPage() {
@@ -724,6 +833,9 @@ export default function SalesPage() {
             )}
           </div>
         </section>
+
+        {/* AKAI Prospects */}
+        <ProspectsSection />
 
         {/* CTA Banner — uses useDashboardChat() via CTASection component */}
         <CTASection />
