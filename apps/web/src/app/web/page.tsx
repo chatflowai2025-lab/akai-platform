@@ -28,7 +28,13 @@ interface AuditResult {
   speedScore: number;
   seoScore: number;
   mobileScore: number;
+  overallScore: number;
+  ctaScore: number;
+  trustScore: number;
+  headline: string;
   issues: string[];
+  whatsWorking: string[];
+  quickWins: Array<{ action: string; impact: string }>;
 }
 
 interface ChangeEntry {
@@ -315,22 +321,39 @@ function AuditPanel({ url, onBack }: { url: string; onBack: () => void }) {
       });
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json() as {
+        scores?: { overall?: number; seo?: number; mobile?: number; cta?: number; trust?: number; speed?: number };
         speedScore?: number; speed_score?: number; performance?: number;
-        seoScore?: number; seo_score?: number; seo?: number;
-        mobileScore?: number; mobile_score?: number; mobile?: number;
+        seoScore?: number; seo_score?: number;
+        mobileScore?: number; mobile_score?: number;
         recommendations?: string[]; top_recommendations?: string[];
+        whatsWorking?: string[];
+        criticalGaps?: string[];
+        quickWins?: Array<{ action: string; impact: string }>;
+        headline?: string;
       };
+      const scores = data.scores ?? {};
+      // Build issues list: criticalGaps first, then quickWin actions
+      const gaps = data.criticalGaps ?? [];
+      const wins = (data.quickWins ?? []).map(w => w.action);
+      const fallbackIssues = data.recommendations ?? data.top_recommendations ?? [
+        'Compress and lazy-load images to improve LCP',
+        'Add meta descriptions to all key pages',
+        'Ensure tap targets are at least 48px on mobile',
+        'Enable browser caching for static assets',
+        'Minify CSS and JavaScript files',
+      ];
+      const issues = [...gaps, ...wins].length > 0 ? [...gaps, ...wins] : fallbackIssues;
       setResult({
-        speedScore: data.speedScore ?? data.speed_score ?? data.performance ?? 72,
-        seoScore: data.seoScore ?? data.seo_score ?? data.seo ?? 68,
-        mobileScore: data.mobileScore ?? data.mobile_score ?? data.mobile ?? 80,
-        issues: data.recommendations ?? data.top_recommendations ?? [
-          'Compress and lazy-load images to improve LCP',
-          'Add meta descriptions to all key pages',
-          'Ensure tap targets are at least 48px on mobile',
-          'Enable browser caching for static assets',
-          'Minify CSS and JavaScript files',
-        ],
+        overallScore: (scores.overall ?? 0) * 10,
+        speedScore: ((scores.speed ?? 0) * 10) || (data.speedScore ?? data.speed_score ?? data.performance ?? 72),
+        seoScore: ((scores.seo ?? 0) * 10) || (data.seoScore ?? data.seo_score ?? 68),
+        mobileScore: ((scores.mobile ?? 0) * 10) || (data.mobileScore ?? data.mobile_score ?? 80),
+        ctaScore: (scores.cta ?? 0) * 10,
+        trustScore: (scores.trust ?? 0) * 10,
+        headline: data.headline ?? '',
+        whatsWorking: data.whatsWorking ?? [],
+        quickWins: data.quickWins ?? [],
+        issues,
       });
     } catch {
       setError("Couldn't reach the audit service. Check the URL and try again.");
@@ -376,20 +399,46 @@ function AuditPanel({ url, onBack }: { url: string; onBack: () => void }) {
 
       {result && (
         <>
+          {/* Headline */}
+          {result.headline && (
+            <div className="rounded-2xl border border-[#D4AF37]/20 bg-[#D4AF37]/5 px-5 py-4">
+              <p className="text-sm text-[#D4AF37] font-medium">{result.headline}</p>
+            </div>
+          )}
+
           {/* Score cards */}
           <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
             <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-5">Overall Scores</p>
-            <div className="flex justify-around">
-              <ScoreRing label="Speed" score={result.speedScore} />
+            <div className="flex justify-around flex-wrap gap-4">
+              {result.overallScore > 0 && <ScoreRing label="Overall" score={result.overallScore} />}
               <ScoreRing label="SEO" score={result.seoScore} />
               <ScoreRing label="Mobile" score={result.mobileScore} />
+              {result.ctaScore > 0 && <ScoreRing label="CTA" score={result.ctaScore} />}
+              {result.trustScore > 0 && <ScoreRing label="Trust" score={result.trustScore} />}
             </div>
           </div>
 
-          {/* Issues */}
+          {/* What's working */}
+          {result.whatsWorking.length > 0 && (
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">✅ What&apos;s Working</p>
+              <ul className="space-y-2">
+                {result.whatsWorking.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Quick wins / Issues */}
           <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Issues Found</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                {result.quickWins.length > 0 ? '⚡ Quick Wins' : 'Issues Found'}
+              </p>
               <button
                 onClick={() => sendMessage(`Auto-fix the top 3 issues on my website: ${result.issues.slice(0, 3).join(', ')}`)}
                 className="px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/20 transition"
@@ -398,7 +447,23 @@ function AuditPanel({ url, onBack }: { url: string; onBack: () => void }) {
               </button>
             </div>
             <ul className="space-y-3">
-              {result.issues.map((issue, i) => (
+              {result.quickWins.length > 0 ? result.quickWins.map((win, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-xs flex items-center justify-center font-bold">
+                    {i + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-300">{win.action}</p>
+                    {win.impact && <p className="text-xs text-green-400 mt-0.5">→ {win.impact}</p>}
+                  </div>
+                  <button
+                    onClick={() => sendMessage(`Fix this on my website: "${win.action}"`)}
+                    className="flex-shrink-0 px-2.5 py-1 bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-gray-400 rounded-lg hover:text-[#D4AF37] hover:border-[#D4AF37]/30 transition"
+                  >
+                    Fix this
+                  </button>
+                </li>
+              )) : result.issues.map((issue, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-center font-bold">
                     {i + 1}
