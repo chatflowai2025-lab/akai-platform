@@ -246,7 +246,7 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex">
+    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">

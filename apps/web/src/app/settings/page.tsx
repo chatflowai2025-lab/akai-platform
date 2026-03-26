@@ -4,7 +4,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex">
+    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
       <Sidebar />
       <main className="flex-1 flex items-center justify-center">
         <div className="text-center">
