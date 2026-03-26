@@ -12,6 +12,7 @@ YOUR MODULES:
 - Web: Website audit + content generation.
 - Ads: AI-powered Google Ads and Meta/Facebook Ads campaign builder. Users enter business name, goal (leads/sales/awareness), target audience, location, and daily budget ($5–$200/day via slider). AI generates full campaign: Google = 3 ad groups with 5 headlines + 2 descriptions + 8 keywords each. Meta = 3 ad sets with primary text + headline + description + CTA. Campaign is previewed, then launched via 'Launch Campaign' button. Powered by /api/ads/generate and /api/ads/create.
 - Social: Content generation for Instagram, LinkedIn, Facebook.
+- Proposals: AI-generated personalised sales proposals. Pick a prospect, select which AKAI modules to pitch, choose a tone, and AKAI writes a full professional proposal with executive summary, challenges, solutions, investment table, and ROI projection. Export via email, clipboard, or PDF.
 - Chat Widget: Embeddable AI chat widget for client websites. Qualifies visitors as leads, routes to Sophie. Install via a script tag from the Chat module.
 
 CAMPAIGN LAUNCH FLOW (when user says launch/new campaign/configure Sophie):
@@ -297,6 +298,16 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 
   if (msg.includes('recruit') || msg.includes('hire') || msg.includes('hiring')) {
     return "Recruit does two things:\n\n🔍 **Find Candidates** — tell me the role, AKAI sources and scores matches by fit\n📋 **Post a Job** — get a unique apply link, AI screens every inbound\n\nWhich do you need?";
+  }
+
+  // ── Proposals ────────────────────────────────────────────────────────────
+  if (
+    msg.includes('write a proposal') ||
+    msg.includes('generate a proposal') ||
+    msg.includes('create a proposal') ||
+    msg.match(/proposal for .+/i)
+  ) {
+    return "Head to the **Proposals** module — pick your prospect, choose which AKAI services to pitch, and I'll write a full personalised proposal in seconds.";
   }
 
   // ── Social content ───────────────────────────────────────────────────────
