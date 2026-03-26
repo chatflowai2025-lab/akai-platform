@@ -168,15 +168,32 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      // Use Railway-backed Microsoft OAuth → Firebase custom token
-      // This bypasses Firebase's own MS OAuth which requires firebaseapp.com in Azure redirect URIs
-      const res = await fetch('https://api-server-production-2a27.up.railway.app/api/auth/ms/url', {
-        headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
+      const auth = getFirebaseAuth();
+      if (!auth) throw new Error('Auth not available');
+      const provider = new OAuthProvider('microsoft.com');
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        tenant: 'common',
+        client_id: process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870',
       });
-      const { url } = await res.json() as { url: string };
-      window.location.href = url;
+      provider.addScope('email');
+      provider.addScope('profile');
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user?.email || '';
+      if (BETA_MODE && !isWhitelisted(userEmail)) {
+        await auth.signOut();
+        setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+        setLoading(false);
+        return;
+      }
+      // onAuthStateChanged handles redirect
     } catch (err: unknown) {
-      setError('Microsoft sign-in unavailable. Try email/password instead.');
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('popup-closed') || msg.includes('cancelled')) {
+        setLoading(false);
+        return;
+      }
+      setError(cleanError(msg || 'Microsoft sign-in failed. Try again.'));
       setLoading(false);
     }
   };
