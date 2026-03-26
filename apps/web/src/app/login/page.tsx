@@ -98,8 +98,15 @@ export default function LoginPage() {
         if (attempts++ < 10) setTimeout(tryAuth, 300);
         return;
       }
+      // Only clear stale session if not coming from OAuth redirect
+      const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
+      if (!hasOAuthCode) {
+        auth.signOut().catch(() => {});
+      }
+      
       const unsub = onAuthStateChanged(auth, async (user) => {
-        if (user) {
+        if (user && hasOAuthCode) {
+          // Coming back from OAuth - check whitelist then redirect
           const userEmail = user.email || '';
           if (BETA_MODE && !isWhitelisted(userEmail)) {
             await auth.signOut();
