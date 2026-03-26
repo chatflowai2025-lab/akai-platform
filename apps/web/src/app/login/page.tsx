@@ -1,7 +1,7 @@
 'use client';
 
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
@@ -9,6 +9,8 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
 
@@ -67,6 +69,22 @@ export default function LoginPage() {
     }
   };
 
+  // Handle redirect result on page load (MS login returns via redirect)
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) router.push('/dashboard');
+      })
+      .catch((err: unknown) => {
+        if (err instanceof Error && !err.message.includes('no-auth-event')) {
+          setError(cleanError(err.message));
+        }
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleMicrosoft = async () => {
     setError('');
     setLoading(true);
@@ -75,11 +93,10 @@ export default function LoginPage() {
       if (!auth) throw new Error('Auth not available');
       const provider = new OAuthProvider('microsoft.com');
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider);
-      router.push('/dashboard');
+      // Use redirect (works in incognito + avoids popup blockers)
+      await signInWithRedirect(auth, provider);
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
-    } finally {
       setLoading(false);
     }
   };
