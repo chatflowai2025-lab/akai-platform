@@ -14,7 +14,7 @@ import { getFirebaseDb } from '@/lib/firebase';
 // Onboarding types (local — more specific than shared OnboardingState)
 // ---------------------------------------------------------------------------
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'complete';
 
 interface OnboardData {
   industry?: string;
@@ -22,6 +22,11 @@ interface OnboardData {
   goal?: string;
   location?: string;
   contact?: string;
+  notifEmail?: boolean;
+  notifSms?: boolean;
+  notifSmsNumber?: string;
+  notifWhatsapp?: boolean;
+  notifWhatsappNumber?: string;
 }
 
 interface OnboardState {
@@ -73,6 +78,7 @@ export default function OnboardPage() {
     try {
       const db = getFirebaseDb();
       if (db) {
+        const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber } = finalState.data;
         // Save full onboarding data + mark complete
         await setDoc(
           doc(db, 'users', user.uid),
@@ -92,6 +98,14 @@ export default function OnboardPage() {
               location: location || '',
               targetCustomer: '',
               goal: goal || '',
+            },
+            // Notification preferences
+            notificationPrefs: {
+              email: notifEmail !== false,
+              sms: notifSms || false,
+              smsNumber: notifSmsNumber || '',
+              whatsapp: notifWhatsapp || false,
+              whatsappNumber: notifWhatsappNumber || '',
             },
             onboardingComplete: true,
             businessName: businessName || '',

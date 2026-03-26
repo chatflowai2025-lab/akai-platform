@@ -37,6 +37,14 @@ const PLAN_LABELS: Record<string, { label: string; color: string }> = {
   scale: { label: 'Scale — $1,197/mo', color: 'text-[#D4AF37] bg-[#D4AF37]/10 border-[#D4AF37]/20' },
 };
 
+interface NotifPrefs {
+  email: boolean;
+  sms: boolean;
+  smsNumber: string;
+  whatsapp: boolean;
+  whatsappNumber: string;
+}
+
 export default function SettingsPage() {
   const { user, userProfile } = useAuth();
 
@@ -46,7 +54,13 @@ export default function SettingsPage() {
   const [bizSaved, setBizSaved] = useState(false);
 
   // Notifications
-  const [notifForm, setNotifForm] = useState({ telegramChatId: '', emailEnabled: true });
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>({
+    email: true,
+    sms: false,
+    smsNumber: '',
+    whatsapp: false,
+    whatsappNumber: '',
+  });
   const [notifSaving, setNotifSaving] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
 
@@ -89,10 +103,14 @@ export default function SettingsPage() {
           location: onboarding.location || '',
         });
 
-        // Notifications
-        setNotifForm({
-          telegramChatId: data.telegramChatId || '',
-          emailEnabled: data.emailNotifications !== false,
+        // Notification prefs (new multi-channel)
+        const np = data.notificationPrefs || {};
+        setNotifPrefs({
+          email: np.email !== false,
+          sms: np.sms || false,
+          smsNumber: np.smsNumber || '',
+          whatsapp: np.whatsapp || false,
+          whatsappNumber: np.whatsappNumber || '',
         });
 
         // Voice
@@ -137,8 +155,13 @@ export default function SettingsPage() {
       const db = getFirebaseDb();
       if (db) {
         await setDoc(doc(db, 'users', user.uid), {
-          telegramChatId: notifForm.telegramChatId,
-          emailNotifications: notifForm.emailEnabled,
+          notificationPrefs: {
+            email: notifPrefs.email,
+            sms: notifPrefs.sms,
+            smsNumber: notifPrefs.smsNumber,
+            whatsapp: notifPrefs.whatsapp,
+            whatsappNumber: notifPrefs.whatsappNumber,
+          },
         }, { merge: true });
       }
       setNotifSaved(true);
@@ -274,31 +297,96 @@ export default function SettingsPage() {
 
         {/* Notification Preferences */}
         <Section title="Notification Preferences">
-          <div className="space-y-4">
-            <FieldRow label="Telegram Chat ID (for instant alerts)">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={notifForm.telegramChatId}
-                  onChange={e => setNotifForm(f => ({ ...f, telegramChatId: e.target.value }))}
-                  placeholder="e.g. 8320254721"
-                  className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-                />
-              </div>
-              <p className="text-xs text-gray-600">Start a chat with @AKAINotifyBot and paste your chat ID here to get real-time call alerts on Telegram.</p>
-            </FieldRow>
+          <p className="text-sm text-gray-400">How would you like AKAI to notify you? Select one or more channels.</p>
 
-            <div className="flex items-center justify-between py-3 px-4 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl">
-              <div>
-                <p className="text-sm font-medium text-white">Email Notifications</p>
-                <p className="text-xs text-gray-500 mt-0.5">Receive email summaries of campaign results</p>
+          <div className="space-y-3">
+            {/* Email card */}
+            <button
+              onClick={() => setNotifPrefs(p => ({ ...p, email: !p.email }))}
+              className={`w-full flex items-start gap-4 px-4 py-4 rounded-xl border transition-colors text-left ${
+                notifPrefs.email
+                  ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5'
+                  : 'border-[#2a2a2a] bg-[#0a0a0a] hover:border-[#3a3a3a]'
+              }`}
+            >
+              <span className="text-2xl mt-0.5">📧</span>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-white">Email</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  We&apos;ll email you at <span className="text-gray-300">{user?.email}</span>
+                </p>
               </div>
+              <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${
+                notifPrefs.email ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'
+              }`}>
+                {notifPrefs.email && <span className="text-black text-[10px] font-black">✓</span>}
+              </div>
+            </button>
+
+            {/* SMS card */}
+            <div className={`rounded-xl border transition-colors ${
+              notifPrefs.sms ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'
+            }`}>
               <button
-                onClick={() => setNotifForm(f => ({ ...f, emailEnabled: !f.emailEnabled }))}
-                className={`relative w-11 h-6 rounded-full transition-colors ${notifForm.emailEnabled ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
+                onClick={() => setNotifPrefs(p => ({ ...p, sms: !p.sms }))}
+                className="w-full flex items-start gap-4 px-4 py-4 text-left hover:opacity-90 transition"
               >
-                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${notifForm.emailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className="text-2xl mt-0.5">💬</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-white">SMS</p>
+                  <p className="text-xs text-gray-500 mt-0.5">We&apos;ll text you when a lead qualifies</p>
+                </div>
+                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${
+                  notifPrefs.sms ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'
+                }`}>
+                  {notifPrefs.sms && <span className="text-black text-[10px] font-black">✓</span>}
+                </div>
               </button>
+              {notifPrefs.sms && (
+                <div className="px-4 pb-4">
+                  <input
+                    type="tel"
+                    value={notifPrefs.smsNumber}
+                    onChange={e => setNotifPrefs(p => ({ ...p, smsNumber: e.target.value }))}
+                    placeholder="+61 4XX XXX XXX"
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  />
+                  <p className="text-xs text-gray-600 mt-1.5">Australian mobile format: +61 4XX XXX XXX</p>
+                </div>
+              )}
+            </div>
+
+            {/* WhatsApp card */}
+            <div className={`rounded-xl border transition-colors ${
+              notifPrefs.whatsapp ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'
+            }`}>
+              <button
+                onClick={() => setNotifPrefs(p => ({ ...p, whatsapp: !p.whatsapp }))}
+                className="w-full flex items-start gap-4 px-4 py-4 text-left hover:opacity-90 transition"
+              >
+                <span className="text-2xl mt-0.5">📱</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-white">WhatsApp</p>
+                  <p className="text-xs text-gray-500 mt-0.5">We&apos;ll message you on WhatsApp</p>
+                </div>
+                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${
+                  notifPrefs.whatsapp ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'
+                }`}>
+                  {notifPrefs.whatsapp && <span className="text-black text-[10px] font-black">✓</span>}
+                </div>
+              </button>
+              {notifPrefs.whatsapp && (
+                <div className="px-4 pb-4">
+                  <input
+                    type="tel"
+                    value={notifPrefs.whatsappNumber}
+                    onChange={e => setNotifPrefs(p => ({ ...p, whatsappNumber: e.target.value }))}
+                    placeholder="+61 4XX XXX XXX"
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  />
+                  <p className="text-xs text-gray-600 mt-1.5">Include country code: +61 for Australia</p>
+                </div>
+              )}
             </div>
           </div>
 

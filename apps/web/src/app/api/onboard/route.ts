@@ -11,9 +11,14 @@ interface OnboardData {
   goal?: string;
   location?: string;
   contact?: string; // email or phone
+  notifEmail?: boolean;
+  notifSms?: boolean;
+  notifSmsNumber?: string;
+  notifWhatsapp?: boolean;
+  notifWhatsappNumber?: string;
 }
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'complete';
 
 interface OnboardState {
   step: OnboardStep;
@@ -89,19 +94,49 @@ export async function POST(req: NextRequest) {
           data: { ...state.data, location: trimmed },
         };
         return buildResponse(
-          `Perfect. Last one — what's the best email or phone number to reach you on? (We'll send your setup confirmation here)`,
+          `Perfect. What's the best email or phone number to reach you on? (We'll send your setup confirmation here)`,
           newState
         );
       }
 
       case 'contact': {
         const newState: OnboardState = {
-          step: 'complete',
+          step: 'notifications',
           data: { ...state.data, contact: trimmed },
         };
+        return buildResponse(
+          `Almost done! Last thing — how would you like AKAI to notify you when a lead qualifies?\n\nReply with one or more:\n📧 **email** — we'll notify you by email\n💬 **sms** — text message to your mobile\n📱 **whatsapp** — WhatsApp message\n\nOr just say **email** to keep it simple.`,
+          newState
+        );
+      }
+
+      case 'notifications': {
+        const lower = trimmed.toLowerCase();
+        const wantsEmail = lower.includes('email') || lower.includes('e-mail');
+        const wantsSms = lower.includes('sms') || lower.includes('text') || lower.includes('sms');
+        const wantsWhatsapp = lower.includes('whatsapp') || lower.includes('whats app') || lower.includes('wa');
+
+        // If none detected, default to email
+        const hasChoice = wantsEmail || wantsSms || wantsWhatsapp;
+
+        const newState: OnboardState = {
+          step: 'complete',
+          data: {
+            ...state.data,
+            notifEmail: !hasChoice || wantsEmail,
+            notifSms: wantsSms,
+            notifWhatsapp: wantsWhatsapp,
+          },
+        };
+
+        const channels = [];
+        if (!hasChoice || wantsEmail) channels.push('email');
+        if (wantsSms) channels.push('SMS');
+        if (wantsWhatsapp) channels.push('WhatsApp');
+
         const businessName = newState.data.businessName || 'your business';
         return buildResponse(
-          `You're all set! 🎉\n\nHere's what I've configured for **${businessName}**:\n\n✅ Sales module — activated\n✅ AI lead qualification — on\n✅ Auto follow-up — ready\n\nYour dashboard is ready. Let's go close some deals.`,
+          `You're all set! 🎉\n\nHere's what I've configured for **${businessName}**:\n\n✅ Sales module — activated\n✅ AI lead qualification — on\n✅ Auto follow-up — ready\n✅ Notifications — ${channels.join(', ')}\n\nYour dashboard is ready. Let's go close some deals.`,
           newState,
           {
             action: 'complete',

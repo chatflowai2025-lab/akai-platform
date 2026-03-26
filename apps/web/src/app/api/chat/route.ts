@@ -6,7 +6,7 @@ const SYSTEM_PROMPT = `You are AK, the AI brain inside AKAI — a fully autonomo
 PERSONALITY: Direct, warm, confident. Like a brilliant COO who gets things done. No filler phrases. Just results.
 
 YOUR MODULES:
-- Sales: Sophie AI makes outbound calls, qualifies leads, books meetings. Powered by Bland.ai. Users upload leads → Sophie calls them → qualified leads notified via Telegram.
+- Sales: Sophie AI makes outbound calls, qualifies leads, books meetings. Powered by Bland.ai. Users upload leads → Sophie calls them → qualified leads notified via Email, SMS, or WhatsApp (user's preference).
 - Email Guard: Connects to Microsoft/Gmail via OAuth. Reads enquiries, generates proposals with Claude, sends replies from the user's address.
 - Recruit: Find candidates OR screen inbound applicants. AI-powered scoring.
 - Web: Website audit + content generation.
@@ -19,7 +19,7 @@ CAMPAIGN LAUNCH FLOW (when user says launch/new campaign/configure Sophie):
 3. Ask: "Do you have a list of leads to call, or should I find them for you?"
 4. Ask: "What should Sophie say in the opening 10 seconds?" (or offer a default script)
 5. Ask: "What hours should Sophie call? Default is Mon-Fri 9am-5pm [their timezone]"
-6. Confirm all settings → "Ready to launch. Sophie will start calling within the hour. I'll notify you on Telegram when the first lead qualifies."
+6. Confirm all settings → "Ready to launch. Sophie will start calling within the hour. I'll notify you via your preferred channel (Email, SMS, or WhatsApp) when the first lead qualifies."
 7. POST the campaign to /api/campaign/save with their config
 
 EMAIL GUARD SETUP FLOW (when user asks to connect inbox):
@@ -34,7 +34,7 @@ RULES ENGINE (after inbox connected):
 When user describes how they want emails handled, extract the rule and save it:
 - "draft only" → action: draft, no auto-send
 - "auto-send" → action: auto_send
-- "notify me" → notify: telegram=true
+- "notify me" → notify: email/sms/whatsapp based on user preference
 - "forward to [name]" → action: forward, forwardTo: [email]
 - "hold until 9am" → action: hold, holdUntil: 9am
 
@@ -169,15 +169,21 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
     return "Facebook connection via Meta's API is in final testing. To get early access:\n\n1. I'll add you to the beta list now\n2. You'll get an email when it's ready\n3. Setup takes under 2 minutes via OAuth\n\nIn the meantime, use the Social module to generate and copy content directly to Facebook.";
   }
 
+  // ── Notification preference questions ────────────────────────────────────
+  if (msg.includes('notification') || (msg.includes('how') && msg.includes('notify')) ||
+      (msg.includes('notify') && msg.includes('prefer'))) {
+    return "How would you like me to notify you? **Email**, **SMS**, or **WhatsApp**?\n\nYou can set your preference in **Settings → Notification Preferences** — pick one or all three. Email is pre-selected by default.";
+  }
+
   // ── Inbox rules ─────────────────────────────────────────────────────────
   if (msg.includes('draft only') || msg.includes('draft mode')) {
     return "✅ Rule saved: **Draft only** — AKAI generates proposals but holds them for your review. Nothing sends without your sign-off. Applied to all new enquiries.";
   }
   if (msg.includes('auto-send') || msg.includes('auto send') || msg.includes('send automatically')) {
-    return "✅ Rule saved: **Auto-send proposals** immediately after generation. Applied to all new enquiries. You'll still get Telegram notifications.";
+    return "✅ Rule saved: **Auto-send proposals** immediately after generation. Applied to all new enquiries. You'll be notified via Email, SMS, or WhatsApp based on your notification preferences.";
   }
   if (msg.includes('notify me') || msg.includes('send me a notification')) {
-    return "✅ Rule saved: **Notify on new enquiry** — Telegram message every time a proposal is ready. Applied immediately.";
+    return "✅ Rule saved: **Notify on new enquiry** — you'll be notified via your preferred channel (Email, SMS, or WhatsApp) every time a proposal is ready. Update your notification preferences in Settings.";
   }
   if (msg.includes('hold until 9') || msg.includes('send at 9') || msg.includes('9am')) {
     return "✅ Rule saved: **Hold until 9am AEST** — proposals generated immediately but sent when business hours start. Smart timing.";
