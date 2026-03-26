@@ -111,8 +111,8 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
     }
   }
 
-  if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads')) {
-    return "We can add 50 more targeted leads to your campaign for **+$149/mo** — includes scraping, enrichment, and DNC filtering.\n\nWant me to queue that up?";
+  if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads') || msg.includes('more contacts')) {
+    return "Your current plan includes **50 contacts/month**. Adding another list of 50 more targeted leads is **+$149/mo** — includes lead research, enrichment, and DNC filtering.\n\nWant me to add it?";
   }
 
   // ── Inbox rules (post-connect) ────────────────────────────────────────────
