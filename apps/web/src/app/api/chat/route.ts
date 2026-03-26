@@ -341,8 +341,8 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
   }
 
   // ── Chat widget / live chat ───────────────────────────────────────────────
-  if (msg.includes('chat widget') || msg.includes('live chat') || msg.includes('install chat')) {
-    return "Your chat widget is ready. Copy the script tag from the **Chat module** and paste it before `</body>` on your website. Visitors will see a chat bubble — I'll qualify them and route leads to Sophie automatically.";
+  if (msg.includes('chat widget') || msg.includes('live chat') || msg.includes('install chat') || msg.includes('add chat') || (msg.includes('website') && msg.includes('chat'))) {
+    return "Most businesses lose 80% of website visitors who don\'t enquire. A chat widget changes that.\n\nHere\'s what it does:\n• Visitors get an instant response 24/7, even at midnight\n• Leads captured automatically — name, email, what they need\n• Sophie follows up within 60 seconds\n• Every conversation in your Chat dashboard\n\nWant me to set it up on your website? I\'ll need to connect to your site first — do you use WordPress, GitHub, or something else?";
   }
 
   if (msg.includes('configure chat') || (msg.includes('configure') && msg.includes('widget'))) {
