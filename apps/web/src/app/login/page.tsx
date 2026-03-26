@@ -171,29 +171,14 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new OAuthProvider('microsoft.com');
-      provider.setCustomParameters({
-        prompt: 'select_account',
-        tenant: 'common',
-        client_id: process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870',
-      });
+      provider.setCustomParameters({ prompt: 'select_account', tenant: 'common' });
       provider.addScope('email');
       provider.addScope('profile');
-      const result = await signInWithPopup(auth, provider);
-      const userEmail = result.user?.email || '';
-      if (BETA_MODE && !isWhitelisted(userEmail)) {
-        await auth.signOut();
-        setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
-        setLoading(false);
-        return;
-      }
-      // onAuthStateChanged handles redirect
+      // Use redirect — more reliable than popup (no popup blocker issues)
+      await signInWithRedirect(auth, provider);
+      // onAuthStateChanged + getRedirectResult handle the rest
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '';
-      if (msg.includes('popup-closed') || msg.includes('cancelled')) {
-        setLoading(false);
-        return;
-      }
-      setError(cleanError(msg || 'Microsoft sign-in failed. Try again.'));
+      setError(cleanError(err instanceof Error ? err.message : 'Microsoft sign-in failed.'));
       setLoading(false);
     }
   };
