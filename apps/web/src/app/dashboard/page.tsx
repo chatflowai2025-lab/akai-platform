@@ -209,7 +209,6 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top bar */}
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
@@ -380,7 +379,6 @@ export default function DashboardPage() {
           </div>
 
         </div>
-      </main>
     </DashboardLayout>
   );
 }

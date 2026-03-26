@@ -29,7 +29,6 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
             <h1 className="text-xl font-black text-white">Settings</h1>
@@ -132,7 +131,6 @@ export default function SettingsPage() {
           </Section>
 
         </div>
-      </main>
     </DashboardLayout>
   );
 }

@@ -224,7 +224,6 @@ export default function EmailGuardPage() {
           </section>
 
         </div>
-      </main>
     </DashboardLayout>
   );
 }

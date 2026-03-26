@@ -11,7 +11,6 @@ export default function AdsPage() {
           <h1 className="text-2xl font-black text-white mb-2">Ads</h1>
           <p className="text-gray-500 text-sm">Coming soon — paid media strategy and creative generation.</p>
         </div>
-      </main>
     </DashboardLayout>
   );
 }

@@ -23,7 +23,6 @@ export default function WebPage() {
 
   return (
     <DashboardLayout>
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
             <h1 className="text-xl font-black text-white">Web</h1>
@@ -38,7 +37,6 @@ export default function WebPage() {
             <p className="text-gray-500 text-sm leading-relaxed">AI-generated landing pages, web copy, and site audits. We&apos;ll notify you when it&apos;s ready.</p>
           </div>
         </div>
-      </main>
     </DashboardLayout>
   );
 }

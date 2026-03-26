@@ -23,7 +23,6 @@ export default function RecruitPage() {
 
   return (
     <DashboardLayout>
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
             <h1 className="text-xl font-black text-white">Recruit</h1>
@@ -38,7 +37,6 @@ export default function RecruitPage() {
             <p className="text-gray-500 text-sm leading-relaxed">AI-powered candidate screening, outreach, and pipeline management. We&apos;ll notify you when it&apos;s ready.</p>
           </div>
         </div>
-      </main>
     </DashboardLayout>
   );
 }
