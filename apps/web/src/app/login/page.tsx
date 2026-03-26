@@ -171,9 +171,20 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new OAuthProvider('microsoft.com');
-      provider.setCustomParameters({ prompt: 'select_account' });
-      // Use redirect (works in incognito + avoids popup blockers)
-      await signInWithRedirect(auth, provider);
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        tenant: 'common',
+      });
+      // Use popup — redirect requires firebaseapp.com to be registered in Azure
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user?.email || '';
+      if (BETA_MODE && !isWhitelisted(userEmail)) {
+        await auth.signOut();
+        setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+        setLoading(false);
+        return;
+      }
+      // onAuthStateChanged handles redirect
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
       setLoading(false);
