@@ -13,7 +13,7 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
     <div className={cn('flex gap-3', isAssistant ? 'justify-start' : 'justify-end')}>
       {isAssistant && (
         <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs flex-shrink-0 mt-1">
-          M
+          AK
         </div>
       )}
 
@@ -37,7 +37,7 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
                 variant={btn.primary ? 'primary' : 'secondary'}
                 size="sm"
                 href={btn.url}
-                onClick={btn.action ? () => console.log('action:', btn.action) : undefined}
+                onClick={btn.action ? () => { /* action handler: implement as needed */ } : undefined}
               >
                 {btn.label}
               </Button>

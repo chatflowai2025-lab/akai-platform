@@ -21,9 +21,13 @@ export function useAuth() {
     return unsubscribe;
   }, []);
 
-  const logout = () => {
+  const logout = async () => {
     const auth = getFirebaseAuth();
-    if (auth) return signOut(auth);
+    if (auth) {
+      await signOut(auth);
+    }
+    // Hard redirect to login — works regardless of router context
+    window.location.href = '/login';
   };
 
   return { user, loading, logout };
