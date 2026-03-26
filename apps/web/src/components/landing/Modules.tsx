@@ -43,51 +43,99 @@ interface Module {
   features: string[];
   price: string;
   href?: string;
+  emoji?: string;
 }
 
 const MODULES: Module[] = [
   {
     Icon: SalesIcon,
-    name: 'AKAI Sales',
+    name: 'Sales',
     status: 'live',
-    tagline: 'AI finds leads, calls them, books meetings in your calendar.',
-    features: ['Sophie AI voice calling', 'Lead enrichment', 'Auto-booking', 'Call recordings'],
+    tagline: 'Sophie AI calls your leads, qualifies them, and books meetings — 24/7.',
+    features: ['Sophie AI outbound calling', 'Lead qualification', 'Auto-booking', 'DNC compliance'],
     price: '$297',
-    href: '/onboard',
+    href: '/sales',
+    emoji: '📞',
+  },
+  {
+    Icon: SalesIcon,
+    name: 'Voice',
+    status: 'live',
+    tagline: 'Configure Sophie\'s script, call hours, and compliance in 6 steps.',
+    features: ['6-step setup wizard', 'AI script generation', 'Call scheduling', 'Test call before live'],
+    price: '$197',
+    href: '/voice',
+    emoji: '🎙️',
+  },
+  {
+    Icon: SalesIcon,
+    name: 'Proposals',
+    status: 'live',
+    tagline: 'AI writes personalised proposals for any prospect in seconds.',
+    features: ['Prospect picker', 'Module selector', 'ROI projections', 'One-click email send'],
+    price: 'Included',
+    href: '/proposals',
+    emoji: '📄',
   },
   {
     Icon: RecruitIcon,
-    name: 'AKAI Recruit',
-    status: 'building',
-    tagline: 'AI sources candidates, screens them, books interviews.',
-    features: ['Job posting AI', 'Candidate scoring', 'AI screening calls', 'Calendar integration'],
+    name: 'Recruit',
+    status: 'live',
+    tagline: 'Source candidates, screen CVs, and shortlist the best fits with AI.',
+    features: ['AI candidate screening', 'CV scoring', 'JD generation', 'Interview scheduling'],
     price: '$247',
     href: '/recruit',
+    emoji: '🎯',
   },
   {
     Icon: WebIcon,
-    name: 'AKAI Web',
-    status: 'building',
-    tagline: 'AI builds and updates your website through chat.',
-    features: ['Chat-to-website', 'SEO optimised', 'Lead capture', 'Auto-updates via chat'],
+    name: 'Web',
+    status: 'live',
+    tagline: 'Audit any website for revenue gaps. Build new sites in minutes.',
+    features: ['Conversion audit', 'AI website builder', 'Subdomain publishing', 'SEO analysis'],
     price: '$197',
+    href: '/web',
+    emoji: '🌐',
+  },
+  {
+    Icon: SalesIcon,
+    name: 'Email Guard',
+    status: 'live',
+    tagline: 'Every inbound email is read, classified, and replied to automatically.',
+    features: ['Gmail + Outlook connect', 'Auto-proposal generation', 'Smart routing', 'Reply from your address'],
+    price: '$197',
+    href: '/email-guard',
+    emoji: '✉️',
+  },
+  {
+    Icon: SalesIcon,
+    name: 'Calendar',
+    status: 'live',
+    tagline: 'Connect Google or Outlook. Book meetings and manage appointments from AKAI.',
+    features: ['Google Calendar OAuth', 'Outlook integration', 'Event management', 'Availability sharing'],
+    price: 'Included',
+    href: '/calendar',
+    emoji: '📅',
   },
   {
     Icon: AdsIcon,
-    name: 'AKAI Ads',
-    status: 'planned',
-    tagline: 'Google + Meta campaigns planned, launched, and optimised by AI.',
-    features: ['AI copywriting', 'Budget optimisation', 'A/B testing', 'ROI tracking'],
+    name: 'Ads',
+    status: 'live',
+    tagline: 'Google + Meta campaigns planned, built with AI copy, and launched in minutes.',
+    features: ['AI ad copy (3 variations)', 'Budget slider', 'Campaign builder', 'Performance tracking'],
     price: '$397',
+    href: '/ads',
+    emoji: '📣',
   },
   {
     Icon: SocialIcon,
-    name: 'AKAI Social',
-    status: 'planned',
-    tagline: 'Instagram + LinkedIn content calendar, created and published automatically.',
-    features: ['AI content calendar', 'Auto-publishing', 'Engagement tracking', 'Brand voice'],
+    name: 'Social',
+    status: 'live',
+    tagline: 'AI creates platform-perfect content for Instagram, LinkedIn, Facebook, and X.',
+    features: ['4-platform generation', 'Tone selection', '280-char X optimisation', 'Connect accounts'],
     price: '$147',
     href: '/social',
+    emoji: '📱',
   },
 ];
 
@@ -114,14 +162,9 @@ export default function Modules() {
           </p>
         </div>
 
-        {/* 5-card grid: 3 on top, 2 centered on bottom */}
-        <div className="grid md:grid-cols-3 gap-4 mb-4">
-          {MODULES.slice(0, 3).map(mod => (
-            <ModuleCard key={mod.name} mod={mod} />
-          ))}
-        </div>
-        <div className="grid md:grid-cols-2 gap-4 md:mx-[calc(100%/6)]">
-          {MODULES.slice(3).map(mod => (
+        {/* 9-module grid: 3 columns */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {MODULES.map(mod => (
             <ModuleCard key={mod.name} mod={mod} />
           ))}
         </div>
@@ -144,8 +187,8 @@ function ModuleCard({ mod }: { mod: Module }) {
 
       {/* Header row */}
       <div className="flex items-start justify-between mb-5 relative">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLive ? 'bg-[#D4AF37]/15 text-[#D4AF37]' : 'bg-white/[0.04] text-white/30'}`}>
-          <Icon />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${isLive ? 'bg-[#D4AF37]/15' : 'bg-white/[0.04] text-white/30'}`}>
+          {mod.emoji ? mod.emoji : <Icon />}
         </div>
 
         {/* Status pill */}
