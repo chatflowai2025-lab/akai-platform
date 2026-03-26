@@ -6,75 +6,58 @@ import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseStorage } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
-import { useAuth } from '@/hooks/useAuth';
-import { getFirebaseStorage } from '@/lib/firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import type { ChatMessage } from '@/lib/shared-types';
 
-// ── Chat context — lets any child button inject a message into AK ─────────
-interface ChatContextValue {
-  sendMessage: (text: string) => void;
-}
+// ── Chat context ──────────────────────────────────────────────────────────────
+interface ChatContextValue { sendMessage: (text: string) => void; }
 const ChatContext = createContext<ChatContextValue>({ sendMessage: () => {} });
 export const useDashboardChat = () => useContext(ChatContext);
 
 const INITIAL: ChatMessage = {
-  id: '1',
-  role: 'assistant',
-  content: "Hey! I'm AK. Ask me anything — launch a campaign, check your pipeline, configure Email Guard, or just tell me what you need.",
+  id: '1', role: 'assistant',
+  content: "Hey! I'm AK. Ask me anything — connect your inbox, launch a campaign, or just tell me what you need.",
   timestamp: new Date().toISOString(),
 };
 
-interface ChatState {
-  step: string;
-  data: Record<string, string>;
-}
+interface ChatState { step: string; data: Record<string, string>; }
 
-// ── Inline ChatPanel (lives inside layout so it persists across pages) ────
+// ── Chat panel ────────────────────────────────────────────────────────────────
 function InlineChatPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const { user } = useAuth();
-
   const handleFileUpload = async (file: File) => {
     if (!user) return;
     setUploading(true);
     const storage = getFirebaseStorage();
-    if (!storage) { setUploading(false); return; }
+    if (!storage) {
+      setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Storage not available — please try again.', timestamp: new Date().toISOString() }]);
+      setUploading(false);
+      return;
+    }
     try {
       const path = `uploads/${user.uid}/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, path);
       const task = uploadBytesResumable(storageRef, file);
-      await new Promise<void>((resolve, reject) => {
-        task.on('state_changed', null, reject, resolve);
-      });
+      await new Promise<void>((resolve, reject) => { task.on('state_changed', null, reject, resolve); });
       const url = await getDownloadURL(storageRef);
-      const fileMsg: ChatMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: `📎 Attached: [${file.name}](${url})`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages(p => [...p, fileMsg]);
-      setMessages(p => [...p, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `Got it — **${file.name}** is uploaded and only visible to you. What would you like me to do with it?`,
-        timestamp: new Date().toISOString(),
-      }]);
+      setMessages(p => [...p,
+        { id: Date.now().toString(), role: 'user', content: `📎 [${file.name}](${url})`, timestamp: new Date().toISOString() },
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: `Got it — **${file.name}** is uploaded and private to you. What would you like me to do with it?`, timestamp: new Date().toISOString() },
+      ]);
     } catch {
-      setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Upload failed — try again.', timestamp: new Date().toISOString() }]);
+      setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Upload failed — please try again.', timestamp: new Date().toISOString() }]);
     } finally {
       setUploading(false);
     }
@@ -83,30 +66,20 @@ function InlineChatPanel() {
   const sendRaw = useCallback(async (text: string) => {
     if (!text.trim() || loading) return;
 
-    // Feedback shortcut — only for Aaron
+    // Feedback shortcut — Aaron only
     if (text.toLowerCase().startsWith('feedback:') && user?.email === 'mrakersten@gmail.com') {
       const fb = text.slice(9).trim();
-      const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
-      setMessages(p => [...p, userMsg]);
+      setMessages(p => [...p, { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() }]);
       try {
-        await fetch('/api/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ feedback: fb, userEmail: user.email }),
-        });
-        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: '✅ Feedback sent to MM. I\'ll fix it.', timestamp: new Date().toISOString() }]);
+        await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feedback: fb, userEmail: user.email }) });
+        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: "✅ Feedback sent to MM. I'll fix it.", timestamp: new Date().toISOString() }]);
       } catch {
         setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Failed to send feedback — try again.', timestamp: new Date().toISOString() }]);
       }
       return;
     }
 
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: text,
-      timestamp: new Date().toISOString(),
-    };
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
     setMessages(p => [...p, userMsg]);
     setLoading(true);
 
@@ -114,44 +87,29 @@ function InlineChatPanel() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, state: chatState, history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({
+          message: text,
+          state: chatState,
+          history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
+        }),
       });
       const data = await res.json();
       if (data.state) setChatState(data.state);
       if (data.message) {
-        setMessages(p => [...p, {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: data.message,
-          timestamp: new Date().toISOString(),
-          buttons: data.buttons,
-        }]);
+        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: data.message, timestamp: new Date().toISOString(), buttons: data.buttons }]);
       }
-      // Navigate inside the app — no new tabs
       if (data.action === 'redirect' && data.url) {
         const url: string = data.url;
-        if (url.startsWith('/') || url.startsWith(window.location.origin)) {
-          router.push(url.replace(window.location.origin, ''));
-        }
-        // external links: ignore — keep user in the platform
+        if (url.startsWith('/')) router.push(url);
       }
     } catch {
-      setMessages(p => [...p, {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: "Sorry, something went wrong. Try again in a moment.",
-        timestamp: new Date().toISOString(),
-      }]);
+      setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Something went wrong. Try again.', timestamp: new Date().toISOString() }]);
     } finally {
       setLoading(false);
     }
-  }, [loading, chatState, router]);
+  }, [loading, chatState, messages, router, user]);
 
-  const send = () => {
-    const text = input.trim();
-    setInput('');
-    sendRaw(text);
-  };
+  const send = () => { const t = input.trim(); setInput(''); sendRaw(t); };
 
   return (
     <ChatContext.Provider value={{ sendMessage: sendRaw }}>
@@ -159,9 +117,7 @@ function InlineChatPanel() {
         {/* Header */}
         <div className="px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs flex-shrink-0">
-              AK
-            </div>
+            <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs flex-shrink-0">AK</div>
             <span className="font-semibold text-sm text-white">Ask AK</span>
             <span className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
           </div>
@@ -172,23 +128,17 @@ function InlineChatPanel() {
           {messages.map(m => (
             <div key={m.id}>
               <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === 'user'
                     ? 'bg-[#D4AF37] text-black font-medium rounded-br-sm'
                     : 'bg-[#1a1a1a] text-white/90 rounded-bl-sm border border-[#2a2a2a]'
-                }`}>
-                  {m.content}
-                </div>
+                }`}>{m.content}</div>
               </div>
               {m.buttons && m.buttons.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
-                  {m.buttons.map((btn) => (
-                    <button
-                      key={btn.label}
-                      onClick={() => sendRaw(btn.label)}
-                      disabled={loading}
-                      className="text-xs px-2.5 py-1 rounded-lg border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition disabled:opacity-40"
-                    >
+                  {m.buttons.map(btn => (
+                    <button key={btn.label} onClick={() => sendRaw(btn.label)} disabled={loading}
+                      className="text-xs px-2.5 py-1 rounded-lg border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition disabled:opacity-40">
                       {btn.label}
                     </button>
                   ))}
@@ -200,9 +150,7 @@ function InlineChatPanel() {
             <div className="flex justify-start">
               <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl rounded-bl-sm px-3 py-2">
                 <div className="flex gap-1 items-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{animationDelay:'0ms'}}/>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{animationDelay:'150ms'}}/>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{animationDelay:'300ms'}}/>
+                  {[0, 150, 300].map(d => <span key={d} className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
                 </div>
               </div>
             </div>
@@ -212,21 +160,18 @@ function InlineChatPanel() {
 
         {/* Input */}
         <div className="p-3 border-t border-[#1f1f1f] flex-shrink-0">
+          <input ref={fileInputRef} type="file" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); e.target.value = ''; }} />
           <div className="flex gap-2">
-            <input
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && send()}
-              placeholder={user?.email === 'mrakersten@gmail.com' ? 'Ask AK or type feedback: ...' : 'Ask AK anything...'}
-              className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition min-w-0"
-            />
-            <button
-              onClick={send}
-              disabled={loading || !input.trim()}
-              className="px-3 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex-shrink-0"
-            >
-              →
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading || loading} title="Attach file"
+              className="px-2.5 py-2 bg-[#1a1a1a] border border-[#1f1f1f] text-gray-400 rounded-lg hover:text-white hover:border-[#D4AF37]/30 disabled:opacity-40 transition flex-shrink-0 text-sm">
+              {uploading ? '⏳' : '📎'}
             </button>
+            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
+              placeholder={user?.email === 'mrakersten@gmail.com' ? 'Ask AK or feedback: ...' : 'Ask AK anything...'}
+              className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition min-w-0" />
+            <button onClick={send} disabled={loading || !input.trim()}
+              className="px-3 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex-shrink-0">→</button>
           </div>
         </div>
       </aside>
@@ -234,7 +179,7 @@ function InlineChatPanel() {
   );
 }
 
-// ── Main layout ───────────────────────────────────────────────────────────
+// ── Layout ────────────────────────────────────────────────────────────────────
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
