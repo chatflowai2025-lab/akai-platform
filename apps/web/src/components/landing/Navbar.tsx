@@ -2,15 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const ctaHref = !loading && user ? '/dashboard' : '/login';
 
   return (
     <nav
@@ -24,7 +28,7 @@ export default function Navbar() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center">
-            <span className="text-black font-black text-[9px] tracking-tight">AK</span>
+            <span className="text-black font-black text-sm">A</span>
           </div>
           <span className="text-xl font-black tracking-tight">
             AK<span className="text-[#F59E0B]">AI</span>
@@ -39,8 +43,8 @@ export default function Navbar() {
         </div>
 
         {/* CTA */}
-        <Button href="/onboard" size="sm">
-          Get Started →
+        <Button href={ctaHref} size="sm">
+          {!loading && user ? 'Dashboard →' : 'Get Started →'}
         </Button>
       </div>
     </nav>

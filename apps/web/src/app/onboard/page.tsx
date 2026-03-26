@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import type { ChatMessage, OnboardingState, ModuleType } from '@akai/shared-types';
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import type { ChatMessage, OnboardingState } from '@akai/shared-types';
 import ChatBubble from '@/components/ui/ChatBubble';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: '1',
@@ -13,16 +17,25 @@ const INITIAL_MESSAGE: ChatMessage = {
 };
 
 export default function OnboardPage() {
+  const router = useRouter();
+  const { user, loading, logout } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const [state, setState] = useState<OnboardingState>({
     step: 'business_name',
     data: {},
   });
 
+  // Auth gate
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
+
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim() || chatLoading) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -33,7 +46,7 @@ export default function OnboardPage() {
 
     setMessages(prev => [...prev, userMsg]);
     setInput('');
-    setLoading(true);
+    setChatLoading(true);
 
     try {
       const res = await fetch('/api/chat', {
@@ -61,9 +74,18 @@ export default function OnboardPage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setChatLoading(false);
     }
   };
+
+  // Show nothing while auth resolves (redirect happens in useEffect)
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
@@ -73,7 +95,15 @@ export default function OnboardPage() {
           A
         </div>
         <span className="font-semibold text-white">AKAI Setup</span>
-        <span className="ml-auto text-xs text-gray-500">~2 minutes to launch</span>
+        <span className="ml-auto flex items-center gap-3">
+          <span className="text-xs text-gray-500 hidden sm:block">{user.email}</span>
+          <button
+            onClick={logout}
+            className="text-xs text-white/30 hover:text-white/60 transition"
+          >
+            Sign out
+          </button>
+        </span>
       </header>
 
       {/* Messages */}
@@ -81,7 +111,7 @@ export default function OnboardPage() {
         {messages.map(msg => (
           <ChatBubble key={msg.id} message={msg} />
         ))}
-        {loading && (
+        {chatLoading && (
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
             MM is thinking...
@@ -100,7 +130,7 @@ export default function OnboardPage() {
             placeholder="Type your answer..."
             className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
           />
-          <Button onClick={sendMessage} disabled={loading || !input.trim()}>
+          <Button onClick={sendMessage} disabled={chatLoading || !input.trim()}>
             Send →
           </Button>
         </div>
