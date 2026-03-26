@@ -195,6 +195,82 @@ export default function DashboardPage() {
               </div>
             </section>
 
+            {/* Email Guard section */}
+            <section>
+              <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
+                Email Guard
+              </h2>
+              <div className="bg-[#111] border border-green-500/20 rounded-2xl p-6 flex flex-col gap-5">
+                {/* Header row */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🛡️</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-white text-sm">Email Guard — Active</p>
+                        <span className="flex items-center gap-1 text-xs text-green-400 font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
+                          Live
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Monitoring inbox for enquiries. Auto-generates proposals.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-3">
+                    <Link
+                      href="/email-guard"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white rounded-xl text-xs font-medium hover:border-[#D4AF37]/30 transition"
+                    >
+                      📋 View Proposals
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] text-black rounded-xl text-xs font-bold hover:opacity-90 transition"
+                    >
+                      ⚙️ Configure
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Stats row */}
+                <div className="flex items-center gap-6 py-4 border-t border-[#1f1f1f]">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-2xl font-black text-white">0</p>
+                    <p className="text-xs text-gray-500">Proposals generated this week</p>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-2xl font-black text-white">0</p>
+                    <p className="text-xs text-gray-500">Enquiries processed</p>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      <p className="text-sm font-semibold text-green-400">v2.0.0</p>
+                    </div>
+                    <p className="text-xs text-gray-500">Service version</p>
+                  </div>
+                </div>
+
+                {/* Mobile buttons */}
+                <div className="flex sm:hidden items-center gap-3">
+                  <Link
+                    href="/email-guard"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white rounded-xl text-xs font-medium hover:border-[#D4AF37]/30 transition"
+                  >
+                    📋 View Proposals
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] text-black rounded-xl text-xs font-bold hover:opacity-90 transition"
+                  >
+                    ⚙️ Configure
+                  </Link>
+                </div>
+              </div>
+            </section>
+
             {/* Active modules */}
             <section>
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
