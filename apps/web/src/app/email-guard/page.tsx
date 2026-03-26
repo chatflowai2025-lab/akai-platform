@@ -62,8 +62,26 @@ function EmailGuardInner() {
   useEffect(() => {
     const code = searchParams.get('code');
     const state = searchParams.get('state');
-    const provider = searchParams.get('provider') || (state?.includes('gmail') ? 'gmail' : 'microsoft');
-    if (!code || !user) return;
+    const connectedParam = searchParams.get('connected');
+    const emailParam = searchParams.get('email');
+    const errorParam = searchParams.get('error');
+    if (!user) return;
+
+    // Handle redirect back from Gmail callback page
+    if (connectedParam === 'gmail' && emailParam) {
+      setGmailConnected(true);
+      setGmailEmail(decodeURIComponent(emailParam));
+      router.replace('/email-guard');
+      return;
+    }
+    if (errorParam) {
+      setConnectError('Connection failed — please try again.');
+      router.replace('/email-guard');
+      return;
+    }
+
+    if (!code) return;
+    const provider = 'microsoft'; // Only MS uses direct callback on this page
 
     setConnecting(true);
     fetch(`${RAILWAY}/api/email/microsoft/callback`, {
@@ -110,7 +128,7 @@ function EmailGuardInner() {
     setConnecting(true);
     setConnectError(null);
     try {
-      const res = await fetch(`${RAILWAY}/api/email/gmail/auth-url?userId=${user.uid}`, {
+      const res = await fetch(`${RAILWAY}/api/email/gmail/auth-url?userId=${user.uid}&provider=gmail`, {
         headers: { 'x-api-key': API_KEY },
       });
       const data = await res.json();
