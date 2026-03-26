@@ -1,64 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 
-// ---------------------------------------------------------------------------
-// AKAI Web — Generate endpoint
-// POST /api/web/generate
-// Accepts: { businessName, industry, description, goals }
-// Returns: { websiteUrl, status, eta }
-// NOTE: Real generation is future work — this returns a mock response.
-// ---------------------------------------------------------------------------
-
-interface GenerateRequest {
-  businessName: string;
-  industry: string;
-  description: string;
-  goals: string;
-}
-
-interface GenerateResponse {
-  websiteUrl: string;
-  status: 'generating';
-  eta: string;
-}
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-export async function POST(req: NextRequest): Promise<NextResponse<GenerateResponse | { error: string }>> {
+export async function POST(req: NextRequest) {
   try {
-    const body: GenerateRequest = await req.json();
-    const { businessName, industry, description, goals } = body;
+    const body = await req.json();
+    const { pageType, businessName, industry, goal, description } = body;
 
-    if (!businessName || typeof businessName !== 'string' || businessName.trim().length < 1) {
+    if (!businessName?.trim()) {
       return NextResponse.json({ error: 'businessName is required' }, { status: 400 });
     }
-    if (!industry || typeof industry !== 'string') {
-      return NextResponse.json({ error: 'industry is required' }, { status: 400 });
-    }
-    if (!description || typeof description !== 'string') {
-      return NextResponse.json({ error: 'description is required' }, { status: 400 });
-    }
-    if (!goals || typeof goals !== 'string') {
-      return NextResponse.json({ error: 'goals is required' }, { status: 400 });
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (apiKey) {
+      const client = new Anthropic({ apiKey });
+      const response = await client.messages.create({
+        model: 'claude-haiku-4-5',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: `Write professional website copy for the ${pageType || 'Home'} page of a business called "${businessName}".
+Industry: ${industry || 'professional services'}
+Goal: ${goal || 'generate enquiries'}
+${description ? `Description: ${description}` : ''}
+
+Write compelling, conversion-focused copy including:
+- A strong headline (10 words max)
+- A subheadline (20 words max) 
+- 3 key value points (one sentence each)
+- A call to action (5 words max)
+- 2 paragraphs of body copy
+
+Format clearly with labels (Headline:, Subheadline:, etc.)`
+        }]
+      });
+      const content = response.content[0].type === 'text' ? response.content[0].text : '';
+      return NextResponse.json({ content });
     }
 
-    const slug = slugify(businessName.trim());
-
-    // Mock response — real generation is future work
-    const response: GenerateResponse = {
-      websiteUrl: `https://${slug}.getakai.ai`,
-      status: 'generating',
-      eta: '2 minutes',
-    };
-
-    return NextResponse.json(response, { status: 202 });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Internal error';
-    console.error('[/api/web/generate]', message);
-    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
+    // Fallback
+    return NextResponse.json({
+      content: `Headline: Transform Your ${industry || 'Business'} with ${businessName}\n\nSubheadline: Professional solutions that drive real results for your business.\n\nKey Points:\n• Expert team with proven track record\n• Tailored solutions for your specific needs\n• Fast results with ongoing support\n\nCTA: Get Started Today\n\nBody: ${businessName} is dedicated to helping businesses like yours achieve their goals. Our team brings years of expertise and a results-driven approach to every project.\n\nWhether you're looking to grow your customer base, improve efficiency, or scale your operations, we have the tools and expertise to make it happen.`
+    });
+  } catch (err) {
+    console.error('[web/generate]', err);
+    return NextResponse.json({ error: 'Generation failed — please try again.' }, { status: 500 });
   }
 }

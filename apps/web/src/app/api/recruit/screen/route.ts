@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 interface ScreenRequest {
   jobTitle: string;
-  industry: string;
+  industry?: string;
   candidateName: string;
-  resumeSummary: string;
-  requirements: string[];
+  resumeSummary?: string;
+  candidateExperience?: string;
+  requirements?: string[];
+  jobDescription?: string;
 }
 
 interface ScreenResponse {

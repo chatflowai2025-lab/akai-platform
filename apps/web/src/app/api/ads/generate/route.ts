@@ -28,7 +28,7 @@ interface CampaignResult {
   adGroups: AdGroup[];
 }
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Client initialized lazily inside handler to avoid build-time crash
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
@@ -69,6 +69,7 @@ Rules:
 - Headlines must be compelling and specific to the goal: ${goal}
 - No placeholder text — make it real and usable`;
 
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
       model: 'claude-3-5-haiku-20241022',
       max_tokens: 1500,
