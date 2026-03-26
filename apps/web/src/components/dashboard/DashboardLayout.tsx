@@ -67,8 +67,8 @@ function InlineChatPanel() {
     if (!text.trim() || loading) return;
 
     // Feedback shortcut — Aaron only
-    if (text.toLowerCase().startsWith('feedback:') && user?.email === 'mrakersten@gmail.com') {
-      const fb = text.slice(9).trim();
+    if (/^fee?d[ab]?[ae]?c?k?:/i.test(text.trim()) && user?.email === 'mrakersten@gmail.com') {
+      const fb = text.replace(/^fee?d[ab]?[ae]?c?k?:/i, '').trim();
       setMessages(p => [...p, { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() }]);
       try {
         await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feedback: fb, userEmail: user.email }) });
