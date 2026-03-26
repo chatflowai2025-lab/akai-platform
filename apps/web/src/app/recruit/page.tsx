@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Candidate {
@@ -18,17 +18,6 @@ interface Candidate {
   skills: string[];
   matchScore: number;
   availability: string;
-}
-
-interface Job {
-  id: string;
-  title: string;
-  description: string;
-  requirements: string;
-  salary: string;
-  createdAt: string | Timestamp;
-  applicantCount: number;
-  status: 'active' | 'closed';
 }
 
 interface ScreeningResult {
@@ -132,6 +121,12 @@ function FindCandidatesTab() {
   const [searched, setSearched] = useState(false);
   const [contactedIds, setContactedIds] = useState<Set<string>>(new Set());
 
+  // AI Screen modal
+  const [screeningJobTitle, setScreeningJobTitle] = useState('');
+  const [screening, setScreening] = useState(false);
+  const [screeningResult, setScreeningResult] = useState<ScreeningResult | null>(null);
+  const [showScreenModal, setShowScreenModal] = useState(false);
+
   const handleSearch = useCallback(async () => {
     if (!jobTitle.trim()) return;
     setSearching(true);
@@ -144,6 +139,22 @@ function FindCandidatesTab() {
   const handleContact = (candidate: Candidate) => {
     setContactedIds(prev => new Set([...prev, candidate.id]));
     sendMessage(`Draft an outreach message for ${candidate.name}, ${candidate.currentRole} at ${candidate.company}`);
+  };
+
+  const handleAIScreen = async (candidateName: string) => {
+    setScreeningJobTitle(candidateName);
+    setScreening(true);
+    setShowScreenModal(true);
+    setScreeningResult(null);
+    await new Promise(r => setTimeout(r, 1800));
+    setScreeningResult(generateScreeningResult(jobTitle));
+    setScreening(false);
+  };
+
+  const recommendationColor = (rec: ScreeningResult['recommendation']) => {
+    if (rec === 'Interview') return 'text-green-400 bg-green-400/10 border-green-400/20';
+    if (rec === 'Consider') return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    return 'text-red-400 bg-red-400/10 border-red-400/20';
   };
 
   const scoreColor = (score: number) => {
@@ -268,18 +279,26 @@ function FindCandidatesTab() {
                   ))}
                 </div>
 
-                {/* CTA */}
-                <button
-                  onClick={() => handleContact(c)}
-                  disabled={contactedIds.has(c.id)}
-                  className={`w-full py-2 rounded-lg text-xs font-bold transition ${
-                    contactedIds.has(c.id)
-                      ? 'bg-green-500/10 border border-green-500/20 text-green-400 cursor-default'
-                      : 'bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/20'
-                  }`}
-                >
-                  {contactedIds.has(c.id) ? '✅ Outreach drafted in AK chat' : '📬 Contact candidate'}
-                </button>
+                {/* CTAs */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleContact(c)}
+                    disabled={contactedIds.has(c.id)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${
+                      contactedIds.has(c.id)
+                        ? 'bg-green-500/10 border border-green-500/20 text-green-400 cursor-default'
+                        : 'bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/20'
+                    }`}
+                  >
+                    {contactedIds.has(c.id) ? '✅ Drafted' : '📬 Contact'}
+                  </button>
+                  <button
+                    onClick={() => handleAIScreen(c.name)}
+                    className="px-3 py-2 rounded-lg text-xs font-bold border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#D4AF37]/30 transition"
+                  >
+                    🤖 Screen
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -296,267 +315,6 @@ function FindCandidatesTab() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// ── Post a Job Tab ────────────────────────────────────────────────────────────
-function PostJobTab() {
-  const { user } = useAuth();
-  const { sendMessage } = useDashboardChat();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [requirements, setRequirements] = useState('');
-  const [salary, setSalary] = useState('');
-  const [posting, setPosting] = useState(false);
-  const [postedJobId, setPostedJobId] = useState<string | null>(null);
-  const [postedJobTitle, setPostedJobTitle] = useState('');
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loadingJobs, setLoadingJobs] = useState(true);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  // AI Screen modal
-  const [screeningJobTitle, setScreeningJobTitle] = useState('');
-  const [screening, setScreening] = useState(false);
-  const [screeningResult, setScreeningResult] = useState<ScreeningResult | null>(null);
-  const [showScreenModal, setShowScreenModal] = useState(false);
-
-  const loadJobs = useCallback(async () => {
-    if (!user) return;
-    const db = getFirebaseDb();
-    if (!db) { setLoadingJobs(false); return; }
-    try {
-      const q = query(collection(db, `users/${user.uid}/jobs`), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      setJobs(snap.docs.map(d => ({ id: d.id, ...d.data() } as Job)));
-    } catch (e) {
-      console.error('Failed to load jobs', e);
-    } finally {
-      setLoadingJobs(false);
-    }
-  }, [user]);
-
-  useEffect(() => { loadJobs(); }, [loadJobs]);
-
-  const getApplyLink = (jobId: string) =>
-    `${typeof window !== 'undefined' ? window.location.origin : 'https://getakai.ai'}/apply/${user?.uid}/${jobId}`;
-
-  const handlePost = async () => {
-    if (!title.trim() || !user) return;
-    setPosting(true);
-    const db = getFirebaseDb();
-    let jobId = `mock-${Date.now()}`;
-    if (db) {
-      try {
-        const jobData = {
-          title: title.trim(),
-          description: description.trim(),
-          requirements: requirements.trim(),
-          salary: salary.trim(),
-          createdAt: serverTimestamp(),
-          applicantCount: 0,
-          status: 'active',
-        };
-        const ref = await addDoc(collection(db, `users/${user.uid}/jobs`), jobData);
-        jobId = ref.id;
-      } catch (e) {
-        console.error('Failed to post job', e);
-      }
-    }
-    setPostedJobId(jobId);
-    setPostedJobTitle(title.trim());
-    sendMessage(`Posted new job: ${title}${salary ? ` — ${salary}` : ''}. Ready to screen applicants with AI.`);
-    setTitle('');
-    setDescription('');
-    setRequirements('');
-    setSalary('');
-    setPosting(false);
-    await loadJobs();
-  };
-
-  const handleAIScreen = async (jobId: string, jobTitle: string) => {
-    setScreeningJobTitle(jobTitle);
-    setScreening(true);
-    setShowScreenModal(true);
-    setScreeningResult(null);
-    await new Promise(r => setTimeout(r, 1800));
-    setScreeningResult(generateScreeningResult(jobTitle));
-    setScreening(false);
-  };
-
-  const copyLink = async (jobId: string) => {
-    await navigator.clipboard.writeText(getApplyLink(jobId));
-    setCopiedId(jobId);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const formatDate = (ts: string | Timestamp) => {
-    if (!ts) return '—';
-    if (typeof ts === 'string') return new Date(ts).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-    const d = (ts as Timestamp).toDate?.();
-    return d ? d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
-  };
-
-  const recommendationColor = (rec: ScreeningResult['recommendation']) => {
-    if (rec === 'Interview') return 'text-green-400 bg-green-400/10 border-green-400/20';
-    if (rec === 'Consider') return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
-    return 'text-red-400 bg-red-400/10 border-red-400/20';
-  };
-
-  return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6">
-      {/* Post form */}
-      <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
-        <h2 className="text-sm font-bold text-white mb-4">Post a new job</h2>
-        <div className="space-y-3 mb-4">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Job title *</label>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="e.g. Senior Product Manager"
-              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Description</label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Describe the role, team, and what success looks like..."
-              rows={3}
-              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">Requirements</label>
-              <textarea
-                value={requirements}
-                onChange={e => setRequirements(e.target.value)}
-                placeholder="5+ years exp, React, Node.js..."
-                rows={3}
-                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">Salary range</label>
-              <input
-                value={salary}
-                onChange={e => setSalary(e.target.value)}
-                placeholder="e.g. $120k–$150k + equity"
-                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
-              />
-              <div className="mt-3 p-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg">
-                <p className="text-xs text-[#D4AF37] font-medium mb-1">🤖 AI Screening included</p>
-                <p className="text-xs text-gray-500">Every applicant gets AI-screened against your requirements. You only see the top matches.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={handlePost}
-          disabled={!title.trim() || posting}
-          className="px-5 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center gap-2"
-        >
-          {posting ? (
-            <>
-              <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              Posting...
-            </>
-          ) : '📋 Post job'}
-        </button>
-
-        {/* Apply link prominently after posting */}
-        {postedJobId && (
-          <div className="mt-4 bg-green-500/10 border border-green-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-green-400 text-sm font-bold">✅ Job posted!</span>
-              <span className="text-xs text-gray-500">{postedJobTitle}</span>
-            </div>
-            <p className="text-xs text-gray-400 mb-2">Share this apply link with candidates:</p>
-            <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2">
-              <span className="text-xs text-gray-300 flex-1 truncate font-mono">{getApplyLink(postedJobId)}</span>
-              <button
-                onClick={() => copyLink(postedJobId)}
-                className="text-xs px-2.5 py-1 bg-[#D4AF37] text-black rounded font-bold hover:bg-[#c4a030] transition flex-shrink-0"
-              >
-                {copiedId === postedJobId ? '✅ Copied!' : '📋 Copy'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Posted jobs */}
-      <div>
-        <h2 className="text-sm font-bold text-white mb-3">Your posted jobs</h2>
-        {loadingJobs ? (
-          <div className="flex items-center justify-center py-10">
-            <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : jobs.length === 0 ? (
-          <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-8 text-center">
-            <div className="text-4xl mb-3">📭</div>
-            <p className="text-gray-500 text-sm">No jobs posted yet</p>
-            <p className="text-gray-600 text-xs mt-1">Post your first role above to start receiving screened applicants</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {jobs.map(job => (
-              <div key={job.id} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4 hover:border-[#D4AF37]/20 transition">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-semibold text-white truncate">{job.title}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
-                        job.status === 'active'
-                          ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                          : 'bg-gray-500/10 border border-gray-500/20 text-gray-400'
-                      }`}>
-                        {job.status}
-                      </span>
-                    </div>
-                    {job.salary && <p className="text-xs text-[#D4AF37] mb-1">{job.salary}</p>}
-                    {job.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2 mb-2">{job.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-xs text-gray-600">
-                      <span>📅 {formatDate(job.createdAt)}</span>
-                      <span>👥 {job.applicantCount} applicant{job.applicantCount !== 1 ? 's' : ''}</span>
-                    </div>
-
-                    {/* Apply link */}
-                    <div className="mt-2 flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-2.5 py-1.5">
-                      <span className="text-[10px] text-gray-600 flex-1 truncate font-mono">{getApplyLink(job.id)}</span>
-                      <button
-                        onClick={() => copyLink(job.id)}
-                        className="text-[10px] px-2 py-0.5 border border-[#2a2a2a] text-gray-400 rounded hover:text-white transition flex-shrink-0"
-                      >
-                        {copiedId === job.id ? '✅' : '🔗 Copy'}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => handleAIScreen(job.id, job.title)}
-                      className="text-xs px-3 py-1.5 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/10 transition whitespace-nowrap"
-                    >
-                      🤖 AI Screen
-                    </button>
-                    <button
-                      onClick={() => sendMessage(`Screen applicants for job: ${job.title}`)}
-                      className="text-xs px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg hover:text-white hover:border-[#D4AF37]/30 transition whitespace-nowrap"
-                    >
-                      Ask AK
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* AI Screen Modal */}
       {showScreenModal && (
@@ -564,20 +322,15 @@ function PostJobTab() {
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-bold">🤖 AI Screening — {screeningJobTitle}</h3>
-              <button
-                onClick={() => setShowScreenModal(false)}
-                className="text-gray-500 hover:text-white text-xl leading-none"
-              >×</button>
+              <button onClick={() => setShowScreenModal(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
-
             {screening ? (
               <div className="flex flex-col items-center gap-3 py-8">
                 <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-                <p className="text-sm text-gray-400">Screening sample candidate against your requirements...</p>
+                <p className="text-sm text-gray-400">Screening against your requirements...</p>
               </div>
             ) : screeningResult && (
               <div className="space-y-4">
-                {/* Candidate + score */}
                 <div className="flex items-center justify-between bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3">
                   <div>
                     <p className="text-sm font-semibold text-white">{screeningResult.candidateName}</p>
@@ -590,8 +343,6 @@ function PostJobTab() {
                     </span>
                   </div>
                 </div>
-
-                {/* Strengths */}
                 <div>
                   <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-2">✅ Strengths</p>
                   <ul className="space-y-1">
@@ -602,8 +353,6 @@ function PostJobTab() {
                     ))}
                   </ul>
                 </div>
-
-                {/* Gaps */}
                 <div>
                   <p className="text-xs text-orange-400 font-semibold uppercase tracking-wider mb-2">⚠️ Gaps</p>
                   <ul className="space-y-1">
@@ -614,21 +363,564 @@ function PostJobTab() {
                     ))}
                   </ul>
                 </div>
-
-                {/* Summary */}
                 <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3">
                   <p className="text-xs text-gray-300 leading-relaxed">{screeningResult.summary}</p>
                 </div>
-
-                <button
-                  onClick={() => setShowScreenModal(false)}
-                  className="w-full py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c4a030] transition"
-                >
+                <button onClick={() => setShowScreenModal(false)} className="w-full py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c4a030] transition">
                   Got it
                 </button>
               </div>
             )}
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Platform definitions ───────────────────────────────────────────────────────
+interface Platform {
+  id: string;
+  name: string;
+  tagline: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  emoji: string;
+}
+
+const PLATFORMS: Platform[] = [
+  { id: 'seek', name: 'SEEK', tagline: "Australia's #1 job board", color: '#1E4FBE', bgColor: 'rgba(30,79,190,0.1)', borderColor: 'rgba(30,79,190,0.3)', emoji: '🔵' },
+  { id: 'linkedin', name: 'LinkedIn', tagline: 'Professional network', color: '#0077B5', bgColor: 'rgba(0,119,181,0.1)', borderColor: 'rgba(0,119,181,0.3)', emoji: '💼' },
+  { id: 'indeed', name: 'Indeed', tagline: 'Global job board', color: '#2164F3', bgColor: 'rgba(33,100,243,0.1)', borderColor: 'rgba(33,100,243,0.3)', emoji: '🌐' },
+  { id: 'jora', name: 'Jora', tagline: 'Australian job search', color: '#00B4B4', bgColor: 'rgba(0,180,180,0.1)', borderColor: 'rgba(0,180,180,0.3)', emoji: '🔍' },
+  { id: 'website', name: 'Your Website', tagline: 'Post via Web module', color: '#D4AF37', bgColor: 'rgba(212,175,55,0.1)', borderColor: 'rgba(212,175,55,0.3)', emoji: '🌍' },
+  { id: 'all', name: 'All Platforms', tagline: 'Post everywhere at once', color: '#9B59B6', bgColor: 'rgba(155,89,182,0.1)', borderColor: 'rgba(155,89,182,0.3)', emoji: '🚀' },
+];
+
+// ── Post a Job Tab ────────────────────────────────────────────────────────────
+type PostStep = 'form' | 'generating' | 'review' | 'platforms' | 'posted';
+
+interface JobFormData {
+  title: string;
+  location: string;
+  isRemote: boolean;
+  employmentType: 'Full-time' | 'Part-time' | 'Contract' | 'Casual';
+  salaryMin: string;
+  salaryMax: string;
+  description: string;
+}
+
+interface PostedJob {
+  id: string;
+  title: string;
+  location: string;
+  employmentType: string;
+  salaryMin: string;
+  salaryMax: string;
+  platforms: string[];
+  postedAt: string;
+}
+
+function PostJobTab() {
+  const { user } = useAuth();
+  const { sendMessage } = useDashboardChat();
+
+  // Step state
+  const [step, setStep] = useState<PostStep>('form');
+
+  // Form state
+  const [form, setForm] = useState<JobFormData>({
+    title: '',
+    location: '',
+    isRemote: false,
+    employmentType: 'Full-time',
+    salaryMin: '',
+    salaryMax: '',
+    description: '',
+  });
+
+  // JD state
+  const [generatedJD, setGeneratedJD] = useState('');
+  const [editedJD, setEditedJD] = useState('');
+
+  // Platform state
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
+  const [connectedPlatforms] = useState<Set<string>>(new Set()); // mock — none connected by default
+
+  // Posted job state
+  const [postedJob, setPostedJob] = useState<PostedJob | null>(null);
+  const [posting, setPosting] = useState(false);
+
+  const handleGenerateJD = async () => {
+    if (!form.title.trim()) return;
+    setStep('generating');
+
+    try {
+      const locationStr = form.isRemote
+        ? form.location ? `${form.location} (Remote)` : 'Remote'
+        : form.location || 'Australia';
+
+      const res = await fetch('/api/recruit/generate-jd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobTitle: form.title,
+          location: locationStr,
+          employmentType: form.employmentType,
+          salaryMin: form.salaryMin,
+          salaryMax: form.salaryMax,
+          description: form.description,
+          businessName: user?.displayName || undefined,
+          industry: undefined,
+        }),
+      });
+
+      const data = await res.json();
+      const jd = data.jd || '';
+      setGeneratedJD(jd);
+      setEditedJD(jd);
+      setStep('review');
+    } catch {
+      // fallback
+      const fallback = `# ${form.title}\n\n## About the Company\n\nWe're a growing business looking for exceptional talent.\n\n## Role Overview\n\n${form.description || `We're looking for a talented ${form.title} to join our team.`}\n\n## Key Responsibilities\n\n- Lead core responsibilities for this role\n- Collaborate with cross-functional teams\n- Drive results and continuous improvement\n- Build strong stakeholder relationships\n- Contribute to team culture\n\n## What We're Looking For\n\n- Proven experience in a similar role\n- Strong communication skills\n- Results-driven mindset\n- Team player with initiative\n\n## What We Offer\n\n- Salary: ${form.salaryMin && form.salaryMax ? `$${form.salaryMin}–$${form.salaryMax} AUD` : 'Competitive'}\n- ${form.employmentType} position\n- ${form.isRemote ? 'Remote' : form.location || 'Australia'}\n- Supportive team environment\n\n## How to Apply\n\nSubmit your resume and cover letter. We'll be in touch within 5 business days.`;
+      setGeneratedJD(fallback);
+      setEditedJD(fallback);
+      setStep('review');
+    }
+  };
+
+  const togglePlatform = (id: string) => {
+    setSelectedPlatforms(prev => {
+      const next = new Set(prev);
+      if (id === 'all') {
+        if (next.has('all')) {
+          next.clear();
+        } else {
+          PLATFORMS.forEach(p => next.add(p.id));
+        }
+      } else {
+        if (next.has(id)) {
+          next.delete(id);
+          next.delete('all');
+        } else {
+          next.add(id);
+          // if all individual ones selected, also select 'all'
+          const individualSelected = PLATFORMS.filter(p => p.id !== 'all').every(p => next.has(p.id));
+          if (individualSelected) next.add('all');
+        }
+      }
+      return next;
+    });
+  };
+
+  const handlePost = async () => {
+    if (selectedPlatforms.size === 0 || !user) return;
+    setPosting(true);
+
+    const platformNames = Array.from(selectedPlatforms)
+      .filter(id => id !== 'all')
+      .map(id => PLATFORMS.find(p => p.id === id)?.name || id);
+
+    const jobId = `job-${Date.now()}`;
+
+    // Save to Firestore
+    const db = getFirebaseDb();
+    if (db) {
+      try {
+        const locationStr = form.isRemote
+          ? form.location ? `${form.location} (Remote)` : 'Remote'
+          : form.location || 'Australia';
+
+        await addDoc(collection(db, `users/${user.uid}/jobs`), {
+          title: form.title,
+          location: locationStr,
+          employmentType: form.employmentType,
+          salaryMin: form.salaryMin,
+          salaryMax: form.salaryMax,
+          description: form.description,
+          jd: editedJD,
+          platforms: platformNames,
+          createdAt: serverTimestamp(),
+          status: 'active',
+          applicantCount: 0,
+        });
+      } catch (e) {
+        console.error('Failed to save job', e);
+      }
+    }
+
+    setPostedJob({
+      id: jobId,
+      title: form.title,
+      location: form.isRemote ? (form.location ? `${form.location} (Remote)` : 'Remote') : form.location || 'Australia',
+      employmentType: form.employmentType,
+      salaryMin: form.salaryMin,
+      salaryMax: form.salaryMax,
+      platforms: platformNames,
+      postedAt: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }),
+    });
+
+    setPosting(false);
+    setStep('posted');
+  };
+
+  const handleStartOver = () => {
+    setStep('form');
+    setForm({ title: '', location: '', isRemote: false, employmentType: 'Full-time', salaryMin: '', salaryMax: '', description: '' });
+    setGeneratedJD('');
+    setEditedJD('');
+    setSelectedPlatforms(new Set());
+    setPostedJob(null);
+  };
+
+  const activePlatforms = Array.from(selectedPlatforms).filter(id => id !== 'all');
+
+  // ── Step indicator ─────────────────────────────────────────────────────────
+  const steps = [
+    { key: 'form', label: 'Details' },
+    { key: 'review', label: 'JD Review' },
+    { key: 'platforms', label: 'Platforms' },
+    { key: 'posted', label: 'Posted' },
+  ];
+  const currentStepIdx = steps.findIndex(s => s.key === step || (step === 'generating' && s.key === 'review'));
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      {/* Step indicator */}
+      {step !== 'posted' && (
+        <div className="flex items-center gap-2">
+          {steps.map((s, i) => (
+            <div key={s.key} className="flex items-center gap-2">
+              <div className={`flex items-center gap-1.5 text-xs font-semibold ${
+                i === currentStepIdx ? 'text-[#D4AF37]' : i < currentStepIdx ? 'text-green-400' : 'text-gray-600'
+              }`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                  i === currentStepIdx ? 'bg-[#D4AF37] text-black' : i < currentStepIdx ? 'bg-green-500 text-black' : 'bg-[#2a2a2a] text-gray-600'
+                }`}>
+                  {i < currentStepIdx ? '✓' : i + 1}
+                </span>
+                {s.label}
+              </div>
+              {i < steps.length - 1 && <div className={`w-8 h-px ${i < currentStepIdx ? 'bg-green-500' : 'bg-[#2a2a2a]'}`} />}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── STEP 1: Form ─────────────────────────────────────────────────── */}
+      {step === 'form' && (
+        <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
+          <h2 className="text-sm font-bold text-white mb-1">Post a new job</h2>
+          <p className="text-xs text-gray-500 mb-5">Fill in the basics — AK will write the full job description for you.</p>
+
+          <div className="space-y-4">
+            {/* Job title */}
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Job title *</label>
+              <input
+                value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. Senior Product Manager"
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+              />
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Location</label>
+              <div className="flex items-center gap-3">
+                <input
+                  value={form.location}
+                  onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                  placeholder="e.g. Sydney, NSW"
+                  className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                />
+                <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer select-none whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={form.isRemote}
+                    onChange={e => setForm(f => ({ ...f, isRemote: e.target.checked }))}
+                    className="w-3.5 h-3.5 accent-[#D4AF37]"
+                  />
+                  Remote
+                </label>
+              </div>
+            </div>
+
+            {/* Employment type */}
+            <div>
+              <label className="text-xs text-gray-500 mb-2 block">Employment type</label>
+              <div className="flex flex-wrap gap-2">
+                {(['Full-time', 'Part-time', 'Contract', 'Casual'] as const).map(type => (
+                  <label key={type} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs cursor-pointer transition ${
+                    form.employmentType === type
+                      ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
+                      : 'border-[#2a2a2a] text-gray-500 hover:border-[#3a3a3a]'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="employmentType"
+                      value={type}
+                      checked={form.employmentType === type}
+                      onChange={() => setForm(f => ({ ...f, employmentType: type }))}
+                      className="hidden"
+                    />
+                    {type}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Salary range */}
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Salary range (AUD)</label>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">$</span>
+                  <input
+                    type="number"
+                    value={form.salaryMin}
+                    onChange={e => setForm(f => ({ ...f, salaryMin: e.target.value }))}
+                    placeholder="60,000"
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg pl-7 pr-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                  />
+                </div>
+                <span className="text-gray-600 text-sm">–</span>
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">$</span>
+                  <input
+                    type="number"
+                    value={form.salaryMax}
+                    onChange={e => setForm(f => ({ ...f, salaryMax: e.target.value }))}
+                    placeholder="90,000"
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg pl-7 pr-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                  />
+                </div>
+                <span className="text-xs text-gray-600 whitespace-nowrap">AUD / yr</span>
+              </div>
+            </div>
+
+            {/* Brief description */}
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Brief description</label>
+              <p className="text-[11px] text-gray-600 mb-1.5">2-3 sentences — tell us what the role is about</p>
+              <textarea
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="e.g. We're looking for an experienced PM to lead our product team. You'll own the roadmap for our core SaaS platform and work closely with engineering and design."
+                rows={3}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handleGenerateJD}
+            disabled={!form.title.trim()}
+            className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center gap-2"
+          >
+            Generate Job Description →
+          </button>
+        </div>
+      )}
+
+      {/* ── STEP 2: Generating ────────────────────────────────────────────── */}
+      {step === 'generating' && (
+        <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-10 flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          <div className="text-center">
+            <p className="text-white font-semibold text-sm">✍️ Writing your job description...</p>
+            <p className="text-gray-500 text-xs mt-1">AK is crafting a compelling JD based on your details</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP 3: JD Review ────────────────────────────────────────────── */}
+      {step === 'review' && (
+        <div className="space-y-4">
+          <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="text-sm font-bold text-white">Your Job Description</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Review and edit before posting</p>
+              </div>
+              <span className="text-xs px-2 py-1 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full">✅ AI Generated</span>
+            </div>
+            <textarea
+              value={editedJD}
+              onChange={e => setEditedJD(e.target.value)}
+              rows={24}
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-4 py-3 text-sm text-gray-300 font-mono leading-relaxed focus:outline-none focus:border-[#D4AF37] transition resize-none"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStep('platforms')}
+              className="flex-1 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 transition"
+            >
+              Looks good — choose platforms →
+            </button>
+            <button
+              onClick={() => sendMessage(`Change something in the JD for my ${form.title} role`)}
+              className="px-4 py-2.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-sm font-semibold hover:text-white hover:border-[#D4AF37]/30 transition whitespace-nowrap"
+            >
+              Ask AK to change something
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP 4: Platform Selection ───────────────────────────────────── */}
+      {step === 'platforms' && (
+        <div className="space-y-4">
+          <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
+            <h2 className="text-sm font-bold text-white mb-1">Choose where to post</h2>
+            <p className="text-xs text-gray-500 mb-5">Select one or more platforms — connect any that aren't linked yet</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {PLATFORMS.map(platform => {
+                const isSelected = selectedPlatforms.has(platform.id);
+                const isConnected = connectedPlatforms.has(platform.id) || platform.id === 'all';
+
+                return (
+                  <div
+                    key={platform.id}
+                    onClick={() => togglePlatform(platform.id)}
+                    className={`relative rounded-xl border p-4 cursor-pointer transition select-none ${
+                      isSelected
+                        ? 'border-[#D4AF37] bg-[#D4AF37]/5'
+                        : 'border-[#2a2a2a] bg-[#0a0a0a] hover:border-[#3a3a3a]'
+                    }`}
+                  >
+                    {/* Selected checkmark */}
+                    {isSelected && (
+                      <span className="absolute top-2 right-2 text-[#D4AF37] text-xs font-bold">✓</span>
+                    )}
+
+                    {/* Logo placeholder */}
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-xl mb-3"
+                      style={{ background: platform.bgColor, border: `1px solid ${platform.borderColor}` }}
+                    >
+                      {platform.emoji}
+                    </div>
+
+                    <p className="text-sm font-bold text-white">{platform.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 mb-3">{platform.tagline}</p>
+
+                    {/* Connection status */}
+                    {platform.id !== 'all' && (
+                      isConnected ? (
+                        <span className="text-xs text-green-400 flex items-center gap-1">
+                          <span>✅</span> Connected
+                        </span>
+                      ) : (
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            sendMessage(`I want to connect ${platform.name} for job posting`);
+                          }}
+                          className="text-xs px-2.5 py-1 border rounded-lg transition"
+                          style={{ borderColor: platform.borderColor, color: platform.color, background: platform.bgColor }}
+                        >
+                          Connect {platform.name}
+                        </button>
+                      )
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {activePlatforms.length > 0 && (
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4">
+              <p className="text-xs text-gray-500 mb-3">
+                Posting to: {activePlatforms.map(id => PLATFORMS.find(p => p.id === id)?.name).filter(Boolean).join(', ')}
+              </p>
+              <button
+                onClick={handlePost}
+                disabled={posting}
+                className="w-full py-3 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center justify-center gap-2"
+              >
+                {posting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    Posting...
+                  </>
+                ) : `Post to ${activePlatforms.length} platform${activePlatforms.length !== 1 ? 's' : ''}`}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── STEP 5: Posted ───────────────────────────────────────────────── */}
+      {step === 'posted' && postedJob && (
+        <div className="space-y-4">
+          {/* Success banner */}
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-5">
+            <p className="text-green-400 font-bold text-base mb-1">
+              ✅ Posted to {postedJob.platforms.join(', ')}.
+            </p>
+            <p className="text-sm text-gray-400">
+              Here's what happens next: applications will appear in your dashboard as they come in.
+              Every applicant is AI-screened and ranked before you see them.
+            </p>
+          </div>
+
+          {/* Live job card */}
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Live Job Posting</p>
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 hover:border-[#D4AF37]/20 transition">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#D4AF37] to-amber-600 flex items-center justify-center text-black font-black text-lg flex-shrink-0">
+                    💼
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-white">{postedJob.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{postedJob.location} · {postedJob.employmentType}</p>
+                    {(postedJob.salaryMin || postedJob.salaryMax) && (
+                      <p className="text-xs text-[#D4AF37] mt-1 font-semibold">
+                        {postedJob.salaryMin && postedJob.salaryMax
+                          ? `$${Number(postedJob.salaryMin).toLocaleString()} – $${Number(postedJob.salaryMax).toLocaleString()} AUD`
+                          : postedJob.salaryMin
+                          ? `From $${Number(postedJob.salaryMin).toLocaleString()} AUD`
+                          : ''}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full flex-shrink-0">
+                  Active
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {postedJob.platforms.map(p => (
+                  <span key={p} className="text-xs px-2.5 py-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-full text-gray-400">
+                    {p}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-gray-600">
+                <span>📅 Posted {postedJob.postedAt}</span>
+                <span>👥 0 applicants</span>
+                <span>🤖 AI screening active</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={handleStartOver}
+            className="w-full py-2.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-sm font-semibold hover:text-white hover:border-[#D4AF37]/30 transition"
+          >
+            + Post another job
+          </button>
         </div>
       )}
     </div>

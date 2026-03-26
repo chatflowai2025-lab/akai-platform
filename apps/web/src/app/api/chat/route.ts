@@ -172,6 +172,39 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
     }
   }
 
+  // ── Job posting platform connections ────────────────────────────────────
+  if (msg.includes('connect seek') || msg.includes('i want to connect seek')) {
+    return "To post to **SEEK**, you'll need your SEEK employer account credentials. Do you already have an employer account on SEEK?\n\nIf yes, I'll walk you through linking it — takes about 2 minutes.\nIf not, head to **seek.com.au/employer** to create one first (it's free to set up).";
+  }
+
+  if ((msg.includes('connect linkedin') && msg.includes('job')) || msg.includes('i want to connect linkedin for job')) {
+    return "To post jobs on **LinkedIn**, you'll need your LinkedIn account credentials. Do you already have an employer account on LinkedIn?\n\nIf yes, I'll guide you through the OAuth connection — takes under 2 minutes.\nIf not, you can post jobs directly from your existing LinkedIn profile at no cost for basic listings.";
+  }
+
+  if (msg.includes('connect indeed') || msg.includes('i want to connect indeed')) {
+    return "To post to **Indeed**, you'll need your Indeed employer account credentials. Do you already have an employer account on Indeed?\n\nIndeed offers free job postings — if you don't have an account yet, head to **employers.indeed.com** to get set up in minutes.";
+  }
+
+  if (msg.includes('connect jora') || msg.includes('i want to connect jora')) {
+    return "To post to **Jora**, you'll need a Jora employer account. Do you already have one?\n\nJora is an Australian-focused job board — great for local talent. Head to **jora.com/employer** to create an account if you need one.";
+  }
+
+  if (msg.includes('i want to connect') && msg.includes('for job posting')) {
+    const platformMatch = message.match(/connect (.+?) for job posting/i);
+    const platform = platformMatch ? platformMatch[1] : 'that platform';
+    return `To post to **${platform}**, you'll need your ${platform} employer account credentials. Do you already have an employer account on ${platform}?\n\nIf yes, I'll walk you through linking it. If not, you'll need to create one on their website first.`;
+  }
+
+  // ── JD change requests ───────────────────────────────────────────────────
+  if (msg.includes('change') && msg.includes('jd') || msg.includes('change something in the jd') || msg.includes('update the jd') || (msg.includes('change') && msg.includes('job description'))) {
+    return "What would you like me to change? I can update the:\n\n• **Title** — if the role name needs adjusting\n• **Responsibilities** — add, remove, or reword bullet points\n• **Requirements** — tweak experience level or skills needed\n• **Salary** — update the range or add bonus/equity details\n• **Tone** — make it more formal, casual, or punchy\n\nJust tell me what to fix and I'll rewrite that section.";
+  }
+
+  // ── Post my job ──────────────────────────────────────────────────────────
+  if (msg.includes('post my job') || msg.includes('publish my job') || (msg.includes('post') && msg.includes('job') && msg.includes('now'))) {
+    return "Which platforms would you like to post to?\n\n• **SEEK** — Australia's #1 job board\n• **LinkedIn** — professional network, great for referrals\n• **Indeed** — global reach, strong volume\n• **Jora** — Australian-focused, lower cost\n• **Your website** — own the listing, zero fees\n• **All of them** — maximum coverage\n\nYou can multi-select in the Recruit module's platform picker.";
+  }
+
   // ── Platform connection requests ─────────────────────────────────────────
   if (msg.includes('connect my instagram') || msg.includes('connect instagram')) {
     return "Instagram connection uses OAuth — here's how to get set up:\n\n1. Go to **Social** → click **Connect** under Instagram\n2. You'll be redirected to Meta's OAuth page\n3. Approve AKAI's access (read + publish permissions)\n4. You'll land back here fully connected\n\nThis is in beta — send me a quick message and I'll prioritise getting your account linked this week.";
