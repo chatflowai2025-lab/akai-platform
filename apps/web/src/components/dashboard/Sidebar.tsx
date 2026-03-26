@@ -11,8 +11,9 @@ const MODULES = [
   { id: 'recruit', icon: '🎯', label: 'Recruit', status: 'building', href: '/recruit', external: false },
   { id: 'web', icon: '🌐', label: 'Web', status: 'building', href: '/web', external: false },
   { id: 'email-guard', icon: '✉️', label: 'Email', status: 'building', href: '/email-guard', external: false },
-  { id: 'ads', icon: '📣', label: 'Ads', status: 'planned', href: '/ads', external: false },
-  { id: 'social', icon: '📱', label: 'Social', status: 'planned', href: '/social', external: false },
+  { id: 'calendar', icon: '📅', label: 'Calendar', status: 'live', href: '/calendar', external: false },
+  { id: 'ads', icon: '📣', label: 'Ads', status: 'live', href: '/ads', external: false },
+  { id: 'social', icon: '📱', label: 'Social', status: 'live', href: '/social', external: false },
 ];
 
 export default function Sidebar() {

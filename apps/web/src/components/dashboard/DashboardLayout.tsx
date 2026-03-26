@@ -4,7 +4,7 @@ import { useEffect, useRef, createContext, useContext, useState, useCallback } f
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
 import { isSafeMode } from '@/lib/beta-config';
@@ -44,6 +44,31 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useAuth();
+
+  // Persist chat to Firestore
+  useEffect(() => {
+    if (!user || messages.length <= 1) return; // skip initial message
+    const db = getFirebaseDb();
+    if (!db) return;
+    const chatRef = doc(db, 'users', user.uid, 'chat', 'history');
+    setDoc(chatRef, { messages: messages.slice(-50), updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+  }, [messages, user]);
+
+  // Load chat history from Firestore on mount
+  useEffect(() => {
+    if (!user) return;
+    const db = getFirebaseDb();
+    if (!db) return;
+    const chatRef = doc(db, 'users', user.uid, 'chat', 'history');
+    getDoc(chatRef).then(snap => {
+      if (snap.exists()) {
+        const saved = snap.data()?.messages;
+        if (Array.isArray(saved) && saved.length > 0) {
+          setMessages(saved);
+        }
+      }
+    }).catch(() => {});
+  }, [user]);
 
   // Load user's onboarding config for AK context
   useEffect(() => {
