@@ -76,10 +76,12 @@ interface ChatMessage {
 interface ChatRequest {
   message: string;
   history?: ChatMessage[];
+  userContext?: Record<string, string>;
+  state?: Record<string, unknown>;
 }
 
 // ── Smart mock response engine ────────────────────────────────────────────────
-function getMockResponse(message: string, history: ChatMessage[]): string {
+function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}): string {
   const msg = message.toLowerCase().trim();
   const lastAssistant = history.filter(h => h.role === 'assistant').pop()?.content?.toLowerCase() ?? '';
   const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
@@ -113,8 +115,15 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
   }
 
   // ── Campaign configuration ────────────────────────────────────────────────
-  if (msg.includes('launch campaign') || msg.includes('new campaign') || msg.includes('configure sophie')) {
-    return "Based on your onboarding setup, here's Sophie's current config:\n\n📋 **Campaign summary**\n• **Target:** Australian SMBs — kitchens, renovations, luxury trades\n• **Contact list:** 150 leads (Mosman, Paddington, Double Bay)\n• **Script:** Warm intro → qualify budget → book site visit\n• **Call hours:** Mon–Fri, 9am–5pm AEST\n• **Fallback:** SMS if no answer after 2 attempts\n\nWant to change anything, or should I launch Sophie now?";
+  if (msg.includes('launch campaign') || msg.includes('new campaign') || msg.includes('configure sophie') || msg.includes('outbound sales campaign')) {
+    const biz = userContext.businessName || 'your business';
+    const ind = userContext.industry || 'your industry';
+    const loc = userContext.location || 'your area';
+    const goal = userContext.goal || 'book appointments';
+    if (!userContext.businessName) {
+      return "I don't have your onboarding details yet. Head to **Settings** to complete your profile, then I can configure Sophie specifically for your business.";
+    }
+    return `Perfect. Let me check your setup.\n\nBased on your account, here's how Sophie is configured for **${biz}**:\n\n• **Industry:** ${ind}\n• **Location:** ${loc}\n• **Goal:** ${goal}\n• **Call hours:** Mon–Fri 9am–5pm AEST\n• **Fallback:** SMS if no answer\n\nIs this still accurate, or should we update anything?`;
   }
 
   if (lastAssistant.includes('launch sophie now') || lastAssistant.includes('want to change anything')) {
@@ -261,7 +270,7 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], userContext = {} } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
@@ -275,16 +284,20 @@ export async function POST(req: NextRequest) {
         ...history.map(h => ({ role: h.role, content: h.content })),
         { role: 'user', content: message },
       ];
+      const contextBlock = Object.keys(userContext).length > 0
+        ? '\n\nUSER ACCOUNT CONTEXT (already known, use this to personalise responses):\n' +
+          Object.entries(userContext).map(([k,v]) => v ? `- ${k}: ${v}` : '').filter(Boolean).join('\n')
+        : '';
       const response = await client.messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 400,
-        system: SYSTEM_PROMPT,
+        system: SYSTEM_PROMPT + contextBlock,
         messages,
       });
       const text = response.content[0].type === 'text' ? response.content[0].text : '';
       return NextResponse.json({ message: text });
     } else {
-      return NextResponse.json({ message: getMockResponse(message, history) });
+      return NextResponse.json({ message: getMockResponse(message, history, userContext) });
     }
   } catch (err: unknown) {
     console.error('[/api/chat]', err);
