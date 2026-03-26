@@ -7,7 +7,7 @@ import ChatBubble from '@/components/ui/ChatBubble';
 const INITIAL: ChatMessage = {
   id: '1',
   role: 'assistant',
-  content: "Hey! I'm MM. Ask me anything — run a call campaign, check your pipeline, or just ask what's working.",
+  content: "Hi, I'm AK. Ask me anything — run a call campaign, check your pipeline, or just ask what's working.",
   timestamp: new Date().toISOString(),
 };
 
@@ -58,7 +58,7 @@ export default function ChatPanel() {
           <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">
             M
           </div>
-          <span className="font-semibold text-sm">Ask MM</span>
+          <span className="font-semibold text-sm">Ask AK</span>
           <span className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function ChatPanel() {
         {loading && (
           <div className="text-xs text-gray-500 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
-            MM is thinking...
+            AK is thinking...
           </div>
         )}
       </div>
@@ -79,7 +79,7 @@ export default function ChatPanel() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
-            placeholder="Ask MM anything..."
+            placeholder="Ask AK anything..."
             className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
           />
           <button

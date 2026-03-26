@@ -114,7 +114,7 @@ export default function OnboardPage() {
         {chatLoading && (
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-            MM is thinking...
+            AK is thinking...
           </div>
         )}
       </div>
