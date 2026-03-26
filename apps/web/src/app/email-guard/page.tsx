@@ -176,11 +176,7 @@ function EmailGuardInner() {
             <p className="text-xs text-gray-500 mt-0.5">Inbox monitoring &amp; auto-proposal generation</p>
           </div>
           <div className="flex items-center gap-2">
-            {guardStatus === 'live' && (
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-green-400 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Active{guardVersion ? ` · v${guardVersion}` : ''}
-              </span>
-            )}
+  
             <ConnectInboxButton label="⚙️ Help" small />
           </div>
         </header>
