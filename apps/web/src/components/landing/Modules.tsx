@@ -35,11 +35,21 @@ function SocialIcon() {
   );
 }
 
-const MODULES = [
+interface Module {
+  Icon: () => JSX.Element;
+  name: string;
+  status: 'live' | 'building' | 'planned';
+  tagline: string;
+  features: string[];
+  price: string;
+  href?: string;
+}
+
+const MODULES: Module[] = [
   {
     Icon: SalesIcon,
     name: 'AKAI Sales',
-    status: 'live' as const,
+    status: 'live',
     tagline: 'AI finds leads, calls them, books meetings in your calendar.',
     features: ['Sophie AI voice calling', 'Lead enrichment', 'Auto-booking', 'Call recordings'],
     price: '$297',
@@ -48,38 +58,35 @@ const MODULES = [
   {
     Icon: RecruitIcon,
     name: 'AKAI Recruit',
-    status: 'building' as const,
+    status: 'building',
     tagline: 'AI sources candidates, screens them, books interviews.',
     features: ['Job posting AI', 'Candidate scoring', 'AI screening calls', 'Calendar integration'],
     price: '$247',
-    href: undefined,
   },
   {
     Icon: WebIcon,
     name: 'AKAI Web',
-    status: 'building' as const,
+    status: 'building',
     tagline: 'AI builds and updates your website through chat.',
     features: ['Chat-to-website', 'SEO optimised', 'Lead capture', 'Auto-updates via chat'],
     price: '$197',
-    href: '/web',
   },
   {
     Icon: AdsIcon,
     name: 'AKAI Ads',
-    status: 'planned' as const,
+    status: 'planned',
     tagline: 'Google + Meta campaigns planned, launched, and optimised by AI.',
     features: ['AI copywriting', 'Budget optimisation', 'A/B testing', 'ROI tracking'],
     price: '$397',
-    href: undefined,
   },
   {
     Icon: SocialIcon,
     name: 'AKAI Social',
-    status: 'planned' as const,
+    status: 'planned',
     tagline: 'Instagram + LinkedIn content calendar, created and published automatically.',
     features: ['AI content calendar', 'Auto-publishing', 'Engagement tracking', 'Brand voice'],
     price: '$147',
-    href: undefined,
+    href: '/social',
   },
 ];
 
@@ -122,7 +129,7 @@ export default function Modules() {
   );
 }
 
-function ModuleCard({ mod }: { mod: typeof MODULES[0] }) {
+function ModuleCard({ mod }: { mod: Module }) {
   const { Icon } = mod;
   const status = STATUS[mod.status];
   const isLive = mod.status === 'live';
@@ -169,20 +176,12 @@ function ModuleCard({ mod }: { mod: typeof MODULES[0] }) {
           </span>
           <span className={`text-xs ml-1 ${isLive ? 'text-white/40' : 'text-white/20'}`}>/mo</span>
         </div>
-        {isLive ? (
-          <a
-            href="/onboard"
-            className="text-sm font-semibold text-[#D4AF37] hover:text-[#F59E0B] transition-colors flex items-center gap-1 group"
-          >
-            Get started
-            <span className="group-hover:translate-x-0.5 transition-transform inline-block">→</span>
-          </a>
-        ) : mod.href ? (
+        {mod.href ? (
           <a
             href={mod.href}
-            className="text-sm font-semibold text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors flex items-center gap-1 group"
+            className="text-sm font-semibold text-[#D4AF37] hover:text-[#F59E0B] transition-colors flex items-center gap-1 group"
           >
-            Learn more
+            {isLive ? 'Get started' : 'Learn more'}
             <span className="group-hover:translate-x-0.5 transition-transform inline-block">→</span>
           </a>
         ) : (
