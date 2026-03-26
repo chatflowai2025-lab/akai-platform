@@ -35,7 +35,11 @@ interface MetaCampaign {
 
 // ── Connection Banners ────────────────────────────────────────────────────────
 function ConnectionBanner({ platform, icon, description }: { platform: string; icon: string; description: string }) {
-  const { sendMessage } = useDashboardChat();
+  const [showInfo, setShowInfo] = useState(false);
+  const connectUrl = platform === 'Google Ads'
+    ? 'https://ads.google.com/intl/en_au/home/'
+    : 'https://www.facebook.com/business/ads';
+
   return (
     <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
       <div className="flex items-center gap-4">
@@ -53,11 +57,27 @@ function ConnectionBanner({ platform, icon, description }: { platform: string; i
         </div>
         <button
           className="flex-shrink-0 px-4 py-2 rounded-xl border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-bold hover:bg-[#D4AF37]/10 transition"
-          onClick={() => sendMessage(`I want to connect my ${platform} account`)}
+          onClick={() => setShowInfo(v => !v)}
         >
-          Connect {platform}
+          Connect {platform.split(' ')[0]}
         </button>
       </div>
+      {showInfo && (
+        <div className="mt-4 pt-4 border-t border-[#1f1f1f]">
+          <p className="text-xs text-gray-400 mb-3">
+            {platform === 'Google Ads'
+              ? 'Connect your Google Ads account to launch campaigns directly from AKAI. You\'ll need an active Google Ads account.'
+              : 'Connect your Meta Business account to run Facebook and Instagram ads from AKAI.'}
+          </p>
+          <div className="flex gap-2">
+            <a href={connectUrl} target="_blank" rel="noopener noreferrer"
+              className="px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-xs font-bold hover:opacity-90 transition">
+              Open {platform} →
+            </a>
+            <span className="text-xs text-gray-600 self-center">Full integration coming soon — campaigns build and preview now</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
