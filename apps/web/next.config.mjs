@@ -9,6 +9,7 @@ const nextConfig = {
     assetPrefix: '/akai-platform/',
   } : {}),
   transpilePackages: ['@akai/shared-types'],
+  serverExternalPackages: ['undici', '@anthropic-ai/sdk', 'firebase-admin'],
   images: {
     ...(isGitHubPages ? { unoptimized: true } : { domains: ['firebasestorage.googleapis.com'] }),
   },
