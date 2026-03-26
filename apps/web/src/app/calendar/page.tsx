@@ -484,21 +484,57 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
     }
   };
 
+  const handleOutlookConnect = async () => {
+    setConnecting(true);
+    try {
+      // Microsoft OAuth via Railway
+      const r = await fetch(
+        `https://api-server-production-2a27.up.railway.app/api/email/microsoft/auth-url?userId=${userId}`,
+        { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
+      );
+      const { authUrl } = await r.json() as { authUrl: string };
+      window.location.href = authUrl;
+    } catch {
+      setConnecting(false);
+    }
+  };
+
   return (
-    <div className="flex justify-center px-6 pb-4">
-      <div className="w-full max-w-xl bg-[#111] border border-[#D4AF37]/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4">
-        <div className="text-3xl">📅</div>
-        <div className="flex-1 text-center sm:text-left">
-          <p className="text-white font-bold">Connect your calendar to see real events here</p>
-          <p className="text-gray-500 text-sm mt-0.5">Sync Google or Outlook — your mock events will be replaced with real ones.</p>
+    <div className="px-6 pb-4">
+      <div className="w-full bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-2xl">📅</span>
+          <div>
+            <p className="text-white font-bold text-sm">Connect your calendar</p>
+            <p className="text-gray-500 text-xs mt-0.5">Connect one or both — AKAI syncs all of them and books meetings directly into your calendar.</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-2 flex-shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Google */}
           <button
             onClick={handleGoogleConnect}
             disabled={connecting}
-            className="px-4 py-2 rounded-xl bg-white text-[#1a1a1a] text-sm font-bold hover:bg-gray-100 transition disabled:opacity-60 whitespace-nowrap"
+            className="flex items-center gap-3 px-4 py-3 bg-white text-[#1a1a1a] rounded-xl text-sm font-bold hover:bg-gray-100 transition disabled:opacity-60"
           >
-            {connecting ? 'Connecting…' : '🔗 Connect with Google'}
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+              <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+            </svg>
+            {connecting ? 'Connecting…' : 'Connect Google Calendar'}
+          </button>
+          {/* Microsoft */}
+          <button
+            onClick={handleOutlookConnect}
+            disabled={connecting}
+            className="flex items-center gap-3 px-4 py-3 bg-[#0078d4] text-white rounded-xl text-sm font-bold hover:bg-[#006cbd] transition disabled:opacity-60"
+          >
+            <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
+              <rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+              <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+            </svg>
+            {connecting ? 'Connecting…' : 'Connect Outlook Calendar'}
           </button>
         </div>
       </div>
