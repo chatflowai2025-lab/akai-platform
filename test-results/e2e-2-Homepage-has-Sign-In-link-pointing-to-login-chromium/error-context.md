@@ -1,0 +1,206 @@
+# Page snapshot
+
+```yaml
+- main [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - link "AK AKAI" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: AK
+        - generic [ref=e7]: AKAI
+      - generic [ref=e8]:
+        - link "How It Works" [ref=e9] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - link "Modules" [ref=e10] [cursor=pointer]:
+          - /url: "#modules"
+        - link "Pricing" [ref=e11] [cursor=pointer]:
+          - /url: "#pricing"
+      - link "Get Started →" [ref=e13] [cursor=pointer]:
+        - /url: /login
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - text: Now live
+      - text: AI-powered business automation
+    - heading "Your AI Business Partner" [level=1] [ref=e16]:
+      - text: Your AI
+      - text: Business Partner
+    - paragraph [ref=e17]: Sales · Recruit · Web · Ads · Social
+    - paragraph [ref=e18]: Describe your business. AKAI builds it, runs it, and grows it — while you close deals.
+    - generic [ref=e19]:
+      - link "Start Free Trial →" [ref=e20] [cursor=pointer]:
+        - /url: /login
+      - link "See how it works" [ref=e21] [cursor=pointer]:
+        - /url: "#how-it-works"
+    - generic [ref=e23]:
+      - generic [ref=e24]: 5AI Modules
+      - generic [ref=e25]: 24/7Always On
+      - generic [ref=e26]: $297From /mo
+  - generic [ref=e28]:
+    - generic [ref=e29]:
+      - heading "From zero to running in 2 minutes" [level=2] [ref=e30]
+      - paragraph [ref=e31]: No developers. No agencies. No waiting.
+    - generic [ref=e32]:
+      - generic [ref=e34]:
+        - generic [ref=e35]: Step 01
+        - heading "Describe your business" [level=3] [ref=e36]
+        - paragraph [ref=e37]: Tell MM your industry, goals, and who you sell to. Plain English. Two minutes.
+      - generic [ref=e39]:
+        - generic [ref=e40]: Step 02
+        - heading "AKAI builds your stack" [level=3] [ref=e41]
+        - paragraph [ref=e42]: We configure your website, lead pipeline, calling system, and selected modules automatically.
+      - generic [ref=e44]:
+        - generic [ref=e45]: Step 03
+        - heading "AI runs it 24/7" [level=3] [ref=e46]
+        - paragraph [ref=e47]: Sophie calls your leads. Your site converts visitors. Reports hit your dashboard every morning.
+      - generic [ref=e49]:
+        - generic [ref=e50]: Step 04
+        - heading "You close and collect" [level=3] [ref=e51]
+        - paragraph [ref=e52]: Calendar invites land for booked meetings. You show up, close the deal, invoice.
+  - generic [ref=e54]:
+    - generic [ref=e55]:
+      - heading "One platform. Every function." [level=2] [ref=e56]
+      - paragraph [ref=e57]: Each module is a complete AI-powered business function. Use one or combine all five.
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - img [ref=e62]
+          - generic [ref=e64]: Live
+        - heading "AKAI Sales" [level=3] [ref=e65]
+        - paragraph [ref=e66]: AI finds leads, calls them, books meetings in your calendar.
+        - list [ref=e67]:
+          - listitem [ref=e68]: Sophie AI voice calling
+          - listitem [ref=e69]: Lead enrichment
+          - listitem [ref=e70]: Auto-booking
+          - listitem [ref=e71]: Call recordings
+        - generic [ref=e72]:
+          - generic [ref=e73]: $297/mo
+          - link "Get started→" [ref=e74] [cursor=pointer]:
+            - /url: /onboard
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - img [ref=e78]
+          - generic [ref=e83]: Building
+        - heading "AKAI Recruit" [level=3] [ref=e84]
+        - paragraph [ref=e85]: AI sources candidates, screens them, books interviews.
+        - list [ref=e86]:
+          - listitem [ref=e87]: Job posting AI
+          - listitem [ref=e88]: Candidate scoring
+          - listitem [ref=e89]: AI screening calls
+          - listitem [ref=e90]: Calendar integration
+        - generic [ref=e91]:
+          - generic [ref=e92]: $247/mo
+          - link "Learn more→" [ref=e93] [cursor=pointer]:
+            - /url: /recruit
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - img [ref=e97]
+          - generic [ref=e100]: Building
+        - heading "AKAI Web" [level=3] [ref=e101]
+        - paragraph [ref=e102]: AI builds and updates your website through chat.
+        - list [ref=e103]:
+          - listitem [ref=e104]: Chat-to-website
+          - listitem [ref=e105]: SEO optimised
+          - listitem [ref=e106]: Lead capture
+          - listitem [ref=e107]: Auto-updates via chat
+        - generic [ref=e108]:
+          - generic [ref=e109]: $197/mo
+          - text: Coming soon
+    - generic [ref=e110]:
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - img [ref=e114]
+          - generic [ref=e117]: Planned
+        - heading "AKAI Ads" [level=3] [ref=e118]
+        - paragraph [ref=e119]: Google + Meta campaigns planned, launched, and optimised by AI.
+        - list [ref=e120]:
+          - listitem [ref=e121]: AI copywriting
+          - listitem [ref=e122]: Budget optimisation
+          - listitem [ref=e123]: A/B testing
+          - listitem [ref=e124]: ROI tracking
+        - generic [ref=e125]:
+          - generic [ref=e126]: $397/mo
+          - text: Coming soon
+      - generic [ref=e127]:
+        - generic [ref=e128]:
+          - img [ref=e130]
+          - generic [ref=e132]: Planned
+        - heading "AKAI Social" [level=3] [ref=e133]
+        - paragraph [ref=e134]: Instagram + LinkedIn content calendar, created and published automatically.
+        - list [ref=e135]:
+          - listitem [ref=e136]: AI content calendar
+          - listitem [ref=e137]: Auto-publishing
+          - listitem [ref=e138]: Engagement tracking
+          - listitem [ref=e139]: Brand voice
+        - generic [ref=e140]:
+          - generic [ref=e141]: $147/mo
+          - link "Learn more→" [ref=e142] [cursor=pointer]:
+            - /url: /social
+  - generic [ref=e144]:
+    - generic [ref=e145]:
+      - heading "Simple pricing. Serious ROI." [level=2] [ref=e146]
+      - paragraph [ref=e147]: 7-day free trial · Cancel anytime · No setup fees
+    - generic [ref=e148]:
+      - generic [ref=e150]:
+        - generic [ref=e151]: Starter
+        - generic [ref=e152]: $297/mo
+        - paragraph [ref=e153]: One AI module, fully operational.
+        - list [ref=e154]:
+          - listitem [ref=e155]: ✓1 AKAI module
+          - listitem [ref=e156]: ✓500 leads/mo
+          - listitem [ref=e157]: ✓AI automation
+          - listitem [ref=e158]: ✓Basic dashboard
+          - listitem [ref=e159]: ✓Email support
+        - link "Start Free Trial" [ref=e160] [cursor=pointer]:
+          - /url: /onboard
+      - generic [ref=e161]:
+        - generic [ref=e163]: Most Popular
+        - generic [ref=e164]:
+          - generic [ref=e165]: Growth
+          - generic [ref=e166]: $597/mo
+          - paragraph [ref=e167]: Three modules, full automation stack.
+          - list [ref=e168]:
+            - listitem [ref=e169]: ✓3 AKAI modules
+            - listitem [ref=e170]: ✓2,000 leads/mo
+            - listitem [ref=e171]: ✓Team seats (5)
+            - listitem [ref=e172]: ✓Advanced analytics
+            - listitem [ref=e173]: ✓Priority support
+            - listitem [ref=e174]: ✓Onboarding call
+          - link "Start Free Trial" [ref=e175] [cursor=pointer]:
+            - /url: /onboard
+      - generic [ref=e177]:
+        - generic [ref=e178]: Scale
+        - generic [ref=e179]: $1,197/mo
+        - paragraph [ref=e180]: All 5 modules, unlimited everything.
+        - list [ref=e181]:
+          - listitem [ref=e182]: ✓All 5 AKAI modules
+          - listitem [ref=e183]: ✓Unlimited leads
+          - listitem [ref=e184]: ✓Unlimited team seats
+          - listitem [ref=e185]: ✓Dedicated account manager
+          - listitem [ref=e186]: ✓White-label option
+          - listitem [ref=e187]: ✓SLA guarantee
+        - link "Start Free Trial" [ref=e188] [cursor=pointer]:
+          - /url: /onboard
+    - paragraph [ref=e189]:
+      - text: Need a custom plan?
+      - link "Talk to us →" [ref=e190] [cursor=pointer]:
+        - /url: mailto:hello@getakai.ai
+  - generic [ref=e192]:
+    - generic [ref=e193]:
+      - generic [ref=e194]:
+        - generic [ref=e195]: AK
+        - generic [ref=e196]:
+          - generic [ref=e197]: AKAI
+          - paragraph [ref=e198]: Your AI Business Partner
+      - navigation [ref=e199]:
+        - link "How It Works" [ref=e200] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - link "Modules" [ref=e201] [cursor=pointer]:
+          - /url: "#modules"
+        - link "Pricing" [ref=e202] [cursor=pointer]:
+          - /url: "#pricing"
+        - link "Contact" [ref=e203] [cursor=pointer]:
+          - /url: mailto:hello@getakai.ai
+    - generic [ref=e204]:
+      - paragraph [ref=e205]: © 2026 AKAI. All rights reserved.
+      - paragraph [ref=e206]: Built on AI. Powered by results.
+```
