@@ -92,7 +92,7 @@ export default function LoginPage() {
   // If already signed in (e.g. after redirect), go straight to dashboard
   useEffect(() => {
     let attempts = 0;
-    const tryAuth = () => {
+    const tryAuth = async () => {
       const auth = getFirebaseAuth();
       if (!auth) {
         if (attempts++ < 10) setTimeout(tryAuth, 300);
@@ -101,7 +101,7 @@ export default function LoginPage() {
       // Only clear stale session if not coming from OAuth redirect
       const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
       if (!hasOAuthCode) {
-        auth.signOut().catch(() => {});
+        try { await auth.signOut(); } catch {}
       }
       
       const unsub = onAuthStateChanged(auth, async (user) => {
