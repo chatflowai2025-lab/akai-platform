@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const MODULES = [
-  { id: 'sales', icon: '📞', label: 'Sales', status: 'live', href: 'https://aiclozr.vercel.app/portal', external: true },
+  { id: 'sales', icon: '📞', label: 'Sales', status: 'live', href: '/sales', external: false },
   { id: 'recruit', icon: '🎯', label: 'Recruit', status: 'building', href: '/recruit', external: false },
   { id: 'web', icon: '🌐', label: 'Web', status: 'building', href: '/web', external: false },
   { id: 'ads', icon: '📣', label: 'Ads', status: 'planned', href: '/ads', external: false },
