@@ -58,7 +58,8 @@ function EmailGuardContent({
   initialErrorParam,
 }: EmailGuardContentProps) {
   const router = useRouter();
-  const { sendMessage } = useDashboardChat();
+  const chatCtx = useDashboardChat();
+  const sendMessage = chatCtx?.sendMessage ?? (() => {});
 
   const [msConnected, setMsConnected] = useState(false);
   const [msEmail, setMsEmail] = useState<string | null>(null);
