@@ -280,12 +280,10 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <a
-                  href="https://aiclozr.vercel.app/portal"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/sales"
                   className="flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition whitespace-nowrap"
                 >
-                  Go to Sales Portal →
+                  Go to Sales →
                 </a>
               </div>
             </section>
@@ -297,7 +295,7 @@ export default function DashboardPage() {
               </h2>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="https://aiclozr.vercel.app/portal"
+                  href="/sales"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
@@ -305,7 +303,7 @@ export default function DashboardPage() {
                   ⚙️ Configure Sales Module
                 </a>
                 <a
-                  href="https://aiclozr.vercel.app/portal"
+                  href="/sales"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#111] border border-[#2f2f2f] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"
@@ -332,7 +330,7 @@ export default function DashboardPage() {
                   label="Sales"
                   status="live"
                   description="AI-powered outbound sales calls & lead qualification"
-                  href="https://aiclozr.vercel.app/portal"
+                  href="/sales"
                 />
                 <ModuleCard
                   icon="🎯"
