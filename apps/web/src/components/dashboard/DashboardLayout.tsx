@@ -51,7 +51,12 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     if (!db) return;
     getDoc(doc(db, 'users', user.uid)).then(snap => {
       const d = snap.data();
-      if (d?.campaignConfig) setUserContext(d.campaignConfig);
+      setUserContext({
+        ...(d?.campaignConfig || {}),
+        email: user.email || '',
+        displayName: user.displayName || d?.displayName || '',
+        businessName: d?.businessName || d?.campaignConfig?.businessName || '',
+      });
     }).catch(() => {});
   }, [user]);
 
