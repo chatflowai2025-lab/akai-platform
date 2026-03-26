@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 
 // ---------------------------------------------------------------------------
 // AKAI Chat — AK AI Assistant
@@ -69,7 +70,6 @@ export async function POST(req: NextRequest) {
 
     if (apiKey) {
       // Use Claude for real AI responses
-      const { default: Anthropic } = await import('@anthropic-ai/sdk');
       const client = new Anthropic({ apiKey });
 
       const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
