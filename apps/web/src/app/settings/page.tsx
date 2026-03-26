@@ -141,20 +141,29 @@ export default function SettingsPage() {
     setBizSaving(true);
     try {
       const db = getFirebaseDb();
-      if (db) {
-        await setDoc(doc(db, 'users', user.uid), {
+      if (!db) throw new Error('Firestore not available');
+      const savePromise = setDoc(doc(db, 'users', user.uid), {
+        businessName: bizForm.businessName,
+        displayName: bizForm.businessName,
+        campaignConfig: {
           businessName: bizForm.businessName,
-          onboarding: {
-            businessName: bizForm.businessName,
-            industry: bizForm.industry,
-            location: bizForm.location,
-          },
-        }, { merge: true });
-      }
+          industry: bizForm.industry,
+          location: bizForm.location,
+        },
+        onboarding: {
+          businessName: bizForm.businessName,
+          industry: bizForm.industry,
+          location: bizForm.location,
+        },
+      }, { merge: true });
+      // Timeout after 8s
+      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 8000));
+      await Promise.race([savePromise, timeout]);
       setBizSaved(true);
       setTimeout(() => setBizSaved(false), 2500);
     } catch (err) {
       console.error('[SETTINGS] save biz error', err);
+      alert('Save failed — please refresh and try again.');
     } finally {
       setBizSaving(false);
     }
