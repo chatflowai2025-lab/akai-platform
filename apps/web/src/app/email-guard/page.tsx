@@ -183,12 +183,10 @@ export default function EmailGuardPage() {
                   ⚙️ Configure Email Guard
                 </Link>
                 <a
-                  href="https://docs.aiclozr.com/email-guard"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/dashboard"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"
                 >
-                  📖 View docs
+                  ← Back to dashboard
                 </a>
               </div>
             </div>

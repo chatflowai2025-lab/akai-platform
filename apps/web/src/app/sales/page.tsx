@@ -323,19 +323,19 @@ export default function SalesPage() {
                 icon="👥"
                 label="View All Leads"
                 description="See your full lead pipeline and status"
-                href="/onboard"
+                href="#leads"
               />
               <QuickAction
                 icon="🤖"
                 label="Configure Sophie AI"
                 description="Tune your AI sales agent's voice & script"
-                href="/onboard"
+                href="/settings"
               />
             </div>
           </section>
 
           {/* Recent activity */}
-          <section>
+          <section id="leads">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                 Recent activity
