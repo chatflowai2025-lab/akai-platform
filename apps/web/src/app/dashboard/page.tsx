@@ -337,26 +337,35 @@ export default function DashboardPage() {
                   label="Recruit"
                   status="building"
                   description="AI candidate screening and pipeline management"
-                  href="https://getakai.ai/recruit"
+                  href="/recruit"
                 />
                 <ModuleCard
                   icon="🌐"
                   label="Web"
                   status="building"
                   description="Landing pages and web content generation"
-                  href="https://getakai.ai/web"
+                  href="/web"
+                />
+                <ModuleCard
+                  icon="✉️"
+                  label="Email"
+                  status="building"
+                  description="AI inbox monitoring, routing and response"
+                  href="/email-guard"
                 />
                 <ModuleCard
                   icon="📣"
                   label="Ads"
                   status="planned"
                   description="Paid media strategy and creative generation"
+                  href="/ads"
                 />
                 <ModuleCard
                   icon="📱"
                   label="Social"
                   status="planned"
                   description="Social content calendar and auto-posting"
+                  href="/social"
                 />
               </div>
             </section>

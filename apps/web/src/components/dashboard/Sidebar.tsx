@@ -8,6 +8,7 @@ const MODULES = [
   { id: 'sales', icon: '📞', label: 'Sales', status: 'live', href: '/sales', external: false },
   { id: 'recruit', icon: '🎯', label: 'Recruit', status: 'building', href: '/recruit', external: false },
   { id: 'web', icon: '🌐', label: 'Web', status: 'building', href: '/web', external: false },
+  { id: 'email-guard', icon: '✉️', label: 'Email', status: 'building', href: '/email-guard', external: false },
   { id: 'ads', icon: '📣', label: 'Ads', status: 'planned', href: '/ads', external: false },
   { id: 'social', icon: '📱', label: 'Social', status: 'planned', href: '/social', external: false },
 ];
