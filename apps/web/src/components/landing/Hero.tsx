@@ -381,7 +381,7 @@ export default function Hero() {
 
         {/* Sub */}
         <p className="fade-up fade-up-3 text-xl text-white/40 max-w-xl mb-3 leading-relaxed">
-          Sales · Recruit · Web · Ads · Social
+          Sales · Recruit · Web · Ads · Social · Email
         </p>
         <p className="fade-up fade-up-3 text-lg text-white/60 max-w-2xl mb-10 leading-relaxed">
           Describe your business. AKAI builds it, runs it, and grows it —
