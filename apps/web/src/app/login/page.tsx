@@ -149,7 +149,7 @@ export default function LoginPage() {
               setLoading(false);
               return;
             }
-            router.push('/dashboard');
+            // onAuthStateChanged handles redirect — avoids race condition
           }
         })
         .catch((err: unknown) => {
