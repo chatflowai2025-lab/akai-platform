@@ -9,6 +9,7 @@ export interface UserProfile {
   uid: string;
   email: string | null;
   displayName: string | null;
+  businessName?: string | null;
   createdAt: unknown;
   lastLoginAt: unknown;
   onboardingComplete: boolean;
@@ -50,6 +51,7 @@ async function syncUserProfile(user: User): Promise<UserProfile> {
       uid: user.uid,
       email: data.email ?? user.email,
       displayName: data.displayName ?? user.displayName,
+      businessName: data.businessName ?? null,
       createdAt: data.createdAt,
       lastLoginAt: data.lastLoginAt,
       onboardingComplete: data.onboardingComplete ?? false,

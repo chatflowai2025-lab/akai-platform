@@ -7,18 +7,41 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/dashboard/Sidebar';
 import ChatPanel from '@/components/dashboard/ChatPanel';
 import { useAuth } from '@/hooks/useAuth';
-import Link from 'next/link';
+
+const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
+const API_KEY = 'aiclozr_api_key_2026_prod';
+
+interface SalesStats {
+  leads: number;
+  calls: number;
+  meetings: number;
+  loading: boolean;
+}
 
 // ── Quick stat card ──────────────────────────────────────────────────────────
-function QuickStat({ label, value, icon }: { label: string; value: string; icon: string }) {
+function QuickStat({
+  label,
+  value,
+  icon,
+  loading,
+}: {
+  label: string;
+  value: string;
+  icon: string;
+  loading?: boolean;
+}) {
   return (
     <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 flex flex-col gap-2 hover:border-[#D4AF37]/20 transition-colors">
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">{label}</span>
         <span className="text-lg">{icon}</span>
       </div>
-      <p className="text-3xl font-black text-white">{value}</p>
-      <p className="text-xs text-gray-600">this week</p>
+      {loading ? (
+        <div className="h-9 w-16 bg-[#1f1f1f] rounded-lg animate-pulse" />
+      ) : (
+        <p className="text-3xl font-black text-white">{value}</p>
+      )}
+      <p className="text-xs text-gray-600">all time</p>
     </div>
   );
 }
@@ -97,7 +120,75 @@ function EmptyFeed() {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, userProfile, loading, logout } = useAuth();
-  // activeModule is now derived from URL pathname via Sidebar's usePathname
+
+  const [stats, setStats] = useState<SalesStats>({
+    leads: 0,
+    calls: 0,
+    meetings: 0,
+    loading: true,
+  });
+
+  // Fetch real sales stats from Railway API
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+
+    async function fetchStats() {
+      try {
+        // Get Firebase ID token for authenticated requests
+        const idToken = await user!.getIdToken();
+        const authHeaders = {
+          Authorization: `Bearer ${idToken}`,
+          'x-api-key': API_KEY,
+          'Content-Type': 'application/json',
+        };
+
+        // Fetch leads and campaign status in parallel
+        const [leadsRes, campaignRes] = await Promise.allSettled([
+          fetch(`${RAILWAY_API}/api/leads`, { headers: authHeaders }),
+          fetch(`${RAILWAY_API}/api/campaign/status`, { headers: authHeaders }),
+        ]);
+
+        let leadsCount = 0;
+        let meetingsCount = 0;
+        let callsCount = 0;
+
+        // Parse leads
+        if (leadsRes.status === 'fulfilled' && leadsRes.value.ok) {
+          const leadsData = await leadsRes.value.json();
+          const leads: Array<{ status?: string }> = leadsData.leads ?? [];
+          leadsCount = leads.length;
+          meetingsCount = leads.filter(
+            (l) => l.status === 'booked'
+          ).length;
+        }
+
+        // Parse campaign/call stats
+        if (campaignRes.status === 'fulfilled' && campaignRes.value.ok) {
+          const campData = await campaignRes.value.json();
+          callsCount = campData.stats?.total ?? 0;
+        }
+
+        if (!cancelled) {
+          setStats({
+            leads: leadsCount,
+            calls: callsCount,
+            meetings: meetingsCount,
+            loading: false,
+          });
+        }
+      } catch {
+        // Graceful fallback — show zeros, don't crash
+        if (!cancelled) {
+          setStats({ leads: 0, calls: 0, meetings: 0, loading: false });
+        }
+      }
+    }
+
+    fetchStats();
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -114,11 +205,9 @@ export default function DashboardPage() {
   }
 
   const userEmail = user.email ?? 'there';
-  // Prefer Firestore profile displayName → Firebase auth displayName → email prefix
-  const displayName =
-    userProfile?.displayName ||
-    user.displayName ||
-    userEmail.split('@')[0];
+  // Prefer businessName (set during onboarding) → displayName → email prefix
+  const businessName = userProfile?.businessName || userProfile?.displayName || user.displayName;
+  const displayName = businessName || userEmail.split('@')[0];
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex">
@@ -129,8 +218,11 @@ export default function DashboardPage() {
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
             <h1 className="text-xl font-black text-white">
-              Welcome back,{' '}
-              <span className="text-[#D4AF37]">{displayName}</span> 👋
+              {businessName ? (
+                <>Welcome to AKAI, <span className="text-[#D4AF37]">{businessName}</span>! Your Sales module is ready. 🚀</>
+              ) : (
+                <>Welcome back, <span className="text-[#D4AF37]">{displayName}</span> 👋</>
+              )}
             </h1>
             <p className="text-xs text-gray-600 mt-0.5">{userEmail}</p>
           </div>
@@ -155,12 +247,47 @@ export default function DashboardPage() {
             {/* Quick stats */}
             <section>
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
-                This week
+                Sales overview
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <QuickStat label="Leads captured" value="0" icon="🎯" />
-                <QuickStat label="Calls made" value="0" icon="📞" />
-                <QuickStat label="Meetings booked" value="0" icon="📅" />
+                <QuickStat
+                  label="Leads captured"
+                  value={String(stats.leads)}
+                  icon="🎯"
+                  loading={stats.loading}
+                />
+                <QuickStat
+                  label="Calls made"
+                  value={String(stats.calls)}
+                  icon="📞"
+                  loading={stats.loading}
+                />
+                <QuickStat
+                  label="Meetings booked"
+                  value={String(stats.meetings)}
+                  icon="📅"
+                  loading={stats.loading}
+                />
+              </div>
+            </section>
+
+            {/* Sales Portal CTA */}
+            <section>
+              <div className="bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-white font-black text-lg">Sales Portal</h3>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Manage leads, configure campaigns, and track your AI sales pipeline.
+                  </p>
+                </div>
+                <a
+                  href="https://aiclozr.vercel.app/portal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition whitespace-nowrap"
+                >
+                  Go to Sales Portal →
+                </a>
               </div>
             </section>
 
@@ -192,82 +319,6 @@ export default function DashboardPage() {
                 >
                   ⚙️ Settings
                 </a>
-              </div>
-            </section>
-
-            {/* Email Guard section */}
-            <section>
-              <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
-                Email Guard
-              </h2>
-              <div className="bg-[#111] border border-green-500/20 rounded-2xl p-6 flex flex-col gap-5">
-                {/* Header row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">🛡️</span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-white text-sm">Email Guard — Active</p>
-                        <span className="flex items-center gap-1 text-xs text-green-400 font-semibold">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-                          Live
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Monitoring inbox for enquiries. Auto-generates proposals.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-3">
-                    <Link
-                      href="/email-guard"
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white rounded-xl text-xs font-medium hover:border-[#D4AF37]/30 transition"
-                    >
-                      📋 View Proposals
-                    </Link>
-                    <Link
-                      href="/settings"
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] text-black rounded-xl text-xs font-bold hover:opacity-90 transition"
-                    >
-                      ⚙️ Configure
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Stats row */}
-                <div className="flex items-center gap-6 py-4 border-t border-[#1f1f1f]">
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-2xl font-black text-white">0</p>
-                    <p className="text-xs text-gray-500">Proposals generated this week</p>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-2xl font-black text-white">0</p>
-                    <p className="text-xs text-gray-500">Enquiries processed</p>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                      <p className="text-sm font-semibold text-green-400">v2.0.0</p>
-                    </div>
-                    <p className="text-xs text-gray-500">Service version</p>
-                  </div>
-                </div>
-
-                {/* Mobile buttons */}
-                <div className="flex sm:hidden items-center gap-3">
-                  <Link
-                    href="/email-guard"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white rounded-xl text-xs font-medium hover:border-[#D4AF37]/30 transition"
-                  >
-                    📋 View Proposals
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] text-black rounded-xl text-xs font-bold hover:opacity-90 transition"
-                  >
-                    ⚙️ Configure
-                  </Link>
-                </div>
               </div>
             </section>
 
