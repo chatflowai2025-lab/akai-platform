@@ -98,8 +98,14 @@ export default function LoginPage() {
         if (attempts++ < 10) setTimeout(tryAuth, 300);
         return;
       }
-      const unsub = onAuthStateChanged(auth, (user) => {
+      const unsub = onAuthStateChanged(auth, async (user) => {
         if (user) {
+          const userEmail = user.email || '';
+          if (BETA_MODE && !isWhitelisted(userEmail)) {
+            await auth.signOut();
+            setLoading(false);
+            return;
+          }
           router.replace('/dashboard');
         } else {
           setLoading(false);
@@ -122,8 +128,15 @@ export default function LoginPage() {
         return;
       }
       getRedirectResult(auth)
-        .then((result) => {
+        .then(async (result) => {
           if (result?.user) {
+            const userEmail = result.user.email || '';
+            if (BETA_MODE && !isWhitelisted(userEmail)) {
+              await auth.signOut();
+              setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+              setLoading(false);
+              return;
+            }
             router.push('/dashboard');
           }
         })
