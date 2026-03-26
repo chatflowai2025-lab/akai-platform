@@ -190,8 +190,11 @@ export default function DashboardPage() {
   }, [user]);
 
   useEffect(() => {
+    // Wait for Firebase to restore persisted session before redirecting
     if (!loading && !user) {
-      router.replace('/login');
+      // Small buffer to allow Firebase session restore
+      const timer = setTimeout(() => router.replace('/login'), 500);
+      return () => clearTimeout(timer);
     }
   }, [user, loading, router]);
 
