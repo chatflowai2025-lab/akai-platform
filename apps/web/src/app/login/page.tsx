@@ -20,7 +20,13 @@ type Tab = 'signin' | 'signup';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>('signin');
+  const [tab, setTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('tab') === 'signup') return 'signup';
+    }
+    return 'signin';
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

@@ -37,16 +37,23 @@ export default function Navbar() {
           <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
         </div>
 
-        {/* CTA — Sign In when logged out, Dashboard when logged in */}
+        {/* CTA — Sign In / Sign Up when logged out, Dashboard when logged in */}
         <div className="flex items-center gap-3">
           {!loading && !user && (
-            <a href="/login" className="text-sm text-white/50 hover:text-white transition-colors duration-200 hidden md:block">
-              Sign In
-            </a>
+            <>
+              <a href="/login" className="text-sm text-white/60 hover:text-white transition-colors duration-200 hidden md:block">
+                Sign In
+              </a>
+              <Button href="/login?tab=signup" size="sm">
+                Create Account →
+              </Button>
+            </>
           )}
-          <Button href={ctaHref} size="sm">
-            {!loading && user ? 'Dashboard →' : 'Get Started →'}
-          </Button>
+          {(loading || user) && (
+            <Button href={ctaHref} size="sm">
+              {!loading && user ? 'Dashboard →' : 'Get Started →'}
+            </Button>
+          )}
         </div>
       </div>
     </nav>
