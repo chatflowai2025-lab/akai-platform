@@ -62,6 +62,7 @@ const MODULES: Module[] = [
     tagline: 'AI sources candidates, screens them, books interviews.',
     features: ['Job posting AI', 'Candidate scoring', 'AI screening calls', 'Calendar integration'],
     price: '$247',
+    href: '/recruit',
   },
   {
     Icon: WebIcon,
