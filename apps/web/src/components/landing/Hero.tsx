@@ -1,6 +1,12 @@
+'use client';
+
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Hero() {
+  const { user, loading } = useAuth();
+  const ctaHref = !loading && user ? '/dashboard' : '/login';
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 overflow-hidden dot-grid">
 
@@ -37,7 +43,7 @@ export default function Hero() {
 
       {/* CTA row */}
       <div className="fade-up fade-up-4 flex flex-col sm:flex-row gap-4 items-center mb-20">
-        <Button href="/onboard" size="lg" className="glow-gold-sm min-w-[220px]">
+        <Button href={ctaHref} size="lg" className="glow-gold-sm min-w-[220px]">
           Start Free Trial →
         </Button>
         <Button href="#how-it-works" variant="ghost" size="lg">
