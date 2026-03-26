@@ -147,10 +147,15 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
           userContext,
         }),
       });
-      const data = await res.json();
-      if (data.state) setChatState(data.state);
-      if (data.message) {
-        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: data.message, timestamp: new Date().toISOString(), buttons: data.buttons }]);
+      let data: { state?: unknown; message?: string; buttons?: unknown; action?: string; url?: string; error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON response (e.g. 504 gateway timeout) */ }
+      if (data.state) setChatState(data.state as typeof chatState);
+      const reply = data.message || (data.error ? `Error: ${data.error}` : null);
+      if (reply) {
+        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: reply, timestamp: new Date().toISOString(), buttons: data.buttons as ChatMessage['buttons'] }]);
+      } else if (!data.message && !data.error) {
+        // Empty or unrecognised response — show fallback
+        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Something went wrong. Try again.', timestamp: new Date().toISOString() }]);
       }
       if (data.action === 'redirect' && data.url) {
         const url: string = data.url;
