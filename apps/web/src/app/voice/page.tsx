@@ -203,18 +203,208 @@ function StepDots({ current, total }: { current: number; total: number }) {
 
 // ── Setup Wizard ──────────────────────────────────────────────────────────
 
+// ── AI Script Suggestions ──────────────────────────────────────────────────
+
+function ScriptStep({ config, setConfig, userProfile, onBack, onNext }: {
+  config: VoiceConfig;
+  setConfig: (c: VoiceConfig) => void;
+  userProfile: unknown;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const profile = userProfile as { businessName?: string; industry?: string; location?: string; campaignConfig?: { businessName?: string; industry?: string; location?: string } } | null;
+  const businessName = profile?.businessName || profile?.campaignConfig?.businessName || 'your business';
+  const industry = profile?.industry || profile?.campaignConfig?.industry || 'your industry';
+  const location = profile?.campaignConfig?.location || 'your area';
+
+  const [suggestions, setSuggestions] = useState<{ hooks: string[]; questions: string[] } | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [selectedHook, setSelectedHook] = useState<string | null>(config.script.hook || null);
+  const [selectedQ, setSelectedQ] = useState<string | null>(config.script.qualifyingQuestion || null);
+
+  useEffect(() => {
+    // Auto-generate on mount if we have business context
+    if (businessName !== 'your business' && !suggestions) generateSuggestions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const generateSuggestions = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `Generate Sophie AI calling script suggestions for this business. Business: "${businessName}". Industry: "${industry}". Location: "${location}".
+
+Return ONLY valid JSON in this exact format:
+{
+  "hooks": [
+    "Hook option 1 — 1-2 sentences about what value you deliver",
+    "Hook option 2 — different angle",
+    "Hook option 3 — another approach"
+  ],
+  "questions": [
+    "Qualifying question option 1",
+    "Qualifying question option 2",
+    "Qualifying question option 3"
+  ]
+}
+
+Hooks should be specific to ${industry} in ${location}. Questions should help qualify if they're a real prospect. Australian English. No filler. Return ONLY the JSON.`,
+        }),
+      });
+      const data = await res.json() as { message?: string };
+      if (data.message) {
+        const match = data.message.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]) as { hooks?: string[]; questions?: string[] };
+          setSuggestions({ hooks: parsed.hooks || [], questions: parsed.questions || [] });
+          // Auto-select first if nothing selected
+          if (!selectedHook && parsed.hooks?.[0]) setSelectedHook(parsed.hooks[0]);
+          if (!selectedQ && parsed.questions?.[0]) setSelectedQ(parsed.questions[0]);
+        }
+      }
+    } catch { /* use manual input */ }
+    finally { setGenerating(false); }
+  };
+
+  const canProceed = (selectedHook || config.script.hook) && (selectedQ || config.script.qualifyingQuestion);
+
+  const handleNext = () => {
+    setConfig({
+      ...config,
+      script: {
+        ...config.script,
+        hook: selectedHook || config.script.hook,
+        qualifyingQuestion: selectedQ || config.script.qualifyingQuestion,
+      }
+    });
+    onNext();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-white">What should Sophie say?</h2>
+          <p className="text-gray-500 mt-1 text-sm">We&apos;ve written options based on your business — just pick the ones that fit.</p>
+        </div>
+        <button onClick={generateSuggestions} disabled={generating} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/20 transition disabled:opacity-40">
+          {generating ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : '✨'} {generating ? 'Writing...' : 'Regenerate'}
+        </button>
+      </div>
+
+      {/* Opening line */}
+      <div>
+        <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Opening line</label>
+        <input
+          type="text"
+          value={config.script.openingLine}
+          onChange={e => setConfig({ ...config, script: { ...config.script, openingLine: e.target.value } })}
+          className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+        />
+        <p className="text-xs text-gray-600 mt-1">Use &#123;&#123;name&#125;&#125; and &#123;&#123;businessName&#125;&#125; as placeholders</p>
+      </div>
+
+      {/* Hook suggestions */}
+      <div>
+        <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Hook — choose one {generating && <span className="text-[#D4AF37] ml-1">writing for {businessName}…</span>}</label>
+        {generating ? (
+          <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-12 bg-[#1a1a1a] rounded-xl animate-pulse" />)}</div>
+        ) : suggestions?.hooks.length ? (
+          <div className="space-y-2">
+            {suggestions.hooks.map((hook, i) => (
+              <button key={i} onClick={() => setSelectedHook(hook)}
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm border transition-all ${selectedHook === hook ? 'bg-[#D4AF37]/10 border-[#D4AF37]/40 text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-gray-400 hover:border-[#3a3a3a] hover:text-white'}`}>
+                <span className={`text-xs font-bold mr-2 ${selectedHook === hook ? 'text-[#D4AF37]' : 'text-gray-600'}`}>Option {i+1}</span>
+                {hook}
+              </button>
+            ))}
+            <button onClick={() => setSelectedHook('')} className={`w-full text-left px-4 py-3 rounded-xl text-sm border transition-all ${selectedHook === '' ? 'bg-[#D4AF37]/10 border-[#D4AF37]/40 text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-gray-500 hover:border-[#3a3a3a]'}`}>
+              ✏️ Write my own
+            </button>
+            {selectedHook === '' && (
+              <textarea value={config.script.hook} onChange={e => setConfig({ ...config, script: { ...config.script, hook: e.target.value } })}
+                placeholder="Describe what you do and who you help..." rows={2}
+                className="w-full bg-[#0a0a0a] border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors resize-none" />
+            )}
+          </div>
+        ) : (
+          <textarea value={config.script.hook} onChange={e => setConfig({ ...config, script: { ...config.script, hook: e.target.value } })}
+            placeholder={`E.g. We help ${industry} businesses get more qualified enquiries without the manual follow-up.`} rows={2}
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors resize-none" />
+        )}
+      </div>
+
+      {/* Qualifying question suggestions */}
+      <div>
+        <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Qualifying question — choose one</label>
+        {generating ? (
+          <div className="space-y-2">{[1,2].map(i => <div key={i} className="h-10 bg-[#1a1a1a] rounded-xl animate-pulse" />)}</div>
+        ) : suggestions?.questions.length ? (
+          <div className="space-y-2">
+            {suggestions.questions.map((q, i) => (
+              <button key={i} onClick={() => setSelectedQ(q)}
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm border transition-all ${selectedQ === q ? 'bg-[#D4AF37]/10 border-[#D4AF37]/40 text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-gray-400 hover:border-[#3a3a3a] hover:text-white'}`}>
+                <span className={`text-xs font-bold mr-2 ${selectedQ === q ? 'text-[#D4AF37]' : 'text-gray-600'}`}>Option {i+1}</span>
+                {q}
+              </button>
+            ))}
+            <button onClick={() => setSelectedQ('')} className={`w-full text-left px-4 py-3 rounded-xl text-sm border transition-all ${selectedQ === '' ? 'bg-[#D4AF37]/10 border-[#D4AF37]/40 text-white' : 'bg-[#0a0a0a] border-[#2a2a2a] text-gray-500 hover:border-[#3a3a3a]'}`}>
+              ✏️ Write my own
+            </button>
+            {selectedQ === '' && (
+              <input type="text" value={config.script.qualifyingQuestion} onChange={e => setConfig({ ...config, script: { ...config.script, qualifyingQuestion: e.target.value } })}
+                placeholder="Ask something to find out if they're a real prospect..."
+                className="w-full bg-[#0a0a0a] border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors" />
+            )}
+          </div>
+        ) : (
+          <input type="text" value={config.script.qualifyingQuestion} onChange={e => setConfig({ ...config, script: { ...config.script, qualifyingQuestion: e.target.value } })}
+            placeholder="Are you currently handling your own lead follow-up, or do you have someone doing that?"
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors" />
+        )}
+      </div>
+
+      {/* CTA */}
+      <div>
+        <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Goal of the call</label>
+        <div className="flex gap-2 flex-wrap">
+          {['Book a call', 'Get a quote', 'Schedule a visit', 'Book a consultation'].map(cta => (
+            <button key={cta} onClick={() => setConfig({ ...config, script: { ...config.script, cta } })}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${config.script.cta === cta ? 'bg-[#D4AF37] text-black' : 'bg-[#1a1a1a] text-gray-400 border border-[#2a2a2a] hover:text-white'}`}>
+              {cta}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <button onClick={onBack} className="px-4 py-2.5 text-sm text-gray-500 hover:text-white transition-colors">← Back</button>
+        <button onClick={handleNext} disabled={!canProceed}
+          className="px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-40">
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SetupWizard({
   config,
   setConfig,
   onComplete,
   userEmail,
   userName,
+  userProfile,
 }: {
   config: VoiceConfig;
   setConfig: (c: VoiceConfig) => void;
   onComplete: () => void;
   userEmail: string;
   userName: string;
+  userProfile?: unknown;
 }) {
   const [step, setStep] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
@@ -317,78 +507,15 @@ function SetupWizard({
       </button>
     </div>,
 
-    // Step 1: What should Sophie say?
-    <div key="step1" className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-black text-white">What should Sophie say?</h2>
-        <p className="text-gray-500 mt-1 text-sm">Sophie will use this to have natural conversations — she adapts based on responses.</p>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Opening line</label>
-          <input
-            type="text"
-            value={config.script.openingLine}
-            onChange={e => setConfig({ ...config, script: { ...config.script, openingLine: e.target.value } })}
-            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-          />
-          <p className="text-xs text-gray-600 mt-1">Use &#123;&#123;name&#125;&#125; and &#123;&#123;businessName&#125;&#125; as placeholders</p>
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Hook (1–2 sentences)</label>
-          <textarea
-            value={config.script.hook}
-            onChange={e => setConfig({ ...config, script: { ...config.script, hook: e.target.value } })}
-            placeholder="What problem do you solve? E.g. We help kitchen renovation companies get 3x more qualified enquiries using AI."
-            rows={3}
-            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors resize-none"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Qualifying question</label>
-          <input
-            type="text"
-            value={config.script.qualifyingQuestion}
-            onChange={e => setConfig({ ...config, script: { ...config.script, qualifyingQuestion: e.target.value } })}
-            placeholder="E.g. Are you currently handling your own lead follow-up, or do you have someone doing that?"
-            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-2">Call to action</label>
-          <div className="flex gap-2 flex-wrap">
-            {['Book a call', 'Get a quote', 'Schedule a visit'].map(cta => (
-              <button
-                key={cta}
-                onClick={() => setConfig({ ...config, script: { ...config.script, cta } })}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                  config.script.cta === cta
-                    ? 'bg-[#D4AF37] text-black'
-                    : 'bg-[#1a1a1a] text-gray-400 border border-[#2a2a2a] hover:text-white'
-                }`}
-              >
-                {cta}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-3 pt-2">
-        <button onClick={() => setStep(0)} className="px-4 py-2.5 text-sm text-gray-500 hover:text-white transition-colors">← Back</button>
-        <button
-          onClick={() => setStep(2)}
-          disabled={!config.script.hook || !config.script.qualifyingQuestion}
-          className="px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-40"
-        >
-          Next →
-        </button>
-      </div>
-    </div>,
+    // Step 1: What should Sophie say? (AI-assisted)
+    <ScriptStep
+      key="step1"
+      config={config}
+      setConfig={setConfig}
+      userProfile={userProfile}
+      onBack={() => setStep(0)}
+      onNext={() => setStep(2)}
+    />,
 
     // Step 2: When should Sophie call?
     <div key="step2" className="space-y-6">
@@ -977,6 +1104,7 @@ function VoicePageInner() {
               onComplete={handleSetupComplete}
               userEmail={userEmail}
               userName={userName}
+              userProfile={userProfile}
             />
           ) : (
             <ActiveView
