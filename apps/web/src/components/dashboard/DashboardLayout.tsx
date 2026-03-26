@@ -237,7 +237,15 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────
-function DashboardLayoutInner({ children, userEmail }: { children: React.ReactNode; userEmail: string }) {
+function DashboardLayoutInner({
+  children,
+  userEmail,
+  noChat,
+}: {
+  children: React.ReactNode;
+  userEmail: string;
+  noChat?: boolean;
+}) {
   const [chatQueue, setChatQueue] = useState<string | null>(null);
 
   const injectMessage = useCallback((text: string) => {
@@ -256,13 +264,24 @@ function DashboardLayoutInner({ children, userEmail }: { children: React.ReactNo
           )}
           {children}
         </div>
-        <InlineChatPanel externalMessage={chatQueue} onExternalMessageHandled={() => setChatQueue(null)} />
+        {!noChat && (
+          <InlineChatPanel
+            externalMessage={chatQueue}
+            onExternalMessageHandled={() => setChatQueue(null)}
+          />
+        )}
       </div>
     </ChatContext.Provider>
   );
 }
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+  noChat,
+}: {
+  children: React.ReactNode;
+  noChat?: boolean;
+}) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -278,5 +297,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  return <DashboardLayoutInner userEmail={user?.email || ''}>{children}</DashboardLayoutInner>;
+  return (
+    <DashboardLayoutInner userEmail={user?.email || ''} noChat={noChat}>
+      {children}
+    </DashboardLayoutInner>
+  );
 }

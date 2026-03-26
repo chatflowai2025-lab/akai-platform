@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PlatformPost {
@@ -63,6 +63,113 @@ function formatScheduledDate(iso: string): string {
   return d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+// ── Platform connect instructions ─────────────────────────────────────────────
+const CONNECT_INSTRUCTIONS: Record<string, { title: string; icon: string; color: string; steps: string[]; cta: string; ctaUrl: string }> = {
+  Instagram: {
+    title: 'Connect Instagram',
+    icon: '📸',
+    color: 'from-pink-500 to-purple-500',
+    steps: [
+      'Go to Meta Business Suite → business.facebook.com',
+      'Add your Instagram account under "Accounts"',
+      'In AKAI Settings → paste your Instagram Business Account ID',
+      'Grant "instagram_basic" and "instagram_content_publish" permissions',
+    ],
+    cta: 'Open Meta Business Suite',
+    ctaUrl: 'https://business.facebook.com',
+  },
+  LinkedIn: {
+    title: 'Connect LinkedIn',
+    icon: '💼',
+    color: 'from-blue-600 to-blue-400',
+    steps: [
+      'Go to LinkedIn Campaign Manager → linkedin.com/campaignmanager',
+      'Under Account Assets → find your Page ID',
+      'In AKAI Settings → paste your LinkedIn Page ID',
+      'AKAI will use the LinkedIn API to post on your behalf',
+    ],
+    cta: 'Open LinkedIn Campaign Manager',
+    ctaUrl: 'https://www.linkedin.com/campaignmanager',
+  },
+  Facebook: {
+    title: 'Connect Facebook',
+    icon: '👥',
+    color: 'from-blue-500 to-indigo-500',
+    steps: [
+      'Go to Meta Business Suite → business.facebook.com',
+      'Select your Facebook Page',
+      'Under Settings → Page Access → grant AKAI access',
+      'In AKAI Settings → paste your Facebook Page ID',
+    ],
+    cta: 'Open Meta Business Suite',
+    ctaUrl: 'https://business.facebook.com',
+  },
+  'X (Twitter)': {
+    title: 'Connect X (Twitter)',
+    icon: '𝕏',
+    color: 'from-gray-200 to-gray-400',
+    steps: [
+      'Go to developer.twitter.com/en/portal',
+      'Create a project and app (or use existing)',
+      'Under "User authentication settings" → enable OAuth 2.0',
+      'Copy your API Key and Secret → paste in AKAI Settings',
+    ],
+    cta: 'Open X Developer Portal',
+    ctaUrl: 'https://developer.twitter.com/en/portal',
+  },
+};
+
+function ConnectModal({ platform, onClose }: { platform: string; onClose: () => void }) {
+  const info = CONNECT_INSTRUCTIONS[platform];
+  if (!info) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center text-xl`}>
+              {info.icon}
+            </div>
+            <h2 className="text-white font-bold text-lg">{info.title}</h2>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+        </div>
+
+        {/* Steps */}
+        <ol className="space-y-3 mb-6">
+          {info.steps.map((step, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-bold flex items-center justify-center mt-0.5">
+                {i + 1}
+              </span>
+              <span className="text-sm text-gray-300 leading-relaxed">{step}</span>
+            </li>
+          ))}
+        </ol>
+
+        {/* CTA */}
+        <a
+          href={info.ctaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`block w-full text-center py-3 rounded-xl bg-gradient-to-r ${info.color} text-white font-bold text-sm hover:opacity-90 transition mb-3`}
+        >
+          {info.cta} →
+        </a>
+        <p className="text-center text-xs text-gray-600">
+          After setup, paste your credentials in{' '}
+          <a href="/settings" className="text-[#D4AF37] hover:underline">AKAI Settings</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function CharBar({ count, limit }: { count: number; limit: number }) {
   const pct = Math.min(100, (count / limit) * 100);
   const color = pct > 90 ? 'bg-red-500' : pct > 70 ? 'bg-yellow-500' : 'bg-green-500';
@@ -82,7 +189,7 @@ function CharBar({ count, limit }: { count: number; limit: number }) {
 export default function SocialPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const { sendMessage } = useDashboardChat();
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
 
   // Content generator state
   const [brief, setBrief] = useState('');
@@ -161,7 +268,7 @@ export default function SocialPage() {
   }
 
   function handleConnectPlatform(platformLabel: string) {
-    sendMessage(`I want to connect my ${platformLabel} account`);
+    setConnectingPlatform(platformLabel);
   }
 
   const platformCardStyles: Record<string, { gradient: string; border: string; badge: string }> = {
@@ -210,8 +317,12 @@ export default function SocialPage() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-600 mt-2">Click any platform to open AK chat and get connected.</p>
         </section>
+
+        {/* Connect modal */}
+        {connectingPlatform && (
+          <ConnectModal platform={connectingPlatform} onClose={() => setConnectingPlatform(null)} />
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 bg-[#111] rounded-xl p-1 w-fit">
