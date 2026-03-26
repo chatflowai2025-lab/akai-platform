@@ -99,7 +99,7 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
           Launch your first campaign to start generating leads.
         </p>
         <button
-          onClick={() => document.querySelector('input[placeholder="Ask AK anything..."]')?.dispatchEvent(new Event('focus'))}
+          onClick={() => (document.querySelector('input[placeholder="Ask AK anything..."]') as HTMLInputElement)?.focus()}
           className="mt-6 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
         >
           Ask AK to launch campaign →
@@ -380,7 +380,7 @@ export default function SalesPage() {
               </div>
               <a
                 href="#"
-                onClick={(e) => { e.preventDefault(); document.querySelector('input[placeholder="Ask AK anything..."]')?.focus(); }}
+                onClick={(e) => { e.preventDefault(); (document.querySelector('input[placeholder="Ask AK anything..."]') as HTMLInputElement)?.focus(); }}
                 className="relative flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
               >
                 Ask AK →
