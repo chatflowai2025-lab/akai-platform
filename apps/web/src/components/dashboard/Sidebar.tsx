@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 const MODULES = [
   { id: 'sales', icon: '📞', label: 'Sales', status: 'live', href: '/sales', external: false },
@@ -15,6 +16,7 @@ const MODULES = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { logout, user } = useAuth();
 
   const isActive = (href: string, external: boolean) => {
     if (external) return false;
@@ -25,11 +27,25 @@ export default function Sidebar() {
     <aside className="w-64 flex-shrink-0 bg-[#080808] border-r border-[#1f1f1f] flex flex-col h-full overflow-y-auto">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-[#1f1f1f]">
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center">
-            <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
-          </Link>
-        </div>
+        <Link href="/dashboard" className="flex items-center">
+          <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+        </Link>
+      </div>
+
+      {/* Dashboard link */}
+      <div className="px-3 pt-3">
+        <Link
+          href="/dashboard"
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
+            pathname === '/dashboard'
+              ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20'
+              : 'text-gray-400 hover:text-white hover:bg-[#111]'
+          )}
+        >
+          <span>🏠</span>
+          <span>Dashboard</span>
+        </Link>
       </div>
 
       {/* Modules Nav */}
@@ -70,15 +86,12 @@ export default function Sidebar() {
               {mod.status === 'building' && (
                 <span className="ml-auto text-xs text-yellow-500/60">Beta</span>
               )}
-              {mod.external && (
-                <span className="ml-auto text-xs text-gray-600">↗</span>
-              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom */}
+      {/* Bottom — Settings + Sign Out */}
       <div className="px-3 py-4 border-t border-[#1f1f1f] space-y-1">
         <Link
           href="/settings"
@@ -92,18 +105,20 @@ export default function Sidebar() {
           <span>⚙️</span>
           <span>Settings</span>
         </Link>
-        <Link
-          href="/ask"
-          className={cn(
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
-            pathname === '/ask'
-              ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20'
-              : 'text-gray-400 hover:text-white hover:bg-[#111]'
-          )}
-        >
-          <span>💬</span>
-          <span>Ask AK</span>
-        </Link>
+
+        {/* User + Sign Out */}
+        <div className="pt-2 mt-1 border-t border-[#1a1a1a]">
+          <div className="px-3 py-2 mb-1">
+            <p className="text-xs text-gray-600 truncate">{user?.email}</p>
+          </div>
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+          >
+            <span>↩</span>
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
