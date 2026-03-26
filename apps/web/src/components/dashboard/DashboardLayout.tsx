@@ -207,7 +207,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────
-function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
+function DashboardLayoutInner({ children, userEmail }: { children: React.ReactNode; userEmail: string }) {
   const [chatQueue, setChatQueue] = useState<string | null>(null);
 
   const injectMessage = useCallback((text: string) => {
@@ -219,6 +219,11 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          {userEmail && isSafeMode(userEmail) && (
+            <div className="flex-shrink-0 bg-yellow-500/10 border-b border-yellow-500/20 px-6 py-2 flex items-center gap-2">
+              <span className="text-yellow-400 text-xs font-semibold">🧪 Beta / Safe Mode — Full experience. No live calls or emails will be sent.</span>
+            </div>
+          )}
           {children}
         </div>
         <InlineChatPanel externalMessage={chatQueue} onExternalMessageHandled={() => setChatQueue(null)} />
@@ -243,5 +248,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  return <DashboardLayoutInner>{children}</DashboardLayoutInner>;
+  return <DashboardLayoutInner userEmail={user?.email || ''}>{children}</DashboardLayoutInner>;
 }
