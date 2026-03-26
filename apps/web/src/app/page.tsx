@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
+import AITeam from '@/components/landing/AITeam';
 import HowItWorks from '@/components/landing/HowItWorks';
 import Modules from '@/components/landing/Modules';
 import Pricing from '@/components/landing/Pricing';
@@ -110,6 +111,7 @@ export default function Home() {
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       <Hero />
+      <AITeam />
       <HowItWorks />
       <Modules />
       <Pricing />
