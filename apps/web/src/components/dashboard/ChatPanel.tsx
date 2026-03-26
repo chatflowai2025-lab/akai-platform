@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { ChatMessage, ChatButton } from '@akai/shared-types';
+import type { ChatMessage, ChatButton } from '@/lib/shared-types';
 import ChatBubble from '@/components/ui/ChatBubble';
 
 const INITIAL: ChatMessage = {

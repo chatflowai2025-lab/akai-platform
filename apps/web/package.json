@@ -10,7 +10,6 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@akai/shared-types": "workspace:*",
     "@anthropic-ai/sdk": "^0.80.0",
     "clsx": "^2.1.1",
     "firebase": "^10.11.0",

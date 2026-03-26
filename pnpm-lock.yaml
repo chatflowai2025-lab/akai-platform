@@ -63,9 +63,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@akai/shared-types':
-        specifier: workspace:*
-        version: link:../../packages/shared-types
       '@anthropic-ai/sdk':
         specifier: ^0.80.0
         version: 0.80.0

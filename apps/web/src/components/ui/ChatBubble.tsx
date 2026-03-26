@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@akai/shared-types';
+import type { ChatMessage } from '@/lib/shared-types';
 import Button from './Button';
 import { cn } from '@/lib/utils';
 
