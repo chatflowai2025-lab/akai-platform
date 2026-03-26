@@ -2,7 +2,7 @@ const STEPS = [
   {
     number: '01',
     title: 'Describe your business',
-    description: 'Tell MM your industry, goals, and who you sell to. Plain English. Two minutes.',
+    description: 'Tell AK your industry, goals, and who you sell to. Plain English. Two minutes.',
     accent: 'from-[#F59E0B]/20 to-transparent',
   },
   {
