@@ -69,9 +69,15 @@ export default function LoginPage() {
 
   const handleMicrosoft = () => {
     const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
+    if (!clientId) {
+      setError('Microsoft login not configured');
+      return;
+    }
+    const nonce = crypto.randomUUID();
+    sessionStorage.setItem('ms_oauth_state', nonce);
     const redirectUri = encodeURIComponent(process.env.NEXT_PUBLIC_MICROSOFT_REDIRECT_URI || 'https://getakai.ai');
     const scope = encodeURIComponent('openid profile email');
-    window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&prompt=select_account`;
+    window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&prompt=select_account&state=${nonce}`;
   };
 
   return (
