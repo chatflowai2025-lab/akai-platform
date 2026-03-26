@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
-import { getFirebaseDb } from '@/lib/firebase';
+import { getFirebaseDb, getFirebaseAuth } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -71,6 +71,8 @@ export default function SettingsPage() {
     signalNumber: '',
   });
   const [notifSaving, setNotifSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
 
   // Sophie voice
@@ -220,6 +222,24 @@ export default function SettingsPage() {
   };
 
   const planInfo = PLAN_LABELS[planTier] || PLAN_LABELS.trial;
+
+  const deleteAccount = async () => {
+    if (deleteConfirm !== 'DELETE' || !user) return;
+    setDeleting(true);
+    try {
+      const db = getFirebaseDb();
+      if (db) {
+        // Delete all user data from Firestore
+        await setDoc(doc(db, 'users', user.uid), { deleted: true, deletedAt: new Date().toISOString() }, { merge: true });
+      }
+      // Sign out and redirect
+      await getFirebaseAuth()?.signOut();
+      window.location.href = '/login';
+    } catch (err) {
+      console.error('[DELETE ACCOUNT]', err);
+      setDeleting(false);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -592,6 +612,36 @@ export default function SettingsPage() {
         </Section>
 
       </div>
+      {/* Danger Zone */}
+      <Section title="Danger Zone">
+        <p className="text-sm text-gray-400">Permanently delete your account and all associated data. This cannot be undone.</p>
+        <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 space-y-3">
+          <p className="text-xs text-red-400 font-semibold">This will permanently delete:</p>
+          <ul className="text-xs text-gray-500 space-y-1 list-disc list-inside">
+            <li>Your business profile and all settings</li>
+            <li>All email connections and OAuth tokens</li>
+            <li>Campaign history and lead data</li>
+            <li>All chat conversations and proposals</li>
+          </ul>
+          <div className="space-y-2 pt-2">
+            <label className="text-xs text-gray-500">Type <span className="font-mono text-red-400 font-bold">DELETE</span> to confirm</label>
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={e => setDeleteConfirm(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="w-full bg-[#0a0a0a] border border-red-500/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-500 transition font-mono"
+            />
+            <button
+              onClick={deleteAccount}
+              disabled={deleteConfirm !== 'DELETE' || deleting}
+              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition disabled:opacity-40"
+            >
+              {deleting ? '⏳ Deleting...' : '🗑️ Delete My Account'}
+            </button>
+          </div>
+        </div>
+      </Section>
     </DashboardLayout>
   );
 }
