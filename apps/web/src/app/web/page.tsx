@@ -711,6 +711,22 @@ function BuildTab() {
                   setPublishing(true);
                   setPublishError(null);
                   try {
+                    // Get Firebase ID token so the server can write to Firestore
+                    // when Firebase Admin SDK service account creds aren't in env
+                    let idToken: string | undefined;
+                    try {
+                      const { getAuth } = await import('firebase/auth');
+                      const { getFirebaseApp } = await import('@/lib/firebase');
+                      const app = getFirebaseApp();
+                      if (app) {
+                        const fbAuth = getAuth(app);
+                        if (fbAuth.currentUser) {
+                          idToken = await fbAuth.currentUser.getIdToken();
+                        }
+                      }
+                    } catch {
+                      // non-fatal — server will try Admin SDK first
+                    }
                     const res = await fetch('/api/web/publish', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -718,6 +734,7 @@ function BuildTab() {
                         subdomain: generatedSite.subdomain,
                         userId: user.uid,
                         site: { ...generatedSite, businessName, colorScheme },
+                        idToken,
                       }),
                     });
                     if (!res.ok) throw new Error('Publish failed');

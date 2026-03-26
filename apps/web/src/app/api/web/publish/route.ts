@@ -27,10 +27,16 @@ interface PublishBody {
   subdomain: string;
   userId: string;
   site: SiteData;
+  /** Firebase ID token from client auth — used for Firestore REST writes when Admin SDK unavailable */
+  idToken?: string;
 }
 
-// ── Firestore REST fallback ───────────────────────────────────────────────────
-async function saveViaRestApi(subdomain: string, payload: Record<string, unknown>): Promise<void> {
+// ── Firestore REST with ID token ──────────────────────────────────────────────
+async function saveViaRestApi(
+  subdomain: string,
+  payload: Record<string, unknown>,
+  idToken?: string,
+): Promise<void> {
   const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/publishedSites/${subdomain}`;
 
   const fields: Record<string, unknown> = {};
@@ -41,16 +47,22 @@ async function saveViaRestApi(subdomain: string, payload: Record<string, unknown
       fields[k] = { booleanValue: v };
     } else if (typeof v === 'number') {
       fields[k] = { integerValue: String(v) };
-    } else if (v instanceof Date) {
-      fields[k] = { timestampValue: v.toISOString() };
     } else {
       fields[k] = { stringValue: JSON.stringify(v) };
     }
   }
 
-  const res = await fetch(`${url}?updateMask.fieldPaths=${Object.keys(fields).join('&updateMask.fieldPaths=')}`, {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+  }
+
+  const fieldNames = Object.keys(fields);
+  const maskParam = fieldNames.map(f => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&');
+
+  const res = await fetch(`${url}?${maskParam}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ fields }),
   });
 
@@ -64,7 +76,7 @@ async function saveViaRestApi(subdomain: string, payload: Record<string, unknown
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as PublishBody;
-    const { subdomain, userId, site } = body;
+    const { subdomain, userId, site, idToken } = body;
 
     if (!subdomain?.trim()) {
       return NextResponse.json({ error: 'subdomain is required' }, { status: 400 });
@@ -88,13 +100,13 @@ export async function POST(req: NextRequest) {
       active: true,
     };
 
-    // ── 1. Save to Firestore (Admin SDK preferred, REST fallback) ─────────────
+    // ── 1. Save to Firestore (Admin SDK preferred, REST with token fallback) ──
     const db = getAdminFirestore();
     if (db) {
       await db.collection('publishedSites').doc(subdomain).set(payload, { merge: true });
     } else {
-      // Fall back to REST (no service account creds in env)
-      await saveViaRestApi(subdomain, payload);
+      // Fall back to REST with user's ID token (requires Firestore rules allow authenticated write)
+      await saveViaRestApi(subdomain, payload, idToken);
     }
 
     // ── 2. Save to Railway (non-fatal) ────────────────────────────────────────
