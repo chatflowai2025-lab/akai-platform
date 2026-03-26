@@ -54,9 +54,11 @@ interface ChatMessage {
 interface ChatRequest {
   message: string;
   history?: ChatMessage[];
+  userContext?: Record<string, string>;
+  state?: Record<string, unknown>;
 }
 
-function getMockResponse(message: string, history: ChatMessage[]): string {
+function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}): string {
   const msg = message.toLowerCase();
   const lastAssistant = history.filter(h => h.role === 'assistant').pop()?.content?.toLowerCase() ?? '';
 
@@ -188,7 +190,7 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], userContext = {} } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
@@ -202,16 +204,20 @@ export async function POST(req: NextRequest) {
         ...history.map(h => ({ role: h.role, content: h.content })),
         { role: 'user', content: message },
       ];
+      const contextAddition = Object.keys(userContext).length > 0
+        ? '\n\nUSER CONTEXT (from their onboarding):\n' + Object.entries(userContext).map(([k,v]) => `- ${k}: ${v}`).join('\n') + '\n\nUse this context when they ask about launching campaigns.'
+        : '';
+
       const response = await client.messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 300,
-        system: SYSTEM_PROMPT,
+        system: SYSTEM_PROMPT + contextAddition,
         messages,
       });
       const text = response.content[0].type === 'text' ? response.content[0].text : '';
       return NextResponse.json({ message: text });
     } else {
-      return NextResponse.json({ message: getMockResponse(message, history) });
+      return NextResponse.json({ message: getMockResponse(message, history, userContext) });
     }
   } catch (err: unknown) {
     console.error('[/api/chat]', err);

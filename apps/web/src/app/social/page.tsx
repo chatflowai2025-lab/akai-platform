@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PlatformPost {
@@ -47,29 +47,55 @@ const PLATFORMS = [
   { id: 'facebook', label: 'Facebook', icon: '👥', color: 'from-blue-500 to-indigo-500' },
 ];
 
+const CHAR_LIMITS: Record<string, number> = {
+  Instagram: 2200,
+  LinkedIn: 3000,
+  Facebook: 63206,
+};
+
+const TONES = ['Professional', 'Casual', 'Funny', 'Inspirational'] as const;
+type Tone = typeof TONES[number];
+
 function formatScheduledDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+function CharBar({ count, limit }: { count: number; limit: number }) {
+  const pct = Math.min(100, (count / limit) * 100);
+  const color = pct > 90 ? 'bg-red-500' : pct > 70 ? 'bg-yellow-500' : 'bg-green-500';
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-[10px]">
+        <span className={pct > 90 ? 'text-red-400' : 'text-gray-500'}>{count} / {limit.toLocaleString()}</span>
+        {pct > 90 && <span className="text-red-400 font-semibold">Near limit!</span>}
+      </div>
+      <div className="h-1 bg-[#2a2a2a] rounded-full overflow-hidden">
+        <div className={`h-full ${color} rounded-full transition-all duration-300`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default function SocialPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { sendMessage } = useDashboardChat();
 
   // Content generator state
   const [brief, setBrief] = useState('');
+  const [tone, setTone] = useState<Tone>('Professional');
   const [generating, setGenerating] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<PlatformPost[]>([]);
+  const [editedContent, setEditedContent] = useState<Record<string, string>>({});
   const [generateError, setGenerateError] = useState('');
-  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [copiedPlatform, setCopiedPlatform] = useState<string | null>(null);
 
   // Quick post state
   const [quickCaption, setQuickCaption] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['instagram']);
   const [scheduleMode, setScheduleMode] = useState<'now' | 'schedule'>('now');
   const [scheduleDate, setScheduleDate] = useState('');
-  const [quickPosting, setQuickPosting] = useState(false);
-  const [quickPostSuccess, setQuickPostSuccess] = useState('');
 
   // Calendar state
   const [scheduledPosts] = useState<ScheduledPost[]>(MOCK_SCHEDULED);
@@ -92,15 +118,21 @@ export default function SocialPage() {
     setGenerating(true);
     setGenerateError('');
     setGeneratedPosts([]);
+    setEditedContent({});
     try {
       const res = await fetch('/api/social/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brief: brief.trim() }),
+        body: JSON.stringify({ brief: brief.trim(), tone }),
       });
       if (!res.ok) throw new Error('Generation failed');
       const data = await res.json();
-      setGeneratedPosts(data.posts ?? []);
+      const posts: PlatformPost[] = data.posts ?? [];
+      setGeneratedPosts(posts);
+      // Initialise editable content
+      const initial: Record<string, string> = {};
+      posts.forEach(p => { initial[p.platform] = `${p.content}\n\n${p.hashtags}`; });
+      setEditedContent(initial);
     } catch {
       setGenerateError('Failed to generate content. Please try again.');
     } finally {
@@ -108,10 +140,16 @@ export default function SocialPage() {
     }
   }
 
-  function handleCopy(idx: number, content: string, hashtags: string) {
-    navigator.clipboard.writeText(`${content}\n\n${hashtags}`);
-    setCopiedIdx(idx);
-    setTimeout(() => setCopiedIdx(null), 2000);
+  function handleCopy(platform: string) {
+    const text = editedContent[platform] ?? '';
+    navigator.clipboard.writeText(text);
+    setCopiedPlatform(platform);
+    setTimeout(() => setCopiedPlatform(null), 2000);
+  }
+
+  function handleRegenerate(platform: string) {
+    // Re-run full generation — keeps it simple and consistent
+    handleGenerate();
   }
 
   function togglePlatform(id: string) {
@@ -120,17 +158,15 @@ export default function SocialPage() {
     );
   }
 
-  async function handleQuickPost() {
-    if (!quickCaption.trim() || selectedPlatforms.length === 0) return;
-    setQuickPosting(true);
-    // Simulate posting
-    await new Promise(r => setTimeout(r, 1200));
-    setQuickPosting(false);
-    const action = scheduleMode === 'now' ? 'posted' : 'scheduled';
-    setQuickPostSuccess(`Content ${action} to ${selectedPlatforms.join(', ')}! ✅`);
-    setQuickCaption('');
-    setTimeout(() => setQuickPostSuccess(''), 4000);
+  function handleConnectPlatform(platformLabel: string) {
+    sendMessage(`I want to connect my ${platformLabel} account`);
   }
+
+  const platformCardStyles: Record<string, { gradient: string; border: string; badge: string }> = {
+    Instagram: { gradient: 'from-pink-500/10 to-purple-500/10', border: 'border-pink-500/20', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
+    LinkedIn: { gradient: 'from-blue-600/10 to-blue-400/10', border: 'border-blue-500/20', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+    Facebook: { gradient: 'from-indigo-500/10 to-blue-500/10', border: 'border-indigo-500/20', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+  };
 
   return (
     <DashboardLayout>
@@ -156,8 +192,8 @@ export default function SocialPage() {
             ].map(p => (
               <button
                 key={p.label}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r ${p.gradient} border ${p.border} cursor-pointer hover:opacity-80 transition-opacity`}
-                title={`Connect ${p.label} (coming soon)`}
+                onClick={() => handleConnectPlatform(p.label)}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r ${p.gradient} border ${p.border} cursor-pointer hover:opacity-80 transition-opacity w-full text-left`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{p.icon}</span>
@@ -166,11 +202,11 @@ export default function SocialPage() {
                     <div className="text-xs text-gray-500">Not connected</div>
                   </div>
                 </div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Connect</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Connect →</span>
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-600 mt-2">OAuth integration coming soon — generate and copy content now, connect to auto-post later.</p>
+          <p className="text-xs text-gray-600 mt-2">Click any platform to open AK chat and get connected.</p>
         </section>
 
         {/* Tabs */}
@@ -199,19 +235,40 @@ export default function SocialPage() {
           <section className="space-y-4">
             <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-1">What do you want to post about?</h3>
-              <p className="text-xs text-gray-500 mb-3">Describe your topic, product, announcement, or idea — AK will write it for all three platforms.</p>
+              <p className="text-xs text-gray-500 mb-3">Describe your topic, product, or idea — AK writes it for all three platforms simultaneously.</p>
+
+              {/* Tone Selector */}
+              <div className="mb-3">
+                <p className="text-xs text-gray-400 mb-2 font-medium">Tone</p>
+                <div className="flex gap-2 flex-wrap">
+                  {TONES.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setTone(t)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                        tone === t
+                          ? 'bg-[#D4AF37] text-black border-[#D4AF37]'
+                          : 'border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#D4AF37]/40'
+                      }`}
+                    >
+                      {t === 'Professional' ? '🎯' : t === 'Casual' ? '😊' : t === 'Funny' ? '😂' : '💡'} {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex gap-2">
                 <textarea
                   value={brief}
                   onChange={e => setBrief(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate(); }}
-                  placeholder="e.g. We just launched a new AI tool that helps SMBs get more leads..."
+                  placeholder="e.g. We just launched a new AI tool that helps SMBs get more leads without cold calling..."
                   rows={3}
                   className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
                 />
               </div>
               <div className="flex items-center justify-between mt-3">
-                <span className="text-xs text-gray-600">Tip: Cmd+Enter to generate</span>
+                <span className="text-xs text-gray-600">Cmd+Enter to generate</span>
                 <button
                   onClick={handleGenerate}
                   disabled={!brief.trim() || generating}
@@ -228,35 +285,78 @@ export default function SocialPage() {
               {generateError && <p className="text-xs text-red-400 mt-2">{generateError}</p>}
             </div>
 
-            {/* Generated results */}
+            {/* Generated results — 3 platform cards side by side */}
             {generatedPosts.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {generatedPosts.map((post, idx) => (
-                  <div key={post.platform} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4 flex flex-col">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{post.icon}</span>
-                        <span className="text-sm font-semibold text-white">{post.platform}</span>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-semibold text-white">Generated — <span className="text-[#D4AF37]">{tone}</span> tone</p>
+                  <button
+                    onClick={handleGenerate}
+                    disabled={generating}
+                    className="text-xs px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg hover:text-white hover:border-[#D4AF37]/40 transition disabled:opacity-40"
+                  >
+                    🔄 Regenerate all
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {generatedPosts.map(post => {
+                    const styles = platformCardStyles[post.platform] ?? { gradient: 'from-gray-500/10 to-gray-400/10', border: 'border-gray-500/20', badge: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
+                    const currentText = editedContent[post.platform] ?? `${post.content}\n\n${post.hashtags}`;
+                    const charCount = currentText.length;
+                    const limit = CHAR_LIMITS[post.platform] ?? 2200;
+                    return (
+                      <div key={post.platform} className={`bg-gradient-to-b ${styles.gradient} border ${styles.border} rounded-xl p-4 flex flex-col`}>
+                        {/* Card header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{post.icon}</span>
+                            <span className="text-sm font-bold text-white">{post.platform}</span>
+                          </div>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${styles.badge}`}>
+                            {post.platform === 'Instagram' ? '2,200' : post.platform === 'LinkedIn' ? '3,000' : '63,206'} char limit
+                          </span>
+                        </div>
+
+                        {/* Editable textarea */}
+                        <textarea
+                          value={currentText}
+                          onChange={e => setEditedContent(prev => ({ ...prev, [post.platform]: e.target.value }))}
+                          rows={8}
+                          className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-200 leading-relaxed resize-none focus:outline-none focus:border-white/20 transition-colors font-mono"
+                        />
+
+                        {/* Char bar */}
+                        <div className="mt-2">
+                          <CharBar count={charCount} limit={limit} />
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => handleCopy(post.platform)}
+                            className="flex-1 py-2 rounded-lg border border-white/10 text-xs text-gray-300 hover:text-white hover:border-white/30 transition-all font-medium"
+                          >
+                            {copiedPlatform === post.platform ? '✅ Copied!' : '📋 Copy'}
+                          </button>
+                          <button
+                            onClick={() => handleRegenerate(post.platform)}
+                            disabled={generating}
+                            className="flex-1 py-2 rounded-lg border border-white/10 text-xs text-gray-300 hover:text-white hover:border-white/30 transition-all font-medium disabled:opacity-40"
+                          >
+                            🔄 Regen
+                          </button>
+                        </div>
                       </div>
-                      <span className="text-xs text-gray-600">{post.content.length} chars</span>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed flex-1 whitespace-pre-wrap">{post.content}</p>
-                    <p className="text-xs text-[#D4AF37]/70 mt-2">{post.hashtags}</p>
-                    <button
-                      onClick={() => handleCopy(idx, post.content, post.hashtags)}
-                      className="mt-3 w-full py-2 rounded-lg border border-[#2a2a2a] text-xs text-gray-400 hover:text-white hover:border-[#D4AF37]/40 transition-all"
-                    >
-                      {copiedIdx === idx ? '✅ Copied!' : '📋 Copy to clipboard'}
-                    </button>
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             )}
 
             {generatedPosts.length === 0 && !generating && (
               <div className="bg-[#0d0d0d] border border-dashed border-[#2a2a2a] rounded-xl p-8 text-center">
                 <div className="text-4xl mb-3">✨</div>
-                <p className="text-sm text-gray-500">Your generated content will appear here, optimised for each platform.</p>
+                <p className="text-sm text-gray-500">Your generated content will appear here — one card per platform, editable and ready to copy.</p>
               </div>
             )}
           </section>
@@ -264,89 +364,101 @@ export default function SocialPage() {
 
         {/* Quick Post Tab */}
         {activeTab === 'quick' && (
-          <section className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-white mb-1">Quick Post</h3>
-              <p className="text-xs text-gray-500">Write your caption, pick platforms, and schedule or post immediately.</p>
-            </div>
-
-            <textarea
-              value={quickCaption}
-              onChange={e => setQuickCaption(e.target.value)}
-              placeholder="Write your caption here..."
-              rows={4}
-              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
-            />
-
-            {/* Platform selector */}
-            <div>
-              <p className="text-xs text-gray-400 mb-2 font-medium">Platforms</p>
-              <div className="flex gap-2 flex-wrap">
-                {PLATFORMS.map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => togglePlatform(p.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                      selectedPlatforms.includes(p.id)
-                        ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37]'
-                        : 'border-[#2a2a2a] text-gray-500 hover:text-gray-300'
-                    }`}
-                  >
-                    <span>{p.icon}</span> {p.label}
-                    {selectedPlatforms.includes(p.id) && <span className="text-[10px]">✓</span>}
-                  </button>
-                ))}
+          <section className="space-y-4">
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-white mb-1">Quick Post</h3>
+                <p className="text-xs text-gray-500">Write your caption, pick platforms, then copy it to your app.</p>
               </div>
-            </div>
 
-            {/* Schedule mode */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setScheduleMode('now')}
-                className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${
-                  scheduleMode === 'now' ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500'
-                }`}
-              >
-                ⚡ Post Now
-              </button>
-              <button
-                onClick={() => setScheduleMode('schedule')}
-                className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${
-                  scheduleMode === 'schedule' ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500'
-                }`}
-              >
-                📅 Schedule
-              </button>
-            </div>
-
-            {scheduleMode === 'schedule' && (
-              <input
-                type="datetime-local"
-                value={scheduleDate}
-                onChange={e => setScheduleDate(e.target.value)}
-                className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+              <textarea
+                value={quickCaption}
+                onChange={e => setQuickCaption(e.target.value)}
+                placeholder="Write your caption here..."
+                rows={5}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
               />
-            )}
 
-            {quickPostSuccess && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2 text-sm text-green-400">
-                {quickPostSuccess}
+              {/* Platform selector */}
+              <div>
+                <p className="text-xs text-gray-400 mb-2 font-medium">Target platforms</p>
+                <div className="flex gap-2 flex-wrap">
+                  {PLATFORMS.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => togglePlatform(p.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                        selectedPlatforms.includes(p.id)
+                          ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37]'
+                          : 'border-[#2a2a2a] text-gray-500 hover:text-gray-300'
+                      }`}
+                    >
+                      <span>{p.icon}</span> {p.label}
+                      {selectedPlatforms.includes(p.id) && <span className="text-[10px]">✓</span>}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
 
-            <button
-              onClick={handleQuickPost}
-              disabled={!quickCaption.trim() || selectedPlatforms.length === 0 || quickPosting}
-              className="w-full py-2.5 rounded-lg bg-[#D4AF37] text-black text-sm font-bold disabled:opacity-40 hover:bg-[#c4a030] transition-colors flex items-center justify-center gap-2"
-            >
-              {quickPosting ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-black/40 border-t-black rounded-full animate-spin" />
-                  {scheduleMode === 'now' ? 'Posting...' : 'Scheduling...'}
-                </>
-              ) : scheduleMode === 'now' ? '⚡ Post Now' : '📅 Schedule Post'}
-            </button>
-            <p className="text-xs text-gray-600">Note: Direct posting requires connected accounts. Content will be saved to your calendar.</p>
+              {/* Schedule mode */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setScheduleMode('now')}
+                  className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${
+                    scheduleMode === 'now' ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500'
+                  }`}
+                >⚡ Post Now</button>
+                <button
+                  onClick={() => setScheduleMode('schedule')}
+                  className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${
+                    scheduleMode === 'schedule' ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500'
+                  }`}
+                >📅 Schedule</button>
+              </div>
+
+              {scheduleMode === 'schedule' && (
+                <input
+                  type="datetime-local"
+                  value={scheduleDate}
+                  onChange={e => setScheduleDate(e.target.value)}
+                  className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                />
+              )}
+
+              {/* Manual posting instructions */}
+              {quickCaption.trim() && selectedPlatforms.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">How to post</p>
+                  {selectedPlatforms.map(pid => {
+                    const p = PLATFORMS.find(x => x.id === pid)!;
+                    return (
+                      <div key={pid} className="flex items-center justify-between bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <span>{p.icon}</span>
+                          <span className="text-xs text-gray-300">Copy this to your <span className="text-white font-semibold">{p.label}</span> app</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(quickCaption);
+                            setCopiedPlatform(pid);
+                            setTimeout(() => setCopiedPlatform(null), 2000);
+                          }}
+                          className="text-xs px-2.5 py-1 border border-[#2a2a2a] text-gray-400 rounded hover:text-white hover:border-[#D4AF37]/40 transition"
+                        >
+                          {copiedPlatform === pid ? '✅' : '📋 Copy'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <p className="text-xs text-gray-600">
+                {scheduleMode === 'now'
+                  ? 'Copy your caption above to post directly in each platform\'s app.'
+                  : `Scheduled for ${scheduleDate ? new Date(scheduleDate).toLocaleString('en-AU') : 'selected time'}. Saved to your calendar.`}
+              </p>
+            </div>
           </section>
         )}
 

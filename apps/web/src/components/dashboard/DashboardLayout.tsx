@@ -3,7 +3,8 @@
 import { useEffect, useRef, createContext, useContext, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { getFirebaseStorage } from '@/lib/firebase';
+import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
 import type { ChatMessage } from '@/lib/shared-types';
@@ -28,6 +29,8 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
+  const [userContext, setUserContext] = useState<Record<string, string>>({});
+
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Handle messages injected from page buttons
@@ -40,6 +43,17 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useAuth();
+
+  // Load user's onboarding config for AK context
+  useEffect(() => {
+    if (!user) return;
+    const db = getFirebaseDb();
+    if (!db) return;
+    getDoc(doc(db, 'users', user.uid)).then(snap => {
+      const d = snap.data();
+      if (d?.campaignConfig) setUserContext(d.campaignConfig);
+    }).catch(() => {});
+  }, [user]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,6 +113,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
           message: text,
           state: chatState,
           history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
+          userContext,
         }),
       });
       const data = await res.json();
