@@ -1,84 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // ---------------------------------------------------------------------------
-// AKAI Onboarding Chat — Self-contained state machine (no external backend)
-// Handles the 6-step onboarding flow and returns structured responses.
+// AKAI Chat — AK AI Assistant
+// Uses Claude claude-3-haiku-20240307 if ANTHROPIC_API_KEY is set, otherwise
+// falls back to a smart AKAI-aware mock response.
 // ---------------------------------------------------------------------------
 
-type Step =
-  | 'business_name'
-  | 'industry'
-  | 'goal'
-  | 'location'
-  | 'contact'
-  | 'recommend';
+const SYSTEM_PROMPT = `You are AK, the AI assistant inside AKAI — an AI business operating system. You help users manage their Sales, Recruit, Web, Ads, and Social modules. Be helpful, concise, and action-oriented. If asked about Sales, mention the AI Clozr portal at https://aiclozr.vercel.app/portal. Keep responses under 150 words.`;
 
-interface OnboardingState {
-  step: Step;
-  data: Record<string, string>;
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 interface ChatRequest {
   message: string;
-  state: OnboardingState;
+  history?: ChatMessage[];
 }
 
-const INDUSTRIES = [
-  'Trades & Construction',
-  'Real Estate',
-  'Professional Services',
-  'Hospitality & Food',
-  'Health & Wellness',
-  'Retail & E-commerce',
-  'Recruitment Agency',
-  'Other',
-];
+// Smart mock responses for when no API key is available
+function getMockResponse(message: string): string {
+  const msg = message.toLowerCase();
 
-const GOALS = [
-  'Get more leads & sales',
-  'Hire better people faster',
-  'Build or improve my website',
-  'Run Google & Meta ads',
-  'Grow on social media',
-  'All of the above',
-];
+  if (msg.includes('what can you do') || msg.includes('help') || msg.includes('capabilities')) {
+    return "I'm AK, your AKAI assistant. I can help you across all five modules:\n\n• **Sales** — AI-powered lead generation via [AI Clozr](https://aiclozr.vercel.app/portal)\n• **Recruit** — Smart hiring workflows\n• **Web** — Site building and optimization\n• **Ads** — Google & Meta campaign management\n• **Social** — Content scheduling and growth\n\nWhat would you like to work on?";
+  }
 
-function recommendPlan(data: Record<string, string>): string {
-  const goal = data.goal || '';
-  if (goal === 'All of the above') return 'Scale';
-  if (
-    goal === 'Get more leads & sales' ||
-    goal === 'Hire better people faster'
-  )
-    return 'Growth';
-  return 'Starter';
-}
+  if (msg.includes('sales') || msg.includes('lead') || msg.includes('clozr')) {
+    return "For Sales, check out the AI Clozr portal at https://aiclozr.vercel.app/portal — it's your lead generation engine. It captures, qualifies, and routes leads automatically so your team can focus on closing. Want me to walk you through setting it up?";
+  }
 
-function planPrice(plan: string): string {
-  if (plan === 'Scale') return '$1,197/mo';
-  if (plan === 'Growth') return '$597/mo';
-  return '$297/mo';
-}
+  if (msg.includes('recruit') || msg.includes('hire') || msg.includes('hiring')) {
+    return "The Recruit module helps you find and hire top talent faster. AKAI automates job posting, screens applicants using AI, and surfaces the best candidates. What role are you hiring for?";
+  }
 
-function buildResponse(
-  message: string,
-  state: OnboardingState,
-  buttons?: string[],
-  action?: string,
-  url?: string
-) {
-  return NextResponse.json({
-    message,
-    state,
-    ...(buttons ? { buttons } : {}),
-    ...(action ? { action, url } : {}),
-  });
+  if (msg.includes('web') || msg.includes('website') || msg.includes('site')) {
+    return "The Web module lets you build and optimize your business website without a developer. AKAI handles hosting, SEO basics, and conversion-focused layouts. Want to start building or improve an existing site?";
+  }
+
+  if (msg.includes('ads') || msg.includes('google') || msg.includes('meta') || msg.includes('facebook')) {
+    return "The Ads module manages your Google and Meta campaigns in one place. AKAI optimizes spend, targets the right audience, and tracks ROI automatically. What's your current ad budget and primary goal?";
+  }
+
+  if (msg.includes('social') || msg.includes('instagram') || msg.includes('content')) {
+    return "The Social module keeps your brand active across platforms. AKAI helps schedule posts, suggests content ideas, and tracks engagement. Which platforms are you focused on?";
+  }
+
+  if (msg.includes('price') || msg.includes('cost') || msg.includes('plan')) {
+    return "AKAI offers three plans:\n\n• **Starter** — $297/mo — Core modules\n• **Growth** — $597/mo — Leads + hiring\n• **Scale** — $1,197/mo — Everything included\n\nAll plans include a 7-day free trial. Want to see which plan fits your goals?";
+  }
+
+  return "I'm AK, your AKAI assistant. I can help with Sales, Recruit, Web, Ads, and Social. What are you working on today?";
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, state } = body;
+    const { message, history = [] } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -87,101 +65,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const trimmed = message.trim();
-    const currentStep: Step = state?.step || 'business_name';
-    const data: Record<string, string> = state?.data || {};
+    const apiKey = process.env.ANTHROPIC_API_KEY;
 
-    // ── Step transitions ────────────────────────────────────────────────────
+    if (apiKey) {
+      // Use Claude for real AI responses
+      const { default: Anthropic } = await import('@anthropic-ai/sdk');
+      const client = new Anthropic({ apiKey });
 
-    if (currentStep === 'business_name') {
-      if (trimmed.length < 2) {
-        return buildResponse(
-          "Let's get your name right — what's your business called?",
-          { step: 'business_name', data }
-        );
-      }
-      data.business_name = trimmed;
-      return buildResponse(
-        `Love it — ${trimmed} sounds like a winner. 💪\n\nWhat industry are you in?`,
-        { step: 'industry', data },
-        INDUSTRIES
-      );
+      const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+        ...history.map((h) => ({ role: h.role, content: h.content })),
+        { role: 'user', content: message },
+      ];
+
+      const response = await client.messages.create({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 300,
+        system: SYSTEM_PROMPT,
+        messages,
+      });
+
+      const text =
+        response.content[0].type === 'text' ? response.content[0].text : '';
+
+      return NextResponse.json({ message: text });
+    } else {
+      // Smart mock fallback — AKAI-aware responses without API key
+      const mockMessage = getMockResponse(message);
+      return NextResponse.json({ message: mockMessage });
     }
-
-    if (currentStep === 'industry') {
-      data.industry = trimmed;
-      return buildResponse(
-        `Got it. What's your #1 priority right now for ${data.business_name}?`,
-        { step: 'goal', data },
-        GOALS
-      );
-    }
-
-    if (currentStep === 'goal') {
-      data.goal = trimmed;
-      return buildResponse(
-        `Perfect. Where are you based? (City or region — helps us target the right leads for you.)`,
-        { step: 'location', data }
-      );
-    }
-
-    if (currentStep === 'location') {
-      data.location = trimmed;
-      return buildResponse(
-        `Almost there. What's the best email to send your setup confirmation to?`,
-        { step: 'contact', data }
-      );
-    }
-
-    if (currentStep === 'contact') {
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmed)) {
-        return buildResponse(
-          "That doesn't look like a valid email — try again so I can send your setup details.",
-          { step: 'contact', data }
-        );
-      }
-      data.email = trimmed;
-
-      const plan = recommendPlan(data);
-      const price = planPrice(plan);
-
-      return buildResponse(
-        `Based on what you've told me, I'd put ${data.business_name} on the **${plan} plan** at ${price}.\n\nThat gets you everything you need to ${data.goal.toLowerCase()} in ${data.location}.\n\nI'll send your setup details to ${data.email}. Ready to start your free 7-day trial?`,
-        { step: 'recommend', data: { ...data, plan } },
-        ['Start My Free Trial →', 'Tell Me More']
-      );
-    }
-
-    if (currentStep === 'recommend') {
-      if (trimmed.includes('Trial') || trimmed.includes('Start')) {
-        return buildResponse(
-          `You're in! 🚀 Setting up ${data.business_name} now…`,
-          { step: 'recommend', data },
-          undefined,
-          'redirect',
-          `mailto:hello@getakai.ai?subject=Start Free Trial — ${encodeURIComponent(data.business_name)}&body=Name: ${encodeURIComponent(data.business_name)}%0AIndustry: ${encodeURIComponent(data.industry)}%0AGoal: ${encodeURIComponent(data.goal)}%0ALocation: ${encodeURIComponent(data.location)}%0AEmail: ${encodeURIComponent(data.email)}%0APlan: ${encodeURIComponent(data.plan)}`
-        );
-      }
-      const plan = data.plan || 'Growth';
-      const price = planPrice(plan);
-      return buildResponse(
-        `The ${plan} plan at ${price}/mo gives you:\n\n• Everything needed to ${data.goal.toLowerCase()}\n• 7-day free trial, cancel anytime\n• No lock-in contracts\n• Onboarding call included\n\nReady to go?`,
-        { step: 'recommend', data },
-        ['Start My Free Trial →']
-      );
-    }
-
-    // Fallback
-    return buildResponse(
-      "Let's start fresh — what's the name of your business?",
-      { step: 'business_name', data: {} }
-    );
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Internal error';
-    // Never leak stack traces or internal details to the client
     console.error('[/api/chat]', err);
-    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Something went wrong. Please try again.' },
+      { status: 500 }
+    );
   }
 }

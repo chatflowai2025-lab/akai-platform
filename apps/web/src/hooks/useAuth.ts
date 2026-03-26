@@ -2,10 +2,64 @@
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { getFirebaseAuth } from '@/lib/firebase';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirebaseAuth, getFirebaseDb } from '@/lib/firebase';
+
+export interface UserProfile {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  createdAt: unknown;
+  lastLoginAt: unknown;
+  onboardingComplete: boolean;
+}
+
+async function syncUserProfile(user: User): Promise<UserProfile> {
+  const db = getFirebaseDb();
+  if (!db) {
+    // Firestore unavailable — return a minimal in-memory profile
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      createdAt: null,
+      lastLoginAt: null,
+      onboardingComplete: false,
+    };
+  }
+
+  const ref = doc(db, 'users', user.uid);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    // New user — create profile
+    const profile: Omit<UserProfile, 'uid'> = {
+      email: user.email,
+      displayName: user.displayName,
+      createdAt: serverTimestamp(),
+      lastLoginAt: serverTimestamp(),
+      onboardingComplete: false,
+    };
+    await setDoc(ref, profile);
+    return { uid: user.uid, ...profile };
+  } else {
+    // Existing user — update lastLoginAt
+    await updateDoc(ref, { lastLoginAt: serverTimestamp() });
+    const data = snap.data();
+    return {
+      uid: user.uid,
+      email: data.email ?? user.email,
+      displayName: data.displayName ?? user.displayName,
+      createdAt: data.createdAt,
+      lastLoginAt: data.lastLoginAt,
+      onboardingComplete: data.onboardingComplete ?? false,
+    };
+  }
+}
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,8 +68,27 @@ export function useAuth() {
       setLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+      if (u) {
+        try {
+          const profile = await syncUserProfile(u);
+          setUserProfile(profile);
+        } catch (err) {
+          console.error('Failed to sync user profile:', err);
+          // Fall back to basic profile from auth object
+          setUserProfile({
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName,
+            createdAt: null,
+            lastLoginAt: null,
+            onboardingComplete: false,
+          });
+        }
+      } else {
+        setUserProfile(null);
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -30,5 +103,5 @@ export function useAuth() {
     window.location.href = '/login';
   };
 
-  return { user, loading, logout };
+  return { user, userProfile, loading, logout };
 }

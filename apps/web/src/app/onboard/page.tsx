@@ -4,10 +4,12 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { doc, updateDoc } from 'firebase/firestore';
 import type { ChatMessage, OnboardingState } from '@akai/shared-types';
 import ChatBubble from '@/components/ui/ChatBubble';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
+import { getFirebaseDb } from '@/lib/firebase';
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: '1',
@@ -69,6 +71,19 @@ export default function OnboardPage() {
 
       if (data.state) setState(data.state);
       if (data.action === 'redirect') {
+        // Mark onboarding complete in Firestore
+        if (user?.uid) {
+          try {
+            const db = getFirebaseDb();
+            if (db) {
+              await updateDoc(doc(db, 'users', user.uid), {
+                onboardingComplete: true,
+              });
+            }
+          } catch (err) {
+            console.error('Failed to mark onboarding complete:', err);
+          }
+        }
         setTimeout(() => window.location.href = data.url || '/dashboard', 1500);
       }
     } catch (err) {

@@ -96,7 +96,7 @@ function EmptyFeed() {
 // ── Main dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, userProfile, loading, logout } = useAuth();
   // activeModule is now derived from URL pathname via Sidebar's usePathname
 
   useEffect(() => {
@@ -114,7 +114,11 @@ export default function DashboardPage() {
   }
 
   const userEmail = user.email ?? 'there';
-  const displayName = userEmail.split('@')[0];
+  // Prefer Firestore profile displayName → Firebase auth displayName → email prefix
+  const displayName =
+    userProfile?.displayName ||
+    user.displayName ||
+    userEmail.split('@')[0];
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex">
