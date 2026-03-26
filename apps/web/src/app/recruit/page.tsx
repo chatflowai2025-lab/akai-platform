@@ -138,7 +138,10 @@ function FindCandidatesTab() {
 
   const handleContact = (candidate: Candidate) => {
     setContactedIds(prev => new Set([...prev, candidate.id]));
-    sendMessage(`Draft an outreach message for ${candidate.name}, ${candidate.currentRole} at ${candidate.company}`);
+    // Open mailto with pre-filled outreach — no sendMessage to avoid chat context issues
+    const subject = encodeURIComponent(`Exciting opportunity — ${jobTitle || 'a great role'}`);
+    const body = encodeURIComponent(`Hi ${candidate.name.split(' ')[0]},\n\nI came across your profile and think you'd be a great fit for a ${jobTitle || 'role'} we're hiring for.\n\nWould you be open to a quick 15-minute call to learn more?\n\nBest,\n[Your name]`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
 
   const handleAIScreen = async (candidate: Candidate) => {
@@ -259,8 +262,8 @@ function FindCandidatesTab() {
       {searched && !searching && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-white">{candidates.length} candidates found</h2>
-            <span className="text-xs text-gray-500">AI-matched · sorted by fit score</span>
+            <h2 className="text-sm font-bold text-white">{candidates.length} example profiles</h2>
+            <span className="text-xs text-gray-500">AI-generated · illustrative only · connect LinkedIn Recruiter for real candidates</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {candidates.map(c => (
