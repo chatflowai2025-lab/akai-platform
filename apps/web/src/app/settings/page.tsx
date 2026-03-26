@@ -43,6 +43,10 @@ interface NotifPrefs {
   smsNumber: string;
   whatsapp: boolean;
   whatsappNumber: string;
+  telegram: boolean;
+  telegramChatId: string;
+  signal: boolean;
+  signalNumber: string;
 }
 
 export default function SettingsPage() {
@@ -60,6 +64,10 @@ export default function SettingsPage() {
     smsNumber: '',
     whatsapp: false,
     whatsappNumber: '',
+    telegram: false,
+    telegramChatId: '',
+    signal: false,
+    signalNumber: '',
   });
   const [notifSaving, setNotifSaving] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
@@ -111,6 +119,10 @@ export default function SettingsPage() {
           smsNumber: np.smsNumber || '',
           whatsapp: np.whatsapp || false,
           whatsappNumber: np.whatsappNumber || '',
+          telegram: np.telegram || false,
+          telegramChatId: np.telegramChatId || '',
+          signal: np.signal || false,
+          signalNumber: np.signalNumber || '',
         });
 
         // Voice
@@ -161,6 +173,10 @@ export default function SettingsPage() {
             smsNumber: notifPrefs.smsNumber,
             whatsapp: notifPrefs.whatsapp,
             whatsappNumber: notifPrefs.whatsappNumber,
+            telegram: notifPrefs.telegram,
+            telegramChatId: notifPrefs.telegramChatId,
+            signal: notifPrefs.signal,
+            signalNumber: notifPrefs.signalNumber,
           },
         }, { merge: true });
       }
@@ -389,6 +405,72 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
+
+            {/* Telegram card */}
+            <div className={`rounded-xl border transition-colors ${
+              notifPrefs.telegram ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'
+            }`}>
+              <button
+                onClick={() => setNotifPrefs(p => ({ ...p, telegram: !p.telegram }))}
+                className="w-full flex items-start gap-4 px-4 py-4 text-left hover:opacity-90 transition"
+              >
+                <span className="text-2xl mt-0.5">✈️</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-white">Telegram</p>
+                  <p className="text-xs text-gray-500 mt-0.5">We&apos;ll message you on Telegram</p>
+                </div>
+                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${
+                  notifPrefs.telegram ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'
+                }`}>
+                  {notifPrefs.telegram && <span className="text-black text-[10px] font-black">✓</span>}
+                </div>
+              </button>
+              {notifPrefs.telegram && (
+                <div className="px-4 pb-4">
+                  <input
+                    type="text"
+                    value={notifPrefs.telegramChatId}
+                    onChange={e => setNotifPrefs(p => ({ ...p, telegramChatId: e.target.value }))}
+                    placeholder="Your Telegram username or chat ID"
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  />
+                  <p className="text-xs text-gray-600 mt-1.5">Start a chat with @AKAI_Notify_Bot first, then enter your username</p>
+                </div>
+              )}
+            </div>
+
+            {/* Signal card */}
+            <div className={`rounded-xl border transition-colors ${
+              notifPrefs.signal ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'
+            }`}>
+              <button
+                onClick={() => setNotifPrefs(p => ({ ...p, signal: !p.signal }))}
+                className="w-full flex items-start gap-4 px-4 py-4 text-left hover:opacity-90 transition"
+              >
+                <span className="text-2xl mt-0.5">🔵</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-white">Signal</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Private and encrypted notifications via Signal</p>
+                </div>
+                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${
+                  notifPrefs.signal ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'
+                }`}>
+                  {notifPrefs.signal && <span className="text-black text-[10px] font-black">✓</span>}
+                </div>
+              </button>
+              {notifPrefs.signal && (
+                <div className="px-4 pb-4">
+                  <input
+                    type="tel"
+                    value={notifPrefs.signalNumber}
+                    onChange={e => setNotifPrefs(p => ({ ...p, signalNumber: e.target.value }))}
+                    placeholder="+61 4XX XXX XXX"
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  />
+                  <p className="text-xs text-gray-600 mt-1.5">Your Signal-registered mobile number</p>
+                </div>
+              )}
+            </div>
 
           <button
             onClick={saveNotifications}
