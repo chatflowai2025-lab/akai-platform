@@ -12,6 +12,7 @@ YOUR MODULES:
 - Web: Website audit + content generation.
 - Ads: Google Ads campaign builder.
 - Social: Content generation for Instagram, LinkedIn, Facebook.
+- Chat Widget: Embeddable AI chat widget for client websites. Qualifies visitors as leads, routes to Sophie. Install via a script tag from the Chat module.
 
 CAMPAIGN LAUNCH FLOW (when user says launch/new campaign/configure Sophie):
 1. "Let me check your setup..." → Present their onboarding config back: business name, industry, location, target customer
@@ -337,6 +338,15 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
 
   if (msg.includes('help') || msg.includes('what can you do')) {
     return "I'm AK — your AI COO. Here's the current playbook:\n\n• **Email Guard** — inbox monitoring, auto-proposals\n• **Sales** — Sophie AI outbound calls & lead gen\n• **Recruit** — AI candidate sourcing & screening\n• **Social** — content for Instagram, LinkedIn, Facebook\n• **Web** — site audit + AI copywriting\n• **Ads** — Google Ads builder (coming soon)\n\nWhat do you need moving?";
+  }
+
+  // ── Chat widget / live chat ───────────────────────────────────────────────
+  if (msg.includes('chat widget') || msg.includes('live chat') || msg.includes('install chat')) {
+    return "Your chat widget is ready. Copy the script tag from the **Chat module** and paste it before `</body>` on your website. Visitors will see a chat bubble — I'll qualify them and route leads to Sophie automatically.";
+  }
+
+  if (msg.includes('configure chat') || (msg.includes('configure') && msg.includes('widget'))) {
+    return "What would you like to configure? **Greeting message**, **brand color**, or **response style**? Head to the Chat module to update any of these.";
   }
 
   // ── Fallback ─────────────────────────────────────────────────────────────

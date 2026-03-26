@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const MODULES = [
   { id: 'sales', icon: '📞', label: 'Sales', status: 'live', href: '/sales', external: false },
+  { id: 'chat', icon: '💬', label: 'Chat', status: 'live', href: '/chat-module', external: false },
   { id: 'recruit', icon: '🎯', label: 'Recruit', status: 'building', href: '/recruit', external: false },
   { id: 'web', icon: '🌐', label: 'Web', status: 'building', href: '/web', external: false },
   { id: 'email-guard', icon: '✉️', label: 'Email', status: 'building', href: '/email-guard', external: false },
