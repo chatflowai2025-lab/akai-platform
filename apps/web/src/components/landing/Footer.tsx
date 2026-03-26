@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#D4AF37] flex items-center justify-center">
-              <span className="text-black font-black text-sm">A</span>
+              <span className="text-black font-black text-[9px] tracking-tight">AK</span>
             </div>
             <div>
               <div className="text-lg font-black tracking-tight">

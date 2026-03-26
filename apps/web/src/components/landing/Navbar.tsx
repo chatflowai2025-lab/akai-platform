@@ -24,7 +24,7 @@ export default function Navbar() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center">
-            <span className="text-black font-black text-sm">A</span>
+            <span className="text-black font-black text-[9px] tracking-tight">AK</span>
           </div>
           <span className="text-xl font-black tracking-tight">
             AK<span className="text-[#F59E0B]">AI</span>
