@@ -43,7 +43,7 @@ export default function LoginPage() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
-      router.push('/onboard');
+      router.push('/dashboard');
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
     } finally {
@@ -59,7 +59,7 @@ export default function LoginPage() {
       if (!auth) throw new Error('Auth not available');
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push('/onboard');
+      router.push('/dashboard');
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
     } finally {
