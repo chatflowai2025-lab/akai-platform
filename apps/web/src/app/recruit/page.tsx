@@ -461,6 +461,7 @@ interface PostedJob {
 function PostJobTab() {
   const { user } = useAuth();
   const { sendMessage } = useDashboardChat();
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
 
   // Step state
   const [step, setStep] = useState<PostStep>('form');
@@ -857,11 +858,17 @@ function PostJobTab() {
                         <span className="text-xs text-green-400 flex items-center gap-1">
                           <span>✅</span> Connected
                         </span>
+                      ) : platform.id === 'website' ? (
+                        <a href="/web" onClick={e => e.stopPropagation()}
+                          className="text-xs px-2.5 py-1 border rounded-lg transition inline-block"
+                          style={{ borderColor: platform.borderColor, color: platform.color, background: platform.bgColor }}>
+                          Set up in Web →
+                        </a>
                       ) : (
                         <button
                           onClick={e => {
                             e.stopPropagation();
-                            safeSend(sendMessage, `I want to connect ${platform.name} for job posting`);
+                            setConnectingPlatform(platform.name);
                           }}
                           className="text-xs px-2.5 py-1 border rounded-lg transition"
                           style={{ borderColor: platform.borderColor, color: platform.color, background: platform.bgColor }}
@@ -967,6 +974,80 @@ function PostJobTab() {
           </button>
         </div>
       )}
+
+      {/* Platform connect modal */}
+      {connectingPlatform && user && (
+        <PlatformConnectModal
+          platform={connectingPlatform}
+          userId={user.uid}
+          onClose={() => setConnectingPlatform(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Platform Connect Modal ────────────────────────────────────────────────────
+function PlatformConnectModal({ platform, userId, onClose }: { platform: string; userId: string; onClose: () => void }) {
+  const [handle, setHandle] = useState('');
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    try {
+      const { getFirebaseDb } = await import('@/lib/firebase');
+      const { doc, setDoc } = await import('firebase/firestore');
+      const db = getFirebaseDb();
+      if (db) {
+        await setDoc(doc(db, 'users', userId, 'recruitConnections', platform.toLowerCase()), {
+          platform, handle, waitlisted: true, createdAt: new Date().toISOString()
+        }, { merge: true });
+      }
+    } catch { /* non-fatal */ }
+    setDone(true);
+  };
+
+  const platformLinks: Record<string, string> = {
+    'SEEK': 'https://talent.seek.com.au/partners/api-docs',
+    'LinkedIn': 'https://business.linkedin.com/talent-solutions/jobs',
+    'Indeed': 'https://indeed.com/hire',
+    'Jora': 'https://www.jora.com/advertise',
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-white font-bold">Connect {platform}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+        </div>
+        {done ? (
+          <div className="text-center py-4">
+            <p className="text-green-400 font-semibold mb-1">✅ You&apos;re on the list!</p>
+            <p className="text-gray-500 text-sm">We&apos;ll reach out when {platform} integration is ready to activate.</p>
+            <button onClick={onClose} className="mt-4 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-gray-400 text-sm mb-4">
+              Direct {platform} API integration is coming. Enter your account handle and we&apos;ll set it up for you when it&apos;s ready.
+            </p>
+            <input type="text" value={handle} onChange={e => setHandle(e.target.value)}
+              placeholder={`Your ${platform} account/handle`}
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition mb-3" />
+            <button onClick={handleSubmit} disabled={!handle.trim()}
+              className="w-full py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition disabled:opacity-40 mb-3">
+              Request access →
+            </button>
+            {platformLinks[platform] && (
+              <a href={platformLinks[platform]} target="_blank" rel="noopener noreferrer"
+                className="block text-center text-xs text-gray-500 hover:text-[#D4AF37] transition">
+                Or go to {platform} directly →
+              </a>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
