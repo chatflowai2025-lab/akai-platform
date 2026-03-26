@@ -33,7 +33,8 @@ interface AuditResult {
   headline: string;
   issues: string[];
   whatsWorking: string[];
-  quickWins: Array<{ action: string; impact: string }>;
+  quickWins: Array<{ action: string; impact: string; akaiModule?: string; akaiAction?: string }>;
+  opportunityScore?: number;
 }
 
 interface GeneratedSite {
@@ -280,8 +281,9 @@ function AuditPanel({
         recommendations?: string[]; top_recommendations?: string[];
         whatsWorking?: string[];
         criticalGaps?: string[];
-        quickWins?: Array<{ action: string; impact: string }>;
+        quickWins?: Array<{ action: string; impact: string; akaiModule?: string; akaiAction?: string }>;
         headline?: string;
+        opportunityScore?: number;
       };
       const scores = data.scores ?? {};
       const gaps = data.criticalGaps ?? [];
@@ -305,6 +307,7 @@ function AuditPanel({
         whatsWorking: data.whatsWorking ?? [],
         quickWins: data.quickWins ?? [],
         issues,
+        opportunityScore: data.opportunityScore,
       });
     } catch {
       setError("Couldn't reach the audit service. Check the URL and try again.");
@@ -360,6 +363,14 @@ function AuditPanel({
               </div>
             )}
 
+            {/* Opportunity Score — big red number */}
+            {result.opportunityScore != null && result.opportunityScore > 0 && (
+              <div className="text-center py-4 bg-red-500/5 border border-red-500/20 rounded-xl">
+                <p className="text-3xl font-black text-red-400">{result.opportunityScore}%</p>
+                <p className="text-xs text-gray-500 mt-1">of visitors estimated to leave without contacting you</p>
+              </div>
+            )}
+
             {/* Score rings — 3-col grid */}
             <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-8">
               <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-6">Site Scores</p>
@@ -402,12 +413,21 @@ function AuditPanel({
                       <p className="text-sm text-gray-200">{win.action}</p>
                       {win.impact && <p className="text-xs text-green-400 mt-1">→ {win.impact}</p>}
                     </div>
-                    <button
-                      onClick={() => navigator.clipboard?.writeText(win.action)}
-                      className="flex-shrink-0 px-3 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-gray-400 rounded-lg hover:text-[#D4AF37] hover:border-[#D4AF37]/30 transition"
-                    >
-                      Fix this
-                    </button>
+                    {win.akaiModule && win.akaiAction ? (
+                      <a
+                        href={`/${win.akaiModule.toLowerCase().replace(' ', '-')}`}
+                        className="flex-shrink-0 px-2.5 py-1 bg-[#D4AF37] text-black text-xs rounded-lg font-bold hover:opacity-90 transition"
+                      >
+                        {win.akaiAction} →
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => navigator.clipboard?.writeText(win.action)}
+                        className="flex-shrink-0 px-3 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-xs text-gray-400 rounded-lg hover:text-[#D4AF37] hover:border-[#D4AF37]/30 transition"
+                      >
+                        Fix this
+                      </button>
+                    )}
                   </li>
                 )) : result.issues.map((issue, i) => (
                   <li key={i} className="flex items-start gap-4">
