@@ -80,11 +80,8 @@ export default function WebPage() {
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       {/* ── Navbar ─────────────────────────────────────────────────────── */}
       <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f] sticky top-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-md">
-        <a href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-black text-sm">
-            A
-          </div>
-          <span className="font-bold text-white group-hover:text-[#D4AF37] transition-colors">AKAI</span>
+        <a href="/" className="flex items-center">
+          <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
         </a>
         <span className="text-white/20 mx-1">/</span>
         <span className="text-sm text-white/50">Web</span>

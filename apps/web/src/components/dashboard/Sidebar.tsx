@@ -20,11 +20,10 @@ export default function Sidebar({ activeModule, onModuleChange }: SidebarProps) 
     <aside className="w-64 bg-[#080808] border-r border-[#1f1f1f] flex flex-col min-h-screen">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-[#1f1f1f]">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-black font-black text-sm">
-            A
-          </div>
-          <span className="font-black text-lg tracking-tight">AKAI</span>
+        <div className="flex items-center">
+          <a href="/" className="flex items-center">
+            <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+          </a>
         </div>
       </div>
 

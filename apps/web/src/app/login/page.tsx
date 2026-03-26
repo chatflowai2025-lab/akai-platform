@@ -82,11 +82,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4">
-      <a href="/" className="flex items-center gap-2 mb-10">
-        <div className="w-9 h-9 rounded-lg bg-[#D4AF37] flex items-center justify-center">
-          <span className="text-black font-black text-[9px] tracking-tight">AK</span>
-        </div>
-        <span className="text-2xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+      <a href="/" className="flex items-center mb-10">
+        <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
       </a>
 
       <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-8">

@@ -6,16 +6,11 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
           {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#D4AF37] flex items-center justify-center">
-              <span className="text-black font-black text-[9px] tracking-tight">AK</span>
-            </div>
-            <div>
-              <div className="text-lg font-black tracking-tight">
-                AK<span className="text-[#F59E0B]">AI</span>
-              </div>
-              <p className="text-white/30 text-xs">Your AI Business Partner</p>
-            </div>
+          <div className="flex items-center">
+            <a href="/" className="flex items-center">
+              <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+            </a>
+            <p className="text-white/30 text-xs mt-1 ml-3">Your AI Business Partner</p>
           </div>
 
           {/* Links */}
