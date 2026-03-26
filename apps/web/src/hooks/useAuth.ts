@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
@@ -16,7 +21,10 @@ export function useAuth() {
     return unsubscribe;
   }, []);
 
-  const logout = () => signOut(auth);
+  const logout = () => {
+    const auth = getFirebaseAuth();
+    if (auth) return signOut(auth);
+  };
 
   return { user, loading, logout };
 }
