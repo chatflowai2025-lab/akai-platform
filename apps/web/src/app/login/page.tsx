@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
@@ -66,17 +67,21 @@ export default function LoginPage() {
     }
   };
 
-  const handleMicrosoft = () => {
-    const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
-    if (!clientId) {
-      setError('Microsoft login not configured');
-      return;
+  const handleMicrosoft = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const auth = getFirebaseAuth();
+      if (!auth) throw new Error('Auth not available');
+      const provider = new OAuthProvider('microsoft.com');
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
+    } finally {
+      setLoading(false);
     }
-    const nonce = crypto.randomUUID();
-    sessionStorage.setItem('ms_oauth_state', nonce);
-    const redirectUri = encodeURIComponent(process.env.NEXT_PUBLIC_MICROSOFT_REDIRECT_URI || 'https://getakai.ai');
-    const scope = encodeURIComponent('openid profile email');
-    window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&prompt=select_account&state=${nonce}`;
   };
 
   return (
