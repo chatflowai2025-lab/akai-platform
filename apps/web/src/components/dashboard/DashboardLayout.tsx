@@ -4,6 +4,7 @@ import { useEffect, useRef, createContext, useContext, useState, useCallback } f
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Sidebar from './Sidebar';
+import { useAuth } from '@/hooks/useAuth';
 import type { ChatMessage } from '@/lib/shared-types';
 
 // ── Chat context — lets any child button inject a message into AK ─────────
@@ -38,8 +39,29 @@ function InlineChatPanel() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const { user } = useAuth();
+
   const sendRaw = useCallback(async (text: string) => {
     if (!text.trim() || loading) return;
+
+    // Feedback shortcut — only for Aaron
+    if (text.toLowerCase().startsWith('feedback:') && user?.email === 'mrakersten@gmail.com') {
+      const fb = text.slice(9).trim();
+      const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
+      setMessages(p => [...p, userMsg]);
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feedback: fb, userEmail: user.email }),
+        });
+        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: '✅ Feedback sent to MM. I\'ll fix it.', timestamp: new Date().toISOString() }]);
+      } catch {
+        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Failed to send feedback — try again.', timestamp: new Date().toISOString() }]);
+      }
+      return;
+    }
+
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -156,7 +178,7 @@ function InlineChatPanel() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && send()}
-              placeholder="Ask AK anything..."
+              placeholder={user?.email === 'mrakersten@gmail.com' ? 'Ask AK or type feedback: ...' : 'Ask AK anything...'}
               className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition min-w-0"
             />
             <button
