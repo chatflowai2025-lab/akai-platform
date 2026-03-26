@@ -82,7 +82,7 @@ interface ChatRequest {
 }
 
 // ── Smart mock response engine ────────────────────────────────────────────────
-function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}): string {
+async function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}): Promise<string> {
   const msg = message.toLowerCase().trim();
   const lastAssistant = history.filter(h => h.role === 'assistant').pop()?.content?.toLowerCase() ?? '';
   const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
@@ -348,7 +348,52 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
     return `✅ **${change}** has been rolled back.\n\nYour site is restored to the version before that change was made. Everything is live.`;
   }
 
+  // ── Lead count / pipeline ────────────────────────────────────────────────
+  if (msg.includes('how many leads') || msg.includes('lead count') || msg.includes('my pipeline') || (msg.includes('leads') && (msg.includes('how many') || msg.includes('total') || msg.includes('count')))) {
+    // Attempt Railway fetch
+    try {
+      const leadsRes = await fetch('https://api-server-production-2a27.up.railway.app/api/leads', {
+        headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' },
+        signal: AbortSignal.timeout(4000),
+      });
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        const leads: Array<{ status?: string }> = leadsData.leads ?? [];
+        const total = leads.length;
+        const booked = leads.filter((l) => l.status === 'booked').length;
+        const qualified = leads.filter((l) => l.status === 'qualified' || l.status === 'interested').length;
+        return `Your pipeline: **${total} total leads** captured.\n\n• 📅 Meetings booked: **${booked}**\n• ✅ Qualified: **${qualified}**\n• 🔄 In progress: **${total - booked - qualified}**\n\nHead to the **Sales module** to view and manage the full list.`;
+      }
+    } catch {
+      // fall through to default
+    }
+    return "I couldn't connect to your Sales pipeline right now. Head to the **Sales module** to see your current lead count and status.";
+  }
+
+  // ── Revenue ───────────────────────────────────────────────────────────────
+  if (msg.includes('revenue') || msg.includes('how much have we made') || msg.includes('how much money') || (msg.includes('made') && msg.includes('money'))) {
+    return "Your active plan is tracked in Finance. Based on your setup:\n\n• **Plan revenue** — check Settings for your current plan tier\n• **Client billing** — log payments in the Finance section\n• **Pipeline value** — depends on your lead conversion rate\n\nFor a full breakdown, head to **Settings → Billing** or ask me about a specific number you want to track.";
+  }
+
+  // ── Daily brief ───────────────────────────────────────────────────────────
+  if (msg.includes('what should i do today') || msg.includes('daily brief') || msg.includes('my priorities') || msg.includes('where should i start')) {
+    return "**Today's brief:**\n\n1. 📞 **Sales** — check if Sophie has qualified any new leads overnight\n2. 🎯 **Ads** — review your live campaign performance and adjust budget if needed\n3. 🤖 **Recruit** — screen any new applicants in your pipeline\n\nIf you haven't set up Sophie yet, that's priority #1 — she'll compound results every day she's running. Want to launch a campaign now?";
+  }
+
+  // ── Help / what can you do ────────────────────────────────────────────────
+  if (msg === 'help' || msg.includes('what can you do') || msg.includes('what do you do') || msg.includes('your capabilities') || msg.includes('what modules')) {
+    return "I'm AK — your AI COO. Here's what AKAI does:\n\n📞 **Sales** — Sophie AI makes outbound calls, qualifies leads, books meetings 24/7\n🎯 **Ads** — Build Google & Meta ad campaigns with AI-written copy in 30 seconds\n🤖 **Recruit** — Find candidates, screen resumes, post jobs to SEEK/LinkedIn/Indeed\n🌐 **Web** — Audit your site, generate copy, fix SEO issues\n✉️ **Email Guard** — Monitor inbox, auto-generate proposals, set rules\n📱 **Social** — Write content for Instagram, LinkedIn, Facebook & X\n\nWhat do you need moving?";
+  }
+
   // ── Ads module ───────────────────────────────────────────────────────────
+  if (msg.includes('launch an ad') || msg === 'ads' || (msg.includes('ads') && !msg.includes('google') && !msg.includes('meta') && !msg.includes('facebook') && !msg.includes('campaign') && msg.length < 10)) {
+    return "Let's build your Google Ads campaign. I'll walk you through goal → audience → budget → AI-generated ad copy → launch. Head to the **Ads module** to get started.";
+  }
+
+  if (msg.includes('ad copy') || msg.includes('write ads') || msg.includes('write my ads')) {
+    return "The Ads module generates 3 variations of Google-optimised ad copy using AI. Go to **Ads → New Campaign** and I'll write them for you.";
+  }
+
   if (msg.includes('google ads') || msg.includes('build a campaign') || msg.includes('ads campaign') || (msg.includes('ads') && msg.includes('build'))) {
     return "The Ads module builds full Google and Meta campaigns in seconds.\n\n**Here's how it works:**\n1. Enter your business name and campaign goal (leads, sales, or awareness)\n2. Set your daily budget with the slider ($5–$200/day)\n3. Add target audience and location\n4. Hit **Build Campaign** — AI generates 3 ad groups with headlines, descriptions, and keywords\n5. Review the preview, then **Launch Campaign**\n\nWant me to help you fill in the details? Tell me your business name and what you're trying to achieve.";
   }
@@ -476,7 +521,7 @@ export async function POST(req: NextRequest) {
       const text = response.content[0].type === 'text' ? response.content[0].text : '';
       return NextResponse.json({ message: text });
     } else {
-      return NextResponse.json({ message: getMockResponse(message, history, userContext) });
+      return NextResponse.json({ message: await getMockResponse(message, history, userContext) });
     }
   } catch (err: unknown) {
     console.error('[/api/chat]', err);

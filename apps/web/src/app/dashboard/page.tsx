@@ -15,6 +15,7 @@ interface SalesStats {
   meetings: number;
   activeCampaigns: number;
   loading: boolean;
+  lastUpdated: Date | null;
 }
 
 // ── Quick stat card ──────────────────────────────────────────────────────────
@@ -126,6 +127,7 @@ export default function DashboardPage() {
     meetings: 0,
     activeCampaigns: 0,
     loading: true,
+    lastUpdated: null,
   });
 
   // Fetch real sales stats from Railway API
@@ -179,12 +181,13 @@ export default function DashboardPage() {
             meetings: meetingsCount,
             activeCampaigns,
             loading: false,
+            lastUpdated: new Date(),
           });
         }
       } catch {
         // Graceful fallback — show zeros, don't crash
         if (!cancelled) {
-          setStats({ leads: 0, calls: 0, meetings: 0, activeCampaigns: 0, loading: false });
+          setStats({ leads: 0, calls: 0, meetings: 0, activeCampaigns: 0, loading: false, lastUpdated: new Date() });
         }
       }
     }
@@ -246,9 +249,16 @@ export default function DashboardPage() {
 
             {/* Quick stats */}
             <section>
-              <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
-                Sales overview
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                  Sales overview
+                </h2>
+                {stats.lastUpdated && (
+                  <span className="text-[11px] text-gray-600">
+                    Updated {stats.lastUpdated.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <QuickStat
                   label="Leads captured"

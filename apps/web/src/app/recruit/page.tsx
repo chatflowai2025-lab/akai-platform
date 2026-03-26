@@ -955,11 +955,221 @@ function PostJobTab() {
   );
 }
 
+// ── Screen Applicants Tab ─────────────────────────────────────────────────────
+function ScreenApplicantsTab() {
+  const [jobTitle, setJobTitle] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
+  const [resumeText, setResumeText] = useState('');
+  const [screening, setScreening] = useState(false);
+  const [result, setResult] = useState<ScreeningResult | null>(null);
+  const [error, setError] = useState('');
+
+  const handleScreen = async () => {
+    if (!jobTitle.trim() || !resumeText.trim()) return;
+    setScreening(true);
+    setError('');
+    setResult(null);
+    try {
+      const res = await fetch('/api/recruit/screen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobTitle: jobTitle.trim(),
+          industry: 'General',
+          candidateName: 'Applicant',
+          resumeText: resumeText.trim(),
+          jobDescription: jobDescription.trim() || undefined,
+          requirements: jobDescription.trim()
+            ? jobDescription.trim().split('\n').filter(l => l.trim().length > 5).slice(0, 8)
+            : [],
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Screening failed');
+
+      const score: number = data.score ?? 50;
+      const rec: 'advance' | 'review' | 'reject' = data.recommendation ?? 'review';
+      setResult({
+        candidateName: 'Applicant',
+        score,
+        strengths: data.strengths?.length
+          ? data.strengths
+          : data.reasons?.filter((r: string) => !r.toLowerCase().includes('missing') && !r.toLowerCase().includes('limited')) ?? [],
+        gaps: data.gaps?.length
+          ? data.gaps
+          : data.reasons?.filter((r: string) => r.toLowerCase().includes('missing') || r.toLowerCase().includes('limited') || r.toLowerCase().includes('gap')) ?? [],
+        recommendation: rec === 'advance' ? 'Interview' : rec === 'review' ? 'Consider' : 'Pass',
+        summary: data.nextStep || 'Review completed.',
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Screening failed. Try again.');
+    } finally {
+      setScreening(false);
+    }
+  };
+
+  const recColor = (rec: ScreeningResult['recommendation']) => {
+    if (rec === 'Interview') return 'text-green-400 bg-green-400/10 border-green-400/20';
+    if (rec === 'Consider') return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    return 'text-red-400 bg-red-400/10 border-red-400/20';
+  };
+
+  const scoreColor = (s: number) => {
+    if (s >= 80) return 'text-green-400';
+    if (s >= 60) return 'text-[#D4AF37]';
+    return 'text-red-400';
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 space-y-4">
+        <div>
+          <h2 className="text-sm font-bold text-white mb-1">Screen an Applicant</h2>
+          <p className="text-xs text-gray-500">Paste the resume/CV text and optionally the job description — AI scores the match and gives a hire recommendation.</p>
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">Job title *</label>
+          <input
+            value={jobTitle}
+            onChange={e => setJobTitle(e.target.value)}
+            placeholder="e.g. Senior Software Engineer"
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">Job description / requirements <span className="text-gray-600">(optional but improves accuracy)</span></label>
+          <textarea
+            value={jobDescription}
+            onChange={e => setJobDescription(e.target.value)}
+            placeholder="Paste the job description or key requirements here..."
+            rows={4}
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">Resume / CV text *</label>
+          <textarea
+            value={resumeText}
+            onChange={e => setResumeText(e.target.value)}
+            placeholder="Paste the candidate's resume or CV here..."
+            rows={8}
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none font-mono text-xs"
+          />
+        </div>
+
+        {error && <p className="text-xs text-red-400">{error}</p>}
+
+        <button
+          onClick={handleScreen}
+          disabled={!jobTitle.trim() || !resumeText.trim() || screening}
+          className="px-5 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center gap-2"
+        >
+          {screening ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              Screening...
+            </>
+          ) : '🤖 Screen Applicant'}
+        </button>
+      </div>
+
+      {/* Result card */}
+      {result && (
+        <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-white font-bold text-base">Screening Result</h3>
+            <span className={`text-xs px-3 py-1.5 rounded-full border font-bold ${recColor(result.recommendation)}`}>
+              {result.recommendation === 'Interview' ? '✅ Hire' : result.recommendation === 'Consider' ? '⚠️ Maybe' : '❌ Pass'}
+            </span>
+          </div>
+
+          {/* Score meter */}
+          <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Match Score</p>
+              <p className={`text-4xl font-black ${scoreColor(result.score)}`}>{result.score}%</p>
+            </div>
+            <div className="w-full h-2 bg-[#2a2a2a] rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  result.score >= 80 ? 'bg-green-400' : result.score >= 60 ? 'bg-[#D4AF37]' : 'bg-red-400'
+                }`}
+                style={{ width: `${result.score}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] text-gray-600 mt-1">
+              <span>0%</span>
+              <span>Pass ← 60 → Consider ← 80 → Hire</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          {/* Strengths */}
+          {result.strengths.length > 0 && (
+            <div>
+              <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-2">✅ Strengths</p>
+              <ul className="space-y-1.5">
+                {result.strengths.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
+                    <span className="text-green-400 mt-0.5 flex-shrink-0">•</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Gaps */}
+          {result.gaps.length > 0 && (
+            <div>
+              <p className="text-xs text-orange-400 font-semibold uppercase tracking-wider mb-2">⚠️ Gaps</p>
+              <ul className="space-y-1.5">
+                {result.gaps.map((g, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
+                    <span className="text-orange-400 mt-0.5 flex-shrink-0">•</span>
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Next step */}
+          <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Next Step</p>
+            <p className="text-sm text-white leading-relaxed">{result.summary}</p>
+          </div>
+
+          {/* Reset */}
+          <button
+            onClick={() => { setResult(null); setResumeText(''); setJobDescription(''); }}
+            className="text-xs text-gray-500 hover:text-white transition"
+          >
+            ← Screen another applicant
+          </button>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!result && !screening && (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="text-5xl mb-4">🤖</div>
+          <p className="text-gray-500 text-sm">Paste a resume above to get an AI score</p>
+          <p className="text-gray-600 text-xs mt-1">Returns: match score · strengths · gaps · hire recommendation</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function RecruitPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'find' | 'post'>('find');
+  const [activeTab, setActiveTab] = useState<'find' | 'post' | 'screen'>('find');
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -974,7 +1184,7 @@ export default function RecruitPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout noChat>
       <div className="flex flex-col h-full overflow-hidden">
         {/* Header */}
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0">
@@ -989,11 +1199,12 @@ export default function RecruitPage() {
         <div className="flex border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6">
           {[
             { key: 'find', label: '🔍 Find Candidates' },
+            { key: 'screen', label: '🤖 Screen Applicants' },
             { key: 'post', label: '📋 Post a Job' },
           ].map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key as 'find' | 'post')}
+              onClick={() => setActiveTab(tab.key as 'find' | 'post' | 'screen')}
               className={`px-4 py-3 text-sm font-semibold border-b-2 transition mr-2 ${
                 activeTab === tab.key
                   ? 'border-[#D4AF37] text-[#D4AF37]'
@@ -1007,7 +1218,7 @@ export default function RecruitPage() {
 
         {/* Tab content */}
         <div className="flex-1 overflow-hidden flex flex-col">
-          {activeTab === 'find' ? <FindCandidatesTab /> : <PostJobTab />}
+          {activeTab === 'find' ? <FindCandidatesTab /> : activeTab === 'screen' ? <ScreenApplicantsTab /> : <PostJobTab />}
         </div>
       </div>
     </DashboardLayout>

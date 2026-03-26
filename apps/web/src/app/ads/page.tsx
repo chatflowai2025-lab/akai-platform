@@ -696,7 +696,7 @@ export default function AdsPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout noChat>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <h1 className="text-xl font-black text-white">Ads</h1>
