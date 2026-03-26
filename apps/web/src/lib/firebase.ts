@@ -45,3 +45,10 @@ export function getFirebaseDb(): Firestore | null {
 export const auth = getFirebaseAuth() as Auth;
 export const db = getFirebaseDb() as Firestore;
 export default getFirebaseApp() as unknown as FirebaseApp;
+
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
+
+export function getFirebaseStorage(): FirebaseStorage | null {
+  const app = getFirebaseApp();
+  return app ? getStorage(app) : null;
+}

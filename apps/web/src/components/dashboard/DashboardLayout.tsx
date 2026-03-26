@@ -3,8 +3,12 @@
 import { useEffect, useRef, createContext, useContext, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { getFirebaseStorage } from '@/lib/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
 import { useAuth } from '@/hooks/useAuth';
+import { getFirebaseStorage } from '@/lib/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import type { ChatMessage } from '@/lib/shared-types';
 
 // ── Chat context — lets any child button inject a message into AK ─────────
@@ -32,6 +36,8 @@ function InlineChatPanel() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -40,6 +46,39 @@ function InlineChatPanel() {
   }, [messages]);
 
   const { user } = useAuth();
+
+  const handleFileUpload = async (file: File) => {
+    if (!user) return;
+    setUploading(true);
+    const storage = getFirebaseStorage();
+    if (!storage) { setUploading(false); return; }
+    try {
+      const path = `uploads/${user.uid}/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, path);
+      const task = uploadBytesResumable(storageRef, file);
+      await new Promise<void>((resolve, reject) => {
+        task.on('state_changed', null, reject, resolve);
+      });
+      const url = await getDownloadURL(storageRef);
+      const fileMsg: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: `📎 Attached: [${file.name}](${url})`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages(p => [...p, fileMsg]);
+      setMessages(p => [...p, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `Got it — **${file.name}** is uploaded and only visible to you. What would you like me to do with it?`,
+        timestamp: new Date().toISOString(),
+      }]);
+    } catch {
+      setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Upload failed — try again.', timestamp: new Date().toISOString() }]);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const sendRaw = useCallback(async (text: string) => {
     if (!text.trim() || loading) return;
