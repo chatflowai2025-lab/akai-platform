@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/dashboard/Sidebar';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -54,16 +55,23 @@ function QuickAction({
   label,
   description,
   href,
+  chatPrompt,
 }: {
   icon: string;
   label: string;
   description: string;
   href: string;
+  chatPrompt?: string;
 }) {
+  const { sendMessage } = useDashboardChat();
+  const handleClick = chatPrompt
+    ? (e: React.MouseEvent) => { e.preventDefault(); sendMessage(chatPrompt); }
+    : undefined;
   return (
     <a
       href={href}
-      className="flex items-center gap-4 bg-[#111] border border-[#1f1f1f] rounded-2xl p-4 hover:border-[#D4AF37]/30 hover:bg-[#141414] transition-colors group"
+      onClick={handleClick}
+      className="flex items-center gap-4 bg-[#111] border border-[#1f1f1f] rounded-2xl p-4 hover:border-[#D4AF37]/30 hover:bg-[#141414] transition-colors group cursor-pointer"
     >
       <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center text-xl flex-shrink-0 group-hover:bg-[#D4AF37]/20 transition-colors">
         {icon}
@@ -72,7 +80,7 @@ function QuickAction({
         <p className="text-sm font-bold text-white">{label}</p>
         <p className="text-xs text-gray-500 mt-0.5">{description}</p>
       </div>
-      <span className="text-gray-600 group-hover:text-[#D4AF37] transition-colors text-sm">↗</span>
+      <span className="text-gray-600 group-hover:text-[#D4AF37] transition-colors text-sm">→</span>
     </a>
   );
 }
@@ -90,12 +98,12 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
         <p className="text-gray-600 text-xs mt-2 max-w-[260px]">
           Launch your first campaign to start generating leads.
         </p>
-        <a
-          href="/onboard"
+        <button
+          onClick={() => document.querySelector('input[placeholder="Ask AK anything..."]')?.dispatchEvent(new Event('focus'))}
           className="mt-6 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
         >
-          Launch first campaign →
-        </a>
+          Ask AK to launch campaign →
+        </button>
       </div>
     );
   }
@@ -261,7 +269,7 @@ export default function SalesPage() {
               <span className="text-xs text-green-400 font-semibold">Sophie AI live</span>
             </div>
             <a
-              href="/onboard"
+              href="#"
               className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity"
             >
               Configure Campaign →
@@ -317,19 +325,22 @@ export default function SalesPage() {
                 icon="🚀"
                 label="Launch Campaign"
                 description="Start a new outbound sales campaign"
-                href="/onboard"
+                href="#"
+                chatPrompt="I want to launch a new outbound sales campaign"
               />
               <QuickAction
                 icon="👥"
                 label="View All Leads"
                 description="See your full lead pipeline and status"
                 href="#leads"
+                chatPrompt="Show me my lead pipeline"
               />
               <QuickAction
                 icon="🤖"
                 label="Configure Sophie AI"
                 description="Tune your AI sales agent's voice & script"
-                href="/settings"
+                href="#"
+                chatPrompt="I want to configure my Sophie AI sales agent"
               />
             </div>
           </section>
@@ -342,7 +353,7 @@ export default function SalesPage() {
               </h2>
               {leads.length > 0 && (
                 <a
-                  href="/onboard"
+                  href="#"
                   className="text-xs text-[#D4AF37] hover:text-[#F59E0B] transition-colors"
                 >
                   Configure →
@@ -371,16 +382,17 @@ export default function SalesPage() {
                 </p>
               </div>
               <a
-                href="/onboard"
+                href="#"
+                onClick={(e) => { e.preventDefault(); document.querySelector('input[placeholder="Ask AK anything..."]')?.focus(); }}
                 className="relative flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
               >
-                Manage Campaign →
+                Ask AK →
               </a>
             </div>
           </section>
 
         </div>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

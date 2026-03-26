@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/dashboard/Sidebar';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 
@@ -223,6 +223,6 @@ export default function EmailGuardPage() {
 
         </div>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

@@ -1,11 +1,10 @@
 'use client';
 
-import Sidebar from '@/components/dashboard/Sidebar';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 export default function SettingsPage() {
   return (
-    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
-      <Sidebar />
+    <DashboardLayout>
       <main className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <div className="text-5xl mb-4">⚙️</div>
@@ -13,6 +12,6 @@ export default function SettingsPage() {
           <p className="text-gray-500 text-sm">Coming soon — account and workspace configuration.</p>
         </div>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

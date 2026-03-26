@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/dashboard/Sidebar';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function RecruitPage() {
@@ -22,8 +22,7 @@ export default function RecruitPage() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
-      <Sidebar />
+    <DashboardLayout>
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
@@ -40,6 +39,6 @@ export default function RecruitPage() {
           </div>
         </div>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }
