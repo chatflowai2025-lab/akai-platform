@@ -24,7 +24,12 @@ async function sendEmail(to: string, subject: string, html: string, resendKey: s
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, website, phone, businessType, audits } = body;
+    const { name, email, phone, businessType, audits } = body;
+    // Normalise website URL — accept www.example.com or example.com without https://
+    const rawWebsite = body.website || '';
+    const website = rawWebsite && !/^https?:\/\//i.test(rawWebsite)
+      ? `https://${rawWebsite.replace(/^www\./i, 'www.')}`
+      : rawWebsite;
 
     if (!email || !website) {
       return NextResponse.json({ error: 'Email and website are required' }, { status: 400 });
@@ -35,10 +40,22 @@ export async function POST(req: NextRequest) {
       ? audits.join(', ')
       : 'General audit';
 
+    // Always notify via Telegram regardless of Resend availability
+    try {
+      await fetch(`https://api.telegram.org/bot8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: '8320254721',
+          text: `🩺 *New Health Check Lead!*\n\n👤 ${name || 'Unknown'}\n📧 ${email}\n📞 ${phone || 'n/a'}\n🌐 ${website}\n🏢 ${businessType || 'n/a'}\n✅ Audits: ${auditList}`,
+          parse_mode: 'Markdown',
+        }),
+      });
+    } catch { /* non-fatal */ }
+
     if (!resendKey) {
-      // Mock mode
+      // Mock mode — Telegram already sent
       console.log(`[health-check] Mock mode — lead from ${email} (${name}), site: ${website}`);
-      console.log(`[health-check] Audits requested: ${auditList}`);
       return NextResponse.json({ success: true, message: 'Health check booked (mock)' });
     }
 
