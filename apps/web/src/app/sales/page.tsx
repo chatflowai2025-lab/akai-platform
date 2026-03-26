@@ -150,13 +150,8 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
                 : 'New lead captured'}
             </p>
             {lead.created_at && (
-              <p className="text-[11px] text-gray-600 mt-0.5">
-                {new Date(lead.created_at).toLocaleDateString('en-AU', {
-                  day: 'numeric',
-                  month: 'short',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+              <p className="text-[11px] text-gray-600 mt-0.5" suppressHydrationWarning>
+                {(() => { try { return new Date(lead.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch { return ''; } })()}
               </p>
             )}
           </div>
