@@ -53,7 +53,7 @@ function InlineChatPanel() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, state: chatState }),
+        body: JSON.stringify({ message: text, state: chatState, history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })) }),
       });
       const data = await res.json();
       if (data.state) setChatState(data.state);
