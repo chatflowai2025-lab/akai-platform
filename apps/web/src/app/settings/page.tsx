@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb, getFirebaseAuth } from '@/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -82,6 +83,29 @@ export default function SettingsPage() {
   // Plan
   const [planTier, setPlanTier] = useState<string>('trial');
 
+  // Connected Accounts
+  interface ConnectedAccount {
+    connected: boolean;
+    identifier?: string; // email or handle
+  }
+  const [connectedAccounts, setConnectedAccounts] = useState<{
+    microsoft: ConnectedAccount;
+    gmail: ConnectedAccount;
+    googleCalendar: ConnectedAccount;
+    instagram: ConnectedAccount;
+    linkedin: ConnectedAccount;
+    facebook: ConnectedAccount;
+    x: ConnectedAccount;
+  }>({
+    microsoft: { connected: false },
+    gmail: { connected: false },
+    googleCalendar: { connected: false },
+    instagram: { connected: false },
+    linkedin: { connected: false },
+    facebook: { connected: false },
+    x: { connected: false },
+  });
+
   // Email Guard
   const [webhookCopied, setWebhookCopied] = useState(false);
   const [forwardCopied, setForwardCopied] = useState(false);
@@ -137,6 +161,60 @@ export default function SettingsPage() {
 
         // Plan
         setPlanTier(data.plan || data.planTier || 'trial');
+
+        // Connected Accounts — inbox integrations
+        const inboxConn = data.inboxConnection || {};
+        const gmailConn = data.gmailConnection || {};
+
+        // Load Google Calendar from integrations sub-doc
+        let gcalConnected = false;
+        let gcalEmail: string | undefined;
+        try {
+          const gcalSnap = await getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar'));
+          if (gcalSnap.exists()) {
+            const gcal = gcalSnap.data();
+            gcalConnected = gcal.connected === true || !!gcal.accessToken;
+            gcalEmail = gcal.email || undefined;
+          }
+        } catch { /* ignore */ }
+
+        // Load social connections
+        const socialMap: Record<string, ConnectedAccount> = {
+          instagram: { connected: false },
+          linkedin: { connected: false },
+          facebook: { connected: false },
+          x: { connected: false },
+        };
+        try {
+          const socialSnap = await getDocs(collection(db, 'users', user.uid, 'socialConnections'));
+          socialSnap.forEach(d => {
+            const platform = d.id;
+            const sd = d.data();
+            if (platform in socialMap) {
+              const isConnected = sd.connected === true || sd.waitlisted === true || sd.requested === true;
+              socialMap[platform] = {
+                connected: isConnected,
+                identifier: sd.handle || sd.profileUrl || sd.email || undefined,
+              };
+            }
+          });
+        } catch { /* ignore */ }
+
+        setConnectedAccounts({
+          microsoft: {
+            connected: inboxConn.connected === true || !!inboxConn.email,
+            identifier: inboxConn.email || undefined,
+          },
+          gmail: {
+            connected: gmailConn.connected === true || !!gmailConn.email,
+            identifier: gmailConn.email || undefined,
+          },
+          googleCalendar: { connected: gcalConnected, identifier: gcalEmail },
+          instagram: socialMap.instagram,
+          linkedin: socialMap.linkedin,
+          facebook: socialMap.facebook,
+          x: socialMap.x,
+        });
       } catch (err) {
         console.error('[SETTINGS] load error', err);
       }
@@ -324,6 +402,107 @@ export default function SettingsPage() {
               'Save Business Profile'
             )}
           </button>
+        </Section>
+
+        {/* Connected Accounts */}
+        <Section title="Connected Accounts">
+          <p className="text-sm text-gray-400">Integration status for all connected services.</p>
+          <div className="divide-y divide-[#1f1f1f]">
+            {[
+              {
+                key: 'microsoft',
+                label: 'Microsoft Outlook',
+                icon: '📧',
+                account: connectedAccounts.microsoft,
+                connectHref: '/email-guard',
+                disconnectHref: '/email-guard',
+              },
+              {
+                key: 'gmail',
+                label: 'Gmail',
+                icon: '📩',
+                account: connectedAccounts.gmail,
+                connectHref: '/email-guard',
+                disconnectHref: '/email-guard',
+              },
+              {
+                key: 'googleCalendar',
+                label: 'Google Calendar',
+                icon: '📅',
+                account: connectedAccounts.googleCalendar,
+                connectHref: '/calendar',
+                disconnectHref: '/calendar',
+              },
+              {
+                key: 'instagram',
+                label: 'Instagram',
+                icon: '📸',
+                account: connectedAccounts.instagram,
+                connectHref: '/social',
+                disconnectHref: '/social',
+              },
+              {
+                key: 'linkedin',
+                label: 'LinkedIn',
+                icon: '💼',
+                account: connectedAccounts.linkedin,
+                connectHref: '/social',
+                disconnectHref: '/social',
+              },
+              {
+                key: 'facebook',
+                label: 'Facebook',
+                icon: '👥',
+                account: connectedAccounts.facebook,
+                connectHref: '/social',
+                disconnectHref: '/social',
+              },
+              {
+                key: 'x',
+                label: 'X (Twitter)',
+                icon: '𝕏',
+                account: connectedAccounts.x,
+                connectHref: '/social',
+                disconnectHref: '/social',
+              },
+            ].map(item => (
+              <div key={item.key} className="flex items-center gap-4 py-3">
+                <span className="text-xl w-8 flex-shrink-0">{item.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{item.label}</p>
+                  {item.account.connected && item.account.identifier && (
+                    <p className="text-xs text-gray-500 truncate">{item.account.identifier}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {item.account.connected ? (
+                    <>
+                      <span className="flex items-center gap-1.5 text-xs text-green-400 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                        Connected
+                      </span>
+                      <Link
+                        href={item.disconnectHref}
+                        className="text-xs text-gray-500 hover:text-red-400 transition underline underline-offset-2"
+                      >
+                        Disconnect
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs text-gray-600">Not connected</span>
+                      <Link
+                        href={item.connectHref}
+                        className="text-xs text-[#D4AF37] hover:text-[#c4a030] transition font-medium"
+                      >
+                        Connect →
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </Section>
 
         {/* Plan Info */}

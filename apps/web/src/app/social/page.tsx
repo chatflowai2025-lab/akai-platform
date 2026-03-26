@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { getFirebaseDb } from '@/lib/firebase';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 interface PlatformPost {
   platform: string;
@@ -63,65 +65,36 @@ function formatScheduledDate(iso: string): string {
   return d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-// ── Platform connect instructions ─────────────────────────────────────────────
-const CONNECT_INSTRUCTIONS: Record<string, { title: string; icon: string; color: string; steps: string[]; cta: string; ctaUrl: string }> = {
-  Instagram: {
-    title: 'Connect Instagram',
-    icon: '📸',
-    color: 'from-pink-500 to-purple-500',
-    steps: [
-      'Go to Meta Business Suite → business.facebook.com',
-      'Add your Instagram account under "Accounts"',
-      'In AKAI Settings → paste your Instagram Business Account ID',
-      'Grant "instagram_basic" and "instagram_content_publish" permissions',
-    ],
-    cta: 'Open Meta Business Suite',
-    ctaUrl: 'https://business.facebook.com',
-  },
-  LinkedIn: {
-    title: 'Connect LinkedIn',
-    icon: '💼',
-    color: 'from-blue-600 to-blue-400',
-    steps: [
-      'Go to LinkedIn Campaign Manager → linkedin.com/campaignmanager',
-      'Under Account Assets → find your Page ID',
-      'In AKAI Settings → paste your LinkedIn Page ID',
-      'AKAI will use the LinkedIn API to post on your behalf',
-    ],
-    cta: 'Open LinkedIn Campaign Manager',
-    ctaUrl: 'https://www.linkedin.com/campaignmanager',
-  },
-  Facebook: {
-    title: 'Connect Facebook',
-    icon: '👥',
-    color: 'from-blue-500 to-indigo-500',
-    steps: [
-      'Go to Meta Business Suite → business.facebook.com',
-      'Select your Facebook Page',
-      'Under Settings → Page Access → grant AKAI access',
-      'In AKAI Settings → paste your Facebook Page ID',
-    ],
-    cta: 'Open Meta Business Suite',
-    ctaUrl: 'https://business.facebook.com',
-  },
-  'X (Twitter)': {
-    title: 'Connect X (Twitter)',
-    icon: '𝕏',
-    color: 'from-gray-200 to-gray-400',
-    steps: [
-      'Go to developer.twitter.com/en/portal',
-      'Create a project and app (or use existing)',
-      'Under "User authentication settings" → enable OAuth 2.0',
-      'Copy your API Key and Secret → paste in AKAI Settings',
-    ],
-    cta: 'Open X Developer Portal',
-    ctaUrl: 'https://developer.twitter.com/en/portal',
-  },
-};
+// ── Coming Soon Modals ────────────────────────────────────────────────────────
 
-function ConnectModal({ platform, onClose }: { platform: string; onClose: () => void }) {
-  const info = CONNECT_INSTRUCTIONS[platform];
-  if (!info) return null;
+interface WaitlistState {
+  submitted: boolean;
+  loading: boolean;
+  error: string;
+}
+
+function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
+  const [handle, setHandle] = useState('');
+  const [state, setState] = useState<WaitlistState>({ submitted: false, loading: false, error: '' });
+
+  const handleJoin = async () => {
+    if (!handle.trim()) return;
+    setState(s => ({ ...s, loading: true, error: '' }));
+    try {
+      const db = getFirebaseDb();
+      if (!db) throw new Error('Database unavailable');
+      const cleanHandle = handle.trim().replace(/^@/, '');
+      await setDoc(
+        doc(db, 'users', uid, 'socialConnections', 'x'),
+        { handle: cleanHandle, waitlisted: true, createdAt: serverTimestamp() },
+        { merge: true }
+      );
+      setState({ submitted: true, loading: false, error: '' });
+    } catch {
+      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
@@ -129,42 +102,300 @@ function ConnectModal({ platform, onClose }: { platform: string; onClose: () => 
         className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center text-xl`}>
-              {info.icon}
+            <div className="w-10 h-10 rounded-xl bg-black border border-white/10 flex items-center justify-center text-xl font-bold text-white">𝕏</div>
+            <div>
+              <h2 className="text-white font-bold text-lg">Connect X — Coming Soon</h2>
+              <p className="text-xs text-gray-500">X integration is in beta</p>
             </div>
-            <h2 className="text-white font-bold text-lg">{info.title}</h2>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
         </div>
 
-        {/* Steps */}
-        <ol className="space-y-3 mb-6">
-          {info.steps.map((step, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-bold flex items-center justify-center mt-0.5">
-                {i + 1}
-              </span>
-              <span className="text-sm text-gray-300 leading-relaxed">{step}</span>
-            </li>
-          ))}
-        </ol>
+        {state.submitted ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="text-white font-semibold mb-1">You're on the waitlist!</p>
+            <p className="text-sm text-gray-400">We'll notify you at <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> when X integration is ready.</p>
+            <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
+              Enter your X handle and we'll notify you when it's ready. X integration is currently in beta — OAuth is coming soon.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
+                <span className="text-gray-500 text-sm">@</span>
+                <input
+                  type="text"
+                  value={handle}
+                  onChange={e => setHandle(e.target.value)}
+                  placeholder="yourhandle"
+                  className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
+                />
+              </div>
+              {state.error && <p className="text-xs text-red-400">{state.error}</p>}
+              <button
+                onClick={handleJoin}
+                disabled={!handle.trim() || state.loading}
+                className="w-full py-3 rounded-xl bg-white text-black text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {state.loading ? <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : null}
+                Join Waitlist
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
-        {/* CTA */}
-        <a
-          href={info.ctaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`block w-full text-center py-3 rounded-xl bg-gradient-to-r ${info.color} text-white font-bold text-sm hover:opacity-90 transition mb-3`}
-        >
-          {info.cta} →
-        </a>
-        <p className="text-center text-xs text-gray-600">
-          After setup, paste your credentials in{' '}
-          <a href="/settings" className="text-[#D4AF37] hover:underline">AKAI Settings</a>
-        </p>
+function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
+  const [handle, setHandle] = useState('');
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState<WaitlistState>({ submitted: false, loading: false, error: '' });
+
+  const handleRequest = async () => {
+    if (!handle.trim() || !email.trim()) return;
+    setState(s => ({ ...s, loading: true, error: '' }));
+    try {
+      const db = getFirebaseDb();
+      if (!db) throw new Error('Database unavailable');
+      const cleanHandle = handle.trim().replace(/^@/, '');
+      await setDoc(
+        doc(db, 'users', uid, 'socialConnections', 'instagram'),
+        { handle: cleanHandle, email: email.trim(), requested: true, waitlisted: true, createdAt: serverTimestamp() },
+        { merge: true }
+      );
+      setState({ submitted: true, loading: false, error: '' });
+    } catch {
+      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-xl">📸</div>
+            <div>
+              <h2 className="text-white font-bold text-lg">Connect Instagram</h2>
+              <p className="text-xs text-gray-500">Meta OAuth — coming soon</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+        </div>
+
+        {state.submitted ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="text-white font-semibold mb-1">Access requested!</p>
+            <p className="text-sm text-gray-400">We'll reach out to <span className="text-[#D4AF37]">{email}</span> to set this up for you.</p>
+            <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
+              Instagram integration via Meta Business OAuth is coming soon. Enter your handle and we'll set this up for you directly.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
+                <span className="text-gray-500 text-sm">@</span>
+                <input
+                  type="text"
+                  value={handle}
+                  onChange={e => setHandle(e.target.value)}
+                  placeholder="your.instagram"
+                  className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
+                />
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+              />
+              {state.error && <p className="text-xs text-red-400">{state.error}</p>}
+              <button
+                onClick={handleRequest}
+                disabled={!handle.trim() || !email.trim() || state.loading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {state.loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+                Request Access
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
+  const [profileUrl, setProfileUrl] = useState('');
+  const [state, setState] = useState<WaitlistState>({ submitted: false, loading: false, error: '' });
+
+  const handleRequest = async () => {
+    if (!profileUrl.trim()) return;
+    setState(s => ({ ...s, loading: true, error: '' }));
+    try {
+      const db = getFirebaseDb();
+      if (!db) throw new Error('Database unavailable');
+      await setDoc(
+        doc(db, 'users', uid, 'socialConnections', 'linkedin'),
+        { profileUrl: profileUrl.trim(), requested: true, waitlisted: true, createdAt: serverTimestamp() },
+        { merge: true }
+      );
+      setState({ submitted: true, loading: false, error: '' });
+    } catch {
+      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center text-xl">💼</div>
+            <div>
+              <h2 className="text-white font-bold text-lg">Connect LinkedIn</h2>
+              <p className="text-xs text-gray-500">OAuth — coming soon</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+        </div>
+
+        {state.submitted ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="text-white font-semibold mb-1">Access requested!</p>
+            <p className="text-sm text-gray-400">We'll be in touch to connect your LinkedIn profile.</p>
+            <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
+              LinkedIn integration is coming soon. Paste your profile or company page URL and we'll set this up when it's ready.
+            </p>
+            <div className="space-y-3">
+              <input
+                type="url"
+                value={profileUrl}
+                onChange={e => setProfileUrl(e.target.value)}
+                placeholder="linkedin.com/in/yourname or linkedin.com/company/yourco"
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+              />
+              {state.error && <p className="text-xs text-red-400">{state.error}</p>}
+              <button
+                onClick={handleRequest}
+                disabled={!profileUrl.trim() || state.loading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-400 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {state.loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+                Request Access
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
+  const [handle, setHandle] = useState('');
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState<WaitlistState>({ submitted: false, loading: false, error: '' });
+
+  const handleRequest = async () => {
+    if (!handle.trim() || !email.trim()) return;
+    setState(s => ({ ...s, loading: true, error: '' }));
+    try {
+      const db = getFirebaseDb();
+      if (!db) throw new Error('Database unavailable');
+      await setDoc(
+        doc(db, 'users', uid, 'socialConnections', 'facebook'),
+        { handle: handle.trim(), email: email.trim(), requested: true, waitlisted: true, createdAt: serverTimestamp() },
+        { merge: true }
+      );
+      setState({ submitted: true, loading: false, error: '' });
+    } catch {
+      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-xl">👥</div>
+            <div>
+              <h2 className="text-white font-bold text-lg">Connect Facebook</h2>
+              <p className="text-xs text-gray-500">Meta OAuth — coming soon</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+        </div>
+
+        {state.submitted ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="text-white font-semibold mb-1">Access requested!</p>
+            <p className="text-sm text-gray-400">We'll reach out to <span className="text-[#D4AF37]">{email}</span> to set this up for you.</p>
+            <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
+              Facebook integration via Meta Business OAuth is coming soon. Enter your Page name and email and we'll get this connected.
+            </p>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={handle}
+                onChange={e => setHandle(e.target.value)}
+                placeholder="Your Facebook Page name or URL"
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+              />
+              {state.error && <p className="text-xs text-red-400">{state.error}</p>}
+              <button
+                onClick={handleRequest}
+                disabled={!handle.trim() || !email.trim() || state.loading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {state.loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+                Request Access
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -186,10 +417,12 @@ function CharBar({ count, limit }: { count: number; limit: number }) {
   );
 }
 
+type ConnectingPlatform = 'Instagram' | 'LinkedIn' | 'Facebook' | 'X (Twitter)' | null;
+
 export default function SocialPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
+  const [connectingPlatform, setConnectingPlatform] = useState<ConnectingPlatform>(null);
 
   // Content generator state
   const [brief, setBrief] = useState('');
@@ -238,7 +471,6 @@ export default function SocialPage() {
       const data = await res.json();
       const posts: PlatformPost[] = data.posts ?? [];
       setGeneratedPosts(posts);
-      // Initialise editable content
       const initial: Record<string, string> = {};
       posts.forEach(p => { initial[p.platform] = `${p.content}\n\n${p.hashtags}`; });
       setEditedContent(initial);
@@ -256,8 +488,7 @@ export default function SocialPage() {
     setTimeout(() => setCopiedPlatform(null), 2000);
   }
 
-  function handleRegenerate(platform: string) {
-    // Re-run full generation — keeps it simple and consistent
+  function handleRegenerate() {
     handleGenerate();
   }
 
@@ -265,10 +496,6 @@ export default function SocialPage() {
     setSelectedPlatforms(prev =>
       prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
     );
-  }
-
-  function handleConnectPlatform(platformLabel: string) {
-    setConnectingPlatform(platformLabel);
   }
 
   const platformCardStyles: Record<string, { gradient: string; border: string; badge: string }> = {
@@ -296,14 +523,14 @@ export default function SocialPage() {
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Connect Accounts</h2>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Instagram', icon: '📸', gradient: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-500/20', text: 'text-pink-400' },
-              { label: 'LinkedIn', icon: '💼', gradient: 'from-blue-600/20 to-blue-400/20', border: 'border-blue-500/20', text: 'text-blue-400' },
-              { label: 'Facebook', icon: '👥', gradient: 'from-blue-500/20 to-indigo-500/20', border: 'border-indigo-500/20', text: 'text-indigo-400' },
-              { label: 'X (Twitter)', icon: '𝕏', gradient: 'from-gray-200/10 to-gray-400/10', border: 'border-gray-400/20', text: 'text-gray-200' },
+              { label: 'Instagram' as ConnectingPlatform, icon: '📸', gradient: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-500/20', text: 'text-pink-400' },
+              { label: 'LinkedIn' as ConnectingPlatform, icon: '💼', gradient: 'from-blue-600/20 to-blue-400/20', border: 'border-blue-500/20', text: 'text-blue-400' },
+              { label: 'Facebook' as ConnectingPlatform, icon: '👥', gradient: 'from-blue-500/20 to-indigo-500/20', border: 'border-indigo-500/20', text: 'text-indigo-400' },
+              { label: 'X (Twitter)' as ConnectingPlatform, icon: '𝕏', gradient: 'from-gray-200/10 to-gray-400/10', border: 'border-gray-400/20', text: 'text-gray-200' },
             ].map(p => (
               <button
                 key={p.label}
-                onClick={() => handleConnectPlatform(p.label)}
+                onClick={() => setConnectingPlatform(p.label)}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r ${p.gradient} border ${p.border} cursor-pointer hover:opacity-80 transition-opacity w-full text-left`}
               >
                 <div className="flex items-center gap-3">
@@ -319,9 +546,18 @@ export default function SocialPage() {
           </div>
         </section>
 
-        {/* Connect modal */}
-        {connectingPlatform && (
-          <ConnectModal platform={connectingPlatform} onClose={() => setConnectingPlatform(null)} />
+        {/* Connect modals */}
+        {connectingPlatform === 'X (Twitter)' && (
+          <XConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
+        )}
+        {connectingPlatform === 'Instagram' && (
+          <InstagramConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
+        )}
+        {connectingPlatform === 'LinkedIn' && (
+          <LinkedInConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
+        )}
+        {connectingPlatform === 'Facebook' && (
+          <FacebookConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
         )}
 
         {/* Tabs */}
@@ -400,13 +636,13 @@ export default function SocialPage() {
               {generateError && <p className="text-xs text-red-400 mt-2">{generateError}</p>}
             </div>
 
-            {/* Generated results — 3 platform cards side by side */}
+            {/* Generated results */}
             {generatedPosts.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-sm font-semibold text-white">Generated — <span className="text-[#D4AF37]">{tone}</span> tone</p>
                   <button
-                    onClick={handleGenerate}
+                    onClick={handleRegenerate}
                     disabled={generating}
                     className="text-xs px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg hover:text-white hover:border-[#D4AF37]/40 transition disabled:opacity-40"
                   >
@@ -421,7 +657,6 @@ export default function SocialPage() {
                     const limit = CHAR_LIMITS[post.platform] ?? 2200;
                     return (
                       <div key={post.platform} className={`bg-gradient-to-b ${styles.gradient} border ${styles.border} rounded-xl p-4 flex flex-col`}>
-                        {/* Card header */}
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <span className="text-xl">{post.icon}</span>
@@ -432,7 +667,6 @@ export default function SocialPage() {
                           </span>
                         </div>
 
-                        {/* Editable textarea */}
                         <textarea
                           value={currentText}
                           onChange={e => setEditedContent(prev => ({ ...prev, [post.platform]: e.target.value }))}
@@ -440,7 +674,6 @@ export default function SocialPage() {
                           className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-200 leading-relaxed resize-none focus:outline-none focus:border-white/20 transition-colors font-mono"
                         />
 
-                        {/* Char bar */}
                         <div className="mt-2">
                           <CharBar count={charCount} limit={limit} />
                           {post.platform === 'X' && charCount > 280 && (
@@ -448,7 +681,6 @@ export default function SocialPage() {
                           )}
                         </div>
 
-                        {/* Action buttons */}
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() => handleCopy(post.platform)}
@@ -457,7 +689,7 @@ export default function SocialPage() {
                             {copiedPlatform === post.platform ? '✅ Copied!' : '📋 Copy'}
                           </button>
                           <button
-                            onClick={() => handleRegenerate(post.platform)}
+                            onClick={handleRegenerate}
                             disabled={generating}
                             className="flex-1 py-2 rounded-lg border border-white/10 text-xs text-gray-300 hover:text-white hover:border-white/30 transition-all font-medium disabled:opacity-40"
                           >
@@ -497,7 +729,6 @@ export default function SocialPage() {
                 className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
               />
 
-              {/* Platform selector */}
               <div>
                 <p className="text-xs text-gray-400 mb-2 font-medium">Target platforms</p>
                 <div className="flex gap-2 flex-wrap">
@@ -518,7 +749,6 @@ export default function SocialPage() {
                 </div>
               </div>
 
-              {/* Schedule mode */}
               <div className="flex gap-2">
                 <button
                   onClick={() => setScheduleMode('now')}
@@ -543,7 +773,6 @@ export default function SocialPage() {
                 />
               )}
 
-              {/* Manual posting instructions */}
               {quickCaption.trim() && selectedPlatforms.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">How to post</p>
