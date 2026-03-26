@@ -254,8 +254,8 @@ export default function DashboardPage() {
                   Sales overview
                 </h2>
                 {stats.lastUpdated && (
-                  <span className="text-[11px] text-gray-600">
-                    Updated {stats.lastUpdated.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
+                  <span className="text-[11px] text-gray-600" suppressHydrationWarning>
+                    Updated {(() => { try { return stats.lastUpdated.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }); } catch { return ''; } })()}
                   </span>
                 )}
               </div>

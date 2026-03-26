@@ -109,7 +109,7 @@ function ProposalPreview({
   onCopy: () => void;
   onDownloadPdf: () => void;
 }) {
-  const date = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  const date = (() => { try { return new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return new Date().toISOString().split('T')[0]; } })();
   void markdown;
 
   return (

@@ -598,7 +598,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     setShowAddModal(true);
   }, []);
 
-  const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  const monthName = (() => { try { return new Date(currentYear, currentMonth).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }); } catch { return `${currentYear}`; } })();
 
   const prevMonth = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); }
