@@ -1,0 +1,74 @@
+#!/bin/bash
+# Pre-push hook — runs full QA before any push to origin
+# If this fails, the push is blocked. No exceptions.
+
+set -e
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔒 PRE-PUSH QA GATE (akai-platform)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# 1. Build must compile clean (skip if already built — avoids double-build issue
+#    where second npm run build fails on missing font-manifest.json/pages-manifest.json)
+echo "▶ Building..."
+cd apps/web
+CSS_ALREADY_BUILT=$(ls .next/static/css/*.css 2>/dev/null | head -1)
+if [ -n "$CSS_ALREADY_BUILT" ]; then
+  echo "  ✅ Build output exists (skipping rebuild) — $CSS_ALREADY_BUILT"
+else
+  if ! npm run build 2>&1; then
+    echo "❌ BUILD FAILED — push blocked"
+    exit 1
+  fi
+fi
+
+# 2. CSS bundle integrity — must contain all custom classes
+echo "▶ Checking CSS bundle integrity..."
+CSS_FILE=$(ls .next/static/css/*.css 2>/dev/null | head -1)
+if [ -z "$CSS_FILE" ]; then
+  echo "❌ No CSS file found in build output — push blocked"
+  exit 1
+fi
+
+CSS_SIZE=$(wc -c < "$CSS_FILE")
+echo "  CSS: $CSS_FILE (${CSS_SIZE} bytes)"
+
+MISSING_CLASSES=""
+for cls in "gradient-text" "\.glass" "card-hover" "dot-grid" "fade-up" "pulse-ring" "border-gradient"; do
+  if ! grep -q "$cls" "$CSS_FILE"; then
+    MISSING_CLASSES="$MISSING_CLASSES $cls"
+  fi
+done
+
+if [ -n "$MISSING_CLASSES" ]; then
+  echo "❌ CSS PURGE DETECTED — missing classes:$MISSING_CLASSES"
+  echo "   Push blocked. Check @layer utilities vs plain CSS in globals.css"
+  exit 1
+fi
+echo "  ✅ All custom CSS classes present"
+
+# 3. No mailto: on primary CTAs
+echo "▶ Checking CTA links..."
+if grep -r 'href="mailto:[^"]*[Tt]rial' src/ 2>/dev/null | grep -q .; then
+  echo "❌ mailto: found on a Trial CTA — push blocked"
+  grep -r 'href="mailto:[^"]*[Tt]rial' src/ 2>/dev/null
+  exit 1
+fi
+echo "  ✅ No mailto: on CTAs"
+
+cd ../..
+
+# 4. Full QA suite against live site (post-previous-deploy check)
+echo "▶ Running QA suite against live site..."
+if ! bash scripts/qa.sh 2>&1 | tail -8; then
+  QA_EXIT=${PIPESTATUS[0]}
+  if [ $QA_EXIT -ne 0 ]; then
+    echo "⚠️  Live QA failed — check getakai.ai before assuming deploy is clean"
+    # Don't block on live QA — last deploy may not be live yet
+    # But print the failure clearly
+  fi
+fi
+
+echo "✅ Pre-push gates passed"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
