@@ -1,9 +1,14 @@
 name: Deploy to Vercel
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
+    paths:
+      - 'apps/web/src/**'
+      - 'apps/web/public/**'
+      - 'packages/**'
+      - 'apps/web/package.json'
 
 jobs:
   deploy:
