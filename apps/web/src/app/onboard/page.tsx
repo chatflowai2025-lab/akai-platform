@@ -14,7 +14,7 @@ import { getFirebaseDb } from '@/lib/firebase';
 // Onboarding types (local — more specific than shared OnboardingState)
 // ---------------------------------------------------------------------------
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'calendar' | 'complete';
 
 interface OnboardData {
   industry?: string;
@@ -27,6 +27,7 @@ interface OnboardData {
   notifSmsNumber?: string;
   notifWhatsapp?: boolean;
   notifWhatsappNumber?: string;
+  calendarProvider?: 'google' | 'outlook' | null;
 }
 
 interface OnboardState {
@@ -78,7 +79,7 @@ export default function OnboardPage() {
     try {
       const db = getFirebaseDb();
       if (db) {
-        const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber } = finalState.data;
+        const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber, calendarProvider } = finalState.data;
         // Save full onboarding data + mark complete
         await setDoc(
           doc(db, 'users', user.uid),
@@ -90,6 +91,7 @@ export default function OnboardPage() {
               location: location || '',
               contact: contact || '',
               completedAt: new Date().toISOString(),
+              calendarProvider: calendarProvider || null,
             },
             // campaignConfig — used by AK when launching campaigns
             campaignConfig: {
@@ -106,6 +108,11 @@ export default function OnboardPage() {
               smsNumber: notifSmsNumber || '',
               whatsapp: notifWhatsapp || false,
               whatsappNumber: notifWhatsappNumber || '',
+            },
+            // Calendar config from onboarding
+            calendarConfig: {
+              provider: calendarProvider || null,
+              connected: false,
             },
             onboardingComplete: true,
             businessName: businessName || '',

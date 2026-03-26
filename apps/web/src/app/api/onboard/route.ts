@@ -16,9 +16,10 @@ interface OnboardData {
   notifSmsNumber?: string;
   notifWhatsapp?: boolean;
   notifWhatsappNumber?: string;
+  calendarProvider?: 'google' | 'outlook' | null;
 }
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'calendar' | 'complete';
 
 interface OnboardState {
   step: OnboardStep;
@@ -113,14 +114,14 @@ export async function POST(req: NextRequest) {
       case 'notifications': {
         const lower = trimmed.toLowerCase();
         const wantsEmail = lower.includes('email') || lower.includes('e-mail');
-        const wantsSms = lower.includes('sms') || lower.includes('text') || lower.includes('sms');
+        const wantsSms = lower.includes('sms') || lower.includes('text');
         const wantsWhatsapp = lower.includes('whatsapp') || lower.includes('whats app') || lower.includes('wa');
 
         // If none detected, default to email
         const hasChoice = wantsEmail || wantsSms || wantsWhatsapp;
 
         const newState: OnboardState = {
-          step: 'complete',
+          step: 'calendar',
           data: {
             ...state.data,
             notifEmail: !hasChoice || wantsEmail,
@@ -129,14 +130,45 @@ export async function POST(req: NextRequest) {
           },
         };
 
-        const channels = [];
-        if (!hasChoice || wantsEmail) channels.push('email');
-        if (wantsSms) channels.push('SMS');
-        if (wantsWhatsapp) channels.push('WhatsApp');
+        return buildResponse(
+          `Got it! One more thing — would you like to connect your calendar?\n\nAKAI can automatically schedule follow-up calls, meeting reminders, and block time for campaigns.\n\nReply with:\n📅 **google** — Google Calendar\n🗓️ **outlook** — Outlook / Microsoft 365\n⏭️ **skip** — I'll set it up later`,
+          newState,
+          {
+            buttons: [
+              { label: 'Google Calendar' },
+              { label: 'Outlook Calendar' },
+              { label: 'Skip for now' },
+            ],
+          }
+        );
+      }
+
+      case 'calendar': {
+        const lower = trimmed.toLowerCase();
+        let calendarProvider: 'google' | 'outlook' | null = null;
+
+        if (lower.includes('google')) calendarProvider = 'google';
+        else if (lower.includes('outlook') || lower.includes('microsoft')) calendarProvider = 'outlook';
+        // skip / null = no calendar
+
+        const newState: OnboardState = {
+          step: 'complete',
+          data: { ...state.data, calendarProvider },
+        };
+
+        const notifData = newState.data;
+        const channels: string[] = [];
+        if (notifData.notifEmail !== false) channels.push('email');
+        if (notifData.notifSms) channels.push('SMS');
+        if (notifData.notifWhatsapp) channels.push('WhatsApp');
 
         const businessName = newState.data.businessName || 'your business';
+        const calLine = calendarProvider
+          ? `✅ Calendar — ${calendarProvider === 'google' ? 'Google Calendar' : 'Outlook'} (connect in Calendar module)`
+          : '⏭️ Calendar — skipped (connect later in Calendar module)';
+
         return buildResponse(
-          `You're all set! 🎉\n\nHere's what I've configured for **${businessName}**:\n\n✅ Sales module — activated\n✅ AI lead qualification — on\n✅ Auto follow-up — ready\n✅ Notifications — ${channels.join(', ')}\n\nYour dashboard is ready. Let's go close some deals.`,
+          `You're all set! 🎉\n\nHere's what I've configured for **${businessName}**:\n\n✅ Sales module — activated\n✅ AI lead qualification — on\n✅ Auto follow-up — ready\n✅ Notifications — ${channels.join(', ')}\n${calLine}\n\nYour dashboard is ready. Let's go close some deals.`,
           newState,
           {
             action: 'complete',

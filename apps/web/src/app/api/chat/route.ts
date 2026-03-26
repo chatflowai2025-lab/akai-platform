@@ -340,6 +340,31 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
     return "I'm AK — your AI COO. Here's the current playbook:\n\n• **Email Guard** — inbox monitoring, auto-proposals\n• **Sales** — Sophie AI outbound calls & lead gen\n• **Recruit** — AI candidate sourcing & screening\n• **Social** — content for Instagram, LinkedIn, Facebook\n• **Web** — site audit + AI copywriting\n• **Ads** — Google Ads builder (coming soon)\n\nWhat do you need moving?";
   }
 
+  // ── Calendar intents ─────────────────────────────────────────────────────
+  if (msg.includes('connect my google calendar') || msg.includes('connect google calendar') || msg.includes('i want to connect my google calendar')) {
+    return "To connect Google Calendar, I'll need to link your Google account. This lets me:\n\n• Schedule follow-up calls automatically\n• Block time for Sophie campaigns\n• Send meeting reminders\n\nWant to proceed? I'll generate your Google authorisation link.";
+  }
+
+  if (msg.includes('connect my outlook calendar') || msg.includes('connect outlook calendar') || msg.includes('i want to connect my outlook calendar')) {
+    return "To connect Outlook Calendar, I'll need to link your Microsoft account. This lets me:\n\n• Schedule follow-up calls automatically\n• Block time for Sophie campaigns\n• Send meeting reminders\n\nWant to proceed? I'll generate your Microsoft authorisation link.";
+  }
+
+  if ((msg.includes('connect') && msg.includes('calendar')) && !msg.includes('google') && !msg.includes('outlook')) {
+    return "Which calendar would you like to connect?\n\n• **Google Calendar** — Gmail / Google Workspace\n• **Outlook Calendar** — Microsoft 365 / Outlook.com\n\nJust say which one and I'll get it linked.";
+  }
+
+  if (msg.includes('schedule a meeting') || msg.includes('book a call') || msg.includes('add to calendar') || msg.includes('schedule a call')) {
+    return "When would you like to schedule it? Tell me the date, time, and who it's with — I'll add it to your calendar.";
+  }
+
+  if (msg.includes("what's on my calendar") || msg.includes('my schedule') || msg.includes('what do i have today') || msg.includes('calendar today')) {
+    return "Your calendar is in the **Calendar** module. Here's what I see for today:\n\n• **Sophie AI calls** — 9am–5pm (ongoing)\n• Check the Calendar module for your full schedule\n\nWant me to schedule something new?";
+  }
+
+  if (msg.includes('remind me') || msg.includes('set a reminder')) {
+    return "I'll set a reminder. What time and what's it for?";
+  }
+
   // ── Chat widget / live chat ───────────────────────────────────────────────
   if (msg.includes('chat widget') || msg.includes('live chat') || msg.includes('install chat') || msg.includes('add chat') || (msg.includes('website') && msg.includes('chat'))) {
     return "Most businesses lose 80% of website visitors who don\'t enquire. A chat widget changes that.\n\nHere\'s what it does:\n• Visitors get an instant response 24/7, even at midnight\n• Leads captured automatically — name, email, what they need\n• Sophie follows up within 60 seconds\n• Every conversation in your Chat dashboard\n\nWant me to set it up on your website? I\'ll need to connect to your site first — do you use WordPress, GitHub, or something else?";
