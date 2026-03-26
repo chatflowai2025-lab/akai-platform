@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { collection, doc, setDoc, getDocs, serverTimestamp } from 'firebase/firestore';
@@ -35,11 +35,8 @@ function getMockEvents(): CalEvent[] {
     return r.toISOString().split('T')[0];
   };
 
-  // next Tuesday
   const daysUntilTue = (2 - today.getDay() + 7) % 7 || 7;
-  // this Friday
   const daysUntilFri = (5 - today.getDay() + 7) % 7 || 7;
-  // next Monday
   const daysUntilMon = (1 - today.getDay() + 7) % 7 || 7;
 
   return [
@@ -153,47 +150,29 @@ function AddEventModal({ initialDate, onClose, onSave }: AddEventModalProps) {
         </div>
 
         <div className="space-y-4">
-          {/* Title */}
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Title</label>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Event title"
-              className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
-            />
+            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Event title"
+              className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
           </div>
 
-          {/* Date + Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4AF37] transition"
-              />
+              <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4AF37] transition" />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Time</label>
-              <input
-                type="time"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4AF37] transition"
-              />
+              <input type="time" value={time} onChange={e => setTime(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4AF37] transition" />
             </div>
           </div>
 
-          {/* Duration */}
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Duration (minutes)</label>
-            <select
-              value={duration}
-              onChange={e => setDuration(Number(e.target.value))}
-              className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4AF37] transition"
-            >
+            <select value={duration} onChange={e => setDuration(Number(e.target.value))}
+              className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4AF37] transition">
               <option value={15}>15 min</option>
               <option value={30}>30 min</option>
               <option value={45}>45 min</option>
@@ -205,65 +184,47 @@ function AddEventModal({ initialDate, onClose, onSave }: AddEventModalProps) {
             </select>
           </div>
 
-          {/* Type */}
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Type</label>
             <div className="flex gap-2 flex-wrap">
               {(['Call', 'Meeting', 'Task', 'Reminder'] as EventType[]).map(t => (
-                <button
-                  key={t}
-                  onClick={() => setType(t)}
+                <button key={t} onClick={() => setType(t)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
                     type === t
                       ? 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40'
                       : 'bg-[#0a0a0a] text-gray-500 border-[#1f1f1f] hover:text-white hover:border-[#2f2f2f]'
-                  }`}
-                >
+                  }`}>
                   {t}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Notes */}
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Notes</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Optional notes…"
-              rows={2}
-              className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
-            />
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes…" rows={2}
+              className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none" />
           </div>
 
-          {/* Invite via AK */}
           <div className="flex items-center justify-between py-2 px-3 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl">
             <div>
               <p className="text-sm text-white font-medium">Invite via AK</p>
               <p className="text-xs text-gray-500">AK sends a calendar invite by email</p>
             </div>
-            <button
-              onClick={() => setInviteViaAk(!inviteViaAk)}
-              className={`w-10 h-6 rounded-full transition-colors relative ${inviteViaAk ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
-            >
+            <button onClick={() => setInviteViaAk(!inviteViaAk)}
+              className={`w-10 h-6 rounded-full transition-colors relative ${inviteViaAk ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}>
               <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${inviteViaAk ? 'translate-x-4' : 'translate-x-0.5'}`} />
             </button>
           </div>
         </div>
 
         <div className="flex gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-semibold hover:text-white hover:border-[#3a3a3a] transition"
-          >
+          <button onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[#2a2a2a] text-gray-400 text-sm font-semibold hover:text-white hover:border-[#3a3a3a] transition">
             Cancel
           </button>
-          <button
-            onClick={handleSave}
-            disabled={!title.trim() || saving}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[#D4AF37] text-black text-sm font-bold hover:opacity-90 transition disabled:opacity-40"
-          >
+          <button onClick={handleSave} disabled={!title.trim() || saving}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-[#D4AF37] text-black text-sm font-bold hover:opacity-90 transition disabled:opacity-40">
             {saving ? 'Saving…' : 'Save Event'}
           </button>
         </div>
@@ -276,7 +237,7 @@ function AddEventModal({ initialDate, onClose, onSave }: AddEventModalProps) {
 
 interface CalendarGridProps {
   year: number;
-  month: number; // 0-indexed
+  month: number;
   events: CalEvent[];
   selectedDate: string | null;
   onSelectDate: (date: string) => void;
@@ -285,17 +246,11 @@ interface CalendarGridProps {
 
 function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEvent }: CalendarGridProps) {
   const today = new Date().toISOString().split('T')[0];
-
-  // First day of month, last day
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-
-  // Day of week of first day (0=Sun → we want Mon=0)
-  // Convert: Mon=0, Tue=1, ... Sun=6
   const startDow = (firstDay.getDay() + 6) % 7;
   const totalDays = lastDay.getDate();
 
-  // Build grid cells
   const cells: (string | null)[] = [];
   for (let i = 0; i < startDow; i++) cells.push(null);
   for (let d = 1; d <= totalDays; d++) {
@@ -303,7 +258,6 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
     const dd = String(d).padStart(2, '0');
     cells.push(`${year}-${mm}-${dd}`);
   }
-  // Pad to complete last row
   while (cells.length % 7 !== 0) cells.push(null);
 
   const eventsByDate = events.reduce<Record<string, CalEvent[]>>((acc, e) => {
@@ -316,16 +270,11 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
 
   return (
     <div className="flex-1 overflow-auto">
-      {/* Day headers */}
       <div className="grid grid-cols-7 border-b border-[#1f1f1f]">
         {DOW.map(d => (
-          <div key={d} className="text-center text-xs text-gray-500 py-3 font-semibold uppercase tracking-wider">
-            {d}
-          </div>
+          <div key={d} className="text-center text-xs text-gray-500 py-3 font-semibold uppercase tracking-wider">{d}</div>
         ))}
       </div>
-
-      {/* Grid */}
       <div className="grid grid-cols-7 h-[calc(100%-40px)]">
         {cells.map((dateStr, i) => {
           if (!dateStr) {
@@ -337,39 +286,25 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
           const dayNum = parseInt(dateStr.split('-')[2]);
 
           return (
-            <div
-              key={dateStr}
-              onClick={() => onSelectDate(dateStr)}
+            <div key={dateStr} onClick={() => onSelectDate(dateStr)}
               className={`border-b border-r border-[#1a1a1a] min-h-[100px] p-2 cursor-pointer transition group relative
-                ${isSelected ? 'bg-[#D4AF37]/5 border-[#D4AF37]/20' : 'hover:bg-[#111]'}
-              `}
-            >
-              {/* Day number */}
+                ${isSelected ? 'bg-[#D4AF37]/5 border-[#D4AF37]/20' : 'hover:bg-[#111]'}`}>
               <div className="flex items-center justify-between mb-1">
                 <span className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center
-                  ${isToday ? 'bg-[#D4AF37] text-black' : 'text-gray-400 group-hover:text-white'}
-                `}>
+                  ${isToday ? 'bg-[#D4AF37] text-black' : 'text-gray-400 group-hover:text-white'}`}>
                   {dayNum}
                 </span>
-                <button
-                  onClick={e => { e.stopPropagation(); onAddEvent(dateStr); }}
+                <button onClick={e => { e.stopPropagation(); onAddEvent(dateStr); }}
                   className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-[#D4AF37] transition text-xs leading-none w-5 h-5 flex items-center justify-center rounded"
-                  title="Add event"
-                >
+                  title="Add event">
                   +
                 </button>
               </div>
-
-              {/* Events */}
               <div className="space-y-0.5">
                 {dayEvents.slice(0, 3).map(ev => {
                   const colors = EVENT_COLORS[ev.color] || EVENT_COLORS.gray;
                   return (
-                    <div
-                      key={ev.id}
-                      className={`text-[10px] px-1.5 py-0.5 rounded border truncate ${colors.pill}`}
-                      title={ev.title}
-                    >
+                    <div key={ev.id} className={`text-[10px] px-1.5 py-0.5 rounded border truncate ${colors.pill}`} title={ev.title}>
                       {ev.time} {ev.title}
                     </div>
                   );
@@ -420,11 +355,8 @@ function WeekView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (dat
           const dateStr = d.toISOString().split('T')[0];
           const dayEvents = events.filter(e => e.date === dateStr);
           return (
-            <div
-              key={dateStr}
-              className="min-h-[400px] border-r border-[#1a1a1a] last:border-r-0 p-2 space-y-1 cursor-pointer hover:bg-[#111] transition group"
-              onClick={() => onAddEvent(dateStr)}
-            >
+            <div key={dateStr} className="min-h-[400px] border-r border-[#1a1a1a] last:border-r-0 p-2 space-y-1 cursor-pointer hover:bg-[#111] transition group"
+              onClick={() => onAddEvent(dateStr)}>
               {dayEvents.map(ev => {
                 const colors = EVENT_COLORS[ev.color] || EVENT_COLORS.gray;
                 return (
@@ -453,10 +385,8 @@ function DayView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (date
     <div className="flex-1 overflow-auto p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-bold">{today.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
-        <button
-          onClick={() => onAddEvent(todayStr)}
-          className="text-xs px-3 py-1.5 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition"
-        >
+        <button onClick={() => onAddEvent(todayStr)}
+          className="text-xs px-3 py-1.5 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition">
           + Add event
         </button>
       </div>
@@ -487,15 +417,9 @@ function DayView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (date
 // ─── Day Detail Panel ─────────────────────────────────────────────────────────
 
 function DayDetailPanel({
-  date,
-  events,
-  onClose,
-  onAddEvent,
+  date, events, onClose, onAddEvent,
 }: {
-  date: string;
-  events: CalEvent[];
-  onClose: () => void;
-  onAddEvent: (date: string) => void;
+  date: string; events: CalEvent[]; onClose: () => void; onAddEvent: (date: string) => void;
 }) {
   const d = new Date(date + 'T12:00:00');
   const dayEvents = events.filter(e => e.date === date).sort((a, b) => a.time.localeCompare(b.time));
@@ -510,10 +434,8 @@ function DayDetailPanel({
           <p className="text-xs text-gray-500">{dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => onAddEvent(date)}
-            className="text-xs px-2.5 py-1 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition"
-          >
+          <button onClick={() => onAddEvent(date)}
+            className="text-xs px-2.5 py-1 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition">
             + Add
           </button>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition">×</button>
@@ -543,85 +465,42 @@ function DayDetailPanel({
   );
 }
 
-// ─── Left Panel ───────────────────────────────────────────────────────────────
+// ─── Connect Calendar Banner ──────────────────────────────────────────────────
 
-interface LeftPanelProps {
-  calConnected: boolean;
-  calProvider: string | null;
-  onAddEvent: () => void;
-}
+function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConnected: (provider: string) => void }) {
+  const [connecting, setConnecting] = useState(false);
 
-function LeftPanel({ calConnected, calProvider, onAddEvent }: LeftPanelProps) {
-  const { sendMessage } = useDashboardChat();
+  const handleGoogleConnect = async () => {
+    setConnecting(true);
+    try {
+      const r = await fetch(
+        `https://api-server-production-2a27.up.railway.app/api/calendar/google/auth-url?userId=${userId}`,
+        { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
+      );
+      const { url } = await r.json();
+      window.location.href = url;
+    } catch {
+      setConnecting(false);
+    }
+  };
 
   return (
-    <div className="w-64 flex-shrink-0 border-r border-[#1f1f1f] bg-[#080808] flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-[#1f1f1f]">
-        <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Connect Calendar</h2>
-
-        {calConnected ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 bg-green-500/5 border border-green-500/20 rounded-xl">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-            <div>
-              <p className="text-xs font-semibold text-green-300">Connected</p>
-              <p className="text-xs text-gray-500 capitalize">{calProvider}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="p-3 bg-[#111] border border-[#1f1f1f] rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <span>📅</span>
-                <p className="text-sm font-semibold text-white">Google Calendar</p>
-              </div>
-              <button
-                onClick={async () => {
-                  try {
-                    const userId = (typeof window !== 'undefined' && window.__calendarUserId) || '';
-                    const r = await fetch(
-                      `https://api-server-production-2a27.up.railway.app/api/calendar/google/auth-url?userId=${userId}`,
-                      { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
-                    );
-                    const { url } = await r.json();
-                    window.location.href = url;
-                  } catch {
-                    sendMessage('I want to connect my Google Calendar');
-                  }
-                }}
-                className="w-full text-xs px-3 py-2 rounded-lg bg-white text-[#1a1a1a] font-bold hover:bg-gray-100 transition"
-              >
-                Connect with Google
-              </button>
-            </div>
-
-            <div className="p-3 bg-[#111] border border-[#1f1f1f] rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <span>🗓️</span>
-                <p className="text-sm font-semibold text-white">Outlook Calendar</p>
-              </div>
-              <button
-                onClick={() => sendMessage('I want to connect my Outlook Calendar')}
-                className="w-full text-xs px-3 py-2 rounded-lg bg-[#0078d4] text-white font-bold hover:bg-[#006cbd] transition"
-              >
-                Connect with Microsoft
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <button
-          onClick={onAddEvent}
-          className="w-full px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
-        >
-          + Add Event
-        </button>
-      </div>
-
-      <div className="p-4 border-t border-[#1f1f1f] flex-1">
-        <p className="text-xs text-gray-600 uppercase tracking-wider font-semibold mb-3">Upcoming</p>
-        <p className="text-xs text-gray-600">Click a date to see events</p>
+    <div className="flex justify-center px-6 pb-4">
+      <div className="w-full max-w-xl bg-[#111] border border-[#D4AF37]/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4">
+        <div className="text-3xl">📅</div>
+        <div className="flex-1 text-center sm:text-left">
+          <p className="text-white font-bold">Connect your calendar to see real events here</p>
+          <p className="text-gray-500 text-sm mt-0.5">Sync Google or Outlook — your mock events will be replaced with real ones.</p>
+        </div>
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          <button
+            onClick={handleGoogleConnect}
+            disabled={connecting}
+            className="px-4 py-2 rounded-xl bg-white text-[#1a1a1a] text-sm font-bold hover:bg-gray-100 transition disabled:opacity-60 whitespace-nowrap"
+          >
+            {connecting ? 'Connecting…' : '🔗 Connect with Google'}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -629,7 +508,6 @@ function LeftPanel({ calConnected, calProvider, onAddEvent }: LeftPanelProps) {
 
 // ─── Main Calendar Page ───────────────────────────────────────────────────────
 
-// Augment window with calendar userId for button access
 declare global {
   interface Window { __calendarUserId?: string; }
 }
@@ -646,26 +524,22 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   const [calConnected, setCalConnected] = useState(false);
   const [calProvider, setCalProvider] = useState<string | null>(null);
 
-  // Store userId on window so the connect button can access it
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.__calendarUserId = user.uid;
     }
   }, [user.uid]);
 
-  // Check for ?connected=google in URL on load
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('connected') === 'google') {
       setCalConnected(true);
       setCalProvider('google');
-      // Clean the URL without reload
       history.pushState({}, '', window.location.pathname);
     }
   }, []);
 
-  // Reload Firestore calendar config
   const reloadCalConfig = useCallback(() => {
     const db = getFirebaseDb();
     if (!db) return;
@@ -682,32 +556,25 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     });
   }, [user.uid]);
 
-  // Load Firestore events + calendar config
   useEffect(() => {
     reloadCalConfig();
     const db = getFirebaseDb();
     if (!db) return;
 
-    // Calendar config is loaded via reloadCalConfig() above
-
-    // Load events
     getDocs(collection(db, 'users', user.uid, 'events')).then(snap => {
       if (snap.empty) return;
       const firestoreEvents: CalEvent[] = snap.docs.map(d => ({ id: d.id, ...d.data() } as CalEvent));
       setEvents(prev => {
-        // Merge: keep mocks, add Firestore events (avoid dupes by id)
         const ids = new Set(prev.map(e => e.id));
         return [...prev, ...firestoreEvents.filter(e => !ids.has(e.id))];
       });
     }).catch(() => {});
-  }, [user.uid]);
+  }, [user.uid, reloadCalConfig]);
 
   const handleAddEvent = async (eventData: Omit<CalEvent, 'id' | 'createdAt'>) => {
     const db = getFirebaseDb();
     const id = `evt-${Date.now()}`;
     const newEvent: CalEvent = { ...eventData, id, createdAt: new Date().toISOString() };
-
-    // Optimistic update
     setEvents(prev => [...prev, newEvent]);
 
     if (db) {
@@ -750,17 +617,28 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           <h1 className="text-xl font-black text-white">📅 Calendar</h1>
           <p className="text-xs text-gray-500 mt-0.5">Schedule, manage, and stay on top of everything</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Connected badge */}
+          {calConnected && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-xl">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-green-400 font-semibold capitalize">{calProvider} connected</span>
+            </div>
+          )}
+          {/* Add event */}
+          <button
+            onClick={() => openAddModal()}
+            className="px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
+          >
+            + Add Event
+          </button>
           {/* View toggle */}
           <div className="flex bg-[#111] border border-[#1f1f1f] rounded-xl p-0.5">
             {(['month', 'week', 'day'] as CalendarView[]).map(v => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
+              <button key={v} onClick={() => setView(v)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
                   view === v ? 'bg-[#D4AF37] text-black' : 'text-gray-400 hover:text-white'
-                }`}
-              >
+                }`}>
                 {v}
               </button>
             ))}
@@ -768,17 +646,14 @@ function CalendarContent({ user }: { user: { uid: string } }) {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left panel */}
-        <LeftPanel
-          calConnected={calConnected}
-          calProvider={calProvider}
-          onAddEvent={() => openAddModal()}
-        />
+      {/* Connect banner — shown when not connected, above the calendar */}
+      {!calConnected && (
+        <ConnectCalendarBanner userId={user.uid} onConnected={(provider) => { setCalConnected(true); setCalProvider(provider); }} />
+      )}
 
-        {/* Center calendar */}
+      {/* Calendar area */}
+      <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          {/* Month nav (month/week views) */}
           {(view === 'month' || view === 'week') && (
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
               <button onClick={prevMonth} className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">‹</button>
@@ -816,7 +691,6 @@ function CalendarContent({ user }: { user: { uid: string } }) {
         )}
       </div>
 
-      {/* Add Event Modal */}
       {showAddModal && (
         <AddEventModal
           initialDate={modalDate}
@@ -847,7 +721,7 @@ function CalendarPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout noChat>
       <CalendarContent user={user} />
     </DashboardLayout>
   );
