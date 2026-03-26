@@ -223,10 +223,16 @@ function ScriptStep({ config, setConfig, userProfile, onBack, onNext }: {
   const [selectedQ, setSelectedQ] = useState<string | null>(config.script.qualifyingQuestion || null);
 
   useEffect(() => {
-    // Auto-generate on mount if we have business context
-    if (businessName !== 'your business' && !suggestions) generateSuggestions();
+    // Auto-generate when we have business context (fires on mount AND when userProfile loads)
+    if (businessName !== 'your business' && !suggestions && !generating) {
+      generateSuggestions();
+      // Pre-fill opening line with real business name if still default
+      if (config.script.openingLine.includes('{{businessName}}') || config.script.openingLine.includes('[BusinessName]')) {
+        setConfig({ ...config, script: { ...config.script, openingLine: `Hi, is that {{name}}? This is Sophie calling from ${businessName}.` } });
+      }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [businessName]); // re-run when businessName changes (userProfile loads async)
 
   const generateSuggestions = async () => {
     setGenerating(true);
@@ -1018,7 +1024,7 @@ function VoicePageInner() {
         if (!db) { setConfigLoading(false); return; }
         const ref = doc(db, 'users', user!.uid, 'voiceConfig', 'config');
         const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Firestore timeout')), 5000)
+          setTimeout(() => reject(new Error('Firestore timeout')), 1500)
         );
         const snap = await Promise.race([getDoc(ref), timeout]);
         if (snap.exists()) {
