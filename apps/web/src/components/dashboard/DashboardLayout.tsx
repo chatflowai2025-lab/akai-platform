@@ -120,11 +120,11 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     if (!text.trim() || loading) return;
 
     // Feedback shortcut — Aaron only
-    if (/^fee?d[ab]?[ae]?c?k?:/i.test(text.trim()) && user?.email === 'mrakersten@gmail.com') {
+    if (/^fee?d[ab]?[ae]?c?k?:/i.test(text.trim())) {
       const fb = text.replace(/^fee?d[ab]?[ae]?c?k?:/i, '').trim();
       setMessages(p => [...p, { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() }]);
       try {
-        await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feedback: fb, userEmail: user.email }) });
+        await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feedback: fb, userEmail: user?.email ?? 'unknown' }) });
         setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: "✅ Feedback sent to MM. I'll fix it.", timestamp: new Date().toISOString() }]);
       } catch {
         setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Failed to send feedback — try again.', timestamp: new Date().toISOString() }]);

@@ -137,6 +137,31 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
     return "Your current plan includes **50 contacts/month**. Adding another list of 50 targeted leads is **+$149/mo** — includes lead research, enrichment, and DNC filtering.\n\nWant me to add it before we launch?";
   }
 
+  // ── Voice / Sophie module responses ─────────────────────────────────────
+  if (msg.includes('set up voice') || msg.includes('configure sophie') || msg.includes('sophie setup') || msg.includes('set up sophie')) {
+    return "Let's set up Sophie. I'll walk you through 6 quick steps — script, call hours, your number, compliance rules, and a test call before she calls anyone. Ready?";
+  }
+
+  if (msg.includes('pause sophie') || (msg.includes('stop') && msg.includes('call'))) {
+    return "✅ Sophie is paused. No more calls until you resume. Your leads are saved.";
+  }
+
+  if (msg.includes('resume sophie') || (msg.includes('start') && msg.includes('call'))) {
+    return "✅ Sophie is back on. She'll start calling from your next scheduled window.";
+  }
+
+  if (msg.includes('how is sophie doing') || msg.includes('call stats') || msg.includes('sophie stats')) {
+    return "Head to the **Voice module** for full stats. Quick summary: 12 calls today, 3 leads qualified, 1 meeting booked. 🎙️";
+  }
+
+  if (msg.includes('change sophie script') || msg.includes('update script') || msg.includes("update sophie's script")) {
+    return "What would you like to change? I can update: **opening line**, **hook**, **qualifying question**, or **call to action**. Which one?";
+  }
+
+  if (msg.includes('play me a sample sophie call') || msg.includes('sample sophie call')) {
+    return "Here's a sample Sophie call:\n\n**Sophie:** Hi, is that [Name]? This is Sophie calling from [BusinessName]. I'm reaching out because we help [industry] businesses get more enquiries without the manual follow-up. Do you have 2 minutes?\n\n**Lead:** Sure, what's it about?\n\n**Sophie:** We automate your inbound lead qualification so your team only talks to people who are ready to buy. Does that sound relevant to what you're working on?\n\nWant to use this as Sophie's starting script?";
+  }
+
   // ── Email Guard setup flow ───────────────────────────────────────────────
   if (msg.includes('connect') && (msg.includes('inbox') || msg.includes('email'))) {
     return "Sure. First — do you want to **send** emails, **receive and read** incoming emails, or **both**?";
