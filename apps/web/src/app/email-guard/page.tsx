@@ -34,6 +34,23 @@ function HowItWorksStep({
 }
 
 // ── Main page ────────────────────────────────────────────────────────────────
+
+// ── Connect inbox button — triggers AK chat walkthrough ──────────────────────
+function ConnectInboxButton({ label = "🔗 Connect your inbox", small = false }: { label?: string; small?: boolean }) {
+  const { sendMessage } = useDashboardChat();
+  return (
+    <button
+      onClick={() => sendMessage("I want to connect my inbox to Email Guard")}
+      className={small
+        ? "text-xs text-gray-600 hover:text-white transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-[#2f2f2f]"
+        : "mt-2 flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
+      }
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function EmailGuardPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -87,12 +104,7 @@ export default function EmailGuardPage() {
               🛡️ Email Guard
             </h1>
           </div>
-          <Link
-            href="/settings"
-            className="text-xs text-gray-600 hover:text-white transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-[#2f2f2f]"
-          >
-            ⚙️ Configure
-          </Link>
+          <ConnectInboxButton label="⚙️ Configure" small={true} />
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8 max-w-4xl">
@@ -156,12 +168,7 @@ export default function EmailGuardPage() {
                   their auto-generated proposals.
                 </p>
               </div>
-              <Link
-                href="/settings"
-                className="mt-2 flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
-              >
-                🔗 Connect your inbox
-              </Link>
+              <ConnectInboxButton />
             </div>
           </section>
 
@@ -176,12 +183,7 @@ export default function EmailGuardPage() {
                 Enquiries are parsed, classified, and a tailored proposal is generated automatically.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/settings"
-                  className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
-                >
-                  ⚙️ Configure Email Guard
-                </Link>
+                <ConnectInboxButton />
                 <a
                   href="/dashboard"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"

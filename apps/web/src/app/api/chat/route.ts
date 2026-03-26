@@ -27,8 +27,16 @@ function getMockResponse(message: string): string {
     return "I'm AK, your AKAI assistant. Here's what I can help with:\n\n• **Sales** — AI calling, lead gen, Sophie AI outbound\n• **Email Guard** — Monitors your inbox, auto-generates proposals\n• **Recruit** — Smart hiring workflows\n• **Web** — Site building and optimisation\n• **Ads** — Google & Meta campaign management\n• **Social** — Content scheduling and growth\n\nWhat would you like to work on?";
   }
 
+  if (msg.includes('connect') && (msg.includes('inbox') || msg.includes('email'))) {
+    return "Let\'s connect your inbox to Email Guard. You have two options:\n\n**Option A — Email forwarding (easiest):**\nSet up an auto-forward rule to send a copy of your enquiry emails to:\n`inbound@aiclozr.com`\n\nIn Gmail: Settings → See all settings → Forwarding → Add a forwarding address → paste that address → confirm.\n\n**Option B — Webhook:**\nIf you use SendGrid, Postmark or Mailgun, point your inbound webhook to:\n`https://api-server-production-2a27.up.railway.app/api/mail-guard/inbound`\n\nWhich option suits you — Gmail forwarding or a webhook?";
+  }
+
+  if (msg.includes('gmail') || msg.includes('forwarding') || msg.includes('option a')) {
+    return "Perfect. Here\'s exactly how to do it in Gmail:\n\n1. Open Gmail → click the ⚙️ gear → **See all settings**\n2. Click the **Forwarding and POP/IMAP** tab\n3. Click **Add a forwarding address**\n4. Enter: `inbound@aiclozr.com`\n5. Gmail will send a confirmation email — click the link in it\n6. Back in settings, select **Forward a copy of incoming mail to** inbound@aiclozr.com\n7. Hit **Save Changes**\n\nOnce done, the next enquiry that hits your inbox will appear in your Email Guard dashboard automatically. Want me to check if it\'s working?";
+  }
+
   if (msg.includes('email') || msg.includes('inbox') || msg.includes('proposal') || msg.includes('guard')) {
-    return "Email Guard monitors your inbox 24/7 and auto-generates proposals when enquiries arrive. Head to the **Email** module to connect your inbox — once live, every enquiry gets a tailored proposal within seconds. Want help setting it up?";
+    return "Email Guard monitors your inbox 24/7 and auto-generates proposals when enquiries arrive. Once live, every inbound enquiry gets a tailored proposal within seconds — no manual work. Want me to walk you through connecting your inbox?";
   }
 
   if (msg.includes('sales') || msg.includes('lead') || msg.includes('campaign') || msg.includes('sophie')) {
