@@ -1,7 +1,4 @@
 'use client';
-
-export const dynamic = 'force-dynamic';
-
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
 import Button from '@/components/ui/Button';
