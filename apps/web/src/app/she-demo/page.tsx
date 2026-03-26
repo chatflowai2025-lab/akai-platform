@@ -216,7 +216,7 @@ function BookingModal({
               <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">
                 Estimated total
               </p>
-              <p className="text-2xl font-bold mt-0.5" style={{ color: '#0a1628' }}>
+              <p suppressHydrationWarning className="text-2xl font-bold mt-0.5" style={{ color: '#0a1628' }}>
                 ${totalPrice.toLocaleString()}
               </p>
             </div>

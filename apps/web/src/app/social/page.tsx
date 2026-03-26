@@ -407,7 +407,7 @@ function CharBar({ count, limit }: { count: number; limit: number }) {
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-[10px]">
-        <span className={pct > 90 ? 'text-red-400' : 'text-gray-500'}>{count} / {limit.toLocaleString()}</span>
+        <span suppressHydrationWarning className={pct > 90 ? 'text-red-400' : 'text-gray-500'}>{count} / {limit.toLocaleString()}</span>
         {pct > 90 && <span className="text-red-400 font-semibold">Near limit!</span>}
       </div>
       <div className="h-1 bg-[#2a2a2a] rounded-full overflow-hidden">

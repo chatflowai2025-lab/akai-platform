@@ -928,7 +928,7 @@ function PostJobTab() {
                     <p className="text-base font-bold text-white">{postedJob.title}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{postedJob.location} · {postedJob.employmentType}</p>
                     {(postedJob.salaryMin || postedJob.salaryMax) && (
-                      <p className="text-xs text-[#D4AF37] mt-1 font-semibold">
+                      <p suppressHydrationWarning className="text-xs text-[#D4AF37] mt-1 font-semibold">
                         {postedJob.salaryMin && postedJob.salaryMax
                           ? `$${Number(postedJob.salaryMin).toLocaleString()} – $${Number(postedJob.salaryMax).toLocaleString()} AUD`
                           : postedJob.salaryMin

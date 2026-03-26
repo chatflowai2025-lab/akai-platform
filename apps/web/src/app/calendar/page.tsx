@@ -344,7 +344,7 @@ function WeekView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (dat
           const isToday = dateStr === todayStr;
           return (
             <div key={dateStr} className="text-center py-3 border-r border-[#1a1a1a] last:border-r-0">
-              <p className="text-xs text-gray-500 uppercase">{d.toLocaleDateString('en', { weekday: 'short' })}</p>
+              <p suppressHydrationWarning className="text-xs text-gray-500 uppercase">{d.toLocaleDateString('en', { weekday: 'short' })}</p>
               <p className={`text-lg font-bold mt-0.5 ${isToday ? 'text-[#D4AF37]' : 'text-white'}`}>{d.getDate()}</p>
             </div>
           );
@@ -384,7 +384,7 @@ function DayView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (date
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-bold">{today.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+        <h3 suppressHydrationWarning className="text-white font-bold">{today.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
         <button onClick={() => onAddEvent(todayStr)}
           className="text-xs px-3 py-1.5 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition">
           + Add event
@@ -428,7 +428,7 @@ function DayDetailPanel({
     <div className="w-72 border-l border-[#1f1f1f] flex flex-col bg-[#080808] overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f]">
         <div>
-          <p className="text-sm font-bold text-white">
+          <p suppressHydrationWarning className="text-sm font-bold text-white">
             {d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}
           </p>
           <p className="text-xs text-gray-500">{dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}</p>
