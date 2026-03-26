@@ -54,6 +54,7 @@ export default function SettingsPage() {
 
   // Business profile
   const [bizForm, setBizForm] = useState({ businessName: '', industry: '', location: '', website: '', phone: '' });
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [bizSaving, setBizSaving] = useState(false);
   const [bizSaved, setBizSaved] = useState(false);
 
@@ -112,6 +113,7 @@ export default function SettingsPage() {
           website: onboarding.website || data.website || '',
           phone: onboarding.phone || data.phone || '',
         });
+        setProfileLoaded(true);
 
         // Notification prefs (new multi-channel)
         const np = data.notificationPrefs || {};
