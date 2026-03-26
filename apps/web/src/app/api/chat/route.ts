@@ -90,7 +90,39 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
     }
   }
 
-  // General
+  // ── Campaign launcher ────────────────────────────────────────────────────
+  if (msg.includes('launch campaign') || msg.includes('new campaign') || msg.includes('configure sophie')) {
+    return "Based on your onboarding setup, here's what Sophie is configured with:\n\n📋 **Campaign summary**\n• **Target:** Australian SMBs — kitchens, renovations, luxury trades\n• **Contact list:** 150 leads (Mosman, Paddington, Double Bay)\n• **Script:** Warm intro → qualify budget → book site visit\n• **Call hours:** Mon–Fri, 9am–5pm AEST\n• **Fallback:** SMS if no answer after 2 attempts\n\nWant to change anything, or should I launch Sophie now?";
+  }
+
+  if (lastAssistant.includes('launch sophie now') || lastAssistant.includes('want to change anything')) {
+    if (msg.includes('launch') || msg.includes('looks good') || msg.includes('go') || msg.includes('yes') || msg.includes('do it')) {
+      return "✅ Sophie is launching now.\n\nShe'll start working through your list today. I'll send you a Telegram notification when the first meeting is booked — usually within a few hours.\n\nYou can check live call stats in the Sales dashboard anytime.";
+    }
+    if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads')) {
+      return "Want to add another contact list? We can load 50 more targeted leads for **+$149/mo**.\n\nThat covers scraping, enrichment, and DNC filtering. Want me to set that up before we launch?";
+    }
+  }
+
+  if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads')) {
+    return "We can add 50 more targeted leads to your campaign for **+$149/mo** — includes scraping, enrichment, and DNC filtering.\n\nWant me to queue that up?";
+  }
+
+  // ── Inbox rules (post-connect) ────────────────────────────────────────────
+  if (msg.includes('draft only') || msg.includes('draft mode')) {
+    return "✅ Rule saved: **Draft only — don't auto-send**. AKAI will generate proposals and hold them for your review before anything goes out. Applied to all new enquiries.";
+  }
+  if (msg.includes('auto-send') || msg.includes('auto send') || msg.includes('send automatically')) {
+    return "✅ Rule saved: **Auto-send proposals** as soon as they're generated. No manual review needed. Applied to all new enquiries.";
+  }
+  if (msg.includes('notify me') || msg.includes('send me a notification') || msg.includes('alert me')) {
+    return "✅ Rule saved: **Notify on new enquiry** — you'll get a Telegram message every time a new proposal is ready. Applied to all new enquiries.";
+  }
+  if (msg.includes('hold until 9') || msg.includes('send at 9') || msg.includes('wait until morning') || msg.includes('9am')) {
+    return "✅ Rule saved: **Hold until 9am AEST** — proposals are generated immediately but only sent when business hours start. Applied to all new enquiries.";
+  }
+
+  // ── General ───────────────────────────────────────────────────────────────
   if (msg.includes('email') || msg.includes('inbox') || msg.includes('guard')) {
     return "Email Guard monitors your inbox and auto-generates proposals when enquiries arrive. Want me to walk you through connecting it?";
   }

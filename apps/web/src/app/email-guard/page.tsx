@@ -288,31 +288,58 @@ function EmailGuardInner() {
             </section>
           )}
 
-          {/* How it works — only when not connected */}
-          {!isConnected && (
+          {/* Dashboard preview — only when not connected */}
+          {!isConnected && !connecting && (
             <section>
-              <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">How it works</h2>
-              <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 space-y-6">
-                {[
-                  { step: 1, icon: '🔗', title: 'Connect your inbox', desc: 'One-click sign-in. No forwarding rules, no IT admin, no technical setup.' },
-                  { step: 2, icon: '🤖', title: 'AKAI reads enquiries', desc: 'Every inbound email is read and classified. Name, budget, requirements — all extracted automatically.' },
-                  { step: 3, icon: '📄', title: 'Set your rules', desc: 'Tell AK how to handle each type — draft, auto-send, notify, forward. Plain English.' },
-                  { step: 4, icon: '✉️', title: 'Proposals sent', desc: 'Tailored proposals land in your dashboard within seconds. Review and send, or let AKAI auto-send.' },
-                ].map((s, i) => (
-                  <div key={s.step}>
-                    {i > 0 && <div className="w-full border-t border-[#1f1f1f] mb-6" />}
-                    <div className="flex gap-4 items-start">
-                      <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center">
-                        <span className="text-xs font-black text-[#D4AF37]">{s.step}</span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1"><span className="text-lg">{s.icon}</span><p className="font-bold text-white text-sm">{s.title}</p></div>
-                        <p className="text-xs text-gray-500">{s.desc}</p>
-                      </div>
+              <div className="mb-4">
+                <h2 className="text-base font-black text-white">This is what lands in your dashboard</h2>
+                <p className="text-xs text-gray-500 mt-1">Connect your inbox and enquiries like this arrive automatically — with proposals already drafted.</p>
+              </div>
+
+              {/* Mock enquiry card */}
+              <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl overflow-hidden opacity-90 select-none">
+                {/* Card header */}
+                <div className="p-4 flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0 bg-[#D4AF37]" />
+                      <p className="text-sm font-semibold text-white truncate">Kitchen renovation enquiry</p>
+                    </div>
+                    <p className="text-xs text-gray-400">john.smith@gmail.com</p>
+                    <p className="text-xs text-gray-600 mt-1 truncate">Hi, I&apos;m interested in a custom kitchen for my Mosman home, budget around $40k…</p>
+                  </div>
+                  <span className="flex-shrink-0 text-xs px-2 py-0.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 font-semibold whitespace-nowrap">
+                    ✨ Proposal ready
+                  </span>
+                </div>
+
+                {/* Expanded proposal preview */}
+                <div className="border-t border-[#1f1f1f] p-4 space-y-3">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">AI-generated proposal</p>
+                  <div className="bg-[#0a0a0a] rounded-xl p-4 space-y-2 relative overflow-hidden">
+                    <p className="text-sm text-white/40 leading-relaxed">Hi John,</p>
+                    <p className="text-sm text-white/30 leading-relaxed">Thank you for reaching out about your kitchen renovation in Mosman. Based on your budget of $40,000, we&apos;d love to create something exceptional for you…</p>
+                    <p className="text-sm text-white/20 leading-relaxed">Our custom cabinetry starts from premium European materials, and we&apos;ll include a full design consultation at no charge. We&apos;ve completed over 40 kitchens in the…</p>
+                    {/* Fade-out overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
+                  </div>
+
+                  {/* Greyed send button with tooltip */}
+                  <div className="relative group inline-block">
+                    <button
+                      disabled
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37]/20 text-[#D4AF37]/40 rounded-xl text-sm font-bold cursor-not-allowed border border-[#D4AF37]/10"
+                    >
+                      ✉️ Send this proposal
+                    </button>
+                    <div className="absolute bottom-full left-0 mb-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#2f2f2f] text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
+                      Connect inbox to enable
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
+
+              <p className="text-xs text-gray-600 text-center mt-4">⬆️ Connect your inbox above to start receiving real enquiries like this</p>
             </section>
           )}
 
