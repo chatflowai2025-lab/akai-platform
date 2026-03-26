@@ -64,10 +64,10 @@ export default function LoginPage() {
           return;
         }
       }
-      router.push('/dashboard');
+      // Let onAuthStateChanged handle the redirect — it fires after Firebase
+      // persists the session, avoiding a race where dashboard sees no user
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
-    } finally {
       setLoading(false);
     }
   };
@@ -87,10 +87,9 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      router.push('/dashboard');
+      // onAuthStateChanged handles redirect
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
-    } finally {
       setLoading(false);
     }
   };
