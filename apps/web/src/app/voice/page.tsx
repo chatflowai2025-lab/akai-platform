@@ -218,26 +218,43 @@ function ScriptStep({ config, setConfig, userProfile, onBack, onNext }: {
   onNext: () => void;
 }) {
   const profile = userProfile as { businessName?: string; industry?: string; location?: string; campaignConfig?: { businessName?: string; industry?: string; location?: string } } | null;
-  const businessName = profile?.businessName || profile?.campaignConfig?.businessName || 'your business';
-  const industry = profile?.industry || profile?.campaignConfig?.industry || 'your industry';
-  const location = profile?.campaignConfig?.location || 'your area';
+  const profileBizName = profile?.businessName || profile?.campaignConfig?.businessName || '';
+  const profileIndustry = profile?.industry || profile?.campaignConfig?.industry || '';
+  const profileLocation = profile?.campaignConfig?.location || '';
+
+  // Allow user to enter business context inline if profile not loaded
+  const [manualBiz, setManualBiz] = useState(profileBizName);
+  const [manualIndustry, setManualIndustry] = useState(profileIndustry);
+  const [manualLocation, setManualLocation] = useState(profileLocation);
+
+  // Update manual fields when profile loads
+  useEffect(() => {
+    if (profileBizName && !manualBiz) setManualBiz(profileBizName);
+    if (profileIndustry && !manualIndustry) setManualIndustry(profileIndustry);
+    if (profileLocation && !manualLocation) setManualLocation(profileLocation);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileBizName, profileIndustry, profileLocation]);
+
+  const businessName = manualBiz || 'your business';
+  const industry = manualIndustry || 'your industry';
+  const location = manualLocation || 'your area';
 
   const [suggestions, setSuggestions] = useState<{ hooks: string[]; questions: string[] } | null>(null);
   const [generating, setGenerating] = useState(false);
   const [selectedHook, setSelectedHook] = useState<string | null>(config.script.hook || null);
   const [selectedQ, setSelectedQ] = useState<string | null>(config.script.qualifyingQuestion || null);
+  const [showBizForm, setShowBizForm] = useState(!profileBizName);
 
   useEffect(() => {
-    // Auto-generate when we have business context (fires on mount AND when userProfile loads)
+    // Auto-generate when we have business context
     if (businessName !== 'your business' && !suggestions && !generating) {
       generateSuggestions();
-      // Pre-fill opening line with real business name if still default
       if (config.script.openingLine.includes('{{businessName}}') || config.script.openingLine.includes('[BusinessName]')) {
         setConfig({ ...config, script: { ...config.script, openingLine: `Hi, is that {{name}}? This is Sophie calling from ${businessName}.` } });
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessName]); // re-run when businessName changes (userProfile loads async)
+  }, [businessName]);
 
   const generateSuggestions = async () => {
     setGenerating(true);
@@ -305,6 +322,43 @@ Hooks should be specific to ${industry} in ${location}. Questions should help qu
           {generating ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : '✨'} {generating ? 'Writing...' : 'Regenerate'}
         </button>
       </div>
+
+      {/* Business context form — shown if profile not loaded */}
+      {showBizForm && (
+        <div className="bg-[#0d0d0d] border border-[#D4AF37]/20 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-[#D4AF37] font-semibold uppercase tracking-wider">Tell Sophie about your business</p>
+            {manualBiz && <button onClick={() => { setShowBizForm(false); generateSuggestions(); }} className="text-xs text-gray-500 hover:text-white transition">Done →</button>}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Business name</label>
+              <input type="text" value={manualBiz} onChange={e => setManualBiz(e.target.value)}
+                placeholder="e.g. AP Heritage Interior"
+                className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Industry</label>
+              <input type="text" value={manualIndustry} onChange={e => setManualIndustry(e.target.value)}
+                placeholder="e.g. luxury kitchens"
+                className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Location</label>
+              <input type="text" value={manualLocation} onChange={e => setManualLocation(e.target.value)}
+                placeholder="e.g. Sydney"
+                className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
+            </div>
+          </div>
+          <button
+            onClick={() => { setShowBizForm(false); if (manualBiz) generateSuggestions(); }}
+            disabled={!manualBiz || generating}
+            className="w-full py-2 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 transition disabled:opacity-40"
+          >
+            {generating ? 'Writing suggestions…' : '✨ Write my script →'}
+          </button>
+        </div>
+      )}
 
       {/* Opening line */}
       <div>
