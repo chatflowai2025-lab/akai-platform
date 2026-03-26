@@ -407,7 +407,7 @@ export default function Hero() {
           >
             Free Digital Health Check
           </button>
-          <Button href="#how-it-works" variant="ghost" size="lg">
+          <Button href="#how-it-works" variant="secondary" size="lg">
             See how it works
           </Button>
         </div>
