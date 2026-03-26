@@ -67,8 +67,12 @@ export function useAuth() {
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) {
-      setLoading(false);
-      return;
+      // Auth not available yet (SSR) — retry after hydration
+      const t = setTimeout(() => {
+        const a = getFirebaseAuth();
+        if (!a) setLoading(false);
+      }, 1000);
+      return () => clearTimeout(t);
     }
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
