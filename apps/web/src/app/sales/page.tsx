@@ -198,9 +198,18 @@ function CallStatusBadge({ status }: { status?: Lead['callStatus'] }) {
   return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">Failed</span>;
 }
 
+// ── Plan lead limits ─────────────────────────────────────────────────────────
+const PLAN_LEAD_LIMITS: Record<string, number> = {
+  starter: 50,
+  growth: 150,
+  scale: 500,
+  trial: 20,
+};
+const EXTRA_LEAD_PRICE = 3; // $3 per extra lead
+
 // ── Lead Upload Section ───────────────────────────────────────────────────
 
-function LeadUploadSection({ userId, businessName }: { userId: string; businessName: string }) {
+function LeadUploadSection({ userId, businessName, plan = 'starter' }: { userId: string; businessName: string; plan?: string }) {
   const [mode, setMode] = useState<'manual' | 'csv'>('manual');
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
@@ -208,6 +217,9 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
   const [launching, setLaunching] = useState(false);
   const [launchResult, setLaunchResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const leadLimit = PLAN_LEAD_LIMITS[plan] ?? 50;
+  const excessLeads = Math.max(0, uploadedLeads.length - leadLimit);
+  const extraCost = excessLeads * EXTRA_LEAD_PRICE;
 
   const addManualLead = () => {
     if (!form.name && !form.phone) return;
@@ -452,7 +464,21 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
         )}
 
         {/* Launch result */}
-        {launchResult && (
+        {/* Plan limit warning */}
+      {uploadedLeads.length > leadLimit && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 text-sm">
+          <p className="text-yellow-300 font-semibold">⚠️ Over plan limit</p>
+          <p className="text-yellow-400/80 text-xs mt-1">
+            Your <strong>{plan.charAt(0).toUpperCase() + plan.slice(1)}</strong> plan includes <strong>{leadLimit} leads/mo</strong>.
+            You've added {uploadedLeads.length} — that's <strong>{excessLeads} extra at ${EXTRA_LEAD_PRICE}/each = ${extraCost}</strong>.
+          </p>
+          <button className="mt-2 text-xs text-yellow-300 underline hover:text-yellow-200">
+            Generate payment link for {excessLeads} extra leads →
+          </button>
+        </div>
+      )}
+
+    {launchResult && (
           <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium ${
             launchResult.success
               ? 'bg-green-500/10 border-green-500/20 text-green-400'
@@ -594,7 +620,7 @@ export default function SalesPage() {
       <div className="flex-1 overflow-y-auto p-8 space-y-8">
 
         {/* Lead Upload & Campaign */}
-        <LeadUploadSection userId={user.uid} businessName={businessName} />
+        <LeadUploadSection userId={user.uid} businessName={businessName} plan={(userProfile as { plan?: string } | null)?.plan || 'starter'} />
 
         {/* Live stats */}
         <section>
