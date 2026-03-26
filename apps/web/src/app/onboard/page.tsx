@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 const INITIAL_MESSAGE: ChatMessage = {
   id: '1',
   role: 'assistant',
-  content: "Hey! I'm MM, your AI business partner. I'm here to build, run, and grow your business — while you focus on closing deals.\n\nLet's get your AKAI OS set up in the next 2 minutes.\n\nFirst — what industry are you in?",
+  content: "Hi, I'm AK — your AI business partner. I'm here to build, run, and grow your business while you focus on closing deals.\n\nLet's get your AKAI OS set up in 2 minutes.\n\nFirst — what industry are you in?",
   timestamp: new Date().toISOString(),
 };
 
