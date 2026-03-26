@@ -29,6 +29,15 @@ const TONE_GUIDES: Record<string, string> = {
 function getMockPosts(brief: string, tone = 'Professional'): PlatformPost[] {
   const toneNote = tone === 'Funny' ? '😂 ' : tone === 'Inspirational' ? '💡 ' : tone === 'Casual' ? '👋 ' : '';
 
+  const x =
+    tone === 'Funny'
+      ? `me: i don't need ${brief}\nalso me: *completely obsessed with ${brief}*\n\nthe pipeline was already full 💀`
+      : tone === 'Inspirational'
+      ? `${brief} isn't a shortcut. It's a system.\n\nBuild the system. The results follow.`
+      : tone === 'Casual'
+      ? `ngl ${brief} actually slaps\n\nwhy didn't anyone tell me sooner`
+      : `${brief} is the move right now.\n\nIf you're not paying attention, you're falling behind.`;
+
   const instagram =
     tone === 'Funny'
       ? `POV: You just discovered ${brief} and now you can't imagine life before it. 😅\n\nThis is the glow-up nobody warned you about. Buckle up.\n\n(Swipe if you're ready to never go back 👉)`
@@ -85,6 +94,13 @@ function getMockPosts(brief: string, tone = 'Professional'): PlatformPost[] {
       hashtags: '#community #business #growth',
       characterCount: facebook.length,
     },
+    {
+      platform: 'X',
+      icon: '𝕏',
+      content: x,
+      hashtags: '',
+      characterCount: x.length,
+    },
   ];
 }
 
@@ -113,7 +129,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<GenerateRespo
   try {
     const client = new Anthropic({ apiKey });
 
-    const systemPrompt = `You are a world-class social media strategist. Generate platform-optimised posts for Instagram, LinkedIn, and Facebook.
+    const systemPrompt = `You are a world-class social media strategist. Generate platform-optimised posts for Instagram, LinkedIn, Facebook, and X (Twitter).
 
 TONE: ${tone} — ${toneGuide}
 
@@ -130,10 +146,14 @@ Return ONLY a valid JSON object in this exact format:
   "facebook": {
     "content": "the post text (community-focused, conversational, encourage sharing/comments, warm tone)",
     "hashtags": "#relevant #hashtags (3-5 tags)"
+  },
+  "x": {
+    "content": "the tweet (MUST be under 280 characters total including any spaces — punchy, no hashtags needed, hook in first 5 words, conversational or bold)",
+    "hashtags": ""
   }
 }
 
-Each post must be uniquely crafted for that platform's culture. Instagram is visual and punchy. LinkedIn is professional and insightful. Facebook is community and conversation. Apply the ${tone} tone consistently across all three. No extra text outside the JSON.`;
+Each post must be uniquely crafted for that platform's culture. Instagram is visual and punchy. LinkedIn is professional and insightful. Facebook is community and conversation. X is ultra-short, bold, and punchy — like a hot take or witty observation. Apply the ${tone} tone consistently. No extra text outside the JSON.`;
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
@@ -148,6 +168,7 @@ Each post must be uniquely crafted for that platform's culture. Instagram is vis
       instagram: { content: string; hashtags: string };
       linkedin: { content: string; hashtags: string };
       facebook: { content: string; hashtags: string };
+      x?: { content: string; hashtags: string };
     };
 
     try {
@@ -179,6 +200,13 @@ Each post must be uniquely crafted for that platform's culture. Instagram is vis
         content: parsed.facebook.content,
         hashtags: parsed.facebook.hashtags,
         characterCount: parsed.facebook.content.length,
+      },
+      {
+        platform: 'X',
+        icon: '𝕏',
+        content: parsed.x?.content ?? '',
+        hashtags: '',
+        characterCount: (parsed.x?.content ?? '').length,
       },
     ];
 

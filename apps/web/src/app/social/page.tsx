@@ -45,12 +45,14 @@ const PLATFORMS = [
   { id: 'instagram', label: 'Instagram', icon: '📸', color: 'from-pink-500 to-purple-500' },
   { id: 'linkedin', label: 'LinkedIn', icon: '💼', color: 'from-blue-600 to-blue-400' },
   { id: 'facebook', label: 'Facebook', icon: '👥', color: 'from-blue-500 to-indigo-500' },
+  { id: 'x', label: 'X (Twitter)', icon: '𝕏', color: 'from-gray-200 to-gray-400' },
 ];
 
 const CHAR_LIMITS: Record<string, number> = {
   Instagram: 2200,
   LinkedIn: 3000,
   Facebook: 63206,
+  X: 280,
 };
 
 const TONES = ['Professional', 'Casual', 'Funny', 'Inspirational'] as const;
@@ -166,6 +168,7 @@ export default function SocialPage() {
     Instagram: { gradient: 'from-pink-500/10 to-purple-500/10', border: 'border-pink-500/20', badge: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
     LinkedIn: { gradient: 'from-blue-600/10 to-blue-400/10', border: 'border-blue-500/20', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
     Facebook: { gradient: 'from-indigo-500/10 to-blue-500/10', border: 'border-indigo-500/20', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+    X: { gradient: 'from-gray-200/5 to-gray-400/5', border: 'border-gray-400/20', badge: 'bg-gray-400/10 text-gray-200 border-gray-400/20' },
   };
 
   return (
@@ -174,7 +177,7 @@ export default function SocialPage() {
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <h1 className="text-xl font-black text-white">Social</h1>
-          <p className="text-xs text-gray-500 mt-0.5">AI-powered content for Instagram, LinkedIn & Facebook</p>
+          <p className="text-xs text-gray-500 mt-0.5">AI-powered content for Instagram, LinkedIn, Facebook & X</p>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 font-medium">Live</span>
       </header>
@@ -184,11 +187,12 @@ export default function SocialPage() {
         {/* Connect Accounts */}
         <section>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Connect Accounts</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {[
               { label: 'Instagram', icon: '📸', gradient: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-500/20', text: 'text-pink-400' },
               { label: 'LinkedIn', icon: '💼', gradient: 'from-blue-600/20 to-blue-400/20', border: 'border-blue-500/20', text: 'text-blue-400' },
               { label: 'Facebook', icon: '👥', gradient: 'from-blue-500/20 to-indigo-500/20', border: 'border-indigo-500/20', text: 'text-indigo-400' },
+              { label: 'X (Twitter)', icon: '𝕏', gradient: 'from-gray-200/10 to-gray-400/10', border: 'border-gray-400/20', text: 'text-gray-200' },
             ].map(p => (
               <button
                 key={p.label}
@@ -298,7 +302,7 @@ export default function SocialPage() {
                     🔄 Regenerate all
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                   {generatedPosts.map(post => {
                     const styles = platformCardStyles[post.platform] ?? { gradient: 'from-gray-500/10 to-gray-400/10', border: 'border-gray-500/20', badge: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
                     const currentText = editedContent[post.platform] ?? `${post.content}\n\n${post.hashtags}`;
@@ -313,7 +317,7 @@ export default function SocialPage() {
                             <span className="text-sm font-bold text-white">{post.platform}</span>
                           </div>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${styles.badge}`}>
-                            {post.platform === 'Instagram' ? '2,200' : post.platform === 'LinkedIn' ? '3,000' : '63,206'} char limit
+                            {post.platform === 'Instagram' ? '2,200' : post.platform === 'LinkedIn' ? '3,000' : post.platform === 'X' ? '280' : '63,206'} char limit
                           </span>
                         </div>
 
@@ -328,6 +332,9 @@ export default function SocialPage() {
                         {/* Char bar */}
                         <div className="mt-2">
                           <CharBar count={charCount} limit={limit} />
+                          {post.platform === 'X' && charCount > 280 && (
+                            <p className="text-[10px] text-red-400 mt-1">⚠️ Over 280 chars — trim before posting</p>
+                          )}
                         </div>
 
                         {/* Action buttons */}
