@@ -39,6 +39,45 @@ function ScoreRing({ label, score }: { label: string; score: number }) {
   );
 }
 
+// ── Parse content into sections ────────────────────────────────────────────────
+function parseContentSections(raw: string): Array<{ label: string; text: string }> {
+  const sections: Array<{ label: string; text: string }> = [];
+  // Try to parse "Label: value" or "**Label:** value" or "## Label\n value" patterns
+  const lines = raw.split('\n');
+  let currentLabel = '';
+  let currentLines: string[] = [];
+
+  const flush = () => {
+    if (currentLabel && currentLines.some(l => l.trim())) {
+      sections.push({ label: currentLabel, text: currentLines.join('\n').trim() });
+    }
+    currentLabel = '';
+    currentLines = [];
+  };
+
+  for (const line of lines) {
+    // Match patterns like "Headline:", "**Headline:**", "## Headline"
+    const sectionMatch = line.match(/^(?:#{1,3}\s+)?(?:\*\*)?([A-Z][A-Za-z\s]+?)(?:\*\*)?:\s*(.*)$/);
+    if (sectionMatch) {
+      flush();
+      currentLabel = sectionMatch[1].trim();
+      if (sectionMatch[2].trim()) currentLines.push(sectionMatch[2].trim());
+    } else if (line.trim()) {
+      currentLines.push(line);
+    } else if (currentLabel) {
+      currentLines.push('');
+    }
+  }
+  flush();
+
+  // If we couldn't parse sections, return raw as one block
+  if (sections.length === 0) {
+    sections.push({ label: 'Generated Copy', text: raw.trim() });
+  }
+
+  return sections;
+}
+
 // ── Website Audit Section ─────────────────────────────────────────────────────
 function WebsiteAudit() {
   const { sendMessage } = useDashboardChat();
@@ -63,7 +102,6 @@ function WebsiteAudit() {
       });
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
-      // Normalise various response shapes
       setResult({
         speedScore: data.speedScore ?? data.speed_score ?? data.performance ?? 72,
         seoScore: data.seoScore ?? data.seo_score ?? data.seo ?? 68,
@@ -173,6 +211,8 @@ function ContentGenerator() {
   const [goals, setGoals] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateResult | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -183,11 +223,13 @@ function ContentGenerator() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setEditMode(false);
     try {
       const res = await fetch('/api/web/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          pageType,
           businessName: businessName.trim(),
           industry: industry.trim() || 'General',
           description: description.trim() || `${pageType} page for ${businessName}`,
@@ -196,18 +238,11 @@ function ContentGenerator() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Generation failed');
-      // The current API returns a websiteUrl + status — wrap it into readable copy
-      const generatedContent =
-        data.content ??
-        `# ${pageType} Page — ${businessName}\n\n` +
-          `Your ${pageType.toLowerCase()} page is being generated.\n\n` +
-          `**Preview URL:** ${data.websiteUrl ?? 'Coming soon'}\n` +
-          `**Status:** ${data.status ?? 'generating'}\n` +
-          `**ETA:** ${data.eta ?? '2 minutes'}\n\n` +
-          `Our team will have your full ${pageType.toLowerCase()} page copy ready shortly. ` +
-          `You'll receive a notification once it's live at your preview URL.`;
 
-      setResult({ pageType, content: generatedContent });
+      const content = data.content ?? `Headline: Transform Your Business with ${businessName}\n\nSubheadline: Professional solutions that drive real results.\n\nKey Points:\n• Expert team with proven track record\n• Tailored solutions for your needs\n• Fast results with ongoing support\n\nCTA: Get Started Today\n\nBody: ${businessName} delivers exceptional results for businesses like yours.`;
+
+      setResult({ pageType, content });
+      setEditedContent(content);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Unknown error';
       setError(`Generation failed: ${msg}`);
@@ -217,11 +252,14 @@ function ContentGenerator() {
   };
 
   const copy = async () => {
-    if (!result) return;
-    await navigator.clipboard.writeText(result.content);
+    const text = editMode ? editedContent : (result?.content ?? '');
+    await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const displayContent = editMode ? editedContent : (result?.content ?? '');
+  const sections = result ? parseContentSections(displayContent) : [];
 
   return (
     <section className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
@@ -258,7 +296,6 @@ function ContentGenerator() {
           </div>
         </div>
 
-        {/* Business name */}
         <input
           value={businessName}
           onChange={(e) => setBusinessName(e.target.value)}
@@ -321,21 +358,67 @@ function ContentGenerator() {
       )}
 
       {result && (
-        <div className="mt-5 space-y-3">
+        <div className="mt-5 space-y-4">
+          {/* Toolbar */}
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
               Generated — {result.pageType} Page
             </p>
-            <button
-              onClick={copy}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#D4AF37]/30 transition"
-            >
-              {copied ? '✅ Copied!' : '📋 Copy to clipboard'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setEditMode(!editMode)}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition ${
+                  editMode
+                    ? 'border-[#D4AF37]/50 text-[#D4AF37] bg-[#D4AF37]/10'
+                    : 'border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#D4AF37]/30'
+                }`}
+              >
+                ✏️ {editMode ? 'Editing' : 'Edit'}
+              </button>
+              <button
+                onClick={copy}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#D4AF37]/30 transition"
+              >
+                {copied ? '✅ Copied!' : '📋 Copy all'}
+              </button>
+            </div>
           </div>
-          <pre className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4 text-sm text-gray-300 whitespace-pre-wrap leading-relaxed overflow-x-auto font-mono">
-            {result.content}
-          </pre>
+
+          {/* Edit mode: single textarea */}
+          {editMode ? (
+            <textarea
+              value={editedContent}
+              onChange={e => setEditedContent(e.target.value)}
+              rows={20}
+              className="w-full bg-[#0d0d0d] border border-[#D4AF37]/30 rounded-xl p-4 text-sm text-gray-200 leading-relaxed resize-y focus:outline-none focus:border-[#D4AF37]/60 transition font-mono"
+            />
+          ) : (
+            /* Structured sections display */
+            <div className="space-y-3">
+              {sections.map((section, i) => (
+                <div key={i} className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4">
+                  <p className="text-xs text-[#D4AF37] font-semibold uppercase tracking-wider mb-2">
+                    {section.label}
+                  </p>
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {section.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {editMode && (
+            <button
+              onClick={() => {
+                setResult({ ...result, content: editedContent });
+                setEditMode(false);
+              }}
+              className="w-full py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
+            >
+              ✅ Save edits
+            </button>
+          )}
         </div>
       )}
     </section>

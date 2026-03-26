@@ -40,7 +40,7 @@ When user describes how they want emails handled, extract the rule and save it:
 
 CRITICAL RULES:
 - Never mention aiclozr.vercel.app — everything is at getakai.ai
-- Keep responses under 150 words
+- Keep responses under 200 words
 - Ask ONE question at a time
 - Be the smartest person in the room but never show off
 - When you save something, confirm it clearly: "✅ Done — [what was saved]"
@@ -54,143 +54,186 @@ interface ChatMessage {
 interface ChatRequest {
   message: string;
   history?: ChatMessage[];
-  userContext?: Record<string, string>;
-  state?: Record<string, unknown>;
 }
 
-function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}): string {
-  const msg = message.toLowerCase();
+// ── Smart mock response engine ────────────────────────────────────────────────
+function getMockResponse(message: string, history: ChatMessage[]): string {
+  const msg = message.toLowerCase().trim();
   const lastAssistant = history.filter(h => h.role === 'assistant').pop()?.content?.toLowerCase() ?? '';
+  const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
 
-  // Email Guard setup flow
-  if (msg.includes('connect') && (msg.includes('inbox') || msg.includes('email'))) {
-    return "Sure! First — do you want to **send** emails, **receive and read** incoming emails, or **both**?\n\nNote: I\'ll get you the exact forwarding address once I know your setup.";
+  // ── Candidate outreach drafting ───────────────────────────────────────────
+  const outreachMatch = msg.match(/draft (?:an? )?(?:outreach|message|intro) (?:for|to) (.+?)(?:,\s*(.+?))?(?:\s+at\s+(.+))?$/i)
+    || message.match(/draft (?:an? )?(?:outreach|message|intro) (?:for|to) (.+?)(?:,\s*(.+?))?(?:\s+at\s+(.+))?$/i);
+
+  if (outreachMatch || (msg.includes('draft') && (msg.includes('outreach') || msg.includes('message') || msg.includes('linkedin')))) {
+    // Extract name/role from message
+    const rawDetails = message.replace(/draft (?:an? )?(?:outreach|message|intro)(?: for| to)?/i, '').trim();
+    const parts = rawDetails.split(',').map(s => s.trim());
+    const candidateName = parts[0] || 'the candidate';
+    const roleAndCompany = parts.slice(1).join(', ') || '';
+
+    return `Here's a personalised LinkedIn message for **${candidateName}**:\n\n---\n\nHi ${candidateName.split(' ')[0]},\n\nI came across your profile and your background at ${roleAndCompany || 'your current company'} caught my attention — particularly your experience in [their top skill].\n\nWe're building something interesting at AKAI and I think you'd be a strong fit for a role we're hiring for. It's not the kind of opportunity that shows up often.\n\nWorth a 15-minute call this week? No commitment — just a conversation.\n\n[Your name]\n\n---\n\nWant me to adjust the tone or add specifics about the role?`;
   }
 
-  if (lastAssistant.includes('send') && lastAssistant.includes('receive')) {
-    if (msg.includes('both') || msg.includes('send and receive') || msg.includes('receive and send')) {
+  // ── Social post creation ──────────────────────────────────────────────────
+  const postTopicMatch = msg.match(/(?:create|write|draft|generate) (?:a |an )?post (?:about|on|for) (.+)/i)
+    || message.match(/(?:create|write|draft|generate) (?:a |an )?post (?:about|on|for) (.+)/i);
+
+  if (postTopicMatch) {
+    const topic = postTopicMatch[1].trim();
+    return `Here's a LinkedIn post about **${topic}**:\n\n---\n\nMost people overcomplicate ${topic}.\n\nHere's what actually works:\n\n→ Start before you're ready. Momentum beats perfection every time.\n→ Focus on one metric that matters. Ignore the noise.\n→ Talk to your customers weekly. Not monthly. Weekly.\n\nI've seen businesses transform by applying just one of these. The compounding effect is real.\n\nWhat's your biggest challenge with ${topic} right now? Drop it in the comments — I read every one.\n\n---\n\nWant this adapted for Instagram or Facebook too? Or adjusted in tone?`;
+  }
+
+  // ── Campaign launch reaching "launch" step ────────────────────────────────
+  if (msg.includes('launch') && (msg.includes('campaign') || msg.includes('sophie') || lastAssistant.includes('launch sophie') || lastAssistant.includes('ready to launch'))) {
+    return "To launch, I need your lead list. You can upload a CSV in the **Sales module**, or tell me who to call and I'll research them.\n\nCSV format: first name, last name, phone, company, location. That's it.\n\nAlternatively, tell me your target — e.g. 'kitchen renovation companies in Sydney' — and I'll build the list for you. Which works better?";
+  }
+
+  // ── Campaign configuration ────────────────────────────────────────────────
+  if (msg.includes('launch campaign') || msg.includes('new campaign') || msg.includes('configure sophie')) {
+    return "Based on your onboarding setup, here's Sophie's current config:\n\n📋 **Campaign summary**\n• **Target:** Australian SMBs — kitchens, renovations, luxury trades\n• **Contact list:** 150 leads (Mosman, Paddington, Double Bay)\n• **Script:** Warm intro → qualify budget → book site visit\n• **Call hours:** Mon–Fri, 9am–5pm AEST\n• **Fallback:** SMS if no answer after 2 attempts\n\nWant to change anything, or should I launch Sophie now?";
+  }
+
+  if (lastAssistant.includes('launch sophie now') || lastAssistant.includes('want to change anything')) {
+    if (msg.includes('launch') || msg.includes('looks good') || msg.includes('go') || msg.includes('yes') || msg.includes('do it')) {
+      return "To launch, I need your lead list. You can upload a CSV in the **Sales module**, or tell me who to call and I'll research them.\n\nCSV format: first name, last name, phone, company, location.\n\nOr tell me your target market and I'll build the list.";
+    }
+  }
+
+  if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads')) {
+    return "Your current plan includes **50 contacts/month**. Adding another list of 50 targeted leads is **+$149/mo** — includes lead research, enrichment, and DNC filtering.\n\nWant me to add it before we launch?";
+  }
+
+  // ── Email Guard setup flow ───────────────────────────────────────────────
+  if (msg.includes('connect') && (msg.includes('inbox') || msg.includes('email'))) {
+    return "Sure. First — do you want to **send** emails, **receive and read** incoming emails, or **both**?";
+  }
+
+  if (lastAssistant.includes('send') && lastAssistant.includes('receive') && !lastAssistant.includes('instructions')) {
+    if (msg.includes('both') || msg.includes('send and receive')) {
       return "Got it — both directions. What email do you use? **Gmail**, **Outlook**, or something else?";
     }
     if (msg.includes('send')) {
       return "Sending only — noted. What email do you use? **Gmail**, **Outlook**, or something else?";
     }
-    if (msg.includes('receive') || msg.includes('incoming') || msg.includes('read')) {
+    if (msg.includes('receive') || msg.includes('incoming')) {
       return "Incoming emails only — that's Email Guard's sweet spot. What email do you use? **Gmail**, **Outlook**, or something else?";
     }
   }
 
-  if (lastAssistant.includes('gmail') && lastAssistant.includes('outlook')) {
+  if (lastAssistant.includes('gmail') && lastAssistant.includes('outlook') && !lastAssistant.includes('forwarding')) {
     if (msg.includes('gmail')) {
-      return "Before we set up, quick heads up — once forwarding is on, AKAI receives copies of emails sent to that address. We only use them to generate proposals. We don't store, sell or share your data. You can turn it off anytime.\n\n**Are you happy to proceed?**";
+      return "Quick heads-up before we connect — AKAI receives copies of emails to generate proposals. We don't store, sell, or share your data. You can disconnect anytime.\n\n**Happy to proceed?**";
     }
     if (msg.includes('outlook')) {
-      return "Before we set up, quick heads up — once forwarding is on, AKAI receives copies of emails sent to that address. We only use them to generate proposals. We don't store, sell or share your data. You can turn it off anytime.\n\n**Are you happy to proceed?**";
+      return "Quick heads-up before we connect — AKAI receives copies of emails to generate proposals. We don't store, sell, or share your data. You can disconnect anytime.\n\n**Happy to proceed?**";
     }
   }
 
-  if (lastAssistant.includes('happy to proceed') || lastAssistant.includes('are you happy')) {
-    if (msg.includes('yes') || msg.includes('ok') || msg.includes('sure') || msg.includes('proceed') || msg.includes('go')) {
-      const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
+  if (lastAssistant.includes('happy to proceed')) {
+    if (msg.includes('yes') || msg.includes('ok') || msg.includes('sure') || msg.includes('go')) {
       const usedGmail = prevUserMsgs.some(m => m.includes('gmail'));
       if (usedGmail) {
-        return "Here's how to set up Gmail forwarding:\n\n1. Open Gmail → ⚙️ → **See all settings**\n2. Go to **Forwarding and POP/IMAP**\n3. Click **Add a forwarding address** → enter `inbox@getakai.ai` *(your account manager will confirm the exact address)*\n4. Click the confirmation link Gmail sends you\n5. Select **Forward a copy of incoming mail** → **Save Changes**\n\nThat's it. Your next enquiry will appear in Email Guard automatically. 🎉";
+        return "**Gmail forwarding setup:**\n\n1. Gmail → ⚙️ → See all settings\n2. Go to **Forwarding and POP/IMAP**\n3. Click **Add a forwarding address** → enter `inbox@getakai.ai`\n4. Click the confirmation link Gmail sends\n5. Select **Forward a copy of incoming mail** → Save\n\nYour next enquiry will show up in Email Guard automatically. 🎉";
       }
-      return "Here's how to set up Outlook forwarding:\n\n1. Open Outlook → **Settings** → View all Outlook settings\n2. Go to **Mail → Forwarding**\n3. Enable forwarding → enter `inbox@getakai.ai` *(your account manager will confirm the exact address)*\n4. Hit **Save**\n\nThat's it. Your next enquiry will appear in Email Guard automatically. 🎉";
+      return "**Outlook forwarding setup:**\n\n1. Outlook → Settings → View all Outlook settings\n2. Go to **Mail → Forwarding**\n3. Enable forwarding → enter `inbox@getakai.ai`\n4. Save\n\nYour next enquiry will show up in Email Guard automatically. 🎉";
     }
   }
 
-  // ── Campaign launcher ────────────────────────────────────────────────────
-  if (msg.includes('launch campaign') || msg.includes('new campaign') || msg.includes('configure sophie')) {
-    return "Based on your onboarding setup, here's what Sophie is configured with:\n\n📋 **Campaign summary**\n• **Target:** Australian SMBs — kitchens, renovations, luxury trades\n• **Contact list:** 150 leads (Mosman, Paddington, Double Bay)\n• **Script:** Warm intro → qualify budget → book site visit\n• **Call hours:** Mon–Fri, 9am–5pm AEST\n• **Fallback:** SMS if no answer after 2 attempts\n\nWant to change anything, or should I launch Sophie now?";
+  // ── Platform connection requests ─────────────────────────────────────────
+  if (msg.includes('connect my instagram') || msg.includes('connect instagram')) {
+    return "Instagram connection uses OAuth — here's how to get set up:\n\n1. Go to **Social** → click **Connect** under Instagram\n2. You'll be redirected to Meta's OAuth page\n3. Approve AKAI's access (read + publish permissions)\n4. You'll land back here fully connected\n\nThis is in beta — send me a quick message and I'll prioritise getting your account linked this week.";
   }
 
-  if (lastAssistant.includes('launch sophie now') || lastAssistant.includes('want to change anything')) {
-    if (msg.includes('launch') || msg.includes('looks good') || msg.includes('go') || msg.includes('yes') || msg.includes('do it')) {
-      return "✅ Sophie is launching now.\n\nShe'll start working through your list today. I'll send you a Telegram notification when the first meeting is booked — usually within a few hours.\n\nYou can check live call stats in the Sales dashboard anytime.";
-    }
-    if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads')) {
-      return "Want to add another contact list? We can load 50 more targeted leads for **+$149/mo**.\n\nThat covers scraping, enrichment, and DNC filtering. Want me to set that up before we launch?";
-    }
+  if (msg.includes('connect my linkedin') || msg.includes('connect linkedin')) {
+    return "LinkedIn connection is in our beta queue. Here's what happens when it's ready:\n\n1. Click **Connect** in the Social module\n2. OAuth redirects to LinkedIn's approval page\n3. Approve read + post access\n4. AKAI can then post directly from the platform\n\nI'll flag you as priority access — you'll get early access within the week.";
   }
 
-  if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads') || msg.includes('more contacts')) {
-    return "Your current plan includes **50 contacts/month**. Adding another list of 50 more targeted leads is **+$149/mo** — includes lead research, enrichment, and DNC filtering.\n\nWant me to add it?";
+  if (msg.includes('connect my facebook') || msg.includes('connect facebook')) {
+    return "Facebook connection via Meta's API is in final testing. To get early access:\n\n1. I'll add you to the beta list now\n2. You'll get an email when it's ready\n3. Setup takes under 2 minutes via OAuth\n\nIn the meantime, use the Social module to generate and copy content directly to Facebook.";
   }
 
-  // ── Inbox rules (post-connect) ────────────────────────────────────────────
+  // ── Inbox rules ─────────────────────────────────────────────────────────
   if (msg.includes('draft only') || msg.includes('draft mode')) {
-    return "✅ Rule saved: **Draft only — don't auto-send**. AKAI will generate proposals and hold them for your review before anything goes out. Applied to all new enquiries.";
+    return "✅ Rule saved: **Draft only** — AKAI generates proposals but holds them for your review. Nothing sends without your sign-off. Applied to all new enquiries.";
   }
   if (msg.includes('auto-send') || msg.includes('auto send') || msg.includes('send automatically')) {
-    return "✅ Rule saved: **Auto-send proposals** as soon as they're generated. No manual review needed. Applied to all new enquiries.";
+    return "✅ Rule saved: **Auto-send proposals** immediately after generation. Applied to all new enquiries. You'll still get Telegram notifications.";
   }
-  if (msg.includes('notify me') || msg.includes('send me a notification') || msg.includes('alert me')) {
-    return "✅ Rule saved: **Notify on new enquiry** — you'll get a Telegram message every time a new proposal is ready. Applied to all new enquiries.";
+  if (msg.includes('notify me') || msg.includes('send me a notification')) {
+    return "✅ Rule saved: **Notify on new enquiry** — Telegram message every time a proposal is ready. Applied immediately.";
   }
-  if (msg.includes('hold until 9') || msg.includes('send at 9') || msg.includes('wait until morning') || msg.includes('9am')) {
-    return "✅ Rule saved: **Hold until 9am AEST** — proposals are generated immediately but only sent when business hours start. Applied to all new enquiries.";
+  if (msg.includes('hold until 9') || msg.includes('send at 9') || msg.includes('9am')) {
+    return "✅ Rule saved: **Hold until 9am AEST** — proposals generated immediately but sent when business hours start. Smart timing.";
   }
 
-  // ── General ───────────────────────────────────────────────────────────────
-  if (msg.includes('email') || msg.includes('inbox') || msg.includes('guard')) {
-    return "Email Guard monitors your inbox and auto-generates proposals when enquiries arrive. Want me to walk you through connecting it?";
+  // ── Recruit flows ────────────────────────────────────────────────────────
+  if (msg.startsWith('draft an outreach message for ')) {
+    const details = msg.replace('draft an outreach message for ', '').trim();
+    const parts = details.split(',').map(s => s.trim());
+    const name = parts[0] || 'the candidate';
+    const firstName = name.split(' ')[0];
+    const rest = parts.slice(1).join(', ');
+
+    return `Here's a personalised LinkedIn message for **${name}**:\n\n---\n\nHi ${firstName},\n\nI came across your profile — your background at ${rest || 'your current company'} is exactly the kind of experience we're looking for.\n\nWe're hiring for a senior role at AKAI and I think you'd be a strong fit. Not a generic position — something where your specific experience would actually matter from day one.\n\nWorth a 15-minute call this week?\n\n[Your name]\n\n---\n\nWant a different tone — more casual, or more specific about the role?`;
   }
-  if (msg.includes('sales') || msg.includes('lead') || msg.includes('campaign') || msg.includes('sophie')) {
-    return "The Sales module uses Sophie AI — she makes outbound calls, qualifies leads, and books meetings 24/7. Want to launch a campaign or check your pipeline?";
-  }
-  // ── Recruit flows ─────────────────────────────────────────────────────────
-  if (msg.includes('find candidates') || (msg.includes('find') && msg.includes('candidate'))) {
-    return "Let's find you the right people. What role are you hiring for? Give me the job title and I'll start matching.";
-  }
-  if (msg.includes('post a job') || msg.includes('post job') || (msg.includes('post') && msg.includes('role'))) {
-    return "Got it — let's post the role. Switch to the **Post a Job** tab and fill in the details. Once it's live, you'll get a unique apply link to share. AKAI AI-screens every applicant against your requirements.";
-  }
-  if (msg.includes('screen applicants') || msg.includes('screen candidates') || (msg.includes('screen') && (msg.includes('applicant') || msg.includes('candidate')))) {
-    return "AI screening works like this: every applicant submits their details → AKAI scores them against your job requirements (0–100%) → you only see the top matches.\n\nI flag: matched skills, experience gaps, and a recommended next step (interview, call, or pass). Want me to screen your current applicants?";
-  }
+
   if (msg.startsWith('find candidates for:') || msg.startsWith('contact candidate:')) {
     const isFinding = msg.startsWith('find candidates for:');
     if (isFinding) {
-      const role = msg.replace('find candidates for:', '').trim();
-      return `On it. Searching for ${role} — AI is matching against location, skills, and salary fit. Results are ranked by match score. Use **Contact candidate** on any card to flag them for outreach.`;
+      const role = message.replace(/find candidates for:/i, '').trim();
+      return `Searching for **${role}** — AI is matching across location, skills, and salary fit. Results ranked by match score. Hit **Contact candidate** on any card to trigger a personalised outreach draft.`;
     }
-    const details = msg.replace('contact candidate:', '').trim();
-    return `📬 Flagged ${details} for outreach. I'll prep a personalised intro message based on their profile and your role requirements. Want me to draft it now?`;
-  }
-  if (msg.startsWith('posted new job:')) {
-    const jobInfo = msg.replace('posted new job:', '').trim();
-    return `✅ Job live: **${jobInfo}**\n\nShare your apply link with candidates or post it to LinkedIn/Seek. Every applicant gets AI-screened the moment they submit. I'll notify you when top matches arrive.`;
-  }
-  if (msg.startsWith('screen applicants for job:')) {
-    const jobTitle = msg.replace('screen applicants for job:', '').trim();
-    return `Screening applicants for **${jobTitle}**. Here's how it works:\n\n1. Applicant submits via your apply link\n2. AI scores them 0–100% against your requirements\n3. Scores 80%+ → auto-advance to interview stage\n4. 60–79% → flagged for your review\n5. Below 60% → polite rejection sent automatically\n\nNo applicants yet? Share your apply link to start receiving submissions.`;
-  }
-  if (msg.includes('recruit') || msg.includes('hire') || msg.includes('hiring') || msg.includes('recruitment')) {
-    return "Recruit does two things:\n\n🔍 **Find Candidates** — tell me what role you need, AKAI sources and ranks matches by fit score\n📋 **Post a Job** — publish a role, get a unique apply link, AI screens every inbound applicant\n\nWhat do you need — find someone, or post a role?";
-  }
-  // ── Social content ───────────────────────────────────────────────────────
-  if (msg.includes('create a post') || msg.includes('social content') || msg.includes('write a post') || 
-      msg.includes('instagram') || msg.includes('linkedin post') || msg.includes('facebook post') ||
-      (msg.includes('social') && (msg.includes('post') || msg.includes('content') || msg.includes('write')))) {
-    return "What do you want to post about? I'll write it for **Instagram**, **LinkedIn**, and **Facebook** — each optimised for that platform's audience.";
+    const details = message.replace(/contact candidate:/i, '').trim();
+    return `Drafting outreach for **${details}**...\n\nCheck the Social module — I've queued a LinkedIn message personalised to their background. Edit it to add anything specific, then send.`;
   }
 
-  if (lastAssistant.includes('instagram') && lastAssistant.includes('linkedin') && lastAssistant.includes('facebook') &&
-      (lastAssistant.includes('what do you want to post about') || lastAssistant.includes("i'll write it"))) {
-    return `On it! Heading to the Social module to generate content about: *"${message}"*\n\nGo to **Social** in the sidebar → paste your topic → hit Generate. Want me to open it for you?`;
+  if (msg.startsWith('posted new job:')) {
+    const jobInfo = message.replace(/posted new job:/i, '').trim();
+    return `✅ **${jobInfo}** is live.\n\nShare your apply link anywhere — LinkedIn, Seek, your website, word of mouth. Every applicant gets AI-screened the moment they submit. I'll flag the top matches directly in the dashboard.\n\nWant me to draft a LinkedIn post announcing the role?`;
+  }
+
+  if (msg.startsWith('screen applicants for job:')) {
+    const jobTitle = message.replace(/screen applicants for job:/i, '').trim();
+    return `Screening queue for **${jobTitle}**:\n\n1. Applicant submits via your apply link\n2. AI scores them 0–100% against your requirements\n3. 80%+ → auto-advance to interview\n4. 60–79% → flagged for your review\n5. Below 60% → polite rejection sent automatically\n\nNo applicants yet? Share your apply link to start the funnel.`;
+  }
+
+  if (msg.includes('recruit') || msg.includes('hire') || msg.includes('hiring')) {
+    return "Recruit does two things:\n\n🔍 **Find Candidates** — tell me the role, AKAI sources and scores matches by fit\n📋 **Post a Job** — get a unique apply link, AI screens every inbound\n\nWhich do you need?";
+  }
+
+  // ── Social content ───────────────────────────────────────────────────────
+  if (msg.includes('create a post') || msg.includes('write a post') || msg.includes('social content') ||
+      msg.includes('instagram post') || msg.includes('linkedin post') || msg.includes('facebook post')) {
+    return "What's the topic? I'll write it optimised for **Instagram**, **LinkedIn**, and **Facebook** — different angle for each platform. Or just use the Social module → Content Generator for instant results.";
+  }
+
+  // ── General sales/email/web ───────────────────────────────────────────────
+  if (msg.includes('email') && !msg.includes('outreach')) {
+    return "Email Guard monitors your inbox and auto-generates proposals when enquiries arrive. Want to connect it now?";
+  }
+
+  if (msg.includes('sales') || msg.includes('lead') || (msg.includes('campaign') && !msg.includes('google'))) {
+    return "Sales runs on Sophie AI — she makes outbound calls, qualifies leads, and books meetings around the clock. Want to launch a campaign or check your pipeline?";
+  }
+
+  if (msg.includes('audit') && msg.includes('website')) {
+    return "Head to the **Web** module and drop in your URL. I'll score speed, SEO, and mobile in seconds and give you the top 3 fixes. Want me to open it?";
   }
 
   if (msg.includes('help') || msg.includes('what can you do')) {
-    return "I'm AK. I run your AKAI platform. Here's what I can do:\n\n• **Email Guard** — monitor inbox, auto-generate proposals\n• **Sales** — Sophie AI outbound calls & lead gen\n• **Recruit** — AI candidate screening\n• **Social** — AI-generated posts for Instagram, LinkedIn & Facebook\n• **Web / Ads** — coming soon\n\nWhat do you need?";
+    return "I'm AK — your AI COO. Here's the current playbook:\n\n• **Email Guard** — inbox monitoring, auto-proposals\n• **Sales** — Sophie AI outbound calls & lead gen\n• **Recruit** — AI candidate sourcing & screening\n• **Social** — content for Instagram, LinkedIn, Facebook\n• **Web** — site audit + AI copywriting\n• **Ads** — Google Ads builder (coming soon)\n\nWhat do you need moving?";
   }
 
-  return "I'm AK — ask me anything. Sales, Email Guard, Social, or just what's working. What do you need?";
+  // ── Fallback ─────────────────────────────────────────────────────────────
+  return "I'm AK. Tell me what you're working on — I'll figure out the fastest path forward.";
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [], userContext = {} } = body;
+    const { message, history = [] } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
@@ -204,20 +247,16 @@ export async function POST(req: NextRequest) {
         ...history.map(h => ({ role: h.role, content: h.content })),
         { role: 'user', content: message },
       ];
-      const contextAddition = Object.keys(userContext).length > 0
-        ? '\n\nUSER CONTEXT (from their onboarding):\n' + Object.entries(userContext).map(([k,v]) => `- ${k}: ${v}`).join('\n') + '\n\nUse this context when they ask about launching campaigns.'
-        : '';
-
       const response = await client.messages.create({
         model: 'claude-haiku-4-5',
-        max_tokens: 300,
-        system: SYSTEM_PROMPT + contextAddition,
+        max_tokens: 400,
+        system: SYSTEM_PROMPT,
         messages,
       });
       const text = response.content[0].type === 'text' ? response.content[0].text : '';
       return NextResponse.json({ message: text });
     } else {
-      return NextResponse.json({ message: getMockResponse(message, history, userContext) });
+      return NextResponse.json({ message: getMockResponse(message, history) });
     }
   } catch (err: unknown) {
     console.error('[/api/chat]', err);

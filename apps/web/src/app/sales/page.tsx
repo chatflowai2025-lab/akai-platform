@@ -93,8 +93,11 @@ function QuickAction({
 }
 
 // ── Activity Feed ─────────────────────────────────────────────────────────
+// Must be rendered inside DashboardLayout so useDashboardChat() works.
 
 function ActivityFeed({ leads }: { leads: Lead[] }) {
+  const { sendMessage } = useDashboardChat();
+
   if (!leads || leads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -103,14 +106,26 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
         </div>
         <p className="text-white/60 font-semibold text-sm">No calls made yet.</p>
         <p className="text-gray-600 text-xs mt-2 max-w-[260px]">
-          Launch your first campaign to start generating leads.
+          Add leads above and launch your first campaign to get Sophie calling.
         </p>
-        <button
-          onClick={() => (document.querySelector('input[placeholder="Ask AK anything..."]') as HTMLInputElement)?.focus()}
-          className="mt-6 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
-        >
-          Ask AK to launch campaign →
-        </button>
+        <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
+          <a
+            href="#lead-upload"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('lead-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            className="px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity"
+          >
+            ↑ Add leads now
+          </a>
+          <button
+            onClick={() => sendMessage('I want to launch a new outbound sales campaign')}
+            className="px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
+          >
+            Ask AK to launch campaign →
+          </button>
+        </div>
       </div>
     );
   }
@@ -291,7 +306,7 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
   };
 
   return (
-    <section>
+    <section id="lead-upload">
       <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
         Lead Upload &amp; Campaign
       </h2>
@@ -321,6 +336,7 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
               placeholder="Name"
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && addManualLead()}
               className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
             />
             <input
@@ -328,6 +344,7 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
               placeholder="Phone (+61...)"
               value={form.phone}
               onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && addManualLead()}
               className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
             />
             <input
@@ -335,6 +352,7 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
               placeholder="Email"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && addManualLead()}
               className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
             />
             <button
@@ -444,6 +462,30 @@ function LeadUploadSection({ userId, businessName }: { userId: string; businessN
             <span>{launchResult.message}</span>
           </div>
         )}
+      </div>
+    </section>
+  );
+}
+
+// ── CTA Banner ────────────────────────────────────────────────────────────
+// Rendered inside DashboardLayout so useDashboardChat() has access to the real context.
+
+function CTASection() {
+  const { sendMessage } = useDashboardChat();
+  return (
+    <section>
+      <div className="relative rounded-2xl border border-[#D4AF37]/20 bg-gradient-to-br from-[#D4AF37]/5 to-transparent p-6 flex flex-col sm:flex-row items-center justify-between gap-4 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/[0.03] to-transparent pointer-events-none" />
+        <div className="relative">
+          <p className="font-black text-white text-lg">Ready to close more deals?</p>
+          <p className="text-gray-500 text-sm mt-1">Upload leads above or ask AK to get Sophie calling for you.</p>
+        </div>
+        <button
+          onClick={() => sendMessage('I want to close more deals — help me launch a campaign with Sophie AI')}
+          className="relative flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
+        >
+          Ask AK →
+        </button>
       </div>
     </section>
   );
@@ -614,23 +656,8 @@ export default function SalesPage() {
           </div>
         </section>
 
-        {/* CTA Banner */}
-        <section>
-          <div className="relative rounded-2xl border border-[#D4AF37]/20 bg-gradient-to-br from-[#D4AF37]/5 to-transparent p-6 flex flex-col sm:flex-row items-center justify-between gap-4 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/[0.03] to-transparent pointer-events-none" />
-            <div className="relative">
-              <p className="font-black text-white text-lg">Ready to close more deals?</p>
-              <p className="text-gray-500 text-sm mt-1">Upload leads above or ask AK to get Sophie calling for you.</p>
-            </div>
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); (document.querySelector('input[placeholder="Ask AK anything..."]') as HTMLInputElement)?.focus(); }}
-              className="relative flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
-            >
-              Ask AK →
-            </a>
-          </div>
-        </section>
+        {/* CTA Banner — uses useDashboardChat() via CTASection component */}
+        <CTASection />
 
       </div>
     </DashboardLayout>
