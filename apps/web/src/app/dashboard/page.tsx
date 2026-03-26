@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/dashboard/Sidebar';
-import ChatPanel from '@/components/dashboard/ChatPanel';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
@@ -209,9 +208,7 @@ export default function DashboardPage() {
   const displayName = businessName || userEmail.split('@')[0];
 
   return (
-    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
-      <Sidebar />
-
+    <DashboardLayout>
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top bar */}
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
@@ -382,10 +379,8 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* Chat panel */}
-          <ChatPanel />
         </div>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

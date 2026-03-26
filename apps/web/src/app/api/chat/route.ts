@@ -7,7 +7,7 @@ import Anthropic from '@anthropic-ai/sdk';
 // falls back to a smart AKAI-aware mock response.
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are AK, the AI assistant inside AKAI — an AI business operating system. You help users manage their Sales, Recruit, Web, Ads, and Social modules. Be helpful, concise, and action-oriented. If asked about Sales, mention the AI Clozr portal at https://aiclozr.vercel.app/portal. Keep responses under 150 words.`;
+const SYSTEM_PROMPT = `You are AK, the AI assistant inside AKAI — an AI business operating system. You help users manage their modules: Sales (AI calling & lead gen), Email Guard (inbox monitoring & proposal generation), Recruit, Web, Ads, and Social. Be helpful, concise, and action-oriented. Never link to aiclozr.vercel.app — everything is inside AKAI at getakai.ai. Keep responses under 150 words.`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -24,11 +24,15 @@ function getMockResponse(message: string): string {
   const msg = message.toLowerCase();
 
   if (msg.includes('what can you do') || msg.includes('help') || msg.includes('capabilities')) {
-    return "I'm AK, your AKAI assistant. I can help you across all five modules:\n\n• **Sales** — AI-powered lead generation via [AI Clozr](https://aiclozr.vercel.app/portal)\n• **Recruit** — Smart hiring workflows\n• **Web** — Site building and optimization\n• **Ads** — Google & Meta campaign management\n• **Social** — Content scheduling and growth\n\nWhat would you like to work on?";
+    return "I'm AK, your AKAI assistant. Here's what I can help with:\n\n• **Sales** — AI calling, lead gen, Sophie AI outbound\n• **Email Guard** — Monitors your inbox, auto-generates proposals\n• **Recruit** — Smart hiring workflows\n• **Web** — Site building and optimisation\n• **Ads** — Google & Meta campaign management\n• **Social** — Content scheduling and growth\n\nWhat would you like to work on?";
   }
 
-  if (msg.includes('sales') || msg.includes('lead') || msg.includes('clozr')) {
-    return "For Sales, check out the AI Clozr portal at https://aiclozr.vercel.app/portal — it's your lead generation engine. It captures, qualifies, and routes leads automatically so your team can focus on closing. Want me to walk you through setting it up?";
+  if (msg.includes('email') || msg.includes('inbox') || msg.includes('proposal') || msg.includes('guard')) {
+    return "Email Guard monitors your inbox 24/7 and auto-generates proposals when enquiries arrive. Head to the **Email** module to connect your inbox — once live, every enquiry gets a tailored proposal within seconds. Want help setting it up?";
+  }
+
+  if (msg.includes('sales') || msg.includes('lead') || msg.includes('campaign') || msg.includes('sophie')) {
+    return "The Sales module uses Sophie AI to make outbound calls, qualify leads, and book meetings — 24/7. Your live stats are on the Sales page. Want to launch a campaign or configure Sophie?";
   }
 
   if (msg.includes('recruit') || msg.includes('hire') || msg.includes('hiring')) {
