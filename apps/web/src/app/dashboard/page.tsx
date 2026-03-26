@@ -13,6 +13,7 @@ interface SalesStats {
   leads: number;
   calls: number;
   meetings: number;
+  activeCampaigns: number;
   loading: boolean;
 }
 
@@ -123,6 +124,7 @@ export default function DashboardPage() {
     leads: 0,
     calls: 0,
     meetings: 0,
+    activeCampaigns: 0,
     loading: true,
   });
 
@@ -151,6 +153,7 @@ export default function DashboardPage() {
         let leadsCount = 0;
         let meetingsCount = 0;
         let callsCount = 0;
+        let activeCampaigns = 0;
 
         // Parse leads
         if (leadsRes.status === 'fulfilled' && leadsRes.value.ok) {
@@ -166,6 +169,7 @@ export default function DashboardPage() {
         if (campaignRes.status === 'fulfilled' && campaignRes.value.ok) {
           const campData = await campaignRes.value.json();
           callsCount = campData.stats?.total ?? 0;
+          activeCampaigns = campData.stats?.active ?? 0;
         }
 
         if (!cancelled) {
@@ -173,13 +177,14 @@ export default function DashboardPage() {
             leads: leadsCount,
             calls: callsCount,
             meetings: meetingsCount,
+            activeCampaigns,
             loading: false,
           });
         }
       } catch {
         // Graceful fallback — show zeros, don't crash
         if (!cancelled) {
-          setStats({ leads: 0, calls: 0, meetings: 0, loading: false });
+          setStats({ leads: 0, calls: 0, meetings: 0, activeCampaigns: 0, loading: false });
         }
       }
     }
@@ -244,7 +249,7 @@ export default function DashboardPage() {
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
                 Sales overview
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <QuickStat
                   label="Leads captured"
                   value={String(stats.leads)}
@@ -261,6 +266,12 @@ export default function DashboardPage() {
                   label="Meetings booked"
                   value={String(stats.meetings)}
                   icon="📅"
+                  loading={stats.loading}
+                />
+                <QuickStat
+                  label="Active campaigns"
+                  value={String(stats.activeCampaigns)}
+                  icon="🚀"
                   loading={stats.loading}
                 />
               </div>
@@ -327,7 +338,7 @@ export default function DashboardPage() {
                 <ModuleCard
                   icon="🎯"
                   label="Recruit"
-                  status="building"
+                  status="live"
                   description="AI candidate screening and pipeline management"
                   href="/recruit"
                 />
@@ -348,8 +359,8 @@ export default function DashboardPage() {
                 <ModuleCard
                   icon="📣"
                   label="Ads"
-                  status="planned"
-                  description="Paid media strategy and creative generation"
+                  status="live"
+                  description="AI-generated Google & Meta Ads campaigns"
                   href="/ads"
                 />
                 <ModuleCard

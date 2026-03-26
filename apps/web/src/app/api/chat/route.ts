@@ -8,9 +8,9 @@ PERSONALITY: Direct, warm, confident. Like a brilliant COO who gets things done.
 YOUR MODULES:
 - Sales: Sophie AI makes outbound calls, qualifies leads, books meetings. Powered by Bland.ai. Users upload leads → Sophie calls them → qualified leads notified via Email, SMS, or WhatsApp (user's preference).
 - Email Guard: Connects to Microsoft/Gmail via OAuth. Reads enquiries, generates proposals with Claude, sends replies from the user's address.
-- Recruit: Find candidates OR screen inbound applicants. AI-powered scoring.
+- Recruit: Two modes — (1) Find Candidates: enter job title + location + skills, AI sources and ranks candidates by match score with outreach drafting; (2) Post a Job: enter job details, AI writes a full JD, choose platforms (SEEK, LinkedIn, Indeed, Jora, Your Website), click post. AI screens every inbound applicant and scores 0–100%. Powered by /api/recruit/generate-jd and /api/recruit/screen.
 - Web: Website audit + content generation.
-- Ads: Google Ads campaign builder.
+- Ads: AI-powered Google Ads and Meta/Facebook Ads campaign builder. Users enter business name, goal (leads/sales/awareness), target audience, location, and daily budget ($5–$200/day via slider). AI generates full campaign: Google = 3 ad groups with 5 headlines + 2 descriptions + 8 keywords each. Meta = 3 ad sets with primary text + headline + description + CTA. Campaign is previewed, then launched via 'Launch Campaign' button. Powered by /api/ads/generate and /api/ads/create.
 - Social: Content generation for Instagram, LinkedIn, Facebook.
 - Chat Widget: Embeddable AI chat widget for client websites. Qualifies visitors as leads, routes to Sophie. Install via a script tag from the Chat module.
 
@@ -346,6 +346,49 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
     const changeMatch = message.match(/roll back the "(.+?)" change/i);
     const change = changeMatch ? changeMatch[1] : 'that change';
     return `✅ **${change}** has been rolled back.\n\nYour site is restored to the version before that change was made. Everything is live.`;
+  }
+
+  // ── Ads module ───────────────────────────────────────────────────────────
+  if (msg.includes('google ads') || msg.includes('build a campaign') || msg.includes('ads campaign') || (msg.includes('ads') && msg.includes('build'))) {
+    return "The Ads module builds full Google and Meta campaigns in seconds.\n\n**Here's how it works:**\n1. Enter your business name and campaign goal (leads, sales, or awareness)\n2. Set your daily budget with the slider ($5–$200/day)\n3. Add target audience and location\n4. Hit **Build Campaign** — AI generates 3 ad groups with headlines, descriptions, and keywords\n5. Review the preview, then **Launch Campaign**\n\nWant me to help you fill in the details? Tell me your business name and what you're trying to achieve.";
+  }
+
+  if ((msg.includes('meta') || msg.includes('facebook')) && (msg.includes('ads') || msg.includes('campaign'))) {
+    return "Meta Ads in AKAI builds Facebook + Instagram campaigns ready for Meta Ads Manager.\n\n**Each Meta campaign includes:**\n- 3 ad sets with different audience segments\n- Primary text (hook-first, story-driven copy)\n- Headline + description (character-limit compliant)\n- CTA matched to your goal\n\nSet your daily budget ($5–$200/day), enter your business details, and hit Build. Takes about 10 seconds. What's your business name?";
+  }
+
+  if (msg.includes('daily budget') || msg.includes('how much') && msg.includes('ads')) {
+    return "Budget slider goes from **$5/day to $200/day**. The monthly estimate updates live so you can see the real cost.\n\nAs a guide:\n- $5–15/day → Testing phase, low volume\n- $20–50/day → Consistent lead flow for most local businesses\n- $50–200/day → High-volume campaigns, ecommerce, competitive markets\n\nStart at $20–30/day and scale up once you see what's converting. What's your target market?";
+  }
+
+  if (msg.includes('refine') && msg.includes('campaign')) {
+    return "I can refine your campaign in a few ways:\n\n• **Headlines** — more punchy, benefit-led, or question-based\n• **Descriptions** — more specific to your offer or audience\n• **Keywords** — add long-tail, remove broad terms, focus on buyer intent\n• **Ad groups** — restructure by product/service line or audience segment\n\nWhat would you like to change? Paste the section and I'll rewrite it.";
+  }
+
+  if (msg.includes('launch campaign') && (msg.includes('ads') || msg.includes('google') || msg.includes('meta'))) {
+    return "Once you hit **Launch Campaign**, the campaign is saved and ready to go live.\n\nTo actually run it:\n1. Connect your **Google Ads** or **Meta Business** account (button at the top of the Ads page)\n2. The campaign uploads directly to your account\n3. Set it live in your Ads Manager\n\nAI generates the copy — you control the publish. Want help connecting your account?";
+  }
+
+  // ── Recruit module ────────────────────────────────────────────────────────
+  if (msg.includes('find candidates') || msg.includes('source candidates') || (msg.includes('recruit') && msg.includes('find'))) {
+    return "Recruit's **Find Candidates** mode works like this:\n\n1. Enter the job title, location, and key skills\n2. AI matches from a pool of candidates ranked by fit score\n3. Each card shows: name, current role, company, location, years exp, skills, availability\n4. Click **Contact** → AI drafts a personalised LinkedIn outreach\n5. Click **Screen** → AI scores them 0–100% against your requirements\n\nWhat role are you hiring for?";
+  }
+
+  if (msg.includes('post a job') || msg.includes('post job') || (msg.includes('recruit') && msg.includes('post'))) {
+    return "Recruit's **Post a Job** flow:\n\n1. Enter job title, location, employment type, salary range, and a 2-3 sentence brief\n2. AI writes a full, professional job description in seconds\n3. Edit if needed, then choose platforms: SEEK, LinkedIn, Indeed, Jora, or your website\n4. Post — every inbound applicant is AI-screened and scored before you see them\n\nAI handles the writing. You handle the decisions. Want to post a job now?";
+  }
+
+  if (msg.includes('screen') && (msg.includes('candidate') || msg.includes('applicant') || msg.includes('resume'))) {
+    return "AI candidate screening scores each applicant 0–100% against your job requirements.\n\n**How it works:**\n- Matches skills, experience, and role fit against your requirements\n- Returns: score, strengths, gaps, and a clear recommendation (Interview / Consider / Pass)\n- 80%+ → auto-advance to interview stage\n- 60–79% → flagged for your review\n- Below 60% → professional rejection sent\n\nTo screen an inbound applicant, use the **Screen** button on any candidate card in Recruit. What role are you screening for?";
+  }
+
+  if (msg.includes('jd') || msg.includes('job description') || (msg.includes('recruit') && msg.includes('write'))) {
+    return "The AI writes full job descriptions from 4 inputs:\n\n1. **Job title** (required)\n2. **Location** + remote option\n3. **Employment type** + salary range\n4. **Brief** — just 2-3 sentences about the role\n\nAI expands it into a complete JD with About the Company, Role Overview, Responsibilities, Requirements, What We Offer, and How to Apply. Edit inline before posting. Takes about 5 seconds.";
+  }
+
+  if ((msg.includes('seek') || msg.includes('indeed') || msg.includes('jora')) && (msg.includes('post') || msg.includes('connect') || msg.includes('platform'))) {
+    const platform = msg.includes('seek') ? 'SEEK' : msg.includes('indeed') ? 'Indeed' : 'Jora';
+    return `To post to **${platform}**, you need your ${platform} employer account. Once connected:\n\n1. Write your JD in the Recruit → Post a Job flow\n2. Select ${platform} in the platform picker\n3. Hit Post — the job goes live in their system\n\nDo you already have a ${platform} employer account? If not, I can walk you through creating one.`;
   }
 
   // ── General sales/email/web ───────────────────────────────────────────────

@@ -141,14 +141,42 @@ function FindCandidatesTab() {
     sendMessage(`Draft an outreach message for ${candidate.name}, ${candidate.currentRole} at ${candidate.company}`);
   };
 
-  const handleAIScreen = async (candidateName: string) => {
-    setScreeningJobTitle(candidateName);
+  const handleAIScreen = async (candidate: Candidate) => {
+    setScreeningJobTitle(candidate.name);
     setScreening(true);
     setShowScreenModal(true);
     setScreeningResult(null);
-    await new Promise(r => setTimeout(r, 1800));
-    setScreeningResult(generateScreeningResult(jobTitle));
-    setScreening(false);
+    try {
+      const res = await fetch('/api/recruit/screen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobTitle: jobTitle || 'the role',
+          industry: 'Technology',
+          candidateName: candidate.name,
+          resumeSummary: `${candidate.name} is a ${candidate.currentRole} at ${candidate.company} with ${candidate.yearsExp} years of experience. Skills include: ${candidate.skills.join(', ')}. Location: ${candidate.location}. Availability: ${candidate.availability}.`,
+          requirements: skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : candidate.skills,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setScreeningResult({
+          candidateName: candidate.name,
+          score: data.score,
+          strengths: data.reasons.filter((r: string) => !r.toLowerCase().includes('missing') && !r.toLowerCase().includes('limited')),
+          gaps: data.reasons.filter((r: string) => r.toLowerCase().includes('missing') || r.toLowerCase().includes('limited') || r.toLowerCase().includes('gap')),
+          recommendation: data.recommendation === 'advance' ? 'Interview' : data.recommendation === 'review' ? 'Consider' : 'Pass',
+          summary: data.nextStep,
+        });
+      } else {
+        // Fallback to local generation if API fails
+        setScreeningResult(generateScreeningResult(jobTitle));
+      }
+    } catch {
+      setScreeningResult(generateScreeningResult(jobTitle));
+    } finally {
+      setScreening(false);
+    }
   };
 
   const recommendationColor = (rec: ScreeningResult['recommendation']) => {
@@ -293,7 +321,7 @@ function FindCandidatesTab() {
                     {contactedIds.has(c.id) ? '✅ Drafted' : '📬 Contact'}
                   </button>
                   <button
-                    onClick={() => handleAIScreen(c.name)}
+                    onClick={() => handleAIScreen(c)}
                     className="px-3 py-2 rounded-lg text-xs font-bold border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#D4AF37]/30 transition"
                   >
                     🤖 Screen
