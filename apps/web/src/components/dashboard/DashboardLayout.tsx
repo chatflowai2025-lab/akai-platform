@@ -7,6 +7,7 @@ import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
+import { isSafeMode } from '@/lib/beta-config';
 import type { ChatMessage } from '@/lib/shared-types';
 
 // ── Chat context ──────────────────────────────────────────────────────────────

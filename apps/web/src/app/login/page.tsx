@@ -14,6 +14,7 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
+import { BETA_MODE, isWhitelisted } from '@/lib/beta-config';
 
 type Tab = 'signin' | 'signup';
 
@@ -46,6 +47,17 @@ export default function LoginPage() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
+      // Beta whitelist check
+      if (BETA_MODE) {
+        const currentUser = getFirebaseAuth()?.currentUser;
+        const userEmail = currentUser?.email || email || '';
+        if (!isWhitelisted(userEmail)) {
+          await getFirebaseAuth()?.signOut();
+          setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+          setLoading(false);
+          return;
+        }
+      }
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));
@@ -61,7 +73,14 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user?.email || '';
+      if (BETA_MODE && !isWhitelisted(userEmail)) {
+        await auth.signOut();
+        setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+        setLoading(false);
+        return;
+      }
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(cleanError(err instanceof Error ? err.message : 'Something went wrong'));

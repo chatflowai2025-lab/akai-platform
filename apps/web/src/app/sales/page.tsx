@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { isSafeMode } from '@/lib/beta-config';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -209,7 +210,7 @@ const EXTRA_LEAD_PRICE = 3; // $3 per extra lead
 
 // ── Lead Upload Section ───────────────────────────────────────────────────
 
-function LeadUploadSection({ userId, businessName, plan = 'starter' }: { userId: string; businessName: string; plan?: string }) {
+function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail = '' }: { userId: string; businessName: string; plan?: string; userEmail?: string }) {
   const [mode, setMode] = useState<'manual' | 'csv'>('manual');
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
@@ -297,6 +298,16 @@ function LeadUploadSection({ userId, businessName, plan = 'starter' }: { userId:
 
   const launchCampaign = async () => {
     if (uploadedLeads.length === 0 || launching) return;
+
+    // Safe mode — simulate campaign without calling anyone
+    if (isSafeMode(userEmail)) {
+      setLaunching(true);
+      await new Promise(r => setTimeout(r, 1500));
+      setUploadedLeads(prev => prev.map(l => ({ ...l, callStatus: 'completed' as const })));
+      setLaunchResult({ success: true, message: `✅ Safe mode: Campaign simulated for ${uploadedLeads.length} leads. No calls were made (beta testing mode).` });
+      setLaunching(false);
+      return;
+    }
     setLaunching(true);
     setLaunchResult(null);
 
@@ -652,7 +663,7 @@ export default function SalesPage() {
       <div className="flex-1 overflow-y-auto p-8 space-y-8">
 
         {/* Lead Upload & Campaign */}
-        <LeadUploadSection userId={user.uid} businessName={businessName} plan={(userProfile as { plan?: string } | null)?.plan || 'starter'} />
+        <LeadUploadSection userId={user.uid} businessName={businessName} plan={(userProfile as { plan?: string } | null)?.plan || 'starter'} userEmail={user.email || ''} />
 
         {/* Live stats */}
         <section>
