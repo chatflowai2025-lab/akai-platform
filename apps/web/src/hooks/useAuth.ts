@@ -70,28 +70,27 @@ export function useAuth() {
       setLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
+      // Set loading false immediately — don't wait for Firestore sync
+      setLoading(false);
       if (u) {
-        try {
-          const profile = await syncUserProfile(u);
-          setUserProfile(profile);
-        } catch (err) {
-          console.error('Failed to sync user profile:', err);
-          // Fall back to basic profile from auth object
-          setUserProfile({
-            uid: u.uid,
-            email: u.email,
-            displayName: u.displayName,
-            createdAt: null,
-            lastLoginAt: null,
-            onboardingComplete: false,
+        // Sync profile in background — non-blocking
+        syncUserProfile(u)
+          .then(setUserProfile)
+          .catch(() => {
+            setUserProfile({
+              uid: u.uid,
+              email: u.email,
+              displayName: u.displayName,
+              createdAt: null,
+              lastLoginAt: null,
+              onboardingComplete: false,
+            });
           });
-        }
       } else {
         setUserProfile(null);
       }
-      setLoading(false);
     });
     return unsubscribe;
   }, []);
