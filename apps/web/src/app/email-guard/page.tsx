@@ -223,7 +223,7 @@ function EmailGuardContent({
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <h1 className="text-xl font-black text-white">✉️ Email Guard</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Inbox monitoring &amp; auto-proposal generation</p>
+          <p className="text-xs text-gray-500 mt-0.5">Reads enquiries, generates proposals automatically</p>
         </div>
         {/* ConnectHelp uses useDashboardChat() — works here because we're inside DashboardLayout */}
         <ConnectHelp />
