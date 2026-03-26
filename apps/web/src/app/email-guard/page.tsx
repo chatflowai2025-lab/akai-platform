@@ -89,10 +89,8 @@ export default function EmailGuardPage() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
-      <Sidebar />
-
-      <main className="flex-1 flex flex-col overflow-hidden">
+    <DashboardLayout>
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top bar */}
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div className="flex items-center gap-3">
