@@ -803,7 +803,7 @@ export default function SocialPage() {
               <p className="text-xs text-gray-600">
                 {scheduleMode === 'now'
                   ? 'Copy your caption above to post directly in each platform\'s app.'
-                  : `Scheduled for ${scheduleDate ? new Date(scheduleDate).toLocaleString('en-AU') : 'selected time'}. Saved to your calendar.`}
+                  : `Scheduled for ${scheduleDate ? (() => { try { return new Date(scheduleDate).toLocaleString('en-AU'); } catch { return scheduleDate; } })() : 'selected time'}. Saved to your calendar.`}
               </p>
             </div>
           </section>

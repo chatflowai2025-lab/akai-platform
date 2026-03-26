@@ -3,6 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+
+// ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
+function safeSend(sendMessage: (t: string) => void, text: string) {
+  try { sendMessage(text); } catch { /* chat not ready */ }
+}
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -248,17 +253,17 @@ function ConnectStep({
   const [submitted, setSubmitted] = useState(false);
 
   const handleWordPress = () => {
-    sendMessage(`I want to add AI chat to my WordPress site at ${wpUrl || domain}`);
+    safeSend(sendMessage, `I want to add AI chat to my WordPress site at ${wpUrl || domain}`);
     setSubmitted(true);
   };
 
   const handleGitHub = () => {
-    sendMessage(`I want to add AI chat to my GitHub site — repo: ${ghRepo || domain}`);
+    safeSend(sendMessage, `I want to add AI chat to my GitHub site — repo: ${ghRepo || domain}`);
     setSubmitted(true);
   };
 
   const handleOther = () => {
-    sendMessage(`I want to add AI chat to my website at ${domain} — it's not WordPress or GitHub`);
+    safeSend(sendMessage, `I want to add AI chat to my website at ${domain} — it's not WordPress or GitHub`);
     setSubmitted(true);
   };
 

@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+
+// ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
+function safeSend(sendMessage: (t: string) => void, text: string) {
+  try { sendMessage(text); } catch { /* chat not ready */ }
+}
 import { isSafeMode } from '@/lib/beta-config';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -169,7 +174,7 @@ function LeftPanel({
             {config.active ? '⏸ Pause Sophie' : '▶ Resume Sophie'}
           </button>
           <button
-            onClick={() => sendMessage('Play me a sample Sophie call')}
+            onClick={() => safeSend(sendMessage, 'Play me a sample Sophie call')}
             className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-400 border border-[#2a2a2a] hover:text-white hover:border-[#3a3a3a] transition-colors"
           >
             🔊 Listen to a sample call
@@ -890,7 +895,7 @@ function SetupWizard({
           <div className="flex gap-3">
             <button
               onClick={() => {
-                sendMessage(`Update Sophie's script: ${improvementNote}`);
+                safeSend(sendMessage, `Update Sophie's script: ${improvementNote}`);
                 setTestFeedback(null);
                 setTestCallState('idle');
               }}
@@ -990,7 +995,7 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule }: {
         <button
           onClick={() => {
             setConfig({ ...config, active: false });
-            sendMessage('pause sophie');
+            safeSend(sendMessage, 'pause sophie');
           }}
           className="px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm font-semibold hover:bg-red-500/20 transition-colors"
         >

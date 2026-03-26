@@ -5,6 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
+// ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
+function safeSend(sendMessage: (t: string) => void, text: string) {
+  try { sendMessage(text); } catch { /* chat not ready */ }
+}
+
 const RAILWAY = 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
 
@@ -24,7 +29,7 @@ function ConnectHelp() {
   const { sendMessage } = useDashboardChat();
   return (
     <button
-      onClick={() => sendMessage('How do I connect my inbox?')}
+      onClick={() => safeSend(sendMessage, 'How do I connect my inbox?')}
       className="text-xs text-gray-600 hover:text-white transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-[#2f2f2f]"
     >
       ⚙️ Help
@@ -72,7 +77,7 @@ function EmailGuardContent({
       setGmailConnected(true);
       setGmailEmail(decodeURIComponent(initialEmailParam));
       router.replace('/email-guard');
-      sendMessage('My inbox is now connected — what can you do with it?');
+      safeSend(sendMessage, 'My inbox is now connected — what can you do with it?');
       return;
     }
     if (initialErrorParam) {
@@ -99,7 +104,7 @@ function EmailGuardContent({
             setMsConnected(true);
             setMsEmail(d.email || null);
             router.replace('/email-guard');
-            sendMessage('My inbox is now connected — what can you do with it?');
+            safeSend(sendMessage, 'My inbox is now connected — what can you do with it?');
           } else {
             setConnectError(d.error || 'Connection failed.');
           }
@@ -263,7 +268,7 @@ function EmailGuardContent({
             </div>
             {msConnected
               ? <button onClick={() => disconnect('microsoft')} className="text-xs text-gray-600 hover:text-red-400 transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30">Disconnect</button>
-              : <button onClick={connectMicrosoft} disabled={connecting} className="text-xs px-4 py-2 bg-[#0078d4] text-white rounded-lg font-semibold hover:bg-[#006cbd] transition disabled:opacity-40">Connect →</button>
+              : <button onClick={connectMicrosoft} disabled={connecting} className="text-xs px-4 py-2 bg-[#D4AF37] text-black rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-40">Connect →</button>
             }
           </div>
 
@@ -287,7 +292,7 @@ function EmailGuardContent({
             </div>
             {gmailConnected
               ? <button onClick={() => disconnect('gmail')} className="text-xs text-gray-600 hover:text-red-400 transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30">Disconnect</button>
-              : <button onClick={connectGoogle} disabled={connecting} className="text-xs px-4 py-2 bg-white text-[#1a1a1a] rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-40">Connect →</button>
+              : <button onClick={connectGoogle} disabled={connecting} className="text-xs px-4 py-2 bg-[#D4AF37] text-black rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-40">Connect →</button>
             }
           </div>
 

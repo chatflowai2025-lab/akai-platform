@@ -6,6 +6,11 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
+// ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
+function safeSend(sendMessage: (t: string) => void, text: string) {
+  try { sendMessage(text); } catch { /* chat not ready */ }
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface AdGroup {
   name: string;
@@ -340,7 +345,7 @@ function GoogleCampaignBuilder() {
         <div>
           <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2 block">
             Daily budget — <span className="text-[#D4AF37] font-bold">${dailyBudget}/day</span>
-            <span className="text-gray-600 ml-2">(~${(dailyBudget * 30).toLocaleString()}/mo)</span>
+            <span suppressHydrationWarning className="text-gray-600 ml-2">(~${(dailyBudget * 30).toLocaleString()}/mo)</span>
           </label>
           <input
             type="range"
@@ -367,7 +372,7 @@ function GoogleCampaignBuilder() {
           {loading ? 'Building campaign…' : 'Build my campaign'}
         </button>
         <button
-          onClick={() => sendMessage('Help me build a Google Ads campaign')}
+          onClick={() => safeSend(sendMessage, 'Help me build a Google Ads campaign')}
           className="px-3 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-xs hover:text-white hover:border-[#D4AF37]/30 transition"
           title="Ask AK to refine"
         >
@@ -404,7 +409,7 @@ function GoogleCampaignBuilder() {
                 {copied ? '✅ Copied!' : '📋 Copy campaign'}
               </button>
               <button
-                onClick={() => sendMessage(`Refine my Google Ads campaign: ${campaign.campaignName}`)}
+                onClick={() => safeSend(sendMessage, `Refine my Google Ads campaign: ${campaign.campaignName}`)}
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition"
               >
                 Ask AK to refine
@@ -590,7 +595,7 @@ function MetaCampaignBuilder() {
         <div>
           <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2 block">
             Daily budget — <span className="text-blue-400 font-bold">${dailyBudget}/day</span>
-            <span className="text-gray-600 ml-2">(~${(dailyBudget * 30).toLocaleString()}/mo)</span>
+            <span suppressHydrationWarning className="text-gray-600 ml-2">(~${(dailyBudget * 30).toLocaleString()}/mo)</span>
           </label>
           <input
             type="range"
@@ -617,7 +622,7 @@ function MetaCampaignBuilder() {
           {loading ? 'Building Meta campaign…' : 'Build Meta campaign'}
         </button>
         <button
-          onClick={() => sendMessage('Help me build a Meta/Facebook Ads campaign')}
+          onClick={() => safeSend(sendMessage, 'Help me build a Meta/Facebook Ads campaign')}
           className="px-3 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-xs hover:text-white hover:border-blue-500/30 transition"
           title="Ask AK to refine"
         >
@@ -653,7 +658,7 @@ function MetaCampaignBuilder() {
                 {copied ? '✅ Copied!' : '📋 Copy campaign'}
               </button>
               <button
-                onClick={() => sendMessage(`Refine my Meta Ads campaign: ${campaign.campaignName}`)}
+                onClick={() => safeSend(sendMessage, `Refine my Meta Ads campaign: ${campaign.campaignName}`)}
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition"
               >
                 Ask AK to refine

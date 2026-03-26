@@ -514,7 +514,7 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
           <button
             onClick={handleGoogleConnect}
             disabled={connecting}
-            className="flex items-center gap-3 px-4 py-3 bg-white text-[#1a1a1a] rounded-xl text-sm font-bold hover:bg-gray-100 transition disabled:opacity-60"
+            className="flex items-center gap-3 px-4 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition disabled:opacity-60"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -528,7 +528,7 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
           <button
             onClick={handleOutlookConnect}
             disabled={connecting}
-            className="flex items-center gap-3 px-4 py-3 bg-[#0078d4] text-white rounded-xl text-sm font-bold hover:bg-[#006cbd] transition disabled:opacity-60"
+            className="flex items-center gap-3 px-4 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition disabled:opacity-60"
           >
             <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
               <rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/>

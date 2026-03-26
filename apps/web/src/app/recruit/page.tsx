@@ -4,6 +4,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+
+// ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
+function safeSend(sendMessage: (t: string) => void, text: string) {
+  try { sendMessage(text); } catch { /* chat not ready */ }
+}
 import { getFirebaseDb } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
@@ -799,7 +804,7 @@ function PostJobTab() {
               Looks good — choose platforms →
             </button>
             <button
-              onClick={() => sendMessage(`Change something in the JD for my ${form.title} role`)}
+              onClick={() => safeSend(sendMessage, `Change something in the JD for my ${form.title} role`)}
               className="px-4 py-2.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-sm font-semibold hover:text-white hover:border-[#D4AF37]/30 transition whitespace-nowrap"
             >
               Ask AK to change something
@@ -856,7 +861,7 @@ function PostJobTab() {
                         <button
                           onClick={e => {
                             e.stopPropagation();
-                            sendMessage(`I want to connect ${platform.name} for job posting`);
+                            safeSend(sendMessage, `I want to connect ${platform.name} for job posting`);
                           }}
                           className="text-xs px-2.5 py-1 border rounded-lg transition"
                           style={{ borderColor: platform.borderColor, color: platform.color, background: platform.bgColor }}
