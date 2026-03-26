@@ -929,15 +929,13 @@ function VoicePageInner() {
     await saveConfig({ ...config, active: !config.active });
   };
 
-  if (loading || configLoading) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!user) return null;
 
   const showWizard = !config.setupComplete || editMode !== 'none';
   const userEmail = user.email || '';
@@ -964,6 +962,11 @@ function VoicePageInner() {
       </header>
 
       <div className="flex-1 overflow-y-auto p-8">
+        {configLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
         <div className="flex gap-6 h-full">
           <LeftPanel config={config} onToggleActive={handleToggleActive} />
 
@@ -984,6 +987,7 @@ function VoicePageInner() {
             />
           )}
         </div>
+        )}
       </div>
     </DashboardLayout>
   );

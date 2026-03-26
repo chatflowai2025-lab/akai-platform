@@ -245,7 +245,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <DashboardLayout noChat>
+    <DashboardLayout>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <h1 className="text-xl font-black text-white">Settings</h1>
@@ -253,7 +253,8 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-3xl">
+      <div className="flex-1 overflow-y-auto p-8">
+      <div className="space-y-6 max-w-2xl w-full">
 
         {/* Account */}
         <Section title="Account">
@@ -619,7 +620,6 @@ export default function SettingsPage() {
           </a>
         </Section>
 
-      </div>
       {/* Danger Zone */}
       <Section title="Danger Zone">
         <p className="text-sm text-gray-400">Permanently delete your account and all associated data. This cannot be undone.</p>
@@ -650,6 +650,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </Section>
+      </div>
+      </div>
     </DashboardLayout>
   );
 }
