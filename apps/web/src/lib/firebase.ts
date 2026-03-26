@@ -40,11 +40,30 @@ export function getFirebaseDb(): Firestore | null {
   return app ? getFirestore(app) : null;
 }
 
-// Legacy named exports for backwards compat — these will be null on server
-// but are only used in client-side contexts (useEffect, event handlers).
-export const auth = getFirebaseAuth() as Auth;
-export const db = getFirebaseDb() as Firestore;
-export default getFirebaseApp() as unknown as FirebaseApp;
+// Legacy named exports for backwards compat.
+// NOTE: These are lazily evaluated getters to avoid SSR crashes.
+// Do NOT access at module load time on the server — use inside useEffect or event handlers.
+export const auth: Auth = new Proxy({} as Auth, {
+  get(_target, prop) {
+    const a = getFirebaseAuth();
+    if (!a) throw new Error('Firebase Auth not available (SSR)');
+    return (a as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
+export const db: Firestore = new Proxy({} as Firestore, {
+  get(_target, prop) {
+    const d = getFirebaseDb();
+    if (!d) throw new Error('Firestore not available (SSR)');
+    return (d as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
+export default new Proxy({} as FirebaseApp, {
+  get(_target, prop) {
+    const app = getFirebaseApp();
+    if (!app) throw new Error('Firebase App not available (SSR)');
+    return (app as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
 
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 

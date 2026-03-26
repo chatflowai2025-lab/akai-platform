@@ -575,7 +575,19 @@ function LeftPanel({ calConnected, calProvider, onAddEvent }: LeftPanelProps) {
                 <p className="text-sm font-semibold text-white">Google Calendar</p>
               </div>
               <button
-                onClick={() => sendMessage('I want to connect my Google Calendar')}
+                onClick={async () => {
+                  try {
+                    const userId = (typeof window !== 'undefined' && window.__calendarUserId) || '';
+                    const r = await fetch(
+                      `https://api-server-production-2a27.up.railway.app/api/calendar/google/auth-url?userId=${userId}`,
+                      { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
+                    );
+                    const { url } = await r.json();
+                    window.location.href = url;
+                  } catch {
+                    sendMessage('I want to connect my Google Calendar');
+                  }
+                }}
                 className="w-full text-xs px-3 py-2 rounded-lg bg-white text-[#1a1a1a] font-bold hover:bg-gray-100 transition"
               >
                 Connect with Google
@@ -617,6 +629,11 @@ function LeftPanel({ calConnected, calProvider, onAddEvent }: LeftPanelProps) {
 
 // ─── Main Calendar Page ───────────────────────────────────────────────────────
 
+// Augment window with calendar userId for button access
+declare global {
+  interface Window { __calendarUserId?: string; }
+}
+
 function CalendarContent({ user }: { user: { uid: string } }) {
   const today = new Date();
   const [view, setView] = useState<CalendarView>('month');
@@ -629,21 +646,49 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   const [calConnected, setCalConnected] = useState(false);
   const [calProvider, setCalProvider] = useState<string | null>(null);
 
-  // Load Firestore events + calendar config
+  // Store userId on window so the connect button can access it
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.__calendarUserId = user.uid;
+    }
+  }, [user.uid]);
+
+  // Check for ?connected=google in URL on load
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('connected') === 'google') {
+      setCalConnected(true);
+      setCalProvider('google');
+      // Clean the URL without reload
+      history.pushState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // Reload Firestore calendar config
+  const reloadCalConfig = useCallback(() => {
     const db = getFirebaseDb();
     if (!db) return;
-
-    // Load calendar config
     import('firebase/firestore').then(({ doc, getDoc }) => {
-      getDoc(doc(db, 'users', user.uid)).then(snap => {
-        const d = snap.data();
-        if (d?.calendarConfig) {
-          setCalConnected(d.calendarConfig.connected || false);
-          setCalProvider(d.calendarConfig.provider || null);
+      getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar')).then(snap => {
+        if (snap.exists()) {
+          const d = snap.data();
+          if (d?.connected) {
+            setCalConnected(true);
+            setCalProvider('google');
+          }
         }
       }).catch(() => {});
     });
+  }, [user.uid]);
+
+  // Load Firestore events + calendar config
+  useEffect(() => {
+    reloadCalConfig();
+    const db = getFirebaseDb();
+    if (!db) return;
+
+    // Calendar config is loaded via reloadCalConfig() above
 
     // Load events
     getDocs(collection(db, 'users', user.uid, 'events')).then(snap => {

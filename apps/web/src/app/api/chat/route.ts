@@ -367,7 +367,7 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
 
   // ── Calendar intents ─────────────────────────────────────────────────────
   if (msg.includes('connect my google calendar') || msg.includes('connect google calendar') || msg.includes('i want to connect my google calendar')) {
-    return "To connect Google Calendar, I'll need to link your Google account. This lets me:\n\n• Schedule follow-up calls automatically\n• Block time for Sophie campaigns\n• Send meeting reminders\n\nWant to proceed? I'll generate your Google authorisation link.";
+    return "Head to the **Calendar** module — hit 'Connect with Google' in the left panel. You'll be connected in 30 seconds.";
   }
 
   if (msg.includes('connect my outlook calendar') || msg.includes('connect outlook calendar') || msg.includes('i want to connect my outlook calendar')) {
