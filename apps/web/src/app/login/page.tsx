@@ -100,13 +100,10 @@ export default function LoginPage() {
       }
       // Only clear stale session if not coming from OAuth redirect
       const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
-      if (!hasOAuthCode) {
-        try { await auth.signOut(); } catch {}
-      }
       
       const unsub = onAuthStateChanged(auth, async (user) => {
-        if (user && hasOAuthCode) {
-          // Coming back from OAuth - check whitelist then redirect
+        if (user) {
+          // Already signed in — check whitelist then redirect
           const userEmail = user.email || '';
           if (BETA_MODE && !isWhitelisted(userEmail)) {
             await auth.signOut();
@@ -114,6 +111,9 @@ export default function LoginPage() {
             return;
           }
           router.replace('/dashboard');
+        } else if (hasOAuthCode) {
+          // OAuth callback with no user yet — wait for it
+          setLoading(true);
         } else {
           setLoading(false);
         }
