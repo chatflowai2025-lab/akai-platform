@@ -24,7 +24,7 @@ Step 5: Once approved, confirm they're set up and tell them what to expect
 GMAIL INSTRUCTIONS:
 1. Open Gmail → ⚙️ gear → See all settings
 2. Forwarding and POP/IMAP tab
-3. Add a forwarding address → type: inbound@akai.email
+3. Add a forwarding address → type: inbound@getakai.ai
 4. Click the confirmation link Gmail sends you
 5. Select "Forward a copy of incoming mail" → Save Changes
 Done — next enquiry goes straight to Email Guard.
@@ -32,7 +32,7 @@ Done — next enquiry goes straight to Email Guard.
 OUTLOOK INSTRUCTIONS:
 1. Settings → View all Outlook settings
 2. Mail → Forwarding
-3. Enable forwarding → enter: inbound@akai.email
+3. Enable forwarding → enter: inbound@getakai.ai
 4. Save
 Done.
 
@@ -55,7 +55,7 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
 
   // Email Guard setup flow
   if (msg.includes('connect') && (msg.includes('inbox') || msg.includes('email'))) {
-    return "Sure! First — do you want to **send** emails, **receive and read** incoming emails, or **both**?";
+    return "Sure! First — do you want to **send** emails, **receive and read** incoming emails, or **both**?\n\nNote: I\'ll get you the exact forwarding address once I know your setup.";
   }
 
   if (lastAssistant.includes('send') && lastAssistant.includes('receive')) {
@@ -84,9 +84,9 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
       const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
       const usedGmail = prevUserMsgs.some(m => m.includes('gmail'));
       if (usedGmail) {
-        return "Here's how to set up Gmail forwarding:\n\n1. Open Gmail → ⚙️ → **See all settings**\n2. Go to **Forwarding and POP/IMAP**\n3. Click **Add a forwarding address** → enter `inbound@akai.email`\n4. Click the confirmation link Gmail sends you\n5. Select **Forward a copy of incoming mail** → **Save Changes**\n\nThat's it. Your next enquiry will appear in Email Guard automatically. 🎉";
+        return "Here's how to set up Gmail forwarding:\n\n1. Open Gmail → ⚙️ → **See all settings**\n2. Go to **Forwarding and POP/IMAP**\n3. Click **Add a forwarding address** → enter `inbox@getakai.ai` *(your account manager will confirm the exact address)*\n4. Click the confirmation link Gmail sends you\n5. Select **Forward a copy of incoming mail** → **Save Changes**\n\nThat's it. Your next enquiry will appear in Email Guard automatically. 🎉";
       }
-      return "Here's how to set up Outlook forwarding:\n\n1. Open Outlook → **Settings** → View all Outlook settings\n2. Go to **Mail → Forwarding**\n3. Enable forwarding → enter `inbound@akai.email`\n4. Hit **Save**\n\nThat's it. Your next enquiry will appear in Email Guard automatically. 🎉";
+      return "Here's how to set up Outlook forwarding:\n\n1. Open Outlook → **Settings** → View all Outlook settings\n2. Go to **Mail → Forwarding**\n3. Enable forwarding → enter `inbox@getakai.ai` *(your account manager will confirm the exact address)*\n4. Hit **Save**\n\nThat's it. Your next enquiry will appear in Email Guard automatically. 🎉";
     }
   }
 
