@@ -53,7 +53,7 @@ export default function SettingsPage() {
   const { user, userProfile } = useAuth();
 
   // Business profile
-  const [bizForm, setBizForm] = useState({ businessName: '', industry: '', location: '' });
+  const [bizForm, setBizForm] = useState({ businessName: '', industry: '', location: '', website: '', phone: '' });
   const [bizSaving, setBizSaving] = useState(false);
   const [bizSaved, setBizSaved] = useState(false);
 
@@ -109,6 +109,8 @@ export default function SettingsPage() {
           businessName: onboarding.businessName || data.businessName || '',
           industry: onboarding.industry || '',
           location: onboarding.location || '',
+          website: onboarding.website || data.website || '',
+          phone: onboarding.phone || data.phone || '',
         });
 
         // Notification prefs (new multi-channel)
@@ -149,11 +151,15 @@ export default function SettingsPage() {
           businessName: bizForm.businessName,
           industry: bizForm.industry,
           location: bizForm.location,
+          website: bizForm.website,
+          phone: bizForm.phone,
         },
         onboarding: {
           businessName: bizForm.businessName,
           industry: bizForm.industry,
           location: bizForm.location,
+          website: bizForm.website,
+          phone: bizForm.phone,
         },
       }, { merge: true });
       // Timeout after 8s
