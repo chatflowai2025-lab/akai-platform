@@ -63,8 +63,6 @@ function QuickAction({
   return (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
       className="flex items-center gap-4 bg-[#111] border border-[#1f1f1f] rounded-2xl p-4 hover:border-[#D4AF37]/30 hover:bg-[#141414] transition-colors group"
     >
       <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center text-xl flex-shrink-0 group-hover:bg-[#D4AF37]/20 transition-colors">
@@ -93,9 +91,7 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
           Launch your first campaign to start generating leads.
         </p>
         <a
-          href="https://aiclozr.vercel.app/portal"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/onboard"
           className="mt-6 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
         >
           Launch first campaign →
@@ -265,12 +261,10 @@ export default function SalesPage() {
               <span className="text-xs text-green-400 font-semibold">Sophie AI live</span>
             </div>
             <a
-              href="https://aiclozr.vercel.app/portal"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/onboard"
               className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity"
             >
-              Open AI Clozr Portal →
+              Configure Campaign →
             </a>
           </div>
         </header>
@@ -323,19 +317,19 @@ export default function SalesPage() {
                 icon="🚀"
                 label="Launch Campaign"
                 description="Start a new outbound sales campaign"
-                href="https://aiclozr.vercel.app/portal"
+                href="/onboard"
               />
               <QuickAction
                 icon="👥"
                 label="View All Leads"
                 description="See your full lead pipeline and status"
-                href="https://aiclozr.vercel.app/portal"
+                href="/onboard"
               />
               <QuickAction
                 icon="🤖"
                 label="Configure Sophie AI"
                 description="Tune your AI sales agent's voice & script"
-                href="https://aiclozr.vercel.app/portal"
+                href="/onboard"
               />
             </div>
           </section>
@@ -348,12 +342,10 @@ export default function SalesPage() {
               </h2>
               {leads.length > 0 && (
                 <a
-                  href="https://aiclozr.vercel.app/portal"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/onboard"
                   className="text-xs text-[#D4AF37] hover:text-[#F59E0B] transition-colors"
                 >
-                  View all in portal →
+                  Configure →
                 </a>
               )}
             </div>
@@ -379,12 +371,10 @@ export default function SalesPage() {
                 </p>
               </div>
               <a
-                href="https://aiclozr.vercel.app/portal"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/onboard"
                 className="relative flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
               >
-                Open AI Clozr Portal →
+                Manage Campaign →
               </a>
             </div>
           </section>
