@@ -11,6 +11,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  onAuthStateChanged,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
 
@@ -22,7 +23,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // start true — checking auth state
 
   const cleanError = (msg: string) => {
     if (msg.includes('user-not-found') || msg.includes('wrong-password') || msg.includes('invalid-credential')) return 'Invalid email or password.';
@@ -69,19 +70,53 @@ export default function LoginPage() {
     }
   };
 
-  // Handle redirect result on page load (MS login returns via redirect)
+  // If already signed in (e.g. after redirect), go straight to dashboard
   useEffect(() => {
-    const auth = getFirebaseAuth();
-    if (!auth) return;
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) router.push('/dashboard');
-      })
-      .catch((err: unknown) => {
-        if (err instanceof Error && !err.message.includes('no-auth-event')) {
-          setError(cleanError(err.message));
+    let attempts = 0;
+    const tryAuth = () => {
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        if (attempts++ < 10) setTimeout(tryAuth, 300);
+        return;
+      }
+      const unsub = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          router.replace('/dashboard');
+        } else {
+          setLoading(false);
         }
       });
+      return unsub;
+    };
+    tryAuth();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle MS redirect result — retry until Firebase auth is ready
+  useEffect(() => {
+    let attempts = 0;
+    const tryGetResult = () => {
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        // Firebase not ready yet — retry
+        if (attempts++ < 10) setTimeout(tryGetResult, 300);
+        return;
+      }
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result?.user) {
+            router.push('/dashboard');
+          }
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : '';
+          // Ignore no-redirect-present errors (normal on fresh page loads)
+          if (msg && !msg.includes('no-auth-event') && !msg.includes('No pending')) {
+            setError(cleanError(msg));
+          }
+        });
+    };
+    tryGetResult();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
