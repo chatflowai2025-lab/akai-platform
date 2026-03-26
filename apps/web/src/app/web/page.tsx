@@ -444,6 +444,8 @@ function BuildTab() {
   const [generatedSite, setGeneratedSite] = useState<GeneratedSite | null>(null);
   const [buildError, setBuildError] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   const updateService = (idx: number, val: string) => {
     setServices(prev => prev.map((s, i) => i === idx ? val : s));
@@ -702,10 +704,39 @@ function BuildTab() {
 
         <div className="max-w-2xl space-y-3">
           {!isPublished ? (
-            <button onClick={() => setIsPublished(true)}
-              className="w-full py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition">
-              🚀 Publish to {generatedSite.subdomain}.getakai.ai
-            </button>
+            <>
+              <button
+                onClick={async () => {
+                  if (!user || !generatedSite) return;
+                  setPublishing(true);
+                  setPublishError(null);
+                  try {
+                    const res = await fetch('/api/web/publish', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        subdomain: generatedSite.subdomain,
+                        userId: user.uid,
+                        site: { ...generatedSite, businessName, colorScheme },
+                      }),
+                    });
+                    if (!res.ok) throw new Error('Publish failed');
+                    setIsPublished(true);
+                  } catch {
+                    setPublishError('Failed to publish. Please try again.');
+                  } finally {
+                    setPublishing(false);
+                  }
+                }}
+                disabled={publishing}
+                className="w-full py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 disabled:opacity-60 transition"
+              >
+                {publishing ? '⏳ Publishing…' : `🚀 Publish to ${generatedSite.subdomain}.getakai.ai`}
+              </button>
+              {publishError && (
+                <p className="text-red-400 text-xs text-center">{publishError}</p>
+              )}
+            </>
           ) : (
             <div className="flex items-center gap-3 px-5 py-3 bg-green-500/10 border border-green-500/20 rounded-xl">
               <span className="text-green-400 text-lg">✅</span>
@@ -809,7 +840,7 @@ export default function WebPage() {
   }
 
   return (
-    <DashboardLayout noChat>
+    <DashboardLayout>
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-3 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0">
         <div>

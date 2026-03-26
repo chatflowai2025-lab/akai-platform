@@ -721,7 +721,7 @@ function CalendarPage() {
   }
 
   return (
-    <DashboardLayout noChat>
+    <DashboardLayout>
       <CalendarContent user={user} />
     </DashboardLayout>
   );
