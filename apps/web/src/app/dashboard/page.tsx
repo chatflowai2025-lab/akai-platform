@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/dashboard/Sidebar';
 import ChatPanel from '@/components/dashboard/ChatPanel';
 import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
 
 // ── Quick stat card ──────────────────────────────────────────────────────────
 function QuickStat({ label, value, icon }: { label: string; value: string; icon: string }) {
@@ -28,11 +29,13 @@ function ModuleCard({
   label,
   status,
   description,
+  href,
 }: {
   icon: string;
   label: string;
   status: 'live' | 'building' | 'planned';
   description: string;
+  href?: string;
 }) {
   const statusStyles = {
     live: 'bg-green-500/10 text-green-400 border-green-500/20',
@@ -41,14 +44,8 @@ function ModuleCard({
   };
   const statusLabel = { live: 'Live', building: 'Beta', planned: 'Coming soon' };
 
-  return (
-    <div
-      className={`bg-[#111] border rounded-2xl p-4 flex flex-col gap-3 transition-colors ${
-        status === 'live'
-          ? 'border-[#D4AF37]/20 hover:border-[#D4AF37]/40'
-          : 'border-[#1f1f1f] opacity-60'
-      }`}
-    >
+  const inner = (
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-2xl">{icon}</span>
         <span
@@ -63,6 +60,22 @@ function ModuleCard({
       </div>
     </div>
   );
+
+  const className = `bg-[#111] border rounded-2xl p-4 flex flex-col gap-3 transition-colors block ${
+    status === 'live'
+      ? 'border-[#D4AF37]/20 hover:border-[#D4AF37]/40 cursor-pointer'
+      : 'border-[#1f1f1f] opacity-60'
+  }`;
+
+  if (href && status !== 'planned') {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {inner}
+      </a>
+    );
+  }
+
+  return <div className={className}>{inner}</div>;
 }
 
 // ── Empty activity feed ──────────────────────────────────────────────────────
@@ -84,7 +97,7 @@ function EmptyFeed() {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
-  const [activeModule, setActiveModule] = useState<string>('overview');
+  // activeModule is now derived from URL pathname via Sidebar's usePathname
 
   useEffect(() => {
     if (!loading && !user) {
@@ -105,7 +118,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex">
-      <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
+      <Sidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
@@ -118,9 +131,9 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-600 mt-0.5">{userEmail}</p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-gray-500">Sales module live</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/10">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-green-400 font-semibold">Sales live</span>
             </div>
             <button
               onClick={logout}
@@ -140,7 +153,7 @@ export default function DashboardPage() {
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
                 This week
               </h2>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <QuickStat label="Leads captured" value="0" icon="🎯" />
                 <QuickStat label="Calls made" value="0" icon="📞" />
                 <QuickStat label="Meetings booked" value="0" icon="📅" />
@@ -153,23 +166,28 @@ export default function DashboardPage() {
                 Quick actions
               </h2>
               <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={() => setActiveModule('sales')}
+                <a
+                  href="https://aiclozr.vercel.app/portal"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
                 >
                   ⚙️ Configure Sales Module
-                </button>
-                <button
-                  onClick={() => setActiveModule('sales')}
+                </a>
+                <a
+                  href="https://aiclozr.vercel.app/portal"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#111] border border-[#2f2f2f] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"
                 >
                   👥 View Leads
-                </button>
-                <button
+                </a>
+                <a
+                  href="/settings"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#111] border border-[#2f2f2f] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"
                 >
                   ⚙️ Settings
-                </button>
+                </a>
               </div>
             </section>
 
@@ -178,24 +196,27 @@ export default function DashboardPage() {
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
                 Modules
               </h2>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <ModuleCard
                   icon="📞"
                   label="Sales"
                   status="live"
                   description="AI-powered outbound sales calls & lead qualification"
+                  href="https://aiclozr.vercel.app/portal"
                 />
                 <ModuleCard
                   icon="🎯"
                   label="Recruit"
                   status="building"
                   description="AI candidate screening and pipeline management"
+                  href="https://getakai.ai/recruit"
                 />
                 <ModuleCard
                   icon="🌐"
                   label="Web"
                   status="building"
                   description="Landing pages and web content generation"
+                  href="https://getakai.ai/web"
                 />
                 <ModuleCard
                   icon="📣"
