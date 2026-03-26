@@ -246,6 +246,49 @@ function getMockResponse(message: string, history: ChatMessage[], userContext: R
     return "What's the topic? I'll write it optimised for **Instagram**, **LinkedIn**, and **Facebook** — different angle for each platform. Or just use the Social module → Content Generator for instant results.";
   }
 
+  // ── Web module responses ──────────────────────────────────────────────────
+  if (msg.startsWith('fix the "') && msg.includes('" issue on my website')) {
+    const issueMatch = message.match(/fix the "(.+?)" issue on my website/i);
+    const issue = issueMatch ? issueMatch[1] : 'this issue';
+    const scoreType = issue.toLowerCase().includes('meta') || issue.toLowerCase().includes('seo') ? 'SEO' :
+                      issue.toLowerCase().includes('image') || issue.toLowerCase().includes('lcp') ? 'Speed' : 'Mobile';
+    const points = Math.floor(Math.random() * 8) + 5;
+    return `Here's what I'd change for **"${issue}"**:\n\nI'll update the relevant files to address this directly. This will improve your **${scoreType}** score by ~${points} points.\n\nWant me to apply it? I'll create a backup first so you can roll back instantly if needed.`;
+  }
+
+  if (msg.startsWith('auto-fix the top 3 issues on my website')) {
+    const issuesMatch = message.match(/auto-fix the top 3 issues on my website: (.+)/i);
+    const issues = issuesMatch ? issuesMatch[1] : 'your top issues';
+    return `Here's what I'd do for the top 3:\n\n1. **${issues.split(',')[0]?.trim() ?? 'Issue 1'}** — direct code fix, ~6 point gain\n2. **${issues.split(',')[1]?.trim() ?? 'Issue 2'}** — config change, ~8 point gain\n3. **${issues.split(',')[2]?.trim() ?? 'Issue 3'}** — asset optimisation, ~5 point gain\n\nEstimated total improvement: **+19 points** across Speed, SEO, and Mobile.\n\nShall I apply all three? I'll create a backup checkpoint before making any changes.`;
+  }
+
+  if (msg.includes('i want to edit the') && msg.includes('page on my')) {
+    const pageMatch = message.match(/edit the (.+?) page on my (\w+) site/i);
+    const page = pageMatch ? pageMatch[1] : 'this';
+    const siteType = pageMatch ? pageMatch[2] : 'site';
+    return `I'm looking at your **${page}** page on ${siteType}.\n\nWhat would you like to change? I can update:\n• **Headline** — the main H1 or hero text\n• **Body copy** — any paragraph or section text\n• **Images** — swap, resize, or add alt tags\n• **CTAs** — button text, links, placement\n• **Layout** — section order, spacing, structure\n\nJust tell me what needs work.`;
+  }
+
+  if (msg.includes('apply it') || msg.includes('make the change') || msg.includes('go ahead')) {
+    const now = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+    return `✅ Backup created at ${now}.\n\nChange applied. Preview it and let me know if you want to adjust anything — or I can roll back instantly with one click.`;
+  }
+
+  if (msg.includes('roll back') || msg.includes('rollback') || (msg.includes('undo') && msg.includes('change'))) {
+    return `✅ Rolled back to the previous version.\n\nYour site is restored to exactly how it was before the last change. Everything is live now.`;
+  }
+
+  if ((msg.includes('backup') || msg.includes('save a backup')) && msg.includes('website')) {
+    const now = new Date().toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' });
+    return `✅ Backup saved at **${now}**.\n\nYou can restore this version anytime — just say "roll back to [date]" and I'll restore it instantly.`;
+  }
+
+  if (msg.includes('roll back the') && msg.includes('change')) {
+    const changeMatch = message.match(/roll back the "(.+?)" change/i);
+    const change = changeMatch ? changeMatch[1] : 'that change';
+    return `✅ **${change}** has been rolled back.\n\nYour site is restored to the version before that change was made. Everything is live.`;
+  }
+
   // ── General sales/email/web ───────────────────────────────────────────────
   if (msg.includes('email') && !msg.includes('outreach')) {
     return "Email Guard monitors your inbox and auto-generates proposals when enquiries arrive. Want to connect it now?";
