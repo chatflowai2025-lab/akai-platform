@@ -18,7 +18,7 @@ export const useDashboardChat = () => useContext(ChatContext);
 const INITIAL: ChatMessage = {
   id: '1', role: 'assistant',
   content: "Hey! I'm AK. Ask me anything — connect your inbox, launch a campaign, or just tell me what you need.",
-  timestamp: new Date().toISOString(),
+  timestamp: '2026-01-01T00:00:00.000Z', // static to avoid SSR/client hydration mismatch
 };
 
 interface ChatState { step: string; data: Record<string, string>; }
