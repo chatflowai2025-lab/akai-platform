@@ -85,6 +85,14 @@ export default function OnboardPage() {
               contact: contact || '',
               completedAt: new Date().toISOString(),
             },
+            // campaignConfig — used by AK when launching campaigns
+            campaignConfig: {
+              businessName: businessName || '',
+              industry: industry || '',
+              location: location || '',
+              targetCustomer: '',
+              goal: goal || '',
+            },
             onboardingComplete: true,
             businessName: businessName || '',
             displayName: businessName || '',

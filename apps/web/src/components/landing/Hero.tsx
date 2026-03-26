@@ -347,7 +347,8 @@ function SuccessState({ msg, sub }: { msg: string; sub: string }) {
 /* ─── Main Hero ─── */
 export default function Hero() {
   const { user, loading } = useAuth();
-  const ctaHref = !loading && user ? '/dashboard' : '/login';
+  // When logged in → /dashboard, when logged out → /onboard
+  const ctaHref = !loading && user ? '/dashboard' : '/onboard';
   const [modal, setModal] = useState<ModalType>(null);
 
   return (
@@ -410,16 +411,20 @@ export default function Hero() {
           </Button>
         </div>
 
-        {/* Stats bar */}
-        <div className="fade-up fade-up-4 w-full max-w-2xl">
-          <div className="glass rounded-2xl px-8 py-5 grid grid-cols-3 divide-x divide-white/[0.06]">
+        {/* Social proof stats bar */}
+        <div className="fade-up fade-up-4 w-full max-w-3xl">
+          <div className="glass rounded-2xl px-8 py-5 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.06]">
             <div className="flex flex-col items-center gap-1 px-4">
-              <span className="text-3xl font-black text-white tracking-tight">5</span>
-              <span className="text-xs text-white/40 uppercase tracking-wider">AI Modules</span>
+              <span className="text-3xl font-black text-white tracking-tight">7,000+</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">Businesses</span>
             </div>
             <div className="flex flex-col items-center gap-1 px-4">
-              <span className="text-3xl font-black text-white tracking-tight">24/7</span>
-              <span className="text-xs text-white/40 uppercase tracking-wider">Always On</span>
+              <span className="text-3xl font-black text-white tracking-tight">94%</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">Response Rate</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 px-4">
+              <span className="text-3xl font-black gradient-text tracking-tight">&lt;60s</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">Response Time</span>
             </div>
             <div className="flex flex-col items-center gap-1 px-4">
               <span className="text-3xl font-black gradient-text tracking-tight">$297</span>
