@@ -1,30 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 
 interface GenerateRequest {
-  businessName: string;
-  industry: string;
-  tone: string;
-  platforms: string[];
-  postsPerWeek: number;
+  brief: string;
+  platforms?: string[];
 }
 
-interface Post {
+interface PlatformPost {
   platform: string;
-  caption: string;
-  scheduledAt: string;
-  status: 'scheduled';
+  icon: string;
+  content: string;
+  hashtags: string;
+  characterCount: number;
 }
 
 interface GenerateResponse {
-  posts: Post[];
-  calendarUrl: string;
+  posts: PlatformPost[];
 }
 
-function getScheduledDate(daysFromNow: number, hour: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + daysFromNow);
-  date.setHours(hour, 0, 0, 0);
-  return date.toISOString();
+function getMockPosts(brief: string): PlatformPost[] {
+  return [
+    {
+      platform: 'Instagram',
+      icon: '📸',
+      content: `${brief}\n\nThis is the kind of move that changes everything. We're not just building a business — we're building a legacy. 🔥\n\nThe grind is real. The results are realer.`,
+      hashtags: '#hustle #entrepreneur #business #growth #motivation #success',
+      characterCount: 180,
+    },
+    {
+      platform: 'LinkedIn',
+      icon: '💼',
+      content: `I've been thinking a lot about ${brief}.\n\nHere's what most people get wrong: they focus on the tactics when they should be focused on the strategy.\n\nAfter years in the industry, I've learned that consistency and authenticity win every time.\n\nWhat's your take? Drop a comment below.`,
+      hashtags: '#leadership #business #strategy #growth #entrepreneurship',
+      characterCount: 290,
+    },
+    {
+      platform: 'Facebook',
+      icon: '👥',
+      content: `Big news! We're talking about ${brief} today and the community response has been incredible.\n\nShare this with someone who needs to hear it. Tag a friend who's been asking about this.\n\nJoin the conversation in the comments — we read every single one. 👇`,
+      hashtags: '#community #business #growth',
+      characterCount: 220,
+    },
+  ];
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse<GenerateResponse | { error: string }>> {
@@ -36,39 +53,92 @@ export async function POST(req: NextRequest): Promise<NextResponse<GenerateRespo
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { businessName, industry, tone, platforms } = body;
+  const { brief } = body;
 
-  if (!businessName || !industry || !tone || !platforms || platforms.length === 0) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  if (!brief || typeof brief !== 'string' || brief.trim().length === 0) {
+    return NextResponse.json({ error: 'brief is required' }, { status: 400 });
   }
 
-  // Mock response with 3 sample posts across platforms
-  const posts: Post[] = [
-    {
-      platform: platforms.includes('instagram') ? 'instagram' : platforms[0],
-      caption: `Running a ${industry} business means wearing a hundred hats. 🎩\n\nBut the best founders know which hats to hand off.\n\nAt ${businessName}, we use AI to handle the repetitive stuff — so our team stays focused on what actually moves the needle.\n\nWhat's the one task you wish you could automate today? Drop it below 👇\n\n#${industry.replace(/\s+/g, '')} #AIAutomation #BusinessGrowth #Founders`,
-      scheduledAt: getScheduledDate(1, 9),
-      status: 'scheduled',
-    },
-    {
-      platform: platforms.includes('linkedin') ? 'linkedin' : platforms[0],
-      caption: `3 things we learned scaling ${businessName} in the ${industry} space:\n\n1. Your brand voice is your biggest differentiator — protect it.\n2. Consistency beats virality every time. Show up daily.\n3. The businesses winning right now have AI handling their content calendar.\n\nWe went from posting twice a month to publishing daily across Instagram and LinkedIn — without adding headcount.\n\nHere's how: [link in bio]\n\n#${industry.replace(/\s+/g, '')} #ContentStrategy #GrowthHacking`,
-      scheduledAt: getScheduledDate(3, 8),
-      status: 'scheduled',
-    },
-    {
-      platform: platforms.includes('instagram') ? 'instagram' : platforms[0],
-      caption: `Behind the scenes at ${businessName} 👀\n\nThis is what a week of content creation used to look like:\n— 3 hours brainstorming ideas\n— 2 hours writing captions\n— 1 hour scheduling posts\n— Endless second-guessing\n\nNow? 15 minutes. AI does the rest.\n\nThe ${industry} industry is moving fast. The question is: are you keeping up?\n\n#${industry.replace(/\s+/g, '')} #BehindTheScenes #AIContent #SmallBusiness`,
-      scheduledAt: getScheduledDate(5, 11),
-      status: 'scheduled',
-    },
-  ];
+  const apiKey = process.env.ANTHROPIC_API_KEY;
 
-  const slug = businessName.toLowerCase().replace(/\s+/g, '-');
-  const response: GenerateResponse = {
-    posts,
-    calendarUrl: `/dashboard/social/calendar/${slug}`,
-  };
+  if (!apiKey) {
+    return NextResponse.json({ posts: getMockPosts(brief) });
+  }
 
-  return NextResponse.json(response);
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const systemPrompt = `You are a social media content expert. Generate platform-optimised posts for Instagram, LinkedIn, and Facebook based on a brief. 
+
+Return ONLY a valid JSON object in this exact format:
+{
+  "instagram": {
+    "content": "the post text (use emojis, be engaging, visual storytelling)",
+    "hashtags": "#relevant #hashtags #here"
+  },
+  "linkedin": {
+    "content": "the post text (professional tone, insight-driven, thought leadership)",
+    "hashtags": "#professional #hashtags #here"
+  },
+  "facebook": {
+    "content": "the post text (community-focused, conversational, encourage sharing/comments)",
+    "hashtags": "#relevant #hashtags"
+  }
+}
+
+Each post must be different and optimised for that platform's audience and culture. No extra text outside the JSON.`;
+
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 1200,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Write social media posts about: ${brief}` }],
+    });
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+
+    let parsed: {
+      instagram: { content: string; hashtags: string };
+      linkedin: { content: string; hashtags: string };
+      facebook: { content: string; hashtags: string };
+    };
+
+    try {
+      // Extract JSON from response (handle potential markdown code blocks)
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found');
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      return NextResponse.json({ posts: getMockPosts(brief) });
+    }
+
+    const posts: PlatformPost[] = [
+      {
+        platform: 'Instagram',
+        icon: '📸',
+        content: parsed.instagram.content,
+        hashtags: parsed.instagram.hashtags,
+        characterCount: parsed.instagram.content.length,
+      },
+      {
+        platform: 'LinkedIn',
+        icon: '💼',
+        content: parsed.linkedin.content,
+        hashtags: parsed.linkedin.hashtags,
+        characterCount: parsed.linkedin.content.length,
+      },
+      {
+        platform: 'Facebook',
+        icon: '👥',
+        content: parsed.facebook.content,
+        hashtags: parsed.facebook.hashtags,
+        characterCount: parsed.facebook.content.length,
+      },
+    ];
+
+    return NextResponse.json({ posts });
+  } catch (err) {
+    console.error('[/api/social/generate]', err);
+    return NextResponse.json({ posts: getMockPosts(brief) });
+  }
 }

@@ -1,43 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
-const SYSTEM_PROMPT = `You are AK, the friendly AI assistant inside AKAI — an AI business operating system.
+const SYSTEM_PROMPT = `You are AK, the AI brain inside AKAI — a fully autonomous AI business operating system that runs businesses 24/7.
 
-Your personality: Direct, warm, helpful. No corporate speak. No "I'd be happy to help!" openers. Just get to it.
+PERSONALITY: Direct, warm, confident. Like a brilliant COO who gets things done. No filler phrases. Just results.
 
-Your modules: Sales (AI calling & lead gen via Sophie AI), Email Guard (inbox monitoring & auto-proposals), Recruit, Web, Ads, Social.
+YOUR MODULES:
+- Sales: Sophie AI makes outbound calls, qualifies leads, books meetings. Powered by Bland.ai. Users upload leads → Sophie calls them → qualified leads notified via Telegram.
+- Email Guard: Connects to Microsoft/Gmail via OAuth. Reads enquiries, generates proposals with Claude, sends replies from the user's address.
+- Recruit: Find candidates OR screen inbound applicants. AI-powered scoring.
+- Web: Website audit + content generation.
+- Ads: Google Ads campaign builder.
+- Social: Content generation for Instagram, LinkedIn, Facebook.
+
+CAMPAIGN LAUNCH FLOW (when user says launch/new campaign/configure Sophie):
+1. "Let me check your setup..." → Present their onboarding config back: business name, industry, location, target customer
+2. Ask: "Is this still right, or do you want to update anything?"
+3. Ask: "Do you have a list of leads to call, or should I find them for you?"
+4. Ask: "What should Sophie say in the opening 10 seconds?" (or offer a default script)
+5. Ask: "What hours should Sophie call? Default is Mon-Fri 9am-5pm [their timezone]"
+6. Confirm all settings → "Ready to launch. Sophie will start calling within the hour. I'll notify you on Telegram when the first lead qualifies."
+7. POST the campaign to /api/campaign/save with their config
+
+EMAIL GUARD SETUP FLOW (when user asks to connect inbox):
+1. "Do you want to send, receive, or both?"
+2. "What device — Mac, iPhone, Windows, Android?"
+3. "What email app — Gmail, Outlook, Apple Mail?"
+4. Show tailored instructions for their setup
+5. Explain access: AKAI only reads emails to generate proposals, never stores or shares data
+6. Get approval, confirm connected
+
+RULES ENGINE (after inbox connected):
+When user describes how they want emails handled, extract the rule and save it:
+- "draft only" → action: draft, no auto-send
+- "auto-send" → action: auto_send
+- "notify me" → notify: telegram=true
+- "forward to [name]" → action: forward, forwardTo: [email]
+- "hold until 9am" → action: hold, holdUntil: 9am
 
 CRITICAL RULES:
-- Never link to aiclozr.vercel.app — everything lives at getakai.ai
-- Keep responses SHORT (under 120 words)
-- Be conversational, not robotic
-- Ask ONE question at a time, not multiple
-- When someone wants to connect their email/inbox, follow this EXACT flow:
-
-EMAIL GUARD SETUP FLOW:
-Step 1: Ask "Do you want to send emails, receive and read incoming emails, or both?"
-Step 2: Ask "What email do you use? Gmail, Outlook, or something else?"
-Step 3: Give exact instructions for their email provider
-Step 4: Before they confirm, explain what AKAI will have access to (read incoming emails forwarded to us, generate proposals) and ask for their approval
-Step 5: Once approved, confirm they're set up and tell them what to expect
-
-GMAIL INSTRUCTIONS:
-1. Open Gmail → ⚙️ gear → See all settings
-2. Forwarding and POP/IMAP tab
-3. Add a forwarding address → type: inbound@getakai.ai
-4. Click the confirmation link Gmail sends you
-5. Select "Forward a copy of incoming mail" → Save Changes
-Done — next enquiry goes straight to Email Guard.
-
-OUTLOOK INSTRUCTIONS:
-1. Settings → View all Outlook settings
-2. Mail → Forwarding
-3. Enable forwarding → enter: inbound@getakai.ai
-4. Save
-Done.
-
-ACCESS CAVEAT (always share before confirming setup):
-"Just so you know — once forwarding is on, AKAI will receive copies of emails sent to that address. We only read and process enquiry emails to generate proposals. We don't store, sell, or share your email data. You can turn forwarding off anytime. Are you happy to proceed?"`;
+- Never mention aiclozr.vercel.app — everything is at getakai.ai
+- Keep responses under 150 words
+- Ask ONE question at a time
+- Be the smartest person in the room but never show off
+- When you save something, confirm it clearly: "✅ Done — [what was saved]"
+- If Claude API is available, use it for all responses. The mock fallback is only for emergencies.`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -129,14 +136,53 @@ function getMockResponse(message: string, history: ChatMessage[]): string {
   if (msg.includes('sales') || msg.includes('lead') || msg.includes('campaign') || msg.includes('sophie')) {
     return "The Sales module uses Sophie AI — she makes outbound calls, qualifies leads, and books meetings 24/7. Want to launch a campaign or check your pipeline?";
   }
-  if (msg.includes('recruit') || msg.includes('hire')) {
-    return "The Recruit module screens candidates with AI and surfaces the best ones. What role are you hiring for?";
+  // ── Recruit flows ─────────────────────────────────────────────────────────
+  if (msg.includes('find candidates') || (msg.includes('find') && msg.includes('candidate'))) {
+    return "Let's find you the right people. What role are you hiring for? Give me the job title and I'll start matching.";
   }
-  if (msg.includes('help') || msg.includes('what can you do')) {
-    return "I'm AK. I run your AKAI platform. Here's what I can do:\n\n• **Email Guard** — monitor inbox, auto-generate proposals\n• **Sales** — Sophie AI outbound calls & lead gen\n• **Recruit** — AI candidate screening\n• **Web / Ads / Social** — coming soon\n\nWhat do you need?";
+  if (msg.includes('post a job') || msg.includes('post job') || (msg.includes('post') && msg.includes('role'))) {
+    return "Got it — let's post the role. Switch to the **Post a Job** tab and fill in the details. Once it's live, you'll get a unique apply link to share. AKAI AI-screens every applicant against your requirements.";
+  }
+  if (msg.includes('screen applicants') || msg.includes('screen candidates') || (msg.includes('screen') && (msg.includes('applicant') || msg.includes('candidate')))) {
+    return "AI screening works like this: every applicant submits their details → AKAI scores them against your job requirements (0–100%) → you only see the top matches.\n\nI flag: matched skills, experience gaps, and a recommended next step (interview, call, or pass). Want me to screen your current applicants?";
+  }
+  if (msg.startsWith('find candidates for:') || msg.startsWith('contact candidate:')) {
+    const isFinding = msg.startsWith('find candidates for:');
+    if (isFinding) {
+      const role = msg.replace('find candidates for:', '').trim();
+      return `On it. Searching for ${role} — AI is matching against location, skills, and salary fit. Results are ranked by match score. Use **Contact candidate** on any card to flag them for outreach.`;
+    }
+    const details = msg.replace('contact candidate:', '').trim();
+    return `📬 Flagged ${details} for outreach. I'll prep a personalised intro message based on their profile and your role requirements. Want me to draft it now?`;
+  }
+  if (msg.startsWith('posted new job:')) {
+    const jobInfo = msg.replace('posted new job:', '').trim();
+    return `✅ Job live: **${jobInfo}**\n\nShare your apply link with candidates or post it to LinkedIn/Seek. Every applicant gets AI-screened the moment they submit. I'll notify you when top matches arrive.`;
+  }
+  if (msg.startsWith('screen applicants for job:')) {
+    const jobTitle = msg.replace('screen applicants for job:', '').trim();
+    return `Screening applicants for **${jobTitle}**. Here's how it works:\n\n1. Applicant submits via your apply link\n2. AI scores them 0–100% against your requirements\n3. Scores 80%+ → auto-advance to interview stage\n4. 60–79% → flagged for your review\n5. Below 60% → polite rejection sent automatically\n\nNo applicants yet? Share your apply link to start receiving submissions.`;
+  }
+  if (msg.includes('recruit') || msg.includes('hire') || msg.includes('hiring') || msg.includes('recruitment')) {
+    return "Recruit does two things:\n\n🔍 **Find Candidates** — tell me what role you need, AKAI sources and ranks matches by fit score\n📋 **Post a Job** — publish a role, get a unique apply link, AI screens every inbound applicant\n\nWhat do you need — find someone, or post a role?";
+  }
+  // ── Social content ───────────────────────────────────────────────────────
+  if (msg.includes('create a post') || msg.includes('social content') || msg.includes('write a post') || 
+      msg.includes('instagram') || msg.includes('linkedin post') || msg.includes('facebook post') ||
+      (msg.includes('social') && (msg.includes('post') || msg.includes('content') || msg.includes('write')))) {
+    return "What do you want to post about? I'll write it for **Instagram**, **LinkedIn**, and **Facebook** — each optimised for that platform's audience.";
   }
 
-  return "I'm AK — ask me anything. Sales, Email Guard, or just what's working. What do you need?";
+  if (lastAssistant.includes('instagram') && lastAssistant.includes('linkedin') && lastAssistant.includes('facebook') &&
+      (lastAssistant.includes('what do you want to post about') || lastAssistant.includes("i'll write it"))) {
+    return `On it! Heading to the Social module to generate content about: *"${message}"*\n\nGo to **Social** in the sidebar → paste your topic → hit Generate. Want me to open it for you?`;
+  }
+
+  if (msg.includes('help') || msg.includes('what can you do')) {
+    return "I'm AK. I run your AKAI platform. Here's what I can do:\n\n• **Email Guard** — monitor inbox, auto-generate proposals\n• **Sales** — Sophie AI outbound calls & lead gen\n• **Recruit** — AI candidate screening\n• **Social** — AI-generated posts for Instagram, LinkedIn & Facebook\n• **Web / Ads** — coming soon\n\nWhat do you need?";
+  }
+
+  return "I'm AK — ask me anything. Sales, Email Guard, Social, or just what's working. What do you need?";
 }
 
 export async function POST(req: NextRequest) {
