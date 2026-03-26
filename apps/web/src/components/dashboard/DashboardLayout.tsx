@@ -22,13 +22,21 @@ const INITIAL: ChatMessage = {
 interface ChatState { step: string; data: Record<string, string>; }
 
 // ── Chat panel ────────────────────────────────────────────────────────────────
-function InlineChatPanel() {
+function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { externalMessage: string | null; onExternalMessageHandled: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Handle messages injected from page buttons
+  useEffect(() => {
+    if (externalMessage) {
+      sendRaw(externalMessage);
+      onExternalMessageHandled();
+    }
+  }, [externalMessage]); // eslint-disable-line
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user } = useAuth();
@@ -112,7 +120,6 @@ function InlineChatPanel() {
   const send = () => { const t = input.trim(); setInput(''); sendRaw(t); };
 
   return (
-    <ChatContext.Provider value={{ sendMessage: sendRaw }}>
       <aside className="w-80 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col bg-[#080808] h-full overflow-hidden">
         {/* Header */}
         <div className="px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
@@ -175,11 +182,30 @@ function InlineChatPanel() {
           </div>
         </div>
       </aside>
-    </ChatContext.Provider>
   );
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
+  const [chatQueue, setChatQueue] = useState<string | null>(null);
+
+  const injectMessage = useCallback((text: string) => {
+    setChatQueue(text);
+  }, []);
+
+  return (
+    <ChatContext.Provider value={{ sendMessage: injectMessage }}>
+      <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          {children}
+        </div>
+        <InlineChatPanel externalMessage={chatQueue} onExternalMessageHandled={() => setChatQueue(null)} />
+      </div>
+    </ChatContext.Provider>
+  );
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -196,13 +222,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  return (
-    <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {children}
-      </div>
-      <InlineChatPanel />
-    </div>
-  );
+  return <DashboardLayoutInner>{children}</DashboardLayoutInner>;
 }

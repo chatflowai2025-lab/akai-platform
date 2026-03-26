@@ -375,7 +375,7 @@ export default function SalesPage() {
               <div className="relative">
                 <p className="font-black text-white text-lg">Ready to close more deals?</p>
                 <p className="text-gray-500 text-sm mt-1">
-                  Sophie AI is making calls 24/7. Manage your pipeline in the full portal.
+                  Click "Launch Campaign" or ask AK to get Sophie calling for you.
                 </p>
               </div>
               <a
