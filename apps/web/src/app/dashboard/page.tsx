@@ -90,7 +90,7 @@ function ModuleCard({
 
   if (href && status !== 'planned') {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a href={href} className={className}>
         {inner}
       </a>
     );
@@ -292,16 +292,12 @@ export default function DashboardPage() {
               <div className="flex flex-wrap gap-3">
                 <a
                   href="/sales"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
                 >
                   ⚙️ Configure Sales Module
                 </a>
                 <a
-                  href="/sales"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/sales#leads"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#111] border border-[#2f2f2f] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"
                 >
                   👥 View Leads
