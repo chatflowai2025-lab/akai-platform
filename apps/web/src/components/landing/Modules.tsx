@@ -43,6 +43,7 @@ const MODULES = [
     tagline: 'AI finds leads, calls them, books meetings in your calendar.',
     features: ['Sophie AI voice calling', 'Lead enrichment', 'Auto-booking', 'Call recordings'],
     price: '$297',
+    href: '/onboard',
   },
   {
     Icon: RecruitIcon,
@@ -51,6 +52,7 @@ const MODULES = [
     tagline: 'AI sources candidates, screens them, books interviews.',
     features: ['Job posting AI', 'Candidate scoring', 'AI screening calls', 'Calendar integration'],
     price: '$247',
+    href: undefined,
   },
   {
     Icon: WebIcon,
@@ -59,6 +61,7 @@ const MODULES = [
     tagline: 'AI builds and updates your website through chat.',
     features: ['Chat-to-website', 'SEO optimised', 'Lead capture', 'Auto-updates via chat'],
     price: '$197',
+    href: '/web',
   },
   {
     Icon: AdsIcon,
@@ -67,6 +70,7 @@ const MODULES = [
     tagline: 'Google + Meta campaigns planned, launched, and optimised by AI.',
     features: ['AI copywriting', 'Budget optimisation', 'A/B testing', 'ROI tracking'],
     price: '$397',
+    href: undefined,
   },
   {
     Icon: SocialIcon,
@@ -75,6 +79,7 @@ const MODULES = [
     tagline: 'Instagram + LinkedIn content calendar, created and published automatically.',
     features: ['AI content calendar', 'Auto-publishing', 'Engagement tracking', 'Brand voice'],
     price: '$147',
+    href: undefined,
   },
 ];
 
@@ -170,6 +175,14 @@ function ModuleCard({ mod }: { mod: typeof MODULES[0] }) {
             className="text-sm font-semibold text-[#D4AF37] hover:text-[#F59E0B] transition-colors flex items-center gap-1 group"
           >
             Get started
+            <span className="group-hover:translate-x-0.5 transition-transform inline-block">→</span>
+          </a>
+        ) : mod.href ? (
+          <a
+            href={mod.href}
+            className="text-sm font-semibold text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors flex items-center gap-1 group"
+          >
+            Learn more
             <span className="group-hover:translate-x-0.5 transition-transform inline-block">→</span>
           </a>
         ) : (
