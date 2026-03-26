@@ -232,83 +232,73 @@ function EmailGuardContent({
       <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-3xl">
 
         {/* ── Connected state ─────────────────────────────────────────── */}
-        {isConnected ? (
-          <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-xl">📧</div>
+        {/* ── Always show both providers ──────────────────────────────── */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-sm font-bold text-white">Connected inboxes</h2>
+            <p className="text-xs text-gray-600">Connect one or both — AKAI monitors all of them</p>
+          </div>
+
+          {connectError && (
+            <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+              {connectError}
+            </p>
+          )}
+
+          {/* Microsoft */}
+          <div className={`flex items-center justify-between p-4 rounded-xl border transition-all ${msConnected ? 'bg-[#0078d4]/5 border-[#0078d4]/30' : 'bg-[#111] border-[#1f1f1f]'}`}>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#0078d4]/10 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
+                  <rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+                  <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+                </svg>
+              </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-white text-sm">Inbox connected</p>
-                  <span className="flex items-center gap-1 text-xs text-green-400 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Live
-                  </span>
-                </div>
-                {connectedEmail && <p className="text-xs text-gray-400 mt-0.5">{connectedEmail}</p>}
+                <p className="text-sm font-semibold text-white">Microsoft / Outlook</p>
+                {msConnected && msEmail
+                  ? <p className="text-xs text-green-400">{msEmail} · Live</p>
+                  : <p className="text-xs text-gray-500">Not connected</p>}
               </div>
             </div>
-            <button
-              onClick={() => disconnect(msConnected ? 'microsoft' : 'gmail')}
-              className="text-xs text-gray-600 hover:text-red-400 transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30"
-            >
-              Disconnect
-            </button>
+            {msConnected
+              ? <button onClick={() => disconnect('microsoft')} className="text-xs text-gray-600 hover:text-red-400 transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30">Disconnect</button>
+              : <button onClick={connectMicrosoft} disabled={connecting} className="text-xs px-4 py-2 bg-[#0078d4] text-white rounded-lg font-semibold hover:bg-[#006cbd] transition disabled:opacity-40">Connect →</button>
+            }
           </div>
 
-        ) : connecting ? (
-          /* ── Connecting spinner ─────────────────────────────────────── */
-          <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 flex flex-col items-center gap-4">
-            <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-            <p className="text-white/60 text-sm">Connecting your inbox…</p>
-          </div>
-
-        ) : (
-          /* ── Not connected — connect panel ──────────────────────────── */
-          <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 flex flex-col items-center text-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-[#0078d4]/10 border border-[#0078d4]/20 flex items-center justify-center text-3xl">📧</div>
-            <div>
-              <h2 className="text-xl font-black text-white mb-2">Connect your inbox</h2>
-              <p className="text-gray-500 text-sm max-w-sm leading-relaxed">
-                One click. AKAI reads your enquiries and generates tailored proposals automatically — no forwarding rules, no admin, no IT.
-              </p>
-            </div>
-            {connectError && (
-              <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 w-full">
-                {connectError}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-              <button
-                onClick={connectMicrosoft}
-                disabled={connecting}
-                className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-[#0078d4] text-white rounded-xl text-sm font-bold hover:bg-[#006cbd] transition disabled:opacity-50 shadow-lg shadow-[#0078d4]/20"
-              >
-                <svg width="20" height="20" viewBox="0 0 21 21" fill="none">
-                  <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-                  <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-                  <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-                  <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-                </svg>
-                Microsoft / Outlook
-              </button>
-              <button
-                onClick={connectGoogle}
-                disabled={connecting}
-                className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-white text-[#1a1a1a] rounded-xl text-sm font-bold hover:bg-gray-100 transition disabled:opacity-50"
-              >
-                <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+          {/* Gmail */}
+          <div className={`flex items-center justify-between p-4 rounded-xl border transition-all ${gmailConnected ? 'bg-green-500/5 border-green-500/20' : 'bg-[#111] border-[#1f1f1f]'}`}>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
                   <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
                   <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
                   <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
                 </svg>
-                Gmail
-              </button>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Gmail / Google Workspace</p>
+                {gmailConnected && gmailEmail
+                  ? <p className="text-xs text-green-400">{gmailEmail} · Live</p>
+                  : <p className="text-xs text-gray-500">Not connected</p>}
+              </div>
             </div>
-            <p className="text-xs text-gray-600 max-w-xs">
-              AKAI only reads emails to generate proposals. Your data stays private and you can disconnect anytime.
-            </p>
+            {gmailConnected
+              ? <button onClick={() => disconnect('gmail')} className="text-xs text-gray-600 hover:text-red-400 transition px-3 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30">Disconnect</button>
+              : <button onClick={connectGoogle} disabled={connecting} className="text-xs px-4 py-2 bg-white text-[#1a1a1a] rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-40">Connect →</button>
+            }
           </div>
-        )}
+
+          {connecting && (
+            <div className="flex items-center gap-2 text-xs text-gray-500 px-1">
+              <div className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+              Connecting…
+            </div>
+          )}
+          <p className="text-xs text-gray-600 px-1">AKAI only reads emails to generate proposals. Disconnect anytime.</p>
+        </div>
 
         {/* ── Pre-connect preview (shown only when not connected, not connecting) ── */}
         {!isConnected && !connecting && (
