@@ -36,7 +36,7 @@ function DemoModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Overlay onClose={onClose}>
-      <ModalCard title="Book a Demo Call" accent="#D4AF37" onClose={onClose}>
+      <ModalCard title="Try Live Agent Now" accent="#22c55e" onClose={onClose}>
         {status === 'success' ? (
           <SuccessState msg="📞 We're calling you now!" sub="Expect a call within 60 seconds." />
         ) : (
@@ -46,8 +46,8 @@ function DemoModal({ onClose }: { onClose: () => void }) {
             {step === 1 && (
               <div className="flex flex-col gap-4 mt-4">
                 <Field label="Full name *" value={form.name} onChange={v => set('name', v)} placeholder="Jane Smith" />
-                <Field label="Phone number *" value={form.phone} onChange={v => set('phone', v)} placeholder="+61 400 000 000" type="tel" />
                 <Field label="Email *" value={form.email} onChange={v => set('email', v)} placeholder="jane@business.com" type="email" />
+                <Field label="Phone number *" value={form.phone} onChange={v => set('phone', v)} placeholder="+61 400 000 000" type="tel" />
                 <NavBtn
                   label="Next →"
                   disabled={!form.name || !form.phone || !form.email}
@@ -393,14 +393,12 @@ export default function Hero() {
           <Button href={ctaHref} size="lg" className="glow-gold-sm min-w-[200px]">
             Start Free Trial →
           </Button>
-          <Button
-            size="lg"
-            variant="secondary"
+          <button
             onClick={() => setModal('demo')}
-            className="min-w-[200px]"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-10 py-4 text-lg min-w-[200px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20"
           >
-            Book a Demo Call
-          </Button>
+            🎙️ Try Live Agent Now
+          </button>
           <button
             onClick={() => setModal('healthcheck')}
             className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-10 py-4 text-lg min-w-[240px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
