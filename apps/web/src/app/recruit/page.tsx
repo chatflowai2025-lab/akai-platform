@@ -482,6 +482,7 @@ function PostJobTab() {
   // Posted job state
   const [postedJob, setPostedJob] = useState<PostedJob | null>(null);
   const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState('');
 
   const handleGenerateJD = async () => {
     if (!form.title.trim()) return;
@@ -548,6 +549,7 @@ function PostJobTab() {
   const handlePost = async () => {
     if (selectedPlatforms.size === 0 || !user) return;
     setPosting(true);
+    setPostError('');
 
     const platformNames = Array.from(selectedPlatforms)
       .filter(id => id !== 'all')
@@ -578,6 +580,9 @@ function PostJobTab() {
         });
       } catch (e) {
         console.error('Failed to save job', e);
+        setPostError('Failed to save job. Please check your connection and try again.');
+        setPosting(false);
+        return;
       }
     }
 
@@ -883,6 +888,9 @@ function PostJobTab() {
                   </>
                 ) : `Post to ${activePlatforms.length} platform${activePlatforms.length !== 1 ? 's' : ''}`}
               </button>
+              {postError && (
+                <p className="text-red-400 text-xs mt-2 text-center">{postError}</p>
+              )}
             </div>
           )}
         </div>
