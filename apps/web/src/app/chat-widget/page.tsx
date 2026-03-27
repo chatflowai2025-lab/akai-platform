@@ -33,7 +33,7 @@ function ChatWidget() {
   const [config, setConfig] = useState<ClientConfig>({
     businessName: 'us',
     brandColor: '#0a1628',
-    greeting: "Hi! I'm here to help. What brings you here today?",
+    greeting: "Hi! I'm AK — your AI Business Partner. What can I help you with today?",
   });
   const [configLoaded, setConfigLoaded] = useState(false);
 
@@ -152,16 +152,17 @@ function ChatWidget() {
     <div className="flex flex-col h-screen bg-white font-sans" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 text-white flex-shrink-0" style={{ backgroundColor: brandColor }}>
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
-          AI
+        <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-xs font-black text-black">
+          AK
         </div>
         <div>
-          <p className="text-sm font-semibold leading-tight">
-            {config.businessName !== 'us' ? `${config.businessName} Assistant` : 'AI Assistant'}
+          <p className="text-sm font-bold leading-tight">
+            {config.businessName !== 'us' ? `${config.businessName}` : 'AK'}
           </p>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            <span className="text-xs text-white/70">Online</span>
+          <p className="text-xs text-white/60 leading-tight">Your AI Business Partner</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-xs text-white/60">Online now</span>
           </div>
         </div>
       </div>
