@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, addDoc } from 'firebase/firestore';
 
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
@@ -254,9 +254,11 @@ function InlineConnectPanel({
 function AuditPanel({
   url,
   onDisconnect,
+  userId,
 }: {
   url: string;
   onDisconnect: () => void;
+  userId?: string;
 }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -319,16 +321,31 @@ function AuditPanel({
         notifiedRef.current = true;
         const overall = auditResult.overallScore || auditResult.seoScore;
         const topWin = auditResult.quickWins?.[0]?.action || auditResult.issues?.[0] || 'Check the Web module for details';
+        const msg = `🌐 **Audit complete for ${url}** — scored ${overall ? Math.round(overall) + '/100' : 'N/A'}.\n\nTop opportunity: "${topWin}"\n\n[View full report →](/web)`;
         try {
-          sendMessage(`Audit complete for ${url} — scored ${overall ? Math.round(overall) + '/100' : 'complete'}. Top opportunity: "${topWin}". View full report in the Web module → Audit tab.`);
+          sendMessage(msg);
         } catch { /* non-fatal */ }
+        // Also push to Firestore chatNotifications so it shows even if chat panel is closed
+        if (userId) {
+          try {
+            const db = getFirebaseDb();
+            if (db) {
+              await addDoc(collection(db, 'users', userId, 'chatNotifications'), {
+                type: 'web_audit',
+                message: msg,
+                createdAt: new Date().toISOString(),
+                read: false,
+              });
+            }
+          } catch { /* non-fatal */ }
+        }
       }
     } catch {
       setError("Couldn't reach the audit service. Check the URL and try again.");
     } finally {
       setLoading(false);
     }
-  }, [url, sendMessage]);
+  }, [url, userId, sendMessage]);
 
   useEffect(() => { runAudit(); }, [runAudit]);
 
@@ -988,7 +1005,7 @@ export default function WebPage() {
               {!webConfig?.connected ? (
                 <InlineConnectPanel onConnect={handleConnect} />
               ) : (
-                <AuditPanel url={webConfig.url} onDisconnect={handleDisconnect} />
+                <AuditPanel url={webConfig.url} onDisconnect={handleDisconnect} userId={user.uid} />
               )}
             </>
           )}
