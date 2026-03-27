@@ -17,121 +17,116 @@ export interface DripMessage {
 export const DRIP_MESSAGES: DripMessage[] = [
   {
     day: 1,
-    module: 'Sales',
-    subject: 'Did you know? Sophie called 47 leads last night.',
-    body: `You're in the inner circle. So let's skip the pitch.
+    module: 'Email Guard',
+    subject: 'Did you know? You can email me directly — and I\'ll take action for you.',
+    body: `You're in the inner circle. So here's something most people don't know:
 
-Did you know? You can give AKAI a list of 20 leads right now — and Sophie will call every single one tonight.
+You can email me directly — and I act on it.
 
-Not tomorrow. Not "within a few business days." Tonight.
+Connect your inbox and AKAI reads every email that comes in. Every enquiry. Every lead. Every vendor. I draft the replies, flag the hot ones, and take action — before you've looked at your phone.
 
-She qualifies them, handles objections, and books the ones worth your time straight into your calendar.
+Not a filter. Not a sorter. An AI that actually does the work.
 
-You wake up to meetings. Not maybes.
+The average business takes 47 hours to reply to a lead.
+AKAI replies in minutes. Every time.
 
-→ Head to your Sales module. Upload a list, or ask AKAI to find one.
+→ Connect your inbox now: getakai.ai/email-guard
 
 — AKAI`,
   },
   {
     day: 2,
-    module: 'Social',
-    subject: 'Did you know? A week of content. 60 seconds.',
-    body: `Most businesses post inconsistently. Then wonder why nobody's paying attention.
+    module: 'AK Chat',
+    subject: 'Did you know? Your AI business partner is live right now.',
+    body: `You have an AI business partner. Not a chatbot — a partner.
 
-Did you know? AKAI generates a full week of Instagram, LinkedIn, and Facebook content — captions, hashtags, posting times — in under 60 seconds.
+Open AK Chat and ask it anything about your business. Strategy. Copy. A client situation. What to post today. How to price a project. It knows your business and it gives you real answers.
 
-You don't need a content team.
-You don't need a content calendar.
-You just need to show up and hit post.
+Right now. No waiting. No ticket. No agency retainer.
 
-→ Open your Social module. Pick a theme. Watch it write itself.
+Most of our Trailblazers open it first thing every morning and last thing every night.
+
+→ Talk to your AI business partner: getakai.ai/dashboard
 
 — AKAI`,
   },
   {
     day: 3,
-    module: 'Email Guard',
-    subject: 'Did you know? AKAI already read your inbox this morning.',
-    body: `While you were sleeping, someone sent an enquiry to your business.
+    module: 'Web',
+    subject: 'Did you know? Your website has a score — and you can see it in 60 seconds.',
+    body: `Right now, your website is either winning you business or losing it. You probably don't know which.
 
-Did you know? AKAI reads every inbound email, classifies it, and drafts a professional reply — before you've had your first coffee.
+AKAI audits your site in 60 seconds — speed, SEO, mobile, conversion gaps — and gives you a ranked list of exactly what to fix.
 
-You set the rules once: draft only, auto-send, or hold until business hours.
-AKAI handles the rest. Every time. No exceptions.
+Not vague suggestions. Real issues. Priority order. Fix the top three and you'll see the difference.
 
-The average business takes 47 hours to reply to a lead.
-AKAI replies in minutes.
+Most sites we audit are leaving 30-40% of their traffic on the table.
 
-→ Connect your inbox in Email Guard. Takes 90 seconds.
+→ Get your website scored right now: getakai.ai/web
 
 — AKAI`,
   },
   {
     day: 4,
-    module: 'Web',
-    subject: 'Did you know? Your website might be losing you money right now.',
-    body: `No audit. No idea. No leads.
+    module: 'Proposals',
+    subject: 'Did you know? A client proposal in 30 seconds. Live right now.',
+    body: `You have a prospect. You need a proposal. Most people spend 2 hours writing one.
 
-Did you know? AKAI audits your website in seconds — speed, SEO, mobile, conversion — and gives you a ranked list of exactly what to fix.
+AKAI writes it in 30 seconds.
 
-Not vague suggestions. Specific issues. Priority order.
+Executive summary. Tailored solution. Investment table. ROI projection. All personalised to the specific client. All ready to send.
 
-Most sites we audit are leaving 30-40% of their traffic on the table. Slow load times, missing meta tags, broken mobile layouts.
+Export to PDF or copy straight into an email. Done before the competition even opens a blank doc.
 
-All fixable. Most in minutes.
-
-→ Drop your URL into the Web module. Free. Instant.
+→ Generate a proposal right now: getakai.ai/proposals
 
 — AKAI`,
   },
   {
     day: 5,
-    module: 'Ads',
-    subject: 'Did you know? Full Google Ads campaign. 30 seconds.',
-    body: `Agencies charge $2,000 to build what AKAI builds in 30 seconds.
+    module: 'Social',
+    subject: 'Did you know? A week of Instagram posts. Right now. In under 60 seconds.',
+    body: `You don't have time to think about Instagram every day. You don't have to.
 
-Did you know? AKAI generates a complete Google Ads campaign — 3 ad groups, 5 headlines each, 2 descriptions, 8 keywords — from your business name and goal.
+AKAI writes a full week of social content — captions, hashtags, posting times — in under 60 seconds. Instagram, LinkedIn, Facebook. All adapted for each platform.
 
-You set the budget. AI writes the copy. You review, launch, and move on.
+Describe your business once. Hit generate. Schedule or post.
 
-No copywriter. No account manager. No invoices.
+That's it. You're done for the week.
 
-→ Build your first campaign in the Ads module.
+→ Write your week of content right now: getakai.ai/social
 
 — AKAI`,
   },
   {
     day: 6,
-    module: 'Voice',
-    subject: 'Did you know? Sophie never gets tired. Never takes a day off.',
-    body: `Your best sales rep has a bad week. Sophie doesn't.
+    module: 'Ads',
+    subject: 'Did you know? Your next Google ad campaign. Written in 60 seconds.',
+    body: `Agencies charge $2,000+ to build what AKAI builds in 60 seconds.
 
-Did you know? You can configure Sophie's voice, opening script, call hours, and fallback behaviour in the Voice module — and she runs exactly that way. Every call. Every day.
+Tell AKAI your business and your goal. It writes a complete Google Ads campaign — headlines, descriptions, keywords, ad groups — ready to launch.
 
-No sick days. No "I'll follow up tomorrow." No lost leads.
+You set the budget. AKAI writes the copy. You review and go live.
 
-Set her once. Let her work.
+No copywriter. No account manager. No waiting.
 
-→ Open the Voice module. Configure Sophie your way.
+→ Build your campaign right now: getakai.ai/ads
 
 — AKAI`,
   },
   {
     day: 7,
     module: 'Recruit',
-    subject: 'Did you know? AKAI screens CVs so you never waste an interview again.',
-    body: `The average job post gets 250 applications. You should talk to maybe 5.
+    subject: 'Did you know? You can screen 10 CVs before lunch.',
+    body: `The average job post gets 250 applications. You should interview maybe 5.
 
-Did you know? AKAI reads every application, scores each candidate 0-100% against your requirements, and tells you exactly who to interview — and who to pass on.
+AKAI reads every CV, scores each candidate 0-100% against your requirements, and tells you exactly who to call — and who to pass on.
 
-80%+ gets fast-tracked.
-60-79% gets flagged for your review.
-Below 60% gets a professional rejection. Automatically.
+Fast-track the top scores. Auto-reject the rest with a professional email. You only see the ones worth your time.
 
-You only talk to the ones worth your time.
+Upload a stack before 11am. By lunch, you have a shortlist.
 
-→ Post a job or source candidates in the Recruit module.
+→ Start screening right now: getakai.ai/recruit
 
 — AKAI`,
   },
