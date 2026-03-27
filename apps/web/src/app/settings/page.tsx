@@ -137,8 +137,7 @@ export default function SettingsPage() {
     (async () => {
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
-        if (!snap.exists()) return;
-        const data = snap.data();
+        const data = snap.exists() ? snap.data() : {};
 
         // Business profile from onboarding sub-doc or top-level
         const onboarding = data.onboarding || {};
