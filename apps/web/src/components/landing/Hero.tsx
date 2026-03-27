@@ -220,7 +220,7 @@ function HealthCheckModal({ onClose }: { onClose: () => void }) {
         {status === 'success' ? (
           <SuccessState
             msg="✅ Health check booked!"
-            sub="Check your inbox — we'll send your full report within 24 hours."
+            sub="Check your inbox — your personalised report will be ready in about 15 minutes."
           />
         ) : (
           <>

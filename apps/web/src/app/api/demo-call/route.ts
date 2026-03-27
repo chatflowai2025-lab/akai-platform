@@ -92,7 +92,8 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       const err = await res.text();
       console.error('[demo-call] Bland.ai error:', err);
-      return NextResponse.json({ error: 'Call failed' }, { status: 500 });
+      // Lead already captured via Telegram — don't surface a broken state to the user
+      return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });

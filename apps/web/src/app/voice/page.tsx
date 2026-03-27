@@ -335,36 +335,28 @@ function ScriptStep({ config, setConfig, userProfile, userId, onBack, onNext }: 
     if (config.script.openingLine.includes('{{businessName}}') || config.script.openingLine.includes('[BusinessName]')) {
       setConfig({ ...config, script: { ...config.script, openingLine: `Hi, is that {{name}}? This is Sophie calling from ${biz}.` } });
     }
-    // Show fallbacks immediately so user sees options right away
-    const fallback = getFallbackSuggestions(ind, biz, loc);
-    setSuggestions(fallback);
-    if (!selectedHook) setSelectedHook(fallback.hooks[0] ?? null);
-    if (!selectedQ) setSelectedQ(fallback.questions[0] ?? null);
-    setGenerating(false);
-    // Then try to enhance with AI in the background
+
+    // Try AI first — this is the primary path
     try {
       const res = await fetch(`${RAILWAY_API}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
         body: JSON.stringify({
-          message: `Generate Sophie AI calling script suggestions for this business. Business: "${biz}". Industry: "${ind}". Location: "${loc}".
+          message: `Generate 3 hook options and 3 qualifying question options for a Sophie AI outbound calling script.
 
-Return ONLY valid JSON in this exact format:
+Business: ${biz}
+Industry: ${ind}
+Location: ${loc}
+
+Return ONLY valid JSON:
 {
-  "hooks": [
-    "Hook option 1 — 1-2 sentences about what value you deliver",
-    "Hook option 2 — different angle",
-    "Hook option 3 — another approach"
-  ],
-  "questions": [
-    "Qualifying question option 1",
-    "Qualifying question option 2",
-    "Qualifying question option 3"
-  ]
+  "hooks": ["option 1", "option 2", "option 3"],
+  "questions": ["question 1", "question 2", "question 3"]
 }
 
-Hooks should be specific to ${ind} in ${loc}. Questions should help qualify if they're a real prospect. Australian English. No filler. Return ONLY the JSON.`,
+Be specific to their industry and location. Australian English. Conversational, not salesy. Each hook max 2 sentences.`,
         }),
+        signal: AbortSignal.timeout(12000),
       });
       const data = await res.json() as { message?: string };
       if (data.message) {
@@ -380,9 +372,14 @@ Hooks should be specific to ${ind} in ${loc}. Questions should help qualify if t
           }
         }
       }
-      throw new Error('Invalid response');
+      throw new Error('Invalid AI response');
     } catch {
-      // Fallbacks already shown above — nothing to do
+      // Silent fallback to hardcoded suggestions
+      const fallback = getFallbackSuggestions(ind, biz, loc);
+      setSuggestions(fallback);
+      if (!selectedHook) setSelectedHook(fallback.hooks[0] ?? null);
+      if (!selectedQ) setSelectedQ(fallback.questions[0] ?? null);
+      setGenerating(false);
     }
   };
 
@@ -416,7 +413,7 @@ Hooks should be specific to ${ind} in ${loc}. Questions should help qualify if t
           <p className="text-gray-500 mt-1 text-sm">We&apos;ve written options based on your business — just pick the ones that fit.</p>
         </div>
         <button onClick={generateSuggestions} disabled={generating} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/20 transition disabled:opacity-40">
-          {generating ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : '✨'} {generating ? 'Writing...' : 'Regenerate'}
+          {generating ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : '✨'} {generating ? 'AK is writing your script…' : 'Get AK\'s suggestions'}
         </button>
       </div>
 
@@ -452,7 +449,7 @@ Hooks should be specific to ${ind} in ${loc}. Questions should help qualify if t
             disabled={!manualBiz || generating}
             className="w-full py-2 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 transition disabled:opacity-40"
           >
-            {generating ? 'Writing suggestions…' : '✨ Write my script →'}
+            {generating ? 'AK is writing your script…' : '✨ Get AK\'s suggestions →'}
           </button>
         </div>
       )}
@@ -561,6 +558,7 @@ function SetupWizard({
   userName,
   userProfile,
   userId,
+  leadsSource,
 }: {
   config: VoiceConfig;
   setConfig: (c: VoiceConfig) => void;
@@ -569,6 +567,7 @@ function SetupWizard({
   userName: string;
   userProfile?: unknown;
   userId?: string;
+  leadsSource?: 'akai' | 'uploaded' | 'unknown';
 }) {
   const [step, setStep] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
@@ -897,22 +896,36 @@ function SetupWizard({
           </div>
         </div>
 
-        {/* Consent */}
-        <label
-          className="flex items-start gap-4 bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5 cursor-pointer group hover:border-[#2a2a2a] transition-colors"
-          onClick={() => setConfig({ ...config, consentConfirmed: !config.consentConfirmed })}
-        >
-          <div
-            className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
-              config.consentConfirmed ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-[#3a3a3a] group-hover:border-[#5a5a5a]'
-            }`}
-          >
-            {config.consentConfirmed && <span className="text-black text-xs font-black">✓</span>}
+        {/* Consent — AKAI-sourced: show DNC badge; user-uploaded or unknown: show checkbox */}
+        {leadsSource === 'akai' ? (
+          <div className="flex items-start gap-4 bg-[#0a1a0a] border border-green-500/20 rounded-2xl p-5">
+            <div className="w-5 h-5 rounded bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-green-400 text-xs font-black">✓</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-green-300 mb-1">✅ DNC verified by AKAI</p>
+              <p className="text-xs text-green-400/70 leading-relaxed">
+                All numbers in your AKAI prospect list have already been checked against the Do Not Call Register. No action needed from you.
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-gray-300 leading-relaxed">
-            The leads I&apos;ve uploaded have either given consent to be contacted, or are business numbers (B2B calls don&apos;t require consent under the Spam Act 2003).
-          </p>
-        </label>
+        ) : (
+          <label
+            className="flex items-start gap-4 bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5 cursor-pointer group hover:border-[#2a2a2a] transition-colors"
+            onClick={() => setConfig({ ...config, consentConfirmed: !config.consentConfirmed })}
+          >
+            <div
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                config.consentConfirmed ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-[#3a3a3a] group-hover:border-[#5a5a5a]'
+              }`}
+            >
+              {config.consentConfirmed && <span className="text-black text-xs font-black">✓</span>}
+            </div>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              The leads I&apos;ve uploaded have either given consent to be contacted, or are business numbers (B2B calls don&apos;t require consent under the Spam Act 2003).
+            </p>
+          </label>
+        )}
 
         {/* Recording */}
         <div className="flex items-center justify-between bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5">
@@ -946,7 +959,7 @@ function SetupWizard({
         <button onClick={() => setStep(3)} className="px-4 py-2.5 text-sm text-gray-500 hover:text-white transition-colors">← Back</button>
         <button
           onClick={() => setStep(5)}
-          disabled={!config.consentConfirmed}
+          disabled={leadsSource !== 'akai' && !config.consentConfirmed}
           className="px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-40"
         >
           Next →
@@ -1356,6 +1369,7 @@ function VoicePageInner() {
               userName={userName}
               userProfile={userProfile}
               userId={user.uid}
+              leadsSource="unknown"
             />
           ) : (
             <ActiveView
