@@ -24,24 +24,8 @@ interface ScheduledPost {
   status: 'scheduled' | 'draft';
 }
 
-const MOCK_SCHEDULED: ScheduledPost[] = [
-  {
-    id: '1',
-    platform: 'Instagram',
-    icon: '📸',
-    content: 'The future of business is AI-powered. Here\'s how we\'re using it to 10x our results...',
-    scheduledAt: new Date(Date.now() + 86400000).toISOString(),
-    status: 'scheduled',
-  },
-  {
-    id: '2',
-    platform: 'LinkedIn',
-    icon: '💼',
-    content: '3 lessons from scaling an AI agency from zero to clients in 30 days...',
-    scheduledAt: new Date(Date.now() + 172800000).toISOString(),
-    status: 'scheduled',
-  },
-];
+// Scheduled posts will be populated from user actions (generate + schedule flow)
+const MOCK_SCHEDULED: ScheduledPost[] = [];
 
 const PLATFORMS = [
   { id: 'instagram', label: 'Instagram', icon: '📸', color: 'from-pink-500 to-purple-500' },
