@@ -308,7 +308,7 @@ function EmailGuardContent({
       setGmailConnected(true);
       setGmailEmail(decodeURIComponent(initialEmailParam));
       router.replace('/email-guard');
-      safeSend(sendMessage, 'My inbox is now connected — what can you do with it?');
+      safeSend(sendMessage, `My Gmail inbox is now connected. What can you do with it and what should I do first?`);
       triggerFirstPoll();
       return;
     }
@@ -336,7 +336,7 @@ function EmailGuardContent({
             setMsConnected(true);
             setMsEmail(d.email || null);
             router.replace('/email-guard');
-            safeSend(sendMessage, 'My inbox is now connected — what can you do with it?');
+            safeSend(sendMessage, `My Microsoft inbox is now connected. What can you do with it and what should I do first?`);
             triggerFirstPoll();
           } else {
             setConnectError(d.error || 'Connection failed.');
