@@ -938,7 +938,7 @@ export default function SalesPage() {
               icon="🚀"
               label="Launch Campaign"
               description="Start a new outbound sales campaign"
-              href="#"
+              href="#lead-upload"
               chatPrompt="I want to launch a new outbound sales campaign"
             />
             <QuickAction
@@ -952,7 +952,7 @@ export default function SalesPage() {
               icon="🤖"
               label="Configure Sophie AI"
               description="Tune your AI sales agent's voice & script"
-              href="#"
+              href="/voice"
               chatPrompt="I want to configure my Sophie AI sales agent"
             />
           </div>
