@@ -241,7 +241,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs text-white/50 mb-1.5 font-medium">Email</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required autoComplete="email"
               className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition text-sm" />
           </div>
           <div>
@@ -251,7 +251,7 @@ export default function LoginPage() {
                 <button type="button" className="text-xs text-[#D4AF37]/60 hover:text-[#D4AF37] transition" onClick={() => alert('Password reset coming soon.')}>Forgot password?</button>
               )}
             </div>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={tab === 'signup' ? 'Min. 6 characters' : '••••••••'} required
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={tab === 'signup' ? 'Min. 6 characters' : '••••••••'} required autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
               className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition text-sm" />
           </div>
 

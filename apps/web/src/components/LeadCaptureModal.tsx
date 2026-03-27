@@ -125,6 +125,7 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
                 <input
                   required
                   type="text"
+                  autoComplete="given-name"
                   value={form.firstName}
                   onChange={e => set('firstName', e.target.value)}
                   placeholder="Jane"
@@ -138,6 +139,7 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
                 <input
                   required
                   type="text"
+                  autoComplete="organization"
                   value={form.businessName}
                   onChange={e => set('businessName', e.target.value)}
                   placeholder="ACME Pty Ltd"
@@ -151,6 +153,7 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
                 <input
                   required
                   type="email"
+                  autoComplete="email"
                   value={form.email}
                   onChange={e => set('email', e.target.value)}
                   placeholder="jane@business.com"
@@ -164,6 +167,7 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
                 <input
                   required
                   type="tel"
+                  autoComplete="tel"
                   value={form.phone}
                   onChange={e => set('phone', e.target.value)}
                   placeholder="+61 400 000 000"
@@ -192,6 +196,7 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
                 <label className="text-xs text-white/50 mb-1 block">Website URL</label>
                 <input
                   type="url"
+                  autoComplete="url"
                   value={form.website}
                   onChange={e => set('website', e.target.value)}
                   placeholder="https://yoursite.com.au"
