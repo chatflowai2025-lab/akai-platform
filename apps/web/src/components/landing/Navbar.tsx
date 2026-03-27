@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function Navbar({ onOpenCapture }: { onOpenCapture?: () => void }) {
+export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: () => void; onOpenChat?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const { user, loading } = useAuth();
 
@@ -42,6 +42,12 @@ export default function Navbar({ onOpenCapture }: { onOpenCapture?: () => void }
               <a href="/login" className="text-sm text-white/60 hover:text-white transition-colors duration-200 hidden md:block">
                 Sign In
               </a>
+              <button
+                onClick={() => onOpenChat?.()}
+                className="text-sm font-semibold text-white/70 hover:text-[#D4AF37] transition-colors duration-200 hidden md:flex items-center gap-1.5"
+              >
+                💬 Talk to AK
+              </button>
               <Button onClick={() => onOpenCapture?.()} size="sm">
                 Get Started →
               </Button>

@@ -13,10 +13,10 @@ import LeadCaptureModal from '@/components/LeadCaptureModal';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
-const INITIAL: Msg = { role: 'assistant', content: "Hey! I'm AK — your AI Business Partner. Ask me anything about AKAI — pricing, how it works, or just tell me what your business needs." };
+const INITIAL: Msg = { role: 'assistant', content: "Hey! I'm AK — your AI business partner. 👋\n\nTell me about your business and I'll show you exactly how AKAI can help — from finding leads to closing deals, all on autopilot." };
 
-function HomepageChat() {
-  const [open, setOpen] = useState(false);
+function HomepageChat({ defaultOpen = false, onOpenChange }: { defaultOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
+  const [open, setOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<Msg[]>([INITIAL]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ function HomepageChat() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: messages.slice(-6).map(m => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({ message: text, history: messages.slice(-6).map(m => ({ role: m.role, content: m.content })), currentModule: 'homepage_sales' }),
       });
       let data: { message?: string } = {};
       try { data = await res.json(); } catch { /* non-json */ }
@@ -56,7 +56,7 @@ function HomepageChat() {
               <p className="text-sm font-bold text-white">AK — Your AI Business Partner</p>
               <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /><span className="text-[10px] text-gray-500">Online now</span></div>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Close" className="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">×</button>
+            <button onClick={() => { setOpen(false); onOpenChange?.(false); }} aria-label="Close" className="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">×</button>
           </div>
 
           {/* Messages */}
@@ -101,7 +101,7 @@ function HomepageChat() {
           </div>
         )}
         <button
-          onClick={() => setOpen(o => !o)}
+          onClick={() => { setOpen(o => { onOpenChange?.(!o); return !o; }); }}
           className="w-14 h-14 rounded-full bg-[#D4AF37] text-black flex items-center justify-center shadow-lg shadow-[#D4AF37]/30 hover:opacity-90 transition-all active:scale-95"
           aria-label="Chat with AK"
         >
@@ -118,18 +118,19 @@ function HomepageChat() {
 
 export default function Home() {
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
-      <Navbar onOpenCapture={() => setCaptureOpen(true)} />
-      <Hero onOpenCapture={() => setCaptureOpen(true)} />
+      <Navbar onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />
+      <Hero onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />
       <AITeam />
       <SocialProof />
       <HowItWorks />
       <Modules />
       <Pricing onOpenCapture={() => setCaptureOpen(true)} />
       <Footer />
-      <HomepageChat />
+      <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
       <LeadCaptureModal isOpen={captureOpen} onClose={() => setCaptureOpen(false)} />
     </main>
   );

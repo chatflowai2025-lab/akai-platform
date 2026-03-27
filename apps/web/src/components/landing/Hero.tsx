@@ -401,7 +401,7 @@ function SuccessState({ msg, sub }: { msg: string; sub: string }) {
 }
 
 /* ─── Main Hero ─── */
-export default function Hero({ onOpenCapture }: { onOpenCapture?: () => void }) {
+export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: () => void; onOpenChat?: () => void }) {
   const { user, loading } = useAuth();
   const [modal, setModal] = useState<ModalType>(null);
 
@@ -467,9 +467,12 @@ export default function Hero({ onOpenCapture }: { onOpenCapture?: () => void }) 
           >
             Free Digital Health Check
           </button>
-          <Button href="#how-it-works" variant="secondary" size="lg" className="min-h-[52px]">
-            How it works
-          </Button>
+          <button
+            onClick={() => onOpenChat?.()}
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-white/20 text-white/70 hover:border-[#D4AF37]/60 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5"
+          >
+            💬 Talk to AK
+          </button>
         </div>
 
         {/* Social proof stats bar */}
