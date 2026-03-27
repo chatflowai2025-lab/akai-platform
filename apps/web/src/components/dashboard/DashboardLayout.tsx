@@ -309,6 +309,7 @@ const MODULE_LINKS = [
   { href: '/ads', icon: '📣', label: 'Ads' },
   { href: '/recruit', icon: '🎯', label: 'Recruit' },
   { href: '/social', icon: '📱', label: 'Social' },
+  { href: '/health', icon: '🏥', label: 'Health' },
   { href: '/settings', icon: '⚙️', label: 'Settings' },
 ];
 
