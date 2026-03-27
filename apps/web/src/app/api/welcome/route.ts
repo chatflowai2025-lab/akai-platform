@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Firestore } from 'firebase-admin/firestore';
 import { getAdminFirestore } from '@/lib/firebase-admin';
-import { isSafeMode } from '@/lib/beta-config';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -134,11 +133,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'uid and email are required' }, { status: 400 });
     }
 
-    // Safe mode — skip welcome email for beta testers
-    if (isSafeMode(email)) {
-      console.log(`[welcome] Safe mode — skipping welcome email for ${email}`);
-      return NextResponse.json({ ok: true, skipped: true, reason: 'safe-mode' });
-    }
 
     // Guard: only send once per user
     let db: Firestore | null = null;
