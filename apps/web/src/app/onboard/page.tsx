@@ -121,7 +121,7 @@ export default function OnboardPage() {
           },
           { merge: true }
         );
-        console.log('[ONBOARD] Firestore saved for', user.uid);
+
       }
     } catch (err) {
       console.error('[ONBOARD] Firestore save failed (non-fatal):', err);
@@ -148,7 +148,7 @@ export default function OnboardPage() {
         }),
       });
       const data = await res.json();
-      console.log('[ONBOARD] Railway response:', data);
+
     } catch (err) {
       console.error('[ONBOARD] Railway call failed (non-fatal):', err);
     }

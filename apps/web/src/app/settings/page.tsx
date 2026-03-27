@@ -238,7 +238,7 @@ export default function SettingsPage() {
     if (!user?.uid || bizSaving) return;
     setBizSaving(true);
     setBizError(null);
-    console.log('[SETTINGS] saveBizProfile called', { uid: user?.uid, bizForm });
+
     try {
       const db = getFirebaseDb();
       if (!db) throw new Error('Firestore not available');
@@ -267,7 +267,7 @@ export default function SettingsPage() {
         timeout,
       ]);
 
-      console.log('[SETTINGS] save result', { success: true });
+
       setBizSaved(true);
       setBizError(null);
       setTimeout(() => setBizSaved(false), 3000);
