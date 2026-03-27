@@ -521,27 +521,34 @@ export default function SocialPage() {
         {/* Connect Accounts */}
         <section>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Connect Accounts</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { label: 'Instagram' as ConnectingPlatform, icon: '📸', gradient: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-500/20', text: 'text-pink-400' },
-              { label: 'LinkedIn' as ConnectingPlatform, icon: '💼', gradient: 'from-blue-600/20 to-blue-400/20', border: 'border-blue-500/20', text: 'text-blue-400' },
-              { label: 'Facebook' as ConnectingPlatform, icon: '👥', gradient: 'from-blue-500/20 to-indigo-500/20', border: 'border-indigo-500/20', text: 'text-indigo-400' },
-              { label: 'X (Twitter)' as ConnectingPlatform, icon: '𝕏', gradient: 'from-gray-200/10 to-gray-400/10', border: 'border-gray-400/20', text: 'text-gray-200' },
+              { label: 'Instagram' as ConnectingPlatform, icon: '📸', gradient: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-500/20', text: 'text-pink-400', btnColor: 'bg-pink-500/10 border-pink-500/30 text-pink-300 hover:bg-pink-500/20' },
+              { label: 'LinkedIn' as ConnectingPlatform, icon: '💼', gradient: 'from-blue-600/20 to-blue-400/20', border: 'border-blue-500/20', text: 'text-blue-400', btnColor: 'bg-blue-500/10 border-blue-500/30 text-blue-300 hover:bg-blue-500/20' },
+              { label: 'Facebook' as ConnectingPlatform, icon: '👥', gradient: 'from-blue-500/20 to-indigo-500/20', border: 'border-indigo-500/20', text: 'text-indigo-400', btnColor: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20' },
+              { label: 'X (Twitter)' as ConnectingPlatform, icon: '𝕏', gradient: 'from-gray-200/10 to-gray-400/10', border: 'border-gray-400/20', text: 'text-gray-200', btnColor: 'bg-gray-400/10 border-gray-400/30 text-gray-300 hover:bg-gray-400/20' },
             ].map(p => (
-              <button
+              <div
                 key={p.label}
-                onClick={() => setConnectingPlatform(p.label)}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r ${p.gradient} border ${p.border} cursor-pointer hover:opacity-80 transition-opacity w-full text-left`}
+                className={`flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r ${p.gradient} border ${p.border}`}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{p.icon}</span>
-                  <div className="text-left">
-                    <div className={`text-sm font-semibold ${p.text}`}>{p.label}</div>
-                    <div className="text-xs text-gray-500">Not connected</div>
-                  </div>
+                {/* Icon */}
+                <span className="text-2xl flex-shrink-0">{p.icon}</span>
+                {/* Name */}
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm font-semibold ${p.text} truncate`}>{p.label}</div>
+                  <span className="inline-block mt-0.5 text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-500 font-medium">
+                    Not connected
+                  </span>
                 </div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Connect →</span>
-              </button>
+                {/* Connect button */}
+                <button
+                  onClick={() => setConnectingPlatform(p.label)}
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border font-semibold transition-colors cursor-pointer ${p.btnColor}`}
+                >
+                  Connect →
+                </button>
+              </div>
             ))}
           </div>
         </section>
