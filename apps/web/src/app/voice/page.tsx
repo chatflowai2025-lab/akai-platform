@@ -208,32 +208,89 @@ function StepDots({ current, total }: { current: number; total: number }) {
 
 // ── Setup Wizard ──────────────────────────────────────────────────────────
 
+// ── Fallback script suggestions (industry-aware) ───────────────────────────
+
+function getFallbackSuggestions(industry: string, bizName: string, location: string) {
+  const ind = industry.toLowerCase();
+  const loc = location || 'your area';
+  const month = new Date().toLocaleString('default', { month: 'long' });
+
+  if (ind.includes('kitchen') || ind.includes('interior') || ind.includes('renovation') || ind.includes('fitout')) {
+    return {
+      hooks: [
+        `We help ${loc} homeowners get their dream kitchen designed and quoted — without spending months going back and forth`,
+        `Most of our clients come to us after getting vague quotes from other suppliers — we do fixed-price, Italian-crafted kitchens from day one`,
+        `We specialise in luxury kitchen fitouts for ${loc} homes — and we're booking consultations for ${month}`,
+      ],
+      questions: [
+        'Have you already started getting quotes for your kitchen renovation?',
+        'Are you working with an architect or designer, or are you planning it yourself?',
+        `What's your timeline — are you looking to start in the next few months, or still in the planning phase?`,
+      ],
+    };
+  }
+  if (ind.includes('real estate') || ind.includes('property') || ind.includes('mortgage') || ind.includes('finance')) {
+    return {
+      hooks: [
+        `We help ${loc} property buyers move faster — with pre-approval sorted before they even start inspecting`,
+        `Most buyers waste weeks on the wrong loan — we match you to the right product in one conversation`,
+        `We've helped hundreds of ${loc} clients buy their next property — we'd love to show you how`,
+      ],
+      questions: [
+        'Are you currently pre-approved, or still in the research phase?',
+        'Are you looking to buy in the next 90 days, or still planning?',
+        'Is this your first property purchase, or have you done this before?',
+      ],
+    };
+  }
+  if (ind.includes('recruit') || ind.includes('hiring') || ind.includes('staffing') || ind.includes('hr')) {
+    return {
+      hooks: [
+        `We help ${loc} businesses hire faster — typically placing in 2–3 weeks vs 8+ on the open market`,
+        `We specialise in placing high-quality candidates that actually stay — our 12-month retention rate is over 90%`,
+        `We've placed over 500 candidates in ${loc} — and we only get paid when you hire someone you love`,
+      ],
+      questions: [
+        'Do you have any roles you\'re actively trying to fill right now?',
+        'How long has your current vacancy been open?',
+        'Are you using a recruiter at the moment, or managing it in-house?',
+      ],
+    };
+  }
+  // Generic fallback
+  return {
+    hooks: [
+      `We help ${loc} businesses like yours get more qualified leads without the manual follow-up`,
+      `Our clients typically see results within the first 30 days — and we only work with businesses we know we can help`,
+      `We've worked with dozens of ${industry} businesses in ${loc} — and I'd love to show you what we do`,
+    ],
+    questions: [
+      'Are you currently handling your own lead follow-up, or do you have someone doing that?',
+      'What does your current sales process look like — are leads coming in consistently?',
+      'Are you looking to grow your client base in the next quarter?',
+    ],
+  };
+}
+
 // ── AI Script Suggestions ──────────────────────────────────────────────────
 
-function ScriptStep({ config, setConfig, userProfile, onBack, onNext }: {
+function ScriptStep({ config, setConfig, userProfile, userId, onBack, onNext }: {
   config: VoiceConfig;
   setConfig: (c: VoiceConfig) => void;
   userProfile: unknown;
+  userId?: string;
   onBack: () => void;
   onNext: () => void;
 }) {
-  const profile = userProfile as { businessName?: string; industry?: string; location?: string; campaignConfig?: { businessName?: string; industry?: string; location?: string } } | null;
-  const profileBizName = profile?.businessName || profile?.campaignConfig?.businessName || '';
-  const profileIndustry = profile?.industry || profile?.campaignConfig?.industry || '';
-  const profileLocation = profile?.campaignConfig?.location || '';
+  const profile = userProfile as { businessName?: string; industry?: string; location?: string; campaignConfig?: { businessName?: string; industry?: string; location?: string }; onboarding?: { businessName?: string; industry?: string; location?: string } } | null;
+  const profileBizName = profile?.onboarding?.businessName || profile?.businessName || profile?.campaignConfig?.businessName || '';
+  const profileIndustry = profile?.onboarding?.industry || profile?.industry || profile?.campaignConfig?.industry || '';
+  const profileLocation = profile?.onboarding?.location || profile?.campaignConfig?.location || '';
 
   // Allow user to enter business context inline if profile not loaded
   const [manualBiz, setManualBiz] = useState(profileBizName);
   const [manualIndustry, setManualIndustry] = useState(profileIndustry);
   const [manualLocation, setManualLocation] = useState(profileLocation);
-
-  // Update manual fields when profile loads
-  useEffect(() => {
-    if (profileBizName && !manualBiz) setManualBiz(profileBizName);
-    if (profileIndustry && !manualIndustry) setManualIndustry(profileIndustry);
-    if (profileLocation && !manualLocation) setManualLocation(profileLocation);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileBizName, profileIndustry, profileLocation]);
 
   const businessName = manualBiz || 'your business';
   const industry = manualIndustry || 'your industry';
@@ -245,25 +302,45 @@ function ScriptStep({ config, setConfig, userProfile, onBack, onNext }: {
   const [selectedQ, setSelectedQ] = useState<string | null>(config.script.qualifyingQuestion || null);
   const [showBizForm, setShowBizForm] = useState(!profileBizName);
 
+  // Load onboarding data from Firestore on mount — pre-fill fields & auto-trigger
   useEffect(() => {
-    // Auto-generate when we have business context
-    if (businessName !== 'your business' && !suggestions && !generating) {
-      generateSuggestions();
-      if (config.script.openingLine.includes('{{businessName}}') || config.script.openingLine.includes('[BusinessName]')) {
-        setConfig({ ...config, script: { ...config.script, openingLine: `Hi, is that {{name}}? This is Sophie calling from ${businessName}.` } });
-      }
-    }
+    if (!userId) return;
+    (async () => {
+      try {
+        const db = getFirebaseDb();
+        if (!db) return;
+        const snap = await getDoc(doc(db, 'users', userId));
+        if (!snap.exists()) return;
+        const data = snap.data();
+        const ob = data.onboarding || data.campaignConfig || {};
+        const biz = ob.businessName || data.businessName || '';
+        const ind = ob.industry || data.industry || '';
+        const loc = ob.location || '';
+        if (biz) setManualBiz(biz);
+        if (ind) setManualIndustry(ind);
+        if (loc) setManualLocation(loc);
+        if (biz) {
+          setShowBizForm(false);
+          // Auto-trigger generation with loaded values (pass directly to avoid stale state)
+          void generateSuggestionsWithValues(biz, ind || 'your industry', loc || 'your area');
+        }
+      } catch { /* ignore — user can fill manually */ }
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessName]);
+  }, [userId]);
 
-  const generateSuggestions = async () => {
+  const generateSuggestionsWithValues = async (biz: string, ind: string, loc: string) => {
     setGenerating(true);
+    // Update opening line with business name
+    if (config.script.openingLine.includes('{{businessName}}') || config.script.openingLine.includes('[BusinessName]')) {
+      setConfig({ ...config, script: { ...config.script, openingLine: `Hi, is that {{name}}? This is Sophie calling from ${biz}.` } });
+    }
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: `Generate Sophie AI calling script suggestions for this business. Business: "${businessName}". Industry: "${industry}". Location: "${location}".
+          message: `Generate Sophie AI calling script suggestions for this business. Business: "${biz}". Industry: "${ind}". Location: "${loc}".
 
 Return ONLY valid JSON in this exact format:
 {
@@ -279,7 +356,7 @@ Return ONLY valid JSON in this exact format:
   ]
 }
 
-Hooks should be specific to ${industry} in ${location}. Questions should help qualify if they're a real prospect. Australian English. No filler. Return ONLY the JSON.`,
+Hooks should be specific to ${ind} in ${loc}. Questions should help qualify if they're a real prospect. Australian English. No filler. Return ONLY the JSON.`,
         }),
       });
       const data = await res.json() as { message?: string };
@@ -287,14 +364,33 @@ Hooks should be specific to ${industry} in ${location}. Questions should help qu
         const match = data.message.match(/\{[\s\S]*\}/);
         if (match) {
           const parsed = JSON.parse(match[0]) as { hooks?: string[]; questions?: string[] };
-          setSuggestions({ hooks: parsed.hooks || [], questions: parsed.questions || [] });
-          // Auto-select first if nothing selected
-          if (!selectedHook && parsed.hooks?.[0]) setSelectedHook(parsed.hooks[0]);
-          if (!selectedQ && parsed.questions?.[0]) setSelectedQ(parsed.questions[0]);
+          if (parsed.hooks?.length && parsed.questions?.length) {
+            setSuggestions({ hooks: parsed.hooks, questions: parsed.questions });
+            if (!selectedHook && parsed.hooks[0]) setSelectedHook(parsed.hooks[0]);
+            if (!selectedQ && parsed.questions[0]) setSelectedQ(parsed.questions[0]);
+            setGenerating(false);
+            return;
+          }
         }
       }
-    } catch { /* use manual input */ }
-    finally { setGenerating(false); }
+      throw new Error('Invalid response');
+    } catch {
+      // Use industry-aware fallbacks
+      const fallback = getFallbackSuggestions(ind, biz, loc);
+      setSuggestions(fallback);
+      if (!selectedHook) setSelectedHook(fallback.hooks[0]);
+      if (!selectedQ) setSelectedQ(fallback.questions[0]);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const generateSuggestions = () => {
+    void generateSuggestionsWithValues(
+      manualBiz || 'your business',
+      manualIndustry || 'your industry',
+      manualLocation || 'your area',
+    );
   };
 
   const canProceed = (selectedHook || config.script.hook) && (selectedQ || config.script.qualifyingQuestion);
@@ -463,6 +559,7 @@ function SetupWizard({
   userEmail,
   userName,
   userProfile,
+  userId,
 }: {
   config: VoiceConfig;
   setConfig: (c: VoiceConfig) => void;
@@ -470,6 +567,7 @@ function SetupWizard({
   userEmail: string;
   userName: string;
   userProfile?: unknown;
+  userId?: string;
 }) {
   const [step, setStep] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
@@ -578,6 +676,7 @@ function SetupWizard({
       config={config}
       setConfig={setConfig}
       userProfile={userProfile}
+      userId={userId}
       onBack={() => setStep(0)}
       onNext={() => setStep(2)}
     />,
@@ -1242,6 +1341,7 @@ function VoicePageInner() {
               userEmail={userEmail}
               userName={userName}
               userProfile={userProfile}
+              userId={user.uid}
             />
           ) : (
             <ActiveView
