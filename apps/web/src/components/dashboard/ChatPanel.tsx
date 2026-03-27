@@ -107,6 +107,12 @@ export default function ChatPanel() {
       }
     } catch (err) {
       console.error(err);
+      setMessages(p => [...p, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: "Sorry, something went wrong. Try again in a moment.",
+        timestamp: new Date().toISOString(),
+      }]);
     } finally {
       setLoading(false);
       setInput('');
