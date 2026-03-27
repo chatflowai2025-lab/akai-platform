@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -261,14 +261,15 @@ function AuditPanel({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notified, setNotified] = useState(false);
+  // Use a ref for the notified flag — avoids re-render → useCallback recreation → useEffect re-fire loop
+  const notifiedRef = useRef(false);
   const { sendMessage } = useDashboardChat();
 
   const runAudit = useCallback(async () => {
     setLoading(true);
     setError(null);
     setResult(null);
-    setNotified(false);
+    notifiedRef.current = false;
     try {
       const res = await fetch(`${RAILWAY_API}/api/website-mockup/audit`, {
         method: 'POST',
@@ -313,9 +314,9 @@ function AuditPanel({
         opportunityScore: data.opportunityScore,
       };
       setResult(auditResult);
-      // Notify via AK chat when audit completes
-      if (!notified) {
-        setNotified(true);
+      // Notify via AK chat when audit completes (guarded by ref to prevent duplicate sends)
+      if (!notifiedRef.current) {
+        notifiedRef.current = true;
         const overall = auditResult.overallScore || auditResult.seoScore;
         const topWin = auditResult.quickWins?.[0]?.action || auditResult.issues?.[0] || 'Check the Web module for details';
         try {
@@ -327,7 +328,7 @@ function AuditPanel({
     } finally {
       setLoading(false);
     }
-  }, [url, notified, sendMessage]);
+  }, [url, sendMessage]);
 
   useEffect(() => { runAudit(); }, [runAudit]);
 
@@ -352,19 +353,92 @@ function AuditPanel({
         </button>
       </div>
 
+      {/* Prominent status banners — shown at the very top, impossible to miss */}
+      {loading && (
+        <div className="flex-shrink-0 px-6 pt-4">
+          <style>{`
+            @keyframes auditProgress {
+              0% { width: 0%; }
+              30% { width: 40%; }
+              60% { width: 70%; }
+              85% { width: 88%; }
+              100% { width: 95%; }
+            }
+          `}</style>
+          <div className="rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-lg">🔍</span>
+              <div>
+                <p className="text-sm font-bold text-[#D4AF37]">Auditing {url}…</p>
+                <p className="text-xs text-gray-400 mt-0.5">This takes 10–20 seconds. AK will also notify you in chat when done.</p>
+              </div>
+            </div>
+            <div className="w-full h-1.5 bg-[#2a2a2a] rounded-full overflow-hidden">
+              <div className="h-full bg-[#D4AF37] rounded-full" style={{ animation: 'auditProgress 15s ease-in-out forwards' }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="flex-shrink-0 px-6 pt-4">
+          <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 flex items-start gap-3">
+            <span className="text-lg flex-shrink-0">❌</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-red-400">Audit failed</p>
+              <p className="text-xs text-red-300/70 mt-0.5">{error}</p>
+            </div>
+            <button
+              onClick={runAudit}
+              className="px-3 py-1.5 bg-red-500/20 border border-red-500/30 text-red-300 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition flex-shrink-0"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {result && !loading && (
+        <div className="flex-shrink-0 px-6 pt-4">
+          <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-center gap-3">
+            <span className="text-lg flex-shrink-0">✅</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-green-400">
+                Audit complete — scored {Math.round(result.overallScore || result.seoScore)}/100
+              </p>
+              <p className="text-xs text-green-300/60 mt-0.5">Full report below. Re-audit anytime to track improvements.</p>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              <button
+                onClick={runAudit}
+                className="px-3 py-1.5 bg-green-500/20 border border-green-500/30 text-green-300 rounded-lg text-xs font-semibold hover:bg-green-500/30 transition"
+              >
+                Re-audit
+              </button>
+              <button
+                onClick={onDisconnect}
+                className="px-3 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-semibold hover:text-red-400 hover:border-red-500/30 transition"
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {loading && (
           <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-sm mx-auto text-center">
             <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
             <div>
-              <p className="text-sm text-white font-semibold">Auditing your site…</p>
-              <p className="text-xs text-gray-500 mt-1">Takes 10–20 seconds. You can navigate away — AK will notify you in chat when the report is ready.</p>
+              <p className="text-sm text-white font-semibold">Analysing your site…</p>
+              <p className="text-xs text-gray-500 mt-1">Hang tight — detailed results coming up.</p>
             </div>
           </div>
         )}
 
-        {error && (
+        {error && !loading && (
           <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
             {error}
           </div>
