@@ -805,7 +805,7 @@ export default function ProposalsPage() {
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 w-full max-w-md max-h-[70vh] flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-white font-bold text-sm">Pick a prospect</h3>
-              <button onClick={() => { setShowProspectPicker(false); setProspectSearch(''); }} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+              <button onClick={() => { setShowProspectPicker(false); setProspectSearch(''); }} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
             <input
               type="text"

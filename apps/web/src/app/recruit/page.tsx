@@ -357,7 +357,7 @@ function FindCandidatesTab() {
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-bold">🤖 AI Screening — {screeningJobTitle}</h3>
-              <button onClick={() => setShowScreenModal(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+              <button onClick={() => setShowScreenModal(false)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
             {screening ? (
               <div className="flex flex-col items-center gap-3 py-8">

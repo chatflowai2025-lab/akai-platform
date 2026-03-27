@@ -55,7 +55,7 @@ function HomepageChat() {
               <p className="text-sm font-bold text-white">AK — Your AI Business Partner</p>
               <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /><span className="text-[10px] text-gray-500">Online now</span></div>
             </div>
-            <button onClick={() => setOpen(false)} className="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">×</button>
+            <button onClick={() => setOpen(false)} aria-label="Close" className="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">×</button>
           </div>
 
           {/* Messages */}

@@ -1350,7 +1350,7 @@ function VoicePageInner() {
       {configSaveError && (
         <div className="px-8 py-2 bg-red-500/10 border-b border-red-500/20 text-red-400 text-xs flex items-center justify-between">
           <span>⚠️ {configSaveError}</span>
-          <button onClick={() => setConfigSaveError(null)} className="text-red-400/60 hover:text-red-400 ml-4">×</button>
+          <button onClick={() => setConfigSaveError(null)} aria-label="Dismiss" className="text-red-400/60 hover:text-red-400 ml-4">×</button>
         </div>
       )}
       <div className="flex-1 overflow-y-auto p-8">
