@@ -236,6 +236,122 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   );
 }
 
+// ── Mobile Menu Drawer ────────────────────────────────────────────────────────
+const MODULE_LINKS = [
+  { href: '/dashboard', icon: '📊', label: 'Dashboard' },
+  { href: '/sales', icon: '📞', label: 'Sales' },
+  { href: '/voice', icon: '🎙️', label: 'Voice' },
+  { href: '/web', icon: '🌐', label: 'Web' },
+  { href: '/email-guard', icon: '✉️', label: 'Email Guard' },
+  { href: '/calendar', icon: '📅', label: 'Calendar' },
+  { href: '/proposals', icon: '📄', label: 'Proposals' },
+  { href: '/ads', icon: '📣', label: 'Ads' },
+  { href: '/recruit', icon: '🎯', label: 'Recruit' },
+  { href: '/social', icon: '📱', label: 'Social' },
+  { href: '/settings', icon: '⚙️', label: 'Settings' },
+];
+
+function MobileMenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0f0f0f] border-t border-[#2a2a2a] rounded-t-2xl md:hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#1f1f1f]">
+          <span className="text-sm font-bold text-white">All Modules</span>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>
+        </div>
+        <div className="grid grid-cols-3 gap-px bg-[#1f1f1f] max-h-[60vh] overflow-y-auto">
+          {MODULE_LINKS.map(link => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={onClose}
+              className="flex flex-col items-center gap-1.5 py-4 px-2 bg-[#0f0f0f] hover:bg-[#1a1a1a] transition active:bg-[#222]"
+            >
+              <span className="text-2xl">{link.icon}</span>
+              <span className="text-[11px] text-gray-400 font-medium text-center leading-tight">{link.label}</span>
+            </a>
+          ))}
+        </div>
+        <div className="h-safe-bottom pb-2" />
+      </div>
+    </>
+  );
+}
+
+// ── Mobile Bottom Nav ─────────────────────────────────────────────────────────
+function MobileBottomNav({
+  onChatOpen,
+  onMenuOpen,
+}: {
+  onChatOpen: () => void;
+  onMenuOpen: () => void;
+}) {
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0a0a] border-t border-[#1f1f1f] flex items-center md:hidden">
+      <a
+        href="/dashboard"
+        className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 hover:text-white active:text-[#D4AF37] transition"
+      >
+        <span className="text-xl">📊</span>
+        <span className="text-[10px] font-medium">Home</span>
+      </a>
+      <a
+        href="/sales"
+        className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 hover:text-white active:text-[#D4AF37] transition"
+      >
+        <span className="text-xl">📞</span>
+        <span className="text-[10px] font-medium">Sales</span>
+      </a>
+      <button
+        onClick={onChatOpen}
+        className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 hover:text-white active:text-[#D4AF37] transition"
+      >
+        <span className="text-xl">💬</span>
+        <span className="text-[10px] font-medium">AK Chat</span>
+      </button>
+      <button
+        onClick={onMenuOpen}
+        className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 hover:text-white active:text-[#D4AF37] transition"
+      >
+        <span className="text-xl">☰</span>
+        <span className="text-[10px] font-medium">Menu</span>
+      </button>
+    </nav>
+  );
+}
+
+// ── Mobile Chat Overlay ───────────────────────────────────────────────────────
+function MobileChatOverlay({
+  open,
+  onClose,
+  chatQueue,
+  onChatHandled,
+}: {
+  open: boolean;
+  onClose: () => void;
+  chatQueue: string | null;
+  onChatHandled: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#080808] md:hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">AK</div>
+          <span className="font-semibold text-sm text-white">Ask AK</span>
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        </div>
+        <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <InlineChatPanel externalMessage={chatQueue} onExternalMessageHandled={onChatHandled} />
+      </div>
+    </div>
+  );
+}
+
 // ── Layout ────────────────────────────────────────────────────────────────────
 function DashboardLayoutInner({
   children,
@@ -247,6 +363,8 @@ function DashboardLayoutInner({
   noChat?: boolean;
 }) {
   const [chatQueue, setChatQueue] = useState<string | null>(null);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const injectMessage = useCallback((text: string) => {
     setChatQueue(text);
@@ -265,12 +383,33 @@ function DashboardLayoutInner({
           {children}
         </div>
         {!noChat && (
-          <InlineChatPanel
-            externalMessage={chatQueue}
-            onExternalMessageHandled={() => setChatQueue(null)}
-          />
+          <div className="hidden md:flex">
+            <InlineChatPanel
+              externalMessage={chatQueue}
+              onExternalMessageHandled={() => setChatQueue(null)}
+            />
+          </div>
         )}
       </div>
+
+      {/* Mobile bottom nav */}
+      <MobileBottomNav
+        onChatOpen={() => setMobileChatOpen(true)}
+        onMenuOpen={() => setMobileMenuOpen(true)}
+      />
+
+      {/* Mobile chat overlay */}
+      {!noChat && (
+        <MobileChatOverlay
+          open={mobileChatOpen}
+          onClose={() => setMobileChatOpen(false)}
+          chatQueue={chatQueue}
+          onChatHandled={() => setChatQueue(null)}
+        />
+      )}
+
+      {/* Mobile menu drawer */}
+      <MobileMenuDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </ChatContext.Provider>
   );
 }

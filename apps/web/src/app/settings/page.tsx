@@ -250,7 +250,7 @@ export default function SettingsPage() {
       }, { merge: true });
 
       // Also update voiceConfig so Sophie uses the right businessName
-      const voiceSave = setDoc(doc(db, 'akai-platform', 'voiceConfig'), {
+      const voiceSave = setDoc(doc(db, 'users', user.uid, 'voiceConfig', 'config'), {
         businessName: bizForm.businessName,
         industry: bizForm.industry,
         location: bizForm.location,
