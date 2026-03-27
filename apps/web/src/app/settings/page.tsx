@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
-import { getFirebaseDb, getFirebaseAuth } from '@/lib/firebase';
+import { getFirebaseDb, getFirebaseAuth, getFirebaseStorage } from '@/lib/firebase';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -83,6 +84,13 @@ export default function SettingsPage() {
 
   // Plan
   const [planTier, setPlanTier] = useState<string>('trial');
+
+  // Avatar
+  const AVATAR_COLORS = ['#D4AF37', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6', '#F97316'];
+  const [avatarColor, setAvatarColor] = useState('#D4AF37');
+  const [avatarPhotoUrl, setAvatarPhotoUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   // Connected Accounts
   interface ConnectedAccount {
@@ -162,6 +170,10 @@ export default function SettingsPage() {
 
         // Plan
         setPlanTier(data.plan || data.planTier || 'trial');
+
+        // Avatar
+        if (data.avatarColor) setAvatarColor(data.avatarColor);
+        if (data.avatarPhotoUrl) setAvatarPhotoUrl(data.avatarPhotoUrl);
 
         // Connected Accounts — inbox integrations
         const inboxConn = data.inboxConnection || {};
@@ -319,6 +331,31 @@ export default function SettingsPage() {
 
   const planInfo = PLAN_LABELS[planTier] || PLAN_LABELS.trial;
 
+  const saveAvatarColor = async (color: string) => {
+    setAvatarColor(color);
+    if (!user?.uid) return;
+    try {
+      const db = getFirebaseDb();
+      if (db) await setDoc(doc(db, 'users', user.uid), { avatarColor: color }, { merge: true });
+    } catch (err) { console.error('[SETTINGS] save avatar color', err); }
+  };
+
+  const uploadAvatarPhoto = async (file: File) => {
+    if (!user?.uid || avatarUploading) return;
+    setAvatarUploading(true);
+    try {
+      const storage = getFirebaseStorage();
+      if (!storage) throw new Error('Storage unavailable');
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setAvatarPhotoUrl(url);
+      const db = getFirebaseDb();
+      if (db) await setDoc(doc(db, 'users', user.uid), { avatarPhotoUrl: url }, { merge: true });
+    } catch (err) { console.error('[SETTINGS] avatar upload', err); }
+    finally { setAvatarUploading(false); }
+  };
+
   const deleteAccount = async () => {
     if (deleteConfirm !== 'DELETE' || !user) return;
     setDeleting(true);
@@ -352,14 +389,81 @@ export default function SettingsPage() {
         {/* Account */}
         <Section title="Account">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] font-black text-lg">
-              {(userProfile?.displayName || user?.email || 'A')[0].toUpperCase()}
+            {/* Avatar */}
+            <div className="relative flex-shrink-0">
+              {avatarPhotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarPhotoUrl}
+                  alt="Avatar"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-[#2a2a2a]"
+                />
+              ) : (
+                <div
+                  className="w-14 h-14 rounded-full border-2 border-[#2a2a2a] flex items-center justify-center font-black text-xl text-black"
+                  style={{ backgroundColor: avatarColor }}
+                >
+                  {(userProfile?.displayName || user?.email || 'A')[0].toUpperCase()}
+                </div>
+              )}
+              {avatarUploading && (
+                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
             </div>
-            <div>
+            <div className="flex-1">
               <p className="font-semibold text-white text-sm">{userProfile?.displayName || userProfile?.businessName || 'Your Account'}</p>
               <p className="text-xs text-gray-500">{user?.email}</p>
+              {/* Color picker */}
+              <div className="flex items-center gap-1.5 mt-2">
+                {AVATAR_COLORS.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => saveAvatarColor(c)}
+                    title={c}
+                    className="w-5 h-5 rounded-full border-2 transition-transform hover:scale-110"
+                    style={{
+                      backgroundColor: c,
+                      borderColor: avatarColor === c ? 'white' : 'transparent',
+                    }}
+                  />
+                ))}
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="ml-1 text-xs text-gray-500 hover:text-white transition px-2 py-0.5 border border-[#2a2a2a] rounded-full hover:border-[#3a3a3a]"
+                  title="Upload photo"
+                >
+                  📷 Upload
+                </button>
+                {avatarPhotoUrl && (
+                  <button
+                    onClick={() => {
+                      setAvatarPhotoUrl(null);
+                      if (user?.uid) {
+                        const db = getFirebaseDb();
+                        if (db) setDoc(doc(db, 'users', user.uid), { avatarPhotoUrl: null }, { merge: true }).catch(() => {});
+                      }
+                    }}
+                    className="text-xs text-gray-600 hover:text-red-400 transition"
+                  >
+                    Remove photo
+                  </button>
+                )}
+              </div>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadAvatarPhoto(file);
+                  e.target.value = '';
+                }}
+              />
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex-shrink-0">
               <span className={`text-xs font-bold px-3 py-1 rounded-full border ${planInfo.color}`}>
                 {planInfo.label}
               </span>

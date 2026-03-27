@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getFirebaseDb } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 const MODULES = [
   { id: 'sales', icon: '📞', label: 'Sales', status: 'live', href: '/sales', external: false },
@@ -22,6 +24,21 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [avatarColor, setAvatarColor] = useState('#D4AF37');
+  const [avatarPhotoUrl, setAvatarPhotoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    const db = getFirebaseDb();
+    if (!db) return;
+    const unsub = onSnapshot(doc(db, 'users', user.uid), snap => {
+      if (!snap.exists()) return;
+      const d = snap.data();
+      if (d.avatarColor) setAvatarColor(d.avatarColor);
+      if (d.avatarPhotoUrl !== undefined) setAvatarPhotoUrl(d.avatarPhotoUrl || null);
+    });
+    return unsub;
+  }, [user?.uid]);
 
   const isActive = (href: string, external: boolean) => {
     if (external) return false;
@@ -117,7 +134,18 @@ export default function Sidebar() {
 
         {/* User + Sign Out */}
         <div className="pt-2 mt-1 border-t border-[#1a1a1a]">
-          <div className="px-3 py-2 mb-1">
+          <div className="px-3 py-2 mb-1 flex items-center gap-2">
+            {avatarPhotoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarPhotoUrl} alt="Avatar" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+            ) : (
+              <div
+                className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black text-black"
+                style={{ backgroundColor: avatarColor }}
+              >
+                {(user?.email || 'A')[0].toUpperCase()}
+              </div>
+            )}
             <p className="text-xs text-gray-600 truncate">{user?.email}</p>
           </div>
           <button
