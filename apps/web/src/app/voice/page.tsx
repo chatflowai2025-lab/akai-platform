@@ -898,9 +898,11 @@ function SetupWizard({
         </div>
 
         {/* Consent */}
-        <label className="flex items-start gap-4 bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5 cursor-pointer group hover:border-[#2a2a2a] transition-colors">
+        <label
+          className="flex items-start gap-4 bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5 cursor-pointer group hover:border-[#2a2a2a] transition-colors"
+          onClick={() => setConfig({ ...config, consentConfirmed: !config.consentConfirmed })}
+        >
           <div
-            onClick={() => setConfig({ ...config, consentConfirmed: !config.consentConfirmed })}
             className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
               config.consentConfirmed ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-[#3a3a3a] group-hover:border-[#5a5a5a]'
             }`}
@@ -908,7 +910,7 @@ function SetupWizard({
             {config.consentConfirmed && <span className="text-black text-xs font-black">✓</span>}
           </div>
           <p className="text-sm text-gray-300 leading-relaxed">
-            I confirm that the leads I&apos;m calling have either given consent to be contacted, or are business numbers (B2B calls don&apos;t require consent under the SPAM Act).
+            The leads I&apos;ve uploaded have either given consent to be contacted, or are business numbers (B2B calls don&apos;t require consent under the Spam Act 2003).
           </p>
         </label>
 
