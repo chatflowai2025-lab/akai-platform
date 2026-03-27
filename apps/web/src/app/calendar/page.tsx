@@ -580,14 +580,26 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     const db = getFirebaseDb();
     if (!db) return;
     import('firebase/firestore').then(({ doc, getDoc }) => {
-      getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar')).then(snap => {
+      // Check root user doc first (Railway saves here: googleCalendarConnected / googleRefreshToken)
+      getDoc(doc(db, 'users', user.uid)).then(snap => {
         if (snap.exists()) {
           const d = snap.data();
-          if (d?.connected) {
+          if (d?.googleCalendarConnected || d?.googleRefreshToken) {
             setCalConnected(true);
             setCalProvider('google');
+            return;
           }
         }
+        // Fallback: check integrations sub-doc
+        getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar')).then(snap2 => {
+          if (snap2.exists()) {
+            const d = snap2.data();
+            if (d?.connected || d?.accessToken) {
+              setCalConnected(true);
+              setCalProvider('google');
+            }
+          }
+        }).catch(() => {});
       }).catch(() => {});
     });
   }, [user.uid]);
