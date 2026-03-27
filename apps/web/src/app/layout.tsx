@@ -6,6 +6,9 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  verification: {
+    google: 'VNpyDRPV_WUxGG6u5z3kJNFGVq0xvXp5QCLcb5hENvI',
+  },
   title: 'AKAI — Your AI Business Partner',
   description: 'AKAI runs your business 24/7 with 9 specialised AI agents. Sales, Recruitment, Web, Ads, Social, Email and more. Start free.',
   keywords: ['AI business', 'AI sales', 'AI recruitment', 'AI website builder', 'AKAI', 'AI agents', 'business automation'],
