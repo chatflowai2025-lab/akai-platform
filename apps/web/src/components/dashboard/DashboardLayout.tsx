@@ -53,7 +53,13 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     const db = getFirebaseDb();
     if (!db) return;
     const chatRef = doc(db, 'users', user.uid, 'chat', 'history');
-    setDoc(chatRef, { messages: messages.slice(-50), updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+    // Strip undefined fields before saving — Firestore rejects undefined values
+    const sanitized = messages.slice(-50).map(m => {
+      const clean: Record<string, unknown> = { id: m.id, role: m.role, content: m.content, timestamp: m.timestamp };
+      if (m.buttons !== undefined) clean.buttons = m.buttons;
+      return clean;
+    });
+    setDoc(chatRef, { messages: sanitized, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
   }, [messages, user]);
 
   // Load chat history from Firestore on mount
@@ -194,7 +200,9 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
       if (data.state) setChatState(data.state as typeof chatState);
       const reply = data.message || (data.error ? `Error: ${data.error}` : null);
       if (reply) {
-        setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: reply, timestamp: new Date().toISOString(), buttons: data.buttons as ChatMessage['buttons'] }]);
+        const msg: ChatMessage = { id: Date.now().toString(), role: 'assistant', content: reply, timestamp: new Date().toISOString() };
+        if (data.buttons) msg.buttons = data.buttons as ChatMessage['buttons'];
+        setMessages(p => [...p, msg]);
       } else if (!data.message && !data.error) {
         // Empty or unrecognised response — show fallback
         setMessages(p => [...p, { id: Date.now().toString(), role: 'assistant', content: 'Something went wrong. Try again.', timestamp: new Date().toISOString() }]);
