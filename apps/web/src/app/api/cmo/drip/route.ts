@@ -5,7 +5,7 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? 're_CuqENxkM_AgFzKPSv3ZLgjqb3wLcZibXi';
 const FROM_EMAIL = 'AKAI <welcome@aiclozr.com>';
 
-// Aaron is always BCC'd on every drip email so he sees what goes out.
+// Aaron is always BCC'd on every drip email so he sees everything that goes out.
 const OWNER_BCC = 'mrakersten@gmail.com';
 
 export async function GET(req: NextRequest) {
@@ -17,8 +17,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const db = getAdminFirestore();
+    if (!db) {
+      return NextResponse.json({ error: 'Firestore not initialised' }, { status: 503 });
+    }
+
     // Fetch user record from Firestore
-    const userDoc = await adminDb.collection('users').doc(userId).get();
+    const userDoc = await db.collection('users').doc(userId).get();
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -35,7 +40,7 @@ export async function GET(req: NextRequest) {
     const createdAt: Date | undefined = userData.createdAt?.toDate
       ? userData.createdAt.toDate()
       : userData.createdAt
-        ? new Date(userData.createdAt)
+        ? new Date(userData.createdAt as string)
         : undefined;
 
     const daysSinceSignup = createdAt
@@ -44,11 +49,11 @@ export async function GET(req: NextRequest) {
 
     const dripMessage = getDripMessage(daysSinceSignup);
 
-    // Send via Resend
+    // Send via Resend — goes out automatically, no approval needed.
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -69,7 +74,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const resendData = await resendRes.json();
+    const resendData = (await resendRes.json()) as { id?: string };
 
     return NextResponse.json({
       success: true,

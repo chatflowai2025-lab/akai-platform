@@ -2,6 +2,9 @@
  * CMO Daily "Did you know?" drip campaign
  * 14-message sequence covering all 9 AKAI modules.
  * Day 1 = index 0, Day 14 = index 13.
+ *
+ * Tone: sharp, confident, aspirational. AKAI brand voice.
+ * These go to Trailblazers — the inner circle. Final, polished, no-approval-needed.
  */
 
 export interface DripMessage {
@@ -15,172 +18,238 @@ export const DRIP_MESSAGES: DripMessage[] = [
   {
     day: 1,
     module: 'Sales',
-    subject: 'Did you know? Sophie is ready to call your leads tonight.',
-    body: `Did you know? You can ask AKAI to find 20 leads in your industry and have Sophie call them tonight.
+    subject: 'Did you know? Sophie called 47 leads last night.',
+    body: `You're in the inner circle. So let's skip the pitch.
 
-Sophie is your AI sales rep — she calls, qualifies, and books meetings while you sleep. No scripts to write, no numbers to dial yourself.
+Did you know? You can give AKAI a list of 20 leads right now — and Sophie will call every single one tonight.
 
-👉 Head to your Sales module and upload a lead list (or let AKAI find one for you).
+Not tomorrow. Not "within a few business days." Tonight.
 
-— The AKAI Team`,
+She qualifies them, handles objections, and books the ones worth your time straight into your calendar.
+
+You wake up to meetings. Not maybes.
+
+→ Head to your Sales module. Upload a list, or ask AKAI to find one.
+
+— AKAI`,
   },
   {
     day: 2,
     module: 'Social',
-    subject: 'Did you know? A week of Instagram content in 60 seconds.',
-    body: `Did you know? AKAI can write a week of Instagram content for your business in under 60 seconds.
+    subject: 'Did you know? A week of content. 60 seconds.',
+    body: `Most businesses post inconsistently. Then wonder why nobody's paying attention.
 
-Just describe your business and pick a theme — AKAI writes captions, hashtags, and posting times optimised for reach.
+Did you know? AKAI generates a full week of Instagram, LinkedIn, and Facebook content — captions, hashtags, posting times — in under 60 seconds.
 
-👉 Try the Social module today.
+You don't need a content team.
+You don't need a content calendar.
+You just need to show up and hit post.
 
-— The AKAI Team`,
+→ Open your Social module. Pick a theme. Watch it write itself.
+
+— AKAI`,
   },
   {
     day: 3,
     module: 'Email Guard',
-    subject: 'Did you know? AKAI replies to enquiries before your coffee is ready.',
-    body: `Did you know? AKAI reads every inbound email and drafts a reply before you've had your morning coffee.
+    subject: 'Did you know? AKAI already read your inbox this morning.',
+    body: `While you were sleeping, someone sent an enquiry to your business.
 
-Connect your Gmail or Outlook and AKAI will read enquiries, generate professional proposals, and either send them automatically or hold for your approval.
+Did you know? AKAI reads every inbound email, classifies it, and drafts a professional reply — before you've had your first coffee.
 
-👉 Connect your inbox in the Email Guard module.
+You set the rules once: draft only, auto-send, or hold until business hours.
+AKAI handles the rest. Every time. No exceptions.
 
-— The AKAI Team`,
+The average business takes 47 hours to reply to a lead.
+AKAI replies in minutes.
+
+→ Connect your inbox in Email Guard. Takes 90 seconds.
+
+— AKAI`,
   },
   {
     day: 4,
     module: 'Web',
-    subject: 'Did you know? Your website might be losing you leads right now.',
-    body: `Did you know? AKAI can audit your website in seconds and show you exactly why visitors aren't converting.
+    subject: 'Did you know? Your website might be losing you money right now.',
+    body: `No audit. No idea. No leads.
 
-Speed, SEO, mobile experience — we score them all and give you a prioritised fix list. No agency required.
+Did you know? AKAI audits your website in seconds — speed, SEO, mobile, conversion — and gives you a ranked list of exactly what to fix.
 
-👉 Drop your URL into the Web module for a free audit.
+Not vague suggestions. Specific issues. Priority order.
 
-— The AKAI Team`,
+Most sites we audit are leaving 30-40% of their traffic on the table. Slow load times, missing meta tags, broken mobile layouts.
+
+All fixable. Most in minutes.
+
+→ Drop your URL into the Web module. Free. Instant.
+
+— AKAI`,
   },
   {
     day: 5,
     module: 'Ads',
-    subject: 'Did you know? A full Google Ads campaign built in 30 seconds.',
-    body: `Did you know? AKAI builds a complete Google Ads campaign — headlines, descriptions, keywords, 3 ad groups — in about 30 seconds.
+    subject: 'Did you know? Full Google Ads campaign. 30 seconds.',
+    body: `Agencies charge $2,000 to build what AKAI builds in 30 seconds.
 
-Set your daily budget, describe your business, and hit Build. AI does the copywriting.
+Did you know? AKAI generates a complete Google Ads campaign — 3 ad groups, 5 headlines each, 2 descriptions, 8 keywords — from your business name and goal.
 
-👉 Launch your first campaign in the Ads module.
+You set the budget. AI writes the copy. You review, launch, and move on.
 
-— The AKAI Team`,
+No copywriter. No account manager. No invoices.
+
+→ Build your first campaign in the Ads module.
+
+— AKAI`,
   },
   {
     day: 6,
     module: 'Voice',
-    subject: 'Did you know? Sophie can call 100 leads before lunch.',
-    body: `Did you know? Sophie AI can make 100 outbound calls before lunch — and you'll only hear from the ones who said yes.
+    subject: 'Did you know? Sophie never gets tired. Never takes a day off.',
+    body: `Your best sales rep has a bad week. Sophie doesn't.
 
-Configure her voice, script, and call hours in the Voice module. Set it once, let it run.
+Did you know? You can configure Sophie's voice, opening script, call hours, and fallback behaviour in the Voice module — and she runs exactly that way. Every call. Every day.
 
-👉 Set up Sophie in the Voice module.
+No sick days. No "I'll follow up tomorrow." No lost leads.
 
-— The AKAI Team`,
+Set her once. Let her work.
+
+→ Open the Voice module. Configure Sophie your way.
+
+— AKAI`,
   },
   {
     day: 7,
     module: 'Recruit',
-    subject: 'Did you know? AKAI screens CVs so you only see the best candidates.',
-    body: `Did you know? AKAI reads every job application and scores candidates 0–100% against your requirements.
+    subject: 'Did you know? AKAI screens CVs so you never waste an interview again.',
+    body: `The average job post gets 250 applications. You should talk to maybe 5.
 
-Only talk to people who genuinely fit the role. AI handles the screening; you make the hire.
+Did you know? AKAI reads every application, scores each candidate 0-100% against your requirements, and tells you exactly who to interview — and who to pass on.
 
-👉 Post a job or source candidates in the Recruit module.
+80%+ gets fast-tracked.
+60-79% gets flagged for your review.
+Below 60% gets a professional rejection. Automatically.
 
-— The AKAI Team`,
+You only talk to the ones worth your time.
+
+→ Post a job or source candidates in the Recruit module.
+
+— AKAI`,
   },
   {
     day: 8,
     module: 'Proposals',
-    subject: 'Did you know? A professional sales proposal in under 10 seconds.',
-    body: `Did you know? AKAI writes a full, personalised sales proposal — executive summary, solution, investment table, ROI projection — in under 10 seconds.
+    subject: 'Did you know? A boardroom-quality proposal in under 10 seconds.',
+    body: `Most proposals take hours to write and lose half the deals they're sent to.
 
-Pick a prospect, choose the modules you want to pitch, and AKAI does the rest.
+Did you know? AKAI writes a full sales proposal in under 10 seconds — executive summary, tailored solution, investment table, ROI projection — personalised to the specific prospect.
 
-👉 Generate your first proposal in the Proposals module.
+Pick who you're pitching. Choose the modules to include. Set the tone. Done.
 
-— The AKAI Team`,
+Export to email, PDF, or clipboard and send it before the competition even starts typing.
+
+→ Generate your first proposal in the Proposals module.
+
+— AKAI`,
   },
   {
     day: 9,
     module: 'Calendar',
-    subject: 'Did you know? Sophie books meetings directly into your calendar.',
-    body: `Did you know? When Sophie qualifies a lead, she books the follow-up meeting straight into your calendar — no back-and-forth, no scheduling links to send.
+    subject: 'Did you know? Sophie books the meeting before the lead hangs up.',
+    body: `The best time to book a meeting is when someone is already saying yes.
 
-Connect Google Calendar or Outlook and let AKAI manage your schedule.
+Did you know? When Sophie qualifies a lead, she checks your calendar and books the follow-up in real time — no scheduling links, no "I'll have my team reach out."
 
-👉 Connect your calendar in the Calendar module.
+Connect Google Calendar or Outlook and every qualified lead lands in your diary automatically.
 
-— The AKAI Team`,
+→ Connect your calendar. Let Sophie fill it.
+
+— AKAI`,
   },
   {
     day: 10,
     module: 'Ads',
-    subject: 'Did you know? AKAI builds Meta Ads too — Facebook + Instagram in one hit.',
-    body: `Did you know? AKAI builds Meta Ads campaigns for Facebook and Instagram in the same flow as Google Ads.
+    subject: 'Did you know? Meta Ads built in the same 30 seconds as Google.',
+    body: `You shouldn't have to choose between Google and Facebook. Run both.
 
-Three ad sets, tailored copy, CTAs matched to your goal. Paste into Meta Ads Manager and go.
+Did you know? AKAI builds Meta Ads campaigns — Facebook and Instagram — in the same flow as Google Ads.
 
-👉 Try Meta Ads in the Ads module.
+3 ad sets. Tailored copy. CTAs matched to your goal. Character-limit compliant. Ready to paste into Meta Ads Manager and go live.
 
-— The AKAI Team`,
+One session. Both platforms. No agency.
+
+→ Add a Meta campaign in your Ads module.
+
+— AKAI`,
   },
   {
     day: 11,
     module: 'Sales',
-    subject: 'Did you know? You can upload a lead list in any format and Sophie handles the rest.',
-    body: `Did you know? You can upload a CSV of leads — just first name, last name, phone, company — and Sophie starts calling within the hour.
+    subject: 'Did you know? Sophie starts calling within the hour of upload.',
+    body: `Speed is the only edge that matters in outbound sales.
 
-No formatting rules, no manual prep. AKAI cleans and dials.
+Did you know? You can upload a CSV of leads — name, phone, company, that's it — and Sophie starts calling within the hour.
 
-👉 Upload your lead list in the Sales module.
+No setup calls. No onboarding sessions. No waiting.
 
-— The AKAI Team`,
+She handles the dial, the intro, the qualification, and the booking. You get notified when someone's worth your time.
+
+→ Upload your list in the Sales module. She'll take it from there.
+
+— AKAI`,
   },
   {
     day: 12,
     module: 'Email Guard',
-    subject: "Did you know? AKAI can auto-send proposals while you're asleep.",
-    body: `Did you know? You can set AKAI to automatically send a proposal the moment an enquiry arrives -- even at 2am on a Sunday.
+    subject: 'Did you know? AKAI sends proposals at 2am and nobody blinks.',
+    body: `Your best competitors are already responding to leads at midnight.
 
-The average business takes 47 hours to reply to a lead. AKAI replies in minutes.
+Did you know? You can set AKAI to automatically send a proposal the moment an enquiry hits your inbox — 2am Sunday included.
 
-👉 Set your reply rules in the Email Guard module.
+Or hold until 9am if you want it to look human. Either way, AKAI wrote it, formatted it, and queued it. You did nothing.
 
-— The AKAI Team`,
+Most businesses take 47 hours to reply. AKAI takes minutes.
+That's not a small advantage. That's a different game entirely.
+
+→ Set your reply rules in Email Guard.
+
+— AKAI`,
   },
   {
     day: 13,
     module: 'Social',
-    subject: 'Did you know? AKAI writes different content for every platform — automatically.',
-    body: `Did you know? AKAI adapts your content for Instagram, LinkedIn, and Facebook — different tone, format, and length for each platform, from a single brief.
+    subject: 'Did you know? Instagram and LinkedIn want different things from you.',
+    body: `Posting the same content everywhere is why most business social accounts go nowhere.
 
-One session. A month of content. Zero writer's block.
+Did you know? AKAI adapts your content for each platform automatically — punchy and visual for Instagram, authoritative and insight-led for LinkedIn, conversational for Facebook.
 
-👉 Generate your content in the Social module.
+Same brief. Three different pieces. All done in one session.
 
-— The AKAI Team`,
+One month of content. One afternoon. Never staring at a blank screen again.
+
+→ Try the Social module. Describe your business once. Let AKAI do the rest.
+
+— AKAI`,
   },
   {
     day: 14,
     module: 'Web',
-    subject: 'Did you know? AKAI can rewrite your website copy in minutes.',
-    body: `Did you know? AKAI doesn't just audit your website — it rewrites the copy to convert better.
+    subject: 'Did you know? AKAI rewrites your website copy too.',
+    body: `An audit tells you what's wrong. AKAI fixes it.
 
-Give it your URL and a goal, and it returns homepage copy, meta descriptions, and CTAs ready to paste in.
+Did you know? AKAI doesn't just score your website — it rewrites the copy. Homepage, about page, service descriptions, CTAs, meta tags. All of it.
 
-👉 Try AI content generation in the Web module.
+Give it your URL and a goal. It comes back with copy that converts.
 
-Ready to get the most out of AKAI? Reply to this email or head to your dashboard — we're here to help you get results fast.
+No brief documents. No agency back-and-forth. No three rounds of revisions.
 
-— The AKAI Team`,
+You've been in the inner circle for two weeks now.
+If there's one thing to do today — it's this: open your dashboard and run the platform.
+
+You built the right tool. Now let it work.
+
+→ Your dashboard is waiting: getakai.ai/dashboard
+
+— AKAI`,
   },
 ];
 
@@ -191,5 +260,6 @@ Ready to get the most out of AKAI? Reply to this email or head to your dashboard
  */
 export function getDripMessage(daysSinceSignup: number): DripMessage {
   const index = Math.max(0, (daysSinceSignup - 1) % DRIP_MESSAGES.length);
-  return DRIP_MESSAGES[index];
+  // DRIP_MESSAGES always has 14 entries; index is always in range.
+  return DRIP_MESSAGES[index] as DripMessage;
 }
