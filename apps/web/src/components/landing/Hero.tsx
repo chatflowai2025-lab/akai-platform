@@ -457,8 +457,6 @@ function SuccessState({ msg, sub }: { msg: string; sub: string }) {
 /* ─── Main Hero ─── */
 export default function Hero() {
   const { user, loading } = useAuth();
-  // When logged in → /dashboard, when logged out → /onboard
-  const ctaHref = !loading && user ? '/dashboard' : '/onboard';
   const [modal, setModal] = useState<ModalType>(null);
 
   return (

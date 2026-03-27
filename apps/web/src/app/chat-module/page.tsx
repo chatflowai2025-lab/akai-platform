@@ -453,7 +453,6 @@ function ConnectStep({
 function LiveStep({
   config,
   setConfig,
-  savedConfig,
   saving,
   saved,
   hasChanges,
@@ -463,7 +462,6 @@ function LiveStep({
 }: {
   config: ChatConfig;
   setConfig: React.Dispatch<React.SetStateAction<ChatConfig>>;
-  savedConfig: ChatConfig;
   saving: boolean;
   saved: boolean;
   hasChanges: boolean;
@@ -857,7 +855,6 @@ export default function ChatModulePage() {
             <LiveStep
               config={config}
               setConfig={setConfig}
-              savedConfig={savedConfig}
               saving={saving}
               saved={saved}
               hasChanges={hasChanges}

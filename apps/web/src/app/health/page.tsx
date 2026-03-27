@@ -116,7 +116,7 @@ export default function HealthPage() {
               <div>
                 <p className="text-white/40 text-xs mb-1">Overall Health Score</p>
                 <p className={`text-5xl font-black ${scoreColor(report.score)}`}>{report.score}<span className="text-2xl text-white/30">/100</span></p>
-                <p className="text-white/40 text-xs mt-2">{report.website} · {new Date(report.generatedAt).toLocaleDateString()}</p>
+                <p suppressHydrationWarning className="text-white/40 text-xs mt-2">{report.website} · {new Date(report.generatedAt).toLocaleDateString()}</p>
               </div>
               <div className="text-6xl">
                 {report.score >= 80 ? '✅' : report.score >= 60 ? '⚠️' : '🚨'}
