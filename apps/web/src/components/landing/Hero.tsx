@@ -444,8 +444,7 @@ export default function Hero() {
           ))}
         </div>
         <p className="fade-up fade-up-3 text-lg text-white/60 max-w-2xl mb-10 leading-relaxed">
-          Describe your business. AKAI builds it, runs it, and grows it —
-          <span className="text-white"> while you close deals.</span>
+          Describe your business. AKAI builds it, runs it, and grows it — <span className="text-white">while you close deals.</span>
         </p>
 
         {/* CTA row */}
