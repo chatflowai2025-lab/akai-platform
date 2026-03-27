@@ -14,7 +14,7 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
-import { BETA_MODE, isWhitelisted } from '@/lib/beta-config';
+import { BETA_MODE, BETA_CONTACT_EMAIL, isWhitelisted } from '@/lib/beta-config';
 
 type Tab = 'signin' | 'signup';
 
@@ -59,7 +59,7 @@ export default function LoginPage() {
         const userEmail = currentUser?.email || email || '';
         if (!isWhitelisted(userEmail)) {
           await getFirebaseAuth()?.signOut();
-          setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+          setError(`AKAI is currently in private beta. Contact ${BETA_CONTACT_EMAIL} to request access.`);
           setLoading(false);
           return;
         }
@@ -79,12 +79,11 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || '';
       if (BETA_MODE && !isWhitelisted(userEmail)) {
         await auth.signOut();
-        setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+        setError(`AKAI is currently in private beta. Contact ${BETA_CONTACT_EMAIL} to request access.`);
         setLoading(false);
         return;
       }
@@ -165,7 +164,7 @@ export default function LoginPage() {
             const userEmail = result.user.email || '';
             if (BETA_MODE && !isWhitelisted(userEmail)) {
               await auth.signOut();
-              setError('AKAI is currently in private beta. Contact hello@getakai.ai to request access.');
+              setError(`AKAI is currently in private beta. Contact ${BETA_CONTACT_EMAIL} to request access.`);
               setLoading(false);
               return;
             }
@@ -191,7 +190,8 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new OAuthProvider('microsoft.com');
-      provider.setCustomParameters({ prompt: 'select_account', tenant: 'common' });
+      const msTenant = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID ?? 'common';
+      provider.setCustomParameters({ tenant: msTenant });
       provider.addScope('email');
       provider.addScope('profile');
       // Use redirect — more reliable than popup (no popup blocker issues)
