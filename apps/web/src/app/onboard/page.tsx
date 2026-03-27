@@ -77,7 +77,8 @@ export default function OnboardPage() {
     const { businessName, industry, goal, location, contact } = finalState.data;
 
     try {
-      const db = getFirebaseDb();
+      let db = null;
+      try { db = getFirebaseDb(); } catch { /* ignore */ }
       if (db) {
         const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber, calendarProvider } = finalState.data;
         // Save full onboarding data + mark complete
@@ -264,6 +265,15 @@ export default function OnboardPage() {
           <Button onClick={sendMessage} disabled={chatLoading || completing || !input.trim()}>
             Send →
           </Button>
+        </div>
+        <div className="max-w-2xl mx-auto mt-2 flex justify-end">
+          <button
+            onClick={() => handleComplete({ step: 'complete', data: {} })}
+            disabled={completing}
+            className="text-xs text-gray-600 hover:text-gray-400 transition"
+          >
+            Skip for now →
+          </button>
         </div>
       </div>
     </div>

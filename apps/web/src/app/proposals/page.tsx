@@ -22,6 +22,9 @@ interface ProspectOption {
   name: string;
   email: string;
   website: string;
+  phone?: string;
+  industry?: string;
+  subject?: string;
 }
 
 type ToneOption = 'professional' | 'consultative' | 'direct' | 'friendly';
@@ -353,6 +356,8 @@ export default function ProposalsPage() {
     setBusinessName(p.name);
     setWebsite(p.website || '');
     setContactEmail(p.email || '');
+    if (p.industry) setIndustry(p.industry);
+    if (p.name && !contactName) setContactName(p.name);
     setShowProspectPicker(false);
   };
 
@@ -678,21 +683,55 @@ export default function ProposalsPage() {
       {showProspectPicker && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 w-full max-w-md max-h-[70vh] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-white font-bold text-sm">Pick a prospect</h3>
               <button onClick={() => setShowProspectPicker(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
-            <div className="overflow-y-auto flex-1 space-y-1">
-              {prospects.length === 0 ? (
+            <input
+              type="text"
+              placeholder="Search prospects..."
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition mb-3"
+              onChange={e => {
+                const q = e.target.value.toLowerCase();
+                // Filter inline by searching existing loaded prospects
+                const filtered = prospects.filter(p =>
+                  p.name.toLowerCase().includes(q) ||
+                  (p.email || '').toLowerCase().includes(q) ||
+                  (p.website || '').toLowerCase().includes(q)
+                );
+                // Re-render with filtered — use a dataset attribute approach
+                const list = document.getElementById('prospect-list');
+                if (list) {
+                  list.querySelectorAll('[data-prospect]').forEach(el => {
+                    const name = (el.getAttribute('data-name') || '').toLowerCase();
+                    const email = (el.getAttribute('data-email') || '').toLowerCase();
+                    (el as HTMLElement).style.display = (name.includes(q) || email.includes(q)) ? '' : 'none';
+                  });
+                }
+              }}
+            />
+            <div id="prospect-list" className="overflow-y-auto flex-1 space-y-1">
+              {loadingProspects ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : prospects.length === 0 ? (
                 <p className="text-xs text-gray-500 text-center py-8">No prospects found</p>
               ) : prospects.map(p => (
                 <button
                   key={p.id}
+                  data-prospect
+                  data-name={p.name}
+                  data-email={p.email || ''}
                   onClick={() => pickProspect(p)}
                   className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#1a1a1a] transition group"
                 >
                   <p className="text-sm text-gray-200 group-hover:text-white transition">{p.name}</p>
-                  {p.website && <p className="text-xs text-gray-600">{p.website}</p>}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {p.email && <p className="text-xs text-gray-600 truncate">{p.email}</p>}
+                    {p.website && <p className="text-xs text-gray-700">· {p.website}</p>}
+                  </div>
+                  {p.industry && <p className="text-[11px] text-gray-700 mt-0.5">{p.industry}</p>}
                 </button>
               ))}
             </div>

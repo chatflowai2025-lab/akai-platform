@@ -1249,6 +1249,7 @@ function VoicePageInner() {
               setConfig={(c) => saveConfig(c)}
               onEditScript={() => setEditMode('script')}
               onEditSchedule={() => setEditMode('schedule')}
+              userId={user.uid}
             />
           )}
         </div>
