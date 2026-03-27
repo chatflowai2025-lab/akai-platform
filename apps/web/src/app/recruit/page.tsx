@@ -818,7 +818,7 @@ function PostJobTab() {
         <div className="space-y-4">
           <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
             <h2 className="text-sm font-bold text-white mb-1">Choose where to post</h2>
-            <p className="text-xs text-gray-500 mb-5">Select one or more platforms — connect any that aren't linked yet</p>
+            <p className="text-xs text-gray-500 mb-5">Select one or more platforms — connect any that aren&apos;t linked yet</p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {PLATFORMS.map(platform => {
@@ -916,7 +916,7 @@ function PostJobTab() {
               ✅ Posted to {postedJob.platforms.join(', ')}.
             </p>
             <p className="text-sm text-gray-400">
-              Here's what happens next: applications will appear in your dashboard as they come in.
+              Here&apos;s what happens next: applications will appear in your dashboard as they come in.
               Every applicant is AI-screened and ranked before you see them.
             </p>
           </div>

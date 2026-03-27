@@ -100,14 +100,14 @@ function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
         {state.submitted ? (
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
-            <p className="text-white font-semibold mb-1">You're on the waitlist!</p>
-            <p className="text-sm text-gray-400">We'll notify you at <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> when X integration is ready.</p>
+            <p className="text-white font-semibold mb-1">You&apos;re on the waitlist!</p>
+            <p className="text-sm text-gray-400">We&apos;ll notify you at <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> when X integration is ready.</p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              Enter your X handle and we'll notify you when it's ready. X integration is currently in beta — OAuth is coming soon.
+              Enter your X handle and we&apos;ll notify you when it&apos;s ready. X integration is currently in beta — OAuth is coming soon.
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
@@ -182,13 +182,13 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
             <p className="text-white font-semibold mb-1">Access requested!</p>
-            <p className="text-sm text-gray-400">We'll reach out to <span className="text-[#D4AF37]">{email}</span> to set this up for you.</p>
+            <p className="text-sm text-gray-400">We&apos;ll reach out to <span className="text-[#D4AF37]">{email}</span> to set this up for you.</p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              Instagram integration via Meta Business OAuth is coming soon. Enter your handle and we'll set this up for you directly.
+              Instagram integration via Meta Business OAuth is coming soon. Enter your handle and we&apos;ll set this up for you directly.
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
@@ -268,13 +268,13 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
             <p className="text-white font-semibold mb-1">Access requested!</p>
-            <p className="text-sm text-gray-400">We'll be in touch to connect your LinkedIn profile.</p>
+            <p className="text-sm text-gray-400">We&apos;ll be in touch to connect your LinkedIn profile.</p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              LinkedIn integration is coming soon. Paste your profile or company page URL and we'll set this up when it's ready.
+              LinkedIn integration is coming soon. Paste your profile or company page URL and we&apos;ll set this up when it&apos;s ready.
             </p>
             <div className="space-y-3">
               <input
@@ -345,13 +345,13 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
             <p className="text-white font-semibold mb-1">Access requested!</p>
-            <p className="text-sm text-gray-400">We'll reach out to <span className="text-[#D4AF37]">{email}</span> to set this up for you.</p>
+            <p className="text-sm text-gray-400">We&apos;ll reach out to <span className="text-[#D4AF37]">{email}</span> to set this up for you.</p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              Facebook integration via Meta Business OAuth is coming soon. Enter your Page name and email and we'll get this connected.
+              Facebook integration via Meta Business OAuth is coming soon. Enter your Page name and email and we&apos;ll get this connected.
             </p>
             <div className="space-y-3">
               <input

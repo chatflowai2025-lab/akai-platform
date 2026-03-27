@@ -617,7 +617,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
           <p className="text-yellow-300 font-semibold">⚠️ Over plan limit</p>
           <p className="text-yellow-400/80 text-xs mt-1">
             Your <strong>{plan.charAt(0).toUpperCase() + plan.slice(1)}</strong> plan includes <strong>{leadLimit} leads/mo</strong>.
-            You've added {uploadedLeads.length} — that's <strong>{excessLeads} extra at ${EXTRA_LEAD_PRICE}/each = ${extraCost}</strong>.
+            You&apos;ve added {uploadedLeads.length} — that&apos;s <strong>{excessLeads} extra at ${EXTRA_LEAD_PRICE}/each = ${extraCost}</strong>.
           </p>
           <button className="mt-2 text-xs text-yellow-300 underline hover:text-yellow-200">
             Generate payment link for {excessLeads} extra leads →

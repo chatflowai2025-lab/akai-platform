@@ -89,7 +89,7 @@ function ScanStep({
             Does your website have AI chat?
           </h1>
           <p className="text-gray-400 text-base leading-relaxed">
-            Most business websites don't. Enter your URL and I'll check.
+            Most business websites don&apos;t. Enter your URL and I&apos;ll check.
           </p>
         </div>
 
@@ -153,13 +153,13 @@ function NoChatStep({
             <div>
               <p className="text-white font-semibold">No AI chat found on {domain}</p>
               <p className="text-red-400 text-sm mt-0.5">
-                You're missing out on {conversionLoss}% of visitors who leave without enquiring.
+                You&apos;re missing out on {conversionLoss}% of visitors who leave without enquiring.
               </p>
             </div>
           </div>
 
           <div className="border-t border-[#1f1f1f] pt-4">
-            <p className="text-gray-400 text-sm font-medium mb-3">Here's what AKAI AI Chat does:</p>
+            <p className="text-gray-400 text-sm font-medium mb-3">Here&apos;s what AKAI AI Chat does:</p>
             <ul className="space-y-2">
               {[
                 'Responds to visitors instantly — 24/7, even at 2am',
@@ -215,7 +215,7 @@ function HasChatStep({
             You already have a chat widget. Want to connect it to AKAI instead?
           </p>
           <p className="text-gray-500 text-xs mt-2">
-            AKAI handles lead qualification, routing, and CRM sync — most widgets don't.
+            AKAI handles lead qualification, routing, and CRM sync — most widgets don&apos;t.
           </p>
         </div>
 
@@ -277,7 +277,7 @@ function ConnectStep({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-md">
           <div className="text-4xl mb-4">🚀</div>
-          <h2 className="text-white font-bold text-xl mb-3">We're on it!</h2>
+          <h2 className="text-white font-bold text-xl mb-3">We&apos;re on it!</h2>
           <p className="text-gray-400 text-sm leading-relaxed">
             AKAI is handling the installation for you. Check the chat panel — Sophie will guide you through the next steps.
           </p>
@@ -298,7 +298,7 @@ function ConnectStep({
           </button>
           <h2 className="text-xl font-bold text-white mb-1">Connect your site</h2>
           <p className="text-gray-500 text-sm">
-            Tell us how your site is built — we'll handle the install for you.
+            Tell us how your site is built — we&apos;ll handle the install for you.
           </p>
         </div>
 
@@ -362,7 +362,7 @@ function ConnectStep({
               onClick={handleWordPress}
               className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-xl hover:opacity-90 transition text-sm"
             >
-              Connect WordPress — we'll handle the rest →
+              Connect WordPress — we&apos;ll handle the rest →
             </button>
           </div>
         )}
@@ -410,7 +410,7 @@ function ConnectStep({
               onClick={handleGitHub}
               className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-xl hover:opacity-90 transition text-sm"
             >
-              Connect GitHub — we'll open a PR →
+              Connect GitHub — we&apos;ll open a PR →
             </button>
           </div>
         )}
@@ -421,11 +421,11 @@ function ConnectStep({
             <div>
               <p className="text-white font-medium mb-1">Other platforms</p>
               <p className="text-gray-500 text-xs">
-                Webflow, Wix, Squarespace, custom build — no problem. Send us access and we'll handle the installation end to end.
+                Webflow, Wix, Squarespace, custom build — no problem. Send us access and we&apos;ll handle the installation end to end.
               </p>
             </div>
             <div className="bg-[#0a0a0a] rounded-xl p-4 space-y-2">
-              <p className="text-xs text-gray-400 font-medium">What we'll need:</p>
+              <p className="text-xs text-gray-400 font-medium">What we&apos;ll need:</p>
               {[
                 'Editor / admin access to your site builder, OR',
                 'FTP/SFTP credentials, OR',
@@ -441,7 +441,7 @@ function ConnectStep({
               onClick={handleOther}
               className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-xl hover:opacity-90 transition text-sm"
             >
-              Talk to AKAI — let's sort it →
+              Talk to AKAI — let&apos;s sort it →
             </button>
           </div>
         )}

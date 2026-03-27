@@ -639,7 +639,7 @@ function SetupWizard({
             <div className="flex gap-3">
               <span className="text-[11px] font-bold text-[#D4AF37] pt-0.5 flex-shrink-0 w-14">Sophie</span>
               <p className="text-sm text-white/80 leading-relaxed">
-                "Hi, is that [Name]? This is Sophie calling from [BusinessName]. I'm reaching out because we help [industry] businesses get more enquiries without the manual follow-up. Do you have 2 minutes?"
+                &quot;Hi, is that [Name]? This is Sophie calling from [BusinessName]. I&apos;m reaching out because we help [industry] businesses get more enquiries without the manual follow-up. Do you have 2 minutes?&quot;
               </p>
             </div>
             <div className="flex gap-3">
