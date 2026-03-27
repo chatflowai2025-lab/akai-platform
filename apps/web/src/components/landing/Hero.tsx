@@ -101,6 +101,7 @@ function DemoModal({ onClose }: { onClose: () => void }) {
                 <Field label="Full name *" value={form.name} onChange={v => set('name', v)} placeholder="Jane Smith" />
                 <Field label="Email *" value={form.email} onChange={v => set('email', v)} placeholder="jane@business.com" type="email" />
                 <Field label="Phone number *" value={form.phone} onChange={v => set('phone', v)} placeholder="+61 400 000 000" type="tel" />
+                <Field label="Website URL" value={form.website} onChange={v => set('website', v)} placeholder="https://yoursite.com.au" />
                 <NavBtn
                   label="Next →"
                   disabled={!form.name || !form.phone || !form.email}
@@ -112,7 +113,6 @@ function DemoModal({ onClose }: { onClose: () => void }) {
             {step === 2 && (
               <div className="flex flex-col gap-4 mt-4">
                 <Field label="Business name *" value={form.businessName} onChange={v => set('businessName', v)} placeholder="ACME Pty Ltd" />
-                <Field label="Website URL" value={form.website} onChange={v => set('website', v)} placeholder="https://yoursite.com.au" />
                 <Select
                   label="Industry *"
                   value={form.industry}
