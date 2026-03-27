@@ -79,6 +79,77 @@ const TONES: Array<{ id: ToneOption; label: string }> = [
   { id: 'friendly', label: 'Friendly' },
 ];
 
+// ── Vertical detection + HTML email builder (client-side) ────────────────────
+function detectVertical(industry: string): string {
+  const text = industry.toLowerCase();
+  if (text.match(/plumb|electri|trade|builder|construct|hvac|landscap/)) return 'trades';
+  if (text.match(/real estate|property|mortgage|finance|broker/)) return 'real_estate';
+  if (text.match(/restaurant|cafe|hospitality|food|venue|catering/)) return 'hospitality';
+  if (text.match(/recruit|hiring|staffing|hr|talent|candidate/)) return 'recruitment';
+  if (text.match(/kitchen|interior|design|fitout|renovati/)) return 'interiors';
+  if (text.match(/yacht|charter|boat|vessel|marine/)) return 'marine';
+  return 'professional';
+}
+
+function getCTACopy(vertical: string): string {
+  switch (vertical) {
+    case 'trades': return 'Book a free site visit →';
+    case 'real_estate': return 'Schedule a free consultation →';
+    case 'hospitality': return 'Reserve your tasting →';
+    case 'recruitment': return 'Talk to our team →';
+    case 'interiors': return 'Book a free design consultation →';
+    case 'marine': return 'Schedule a viewing →';
+    default: return 'Book a free call →';
+  }
+}
+
+function escHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function buildProposalEmailHtml(opts: {
+  businessName: string;
+  industry: string;
+  markdown: string;
+  website?: string;
+}): string {
+  const vertical = detectVertical(opts.industry);
+  const ctaCopy = getCTACopy(vertical);
+  const site = opts.website ? opts.website.replace(/^https?:\/\//, '') : '';
+  const ctaUrl = site ? `https://${site}` : 'https://getakai.ai';
+  const initial = (opts.businessName || 'A').charAt(0).toUpperCase();
+
+  const bodyHtml = opts.markdown
+    .split(/\n\n+/)
+    .map(p => p.trim())
+    .filter(p => p.length > 0)
+    .map(p => `<p style="margin:0 0 16px 0;color:#333;font-size:16px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">${escHtml(p).replace(/\n/g, '<br>')}</p>`)
+    .join('\n');
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${escHtml(opts.businessName)}</title></head>
+<body style="margin:0;padding:0;background-color:#f0f0f0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f0f0;padding:24px 0;">
+<tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.10);">
+<tr><td style="background-color:#1a1a1a;padding:40px;text-align:center;">
+<div style="width:68px;height:68px;background-color:#D4AF37;border-radius:50%;margin:0 auto 18px;text-align:center;line-height:68px;font-size:30px;font-weight:900;color:#000;font-family:Arial,sans-serif;">${initial}</div>
+<h1 style="margin:0 0 8px;color:#fff;font-size:26px;font-weight:700;font-family:Arial,sans-serif;">${escHtml(opts.businessName)}</h1>
+${opts.industry ? `<p style="margin:0;color:#D4AF37;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:Arial,sans-serif;">${escHtml(opts.industry)}</p>` : ''}
+</td></tr>
+<tr><td style="padding:40px 40px 8px;background:#fff;">${bodyHtml}</td></tr>
+<tr><td style="padding:8px 40px 40px;background:#fff;text-align:center;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+<tr><td style="background-color:#D4AF37;border-radius:8px;">
+<a href="${ctaUrl}" style="display:inline-block;padding:15px 36px;font-size:15px;font-weight:700;color:#000;text-decoration:none;border-radius:8px;font-family:Arial,sans-serif;">${escHtml(ctaCopy)}</a>
+</td></tr></table></td></tr>
+<tr><td style="padding:0 40px;"><div style="border-top:1px solid #eee;height:1px;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+<tr><td style="background:#f5f5f5;padding:24px 40px;text-align:center;border-radius:0 0 10px 10px;">
+<p style="margin:0 0 10px;color:#666;font-size:13px;font-family:Arial,sans-serif;">AKAI &nbsp;&middot;&nbsp; <a href="https://getakai.ai" style="color:#888;text-decoration:none;">getakai.ai</a></p>
+<p style="margin:0;font-size:11px;color:#aaa;font-family:Arial,sans-serif;">You received this proposal from AKAI. <a href="#" style="color:#aaa;text-decoration:underline;">Unsubscribe</a></p>
+</td></tr>
+</table></td></tr></table></body></html>`;
+}
+
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => {
@@ -99,7 +170,9 @@ function ProposalPreview({
   proposal,
   markdown,
   businessName,
+  industry,
   contactName,
+  website,
   onEmail,
   onCopy,
   onDownloadPdf,
@@ -107,18 +180,37 @@ function ProposalPreview({
   proposal: ProposalSection;
   markdown: string;
   businessName: string;
+  industry: string;
   contactName: string;
+  website?: string;
   onEmail: () => void;
   onCopy: () => void;
   onDownloadPdf: () => void;
 }) {
+  const [viewMode, setViewMode] = useState<'document' | 'email'>('document');
   const date = (() => { try { return new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return new Date().toISOString().split('T')[0]; } })();
-  void markdown;
+
+  const htmlEmail = buildProposalEmailHtml({ businessName, industry, markdown, website });
 
   return (
     <div className="flex flex-col h-full">
       {/* Action bar */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0">
+        {/* View toggle */}
+        <div className="flex items-center gap-1 bg-[#111] rounded-lg p-1 mr-2">
+          <button
+            onClick={() => setViewMode('document')}
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition ${viewMode === 'document' ? 'bg-[#D4AF37] text-black' : 'text-gray-500 hover:text-white'}`}
+          >
+            Document
+          </button>
+          <button
+            onClick={() => setViewMode('email')}
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition ${viewMode === 'email' ? 'bg-[#D4AF37] text-black' : 'text-gray-500 hover:text-white'}`}
+          >
+            Email Preview
+          </button>
+        </div>
         <button
           onClick={onEmail}
           className="px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/20 transition flex items-center gap-1.5"
@@ -139,8 +231,20 @@ function ProposalPreview({
         </button>
       </div>
 
+      {/* Email preview mode */}
+      {viewMode === 'email' && (
+        <div className="flex-1 overflow-hidden bg-[#1a1a1a] p-6">
+          <iframe
+            srcDoc={htmlEmail}
+            title="Email preview"
+            style={{ width: '100%', height: '100%', border: 'none', borderRadius: '10px' }}
+            sandbox="allow-same-origin"
+          />
+        </div>
+      )}
+
       {/* Proposal document */}
-      <div className="flex-1 overflow-y-auto p-8">
+      {viewMode === 'document' && (<div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-2xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center border-b border-[#2a2a2a] pb-8">
@@ -262,7 +366,7 @@ function ProposalPreview({
             <p className="text-xs text-gray-600">AKAI — getakai.ai | hello@getakai.ai</p>
           </div>
         </div>
-      </div>
+      </div>)}
     </div>
   );
 }
@@ -430,8 +534,11 @@ export default function ProposalsPage() {
 
   const handleEmail = useCallback(async () => {
     if (!generatedMarkdown) return;
-    const subject = encodeURIComponent(`AKAI Proposal for ${businessName}`);
-    const body = encodeURIComponent(generatedMarkdown);
+    const subjectLine = `AKAI Proposal for ${businessName}`;
+    const htmlVersion = buildProposalEmailHtml({ businessName, industry, markdown: generatedMarkdown, website });
+
+    const subjectEnc = encodeURIComponent(subjectLine);
+    const bodyEnc = encodeURIComponent(generatedMarkdown);
     const to = encodeURIComponent(contactEmail || '');
 
     // Try Railway API first
@@ -444,8 +551,9 @@ export default function ProposalsPage() {
         },
         body: JSON.stringify({
           to: contactEmail || '',
-          subject: `AKAI Proposal for ${businessName}`,
+          subject: subjectLine,
           body: generatedMarkdown,
+          htmlBody: htmlVersion,
         }),
         signal: AbortSignal.timeout(5000),
       });
@@ -459,8 +567,8 @@ export default function ProposalsPage() {
     }
 
     // Fallback: mailto
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-  }, [generatedMarkdown, businessName, contactEmail]);
+    window.location.href = `mailto:${to}?subject=${subjectEnc}&body=${bodyEnc}`;
+  }, [generatedMarkdown, businessName, industry, website, contactEmail]);
 
   const handleCopy = useCallback(async () => {
     if (!generatedMarkdown) return;
@@ -654,7 +762,9 @@ export default function ProposalsPage() {
                 proposal={generatedProposal}
                 markdown={generatedMarkdown}
                 businessName={businessName}
+                industry={industry}
                 contactName={contactName}
+                website={website}
                 onEmail={handleEmail}
                 onCopy={handleCopy}
                 onDownloadPdf={handleDownloadPdf}

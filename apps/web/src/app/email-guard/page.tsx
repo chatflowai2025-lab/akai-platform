@@ -20,7 +20,7 @@ interface Enquiry {
   body: string;
   receivedAt: string;
   status: 'proposal_draft' | 'sent' | 'held';
-  proposal?: { body: string; generatedAt: string };
+  proposal?: { body: string; htmlBody?: string; vertical?: string; generatedAt: string };
   matchedRule?: string;
 }
 
@@ -274,6 +274,10 @@ function EmailGuardContent({
   // Send-permission modal state
   const [sendPermModal, setSendPermModal] = useState<{ enquiry: Enquiry } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  // Preview/Edit mode per enquiry
+  const [previewMode, setPreviewMode] = useState<Record<string, 'preview' | 'edit'>>({});
+  // Edited proposal text per enquiry
+  const [editedBody, setEditedBody] = useState<Record<string, string>>({});
 
   // Auto-poll on first connect — gives instant gratification
   const triggerFirstPoll = useCallback(async () => {
@@ -445,11 +449,13 @@ function EmailGuardContent({
 
     setSending(eq.id);
     try {
+      const currentBody = editedBody[eq.id] ?? eq.proposal?.body ?? '';
       await fetch(`${RAILWAY}/api/email/${user.uid}/${eq.id}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
         body: JSON.stringify({
-          proposalBody: eq.proposal?.body,
+          proposalBody: currentBody,
+          proposalHtmlBody: eq.proposal?.htmlBody || null,
           subject: `Re: ${eq.subject}`,
         }),
       });
@@ -713,10 +719,55 @@ function EmailGuardContent({
                     </div>
                     {selectedId === eq.id && eq.proposal && (
                       <div className="border-t border-[#1f1f1f] p-4 space-y-3">
-                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">AI-generated proposal</p>
-                        <div className="bg-[#0a0a0a] rounded-xl p-4 text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
-                          {eq.proposal.body}
+                        {/* Preview / Edit toggle */}
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">AI-generated proposal</p>
+                          {eq.proposal.htmlBody && (
+                            <div className="flex items-center gap-1 bg-[#1a1a1a] rounded-lg p-1">
+                              <button
+                                onClick={() => setPreviewMode(prev => ({ ...prev, [eq.id]: 'preview' }))}
+                                className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
+                                  (previewMode[eq.id] ?? 'preview') === 'preview'
+                                    ? 'bg-[#D4AF37] text-black'
+                                    : 'text-gray-500 hover:text-white'
+                                }`}
+                              >
+                                Preview
+                              </button>
+                              <button
+                                onClick={() => setPreviewMode(prev => ({ ...prev, [eq.id]: 'edit' }))}
+                                className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
+                                  previewMode[eq.id] === 'edit'
+                                    ? 'bg-[#D4AF37] text-black'
+                                    : 'text-gray-500 hover:text-white'
+                                }`}
+                              >
+                                Edit
+                              </button>
+                            </div>
+                          )}
                         </div>
+
+                        {/* Preview mode — HTML email */}
+                        {(previewMode[eq.id] ?? 'preview') === 'preview' && eq.proposal.htmlBody ? (
+                          <div className="rounded-xl overflow-hidden border border-[#2a2a2a]">
+                            <iframe
+                              srcDoc={eq.proposal.htmlBody}
+                              title="Email preview"
+                              style={{ width: '100%', height: '520px', border: 'none', background: '#fff' }}
+                              sandbox="allow-same-origin"
+                            />
+                          </div>
+                        ) : (
+                          /* Edit mode — plain text textarea */
+                          <textarea
+                            className="w-full bg-[#0a0a0a] rounded-xl p-4 text-sm text-white/80 leading-relaxed border border-[#2a2a2a] focus:outline-none focus:border-[#D4AF37]/50 resize-none font-mono"
+                            rows={12}
+                            value={editedBody[eq.id] ?? eq.proposal.body}
+                            onChange={e => setEditedBody(prev => ({ ...prev, [eq.id]: e.target.value }))}
+                          />
+                        )}
+
                         {eq.status !== 'sent' && (
                           <div className="flex items-center gap-3 flex-wrap">
                             <button
