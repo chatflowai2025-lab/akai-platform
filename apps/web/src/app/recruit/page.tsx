@@ -1018,7 +1018,7 @@ function PlatformConnectModal({ platform, userId, onClose }: { platform: string;
       <div className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white font-bold">Connect {platform}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none" aria-label="Close">×</button>
         </div>
         {done ? (
           <div className="text-center py-4">
@@ -1100,7 +1100,7 @@ function InterviewModal({ candidateName, jobTitle, userId, onClose }: InterviewM
       <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-white font-bold text-base">📅 Book Interview</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none" aria-label="Close">×</button>
         </div>
 
         {done ? (

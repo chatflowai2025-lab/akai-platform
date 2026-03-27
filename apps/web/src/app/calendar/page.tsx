@@ -146,7 +146,7 @@ function AddEventModal({ initialDate, onClose, onSave }: AddEventModalProps) {
       <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-black text-white">Add Event</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
         </div>
 
         <div className="space-y-4">
@@ -438,7 +438,7 @@ function DayDetailPanel({
             className="text-xs px-2.5 py-1 rounded-lg bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition">
             + Add
           </button>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition" aria-label="Close">×</button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -715,9 +715,9 @@ function CalendarContent({ user }: { user: { uid: string } }) {
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {(view === 'month' || view === 'week') && (
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
-              <button onClick={prevMonth} className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">‹</button>
+              <button onClick={prevMonth} aria-label="Previous month" className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">‹</button>
               <h2 suppressHydrationWarning className="text-sm font-bold text-white">{monthName}</h2>
-              <button onClick={nextMonth} className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">›</button>
+              <button onClick={nextMonth} aria-label="Next month" className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">›</button>
             </div>
           )}
 

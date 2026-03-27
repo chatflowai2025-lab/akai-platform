@@ -86,7 +86,7 @@ function HomepageChat() {
               placeholder="Ask anything..."
               className="flex-1 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
             />
-            <button onClick={send} disabled={loading || !input.trim()} className="px-3 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-40 transition">→</button>
+            <button onClick={send} disabled={loading || !input.trim()} aria-label="Send message" className="px-3 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-40 transition">→</button>
           </div>
         </div>
       )}

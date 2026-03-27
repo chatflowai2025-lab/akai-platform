@@ -176,7 +176,7 @@ function LeadCard({ lead, onStatusChange }: LeadCardProps) {
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 w-full max-w-xs" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-bold text-sm">{lead.name || 'Lead'}</h3>
-              <button onClick={() => setModalOpen(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+              <button onClick={() => setModalOpen(false)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
             {lead.phone && <p className="text-xs text-gray-500 mb-1">📞 {lead.phone}</p>}
             {lead.email && <p className="text-xs text-gray-600 mb-4">✉️ {lead.email}</p>}

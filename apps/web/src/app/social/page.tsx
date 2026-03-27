@@ -94,7 +94,7 @@ function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
               <p className="text-xs text-gray-500">X integration is in beta</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
         </div>
 
         {state.submitted ? (
@@ -175,7 +175,7 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
               <p className="text-xs text-gray-500">Meta OAuth — coming soon</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
         </div>
 
         {state.submitted ? (
@@ -261,7 +261,7 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
               <p className="text-xs text-gray-500">OAuth — coming soon</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
         </div>
 
         {state.submitted ? (
@@ -338,7 +338,7 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
               <p className="text-xs text-gray-500">Meta OAuth — coming soon</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
         </div>
 
         {state.submitted ? (
