@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirebaseAuth, getFirebaseDb } from '@/lib/firebase';
 
@@ -71,12 +71,22 @@ export function useAuth() {
       const t = setTimeout(() => {
         const a = getFirebaseAuth();
         if (!a) setLoading(false);
-      }, 1000);
+        else {
+          // Auth became available — subscribe now
+          setPersistence(a, browserLocalPersistence).catch(() => {});
+          onAuthStateChanged(a, (u) => {
+            setUser(u);
+            setLoading(false);
+          });
+        }
+      }, 500);
       return () => clearTimeout(t);
     }
+    // Ensure session persists across page navigations (fixes post-redirect loop)
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
-      // Set loading false immediately — don't wait for Firestore sync
       setLoading(false);
       if (u) {
         // Sync profile in background — non-blocking
