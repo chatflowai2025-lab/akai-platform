@@ -1109,7 +1109,7 @@ function InterviewModal({ candidateName, jobTitle, userId, onClose }: InterviewM
             <div className="text-4xl mb-3">✅</div>
             <p className="text-green-400 font-bold text-base mb-1">Interview scheduled!</p>
             <p className="text-gray-400 text-sm">
-              {name} · {new Date(dateTime).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              <span suppressHydrationWarning>{name} · {(() => { try { return new Date(dateTime).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return dateTime; } })()}</span>
             </p>
             <button onClick={onClose} className="mt-5 px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">
               Done
