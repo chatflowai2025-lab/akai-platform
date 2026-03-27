@@ -455,6 +455,7 @@ function LiveStep({
   setConfig,
   saving,
   saved,
+  saveError,
   hasChanges,
   onSave,
   sessions,
@@ -464,6 +465,7 @@ function LiveStep({
   setConfig: React.Dispatch<React.SetStateAction<ChatConfig>>;
   saving: boolean;
   saved: boolean;
+  saveError: string | null;
   hasChanges: boolean;
   onSave: () => void;
   sessions: ConversationSession[];
@@ -587,6 +589,7 @@ function LiveStep({
           >
             {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save Changes'}
           </button>
+          {saveError && <p className="text-xs text-red-400 mt-1">{saveError}</p>}
 
           <div className="pt-2 border-t border-[#1f1f1f]">
             <button
@@ -726,6 +729,7 @@ export default function ChatModulePage() {
   const [savedConfig, setSavedConfig] = useState<ChatConfig>(DEFAULT_CONFIG);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [sessions] = useState<ConversationSession[]>(MOCK_SESSIONS);
 
   // Load config from Firestore
@@ -750,6 +754,7 @@ export default function ChatModulePage() {
   const saveConfig = useCallback(async () => {
     if (!user) return;
     setSaving(true);
+    setSaveError(null);
     try {
       const db = getFirebaseDb();
       if (!db) return;
@@ -759,6 +764,7 @@ export default function ChatModulePage() {
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       console.error('Failed to save config:', err);
+      setSaveError('Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -857,6 +863,7 @@ export default function ChatModulePage() {
               setConfig={setConfig}
               saving={saving}
               saved={saved}
+              saveError={saveError}
               hasChanges={hasChanges}
               onSave={saveConfig}
               sessions={sessions}
