@@ -169,7 +169,8 @@ export async function POST(req: NextRequest) {
         messages,
       });
 
-      responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+      const content0 = response.content[0];
+      responseText = content0?.type === 'text' ? content0.text : '';
     } else {
       responseText = getMockResponse(message, conversationHistory, config);
     }
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
     const leadMatch = responseText.match(/LEAD_CAPTURED:\s*(\{[^}]+\})/);
     if (leadMatch) {
       try {
-        const parsed = JSON.parse(leadMatch[1]);
+        const parsed = JSON.parse(leadMatch[1] ?? '');
         if (parsed.name && parsed.email) {
           leadCaptured = true;
           leadData = {

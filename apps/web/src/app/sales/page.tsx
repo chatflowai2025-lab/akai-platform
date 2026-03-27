@@ -150,7 +150,7 @@ function LeadCard({ lead, onStatusChange }: LeadCardProps) {
       >
         <div className="flex items-start gap-2 mb-2">
           <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">
-            {(lead.name || '?')[0].toUpperCase()}
+            {(lead.name || '?')[0]?.toUpperCase() ?? '?'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white truncate">{lead.name || 'Unknown'}</p>
@@ -347,14 +347,14 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
 
   const parseCsv = (text: string) => {
     const lines = text.trim().split('\n');
-    const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+    const headers = (lines[0] ?? '').toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
     const nameIdx = headers.findIndex(h => h.includes('name'));
     const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('mobile'));
     const emailIdx = headers.findIndex(h => h.includes('email'));
 
     const parsed: Lead[] = [];
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim().replace(/"/g, ''));
+      const cols = (lines[i] ?? '').split(',').map(c => c.trim().replace(/"/g, ''));
       if (cols.length < 2) continue;
       parsed.push({
         id: `csv-${i}`,
@@ -561,7 +561,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
               {uploadedLeads.map((lead, i) => (
                 <div key={lead.id ?? i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#0d0d0d] border border-[#1a1a1a]">
                   <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs text-[#D4AF37] font-bold flex-shrink-0">
-                    {(lead.name || '?')[0].toUpperCase()}
+                    {(lead.name || '?')[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{lead.name || '—'}</p>
@@ -733,7 +733,7 @@ function ProspectsSection() {
         ) : (
           <div className="divide-y divide-[#1a1a1a]">
             {filtered.map(p => {
-              const statusInfo = STATUS_STYLES[p.status] ?? STATUS_STYLES.not_contacted;
+              const statusInfo = STATUS_STYLES[p.status] ?? STATUS_STYLES['not_contacted'] ?? { label: p.status, style: '' };
               return (
                 <div key={p.id} className="flex items-center gap-4 px-4 py-3 hover:bg-[#141414] transition-colors group">
                   <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">

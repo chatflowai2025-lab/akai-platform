@@ -125,7 +125,8 @@ function NotFoundPage({ subdomain }: { subdomain: string }) {
 
 // ── Published Site Renderer ───────────────────────────────────────────────────
 function SiteRenderer({ site }: { site: SiteData }) {
-  const scheme = SCHEMES[site.colorScheme] ?? SCHEMES['Modern Dark'];
+  const DEFAULT_SCHEME = { bg: '#0a0a0a', text: '#ffffff', subtext: '#9ca3af', accent: '#D4AF37', accentText: '#000000', card: '#111111', border: '#1f1f1f', navBg: 'rgba(10,10,10,0.95)', footerBg: '#080808' };
+  const scheme = SCHEMES[site.colorScheme] ?? SCHEMES['Modern Dark'] ?? DEFAULT_SCHEME;
   const icons = ['⚡', '🎯', '✅', '🚀', '💡', '🔥'];
 
   return (

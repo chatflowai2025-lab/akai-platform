@@ -96,7 +96,8 @@ Rules:
         messages: [{ role: 'user', content: metaPrompt }],
       });
 
-      const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+      const content0 = message.content[0];
+      const raw = content0?.type === 'text' ? content0.text : '';
       const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
       let metaCampaign: MetaCampaignResult;
@@ -147,7 +148,8 @@ Rules:
       messages: [{ role: 'user', content: googlePrompt }],
     });
 
-    const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+    const content0g = message.content[0];
+    const raw = content0g?.type === 'text' ? content0g.text : '';
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     let campaign: CampaignResult;

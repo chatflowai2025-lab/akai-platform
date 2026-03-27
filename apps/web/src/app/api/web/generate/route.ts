@@ -34,7 +34,8 @@ Write compelling, conversion-focused copy including:
 Format clearly with labels (Headline:, Subheadline:, etc.)`
         }]
       });
-      const content = response.content[0].type === 'text' ? response.content[0].text : '';
+      const content0 = response.content[0];
+      const content = content0?.type === 'text' ? content0.text : '';
       return NextResponse.json({ content });
     }
 

@@ -216,7 +216,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     } finally {
       setLoading(false);
     }
-  }, [loading, chatState, messages, router, user, pathname]);
+  }, [loading, chatState, messages, router, user, pathname, userContext]);
 
   const send = () => { const t = input.trim(); setInput(''); sendRaw(t); };
 

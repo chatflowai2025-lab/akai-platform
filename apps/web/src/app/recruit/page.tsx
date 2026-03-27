@@ -58,11 +58,11 @@ const SKILL_POOLS: Record<string, string[]> = {
 
 function inferSkillPool(jobTitle: string): string[] {
   const t = jobTitle.toLowerCase();
-  if (t.includes('engineer') || t.includes('developer') || t.includes('devops') || t.includes('tech')) return SKILL_POOLS.engineering;
-  if (t.includes('product') || t.includes('manager') || t.includes('pm')) return SKILL_POOLS.product;
-  if (t.includes('design') || t.includes('ux') || t.includes('ui')) return SKILL_POOLS.design;
-  if (t.includes('data') || t.includes('analyst') || t.includes('scientist')) return SKILL_POOLS.data;
-  return SKILL_POOLS.default;
+  if (t.includes('engineer') || t.includes('developer') || t.includes('devops') || t.includes('tech')) return SKILL_POOLS['engineering'] ?? [];
+  if (t.includes('product') || t.includes('manager') || t.includes('pm')) return SKILL_POOLS['product'] ?? [];
+  if (t.includes('design') || t.includes('ux') || t.includes('ui')) return SKILL_POOLS['design'] ?? [];
+  if (t.includes('data') || t.includes('analyst') || t.includes('scientist')) return SKILL_POOLS['data'] ?? [];
+  return SKILL_POOLS['default'] ?? [];
 }
 
 function generateCandidates(jobTitle: string, location: string, requiredSkills: string): Candidate[] {
@@ -77,10 +77,10 @@ function generateCandidates(jobTitle: string, location: string, requiredSkills: 
   return CANDIDATE_POOL.slice(0, 6).map((person, i) => {
     const score = Math.max(62, Math.min(97, 97 - i * 5 + (i % 2 === 0 ? 2 : -1)));
     const personSkills = [
-      allSkills[i % allSkills.length] ?? pool[0],
-      allSkills[(i + 1) % allSkills.length] ?? pool[1],
-      allSkills[(i + 2) % allSkills.length] ?? pool[2],
-    ].filter(Boolean).slice(0, 3);
+      allSkills[i % allSkills.length] ?? pool[0] ?? '',
+      allSkills[(i + 1) % allSkills.length] ?? pool[1] ?? '',
+      allSkills[(i + 2) % allSkills.length] ?? pool[2] ?? '',
+    ].filter((s): s is string => Boolean(s)).slice(0, 3);
 
     return {
       id: `candidate-${i + 1}`,
@@ -91,7 +91,7 @@ function generateCandidates(jobTitle: string, location: string, requiredSkills: 
       yearsExp: person.yearsExp,
       skills: personSkills,
       matchScore: score,
-      availability: availabilities[i],
+      availability: availabilities[i] ?? 'Immediate',
     };
   }).sort((a, b) => b.matchScore - a.matchScore);
 }

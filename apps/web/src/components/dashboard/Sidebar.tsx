@@ -143,7 +143,7 @@ export default function Sidebar() {
                 className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black text-black"
                 style={{ backgroundColor: avatarColor }}
               >
-                {(user?.email || 'A')[0].toUpperCase()}
+                {(user?.email || 'A')[0]?.toUpperCase() ?? 'A'}
               </div>
             )}
             <p className="text-xs text-gray-600 truncate">{user?.email}</p>

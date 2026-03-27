@@ -127,7 +127,8 @@ Write in a professional but human tone. Be specific and compelling — this shou
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const jd = response.content[0].type === 'text' ? response.content[0].text : buildFallbackJD(body);
+    const content0 = response.content[0];
+    const jd = content0?.type === 'text' ? content0.text : buildFallbackJD(body);
 
     return NextResponse.json({ jd });
   } catch (err: unknown) {

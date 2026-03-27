@@ -68,8 +68,8 @@ function generateFallback(body: GenerateRequest): { proposal: Record<string, unk
     ],
   };
 
-  const industryKey = Object.keys(industryPains).find(k => industry.toLowerCase().includes(k)) || 'default';
-  const challenges = industryPains[industryKey];
+  const industryKey = Object.keys(industryPains).find(k => industry.toLowerCase().includes(k)) ?? 'default';
+  const challenges = industryPains[industryKey] ?? [];
 
   const moduleDesc: Record<string, string> = {
     sales: `Sophie AI calls your ${industry} leads the moment they enquire, qualifies them in real-time, and books them straight into your calendar. No missed calls, no manual follow-up, no lost deals.`,
@@ -245,7 +245,8 @@ Remember: use specific AKAI module names in solutions, realistic AU ${industry} 
       messages: [{ role: 'user', content: userPrompt }],
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const content0 = response.content[0];
+    const text = content0?.type === 'text' ? content0.text : '';
 
     let parsed: {
       executiveSummary: string;

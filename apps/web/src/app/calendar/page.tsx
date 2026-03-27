@@ -32,7 +32,7 @@ function getMockEvents(): CalEvent[] {
   const addDays = (d: Date, n: number) => {
     const r = new Date(d);
     r.setDate(r.getDate() + n);
-    return r.toISOString().split('T')[0];
+    return r.toISOString().split('T')[0] ?? '';
   };
 
   const daysUntilTue = (2 - today.getDay() + 7) % 7 || 7;
@@ -43,7 +43,7 @@ function getMockEvents(): CalEvent[] {
     {
       id: 'mock-1',
       title: 'Sophie AI calls',
-      date: today.toISOString().split('T')[0],
+      date: today.toISOString().split('T')[0] ?? '',
       time: '09:00',
       duration: 480,
       type: 'Call',
@@ -111,7 +111,7 @@ interface AddEventModalProps {
 }
 
 function AddEventModal({ initialDate, onClose, onSave }: AddEventModalProps) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0] ?? '';
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(initialDate || today);
   const [time, setTime] = useState('09:00');
@@ -133,7 +133,7 @@ function AddEventModal({ initialDate, onClose, onSave }: AddEventModalProps) {
         type,
         notes,
         inviteViaAk,
-        color: TYPE_COLORS[type],
+        color: TYPE_COLORS[type] ?? 'blue',
       });
       onClose();
     } finally {
@@ -245,7 +245,7 @@ interface CalendarGridProps {
 }
 
 function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEvent }: CalendarGridProps) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0] ?? '';
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startDow = (firstDay.getDay() + 6) % 7;
@@ -262,7 +262,7 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
 
   const eventsByDate = events.reduce<Record<string, CalEvent[]>>((acc, e) => {
     if (!acc[e.date]) acc[e.date] = [];
-    acc[e.date].push(e);
+    acc[e.date]!.push(e);
     return acc;
   }, {});
 
@@ -283,7 +283,7 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
           const isToday = dateStr === today;
           const isSelected = dateStr === selectedDate;
           const dayEvents = eventsByDate[dateStr] || [];
-          const dayNum = parseInt(dateStr.split('-')[2]);
+          const dayNum = parseInt(dateStr.split('-')[2] ?? '0');
 
           return (
             <div key={dateStr} onClick={() => onSelectDate(dateStr)}
@@ -302,7 +302,7 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
               </div>
               <div className="space-y-0.5">
                 {dayEvents.slice(0, 3).map(ev => {
-                  const colors = EVENT_COLORS[ev.color] || EVENT_COLORS.gray;
+                  const colors = EVENT_COLORS[ev.color] ?? EVENT_COLORS['gray'] ?? { pill: '', dot: '' };
                   return (
                     <div key={ev.id} className={`text-[10px] px-1.5 py-0.5 rounded border truncate ${colors.pill}`} title={ev.title}>
                       {ev.time} {ev.title}
@@ -334,13 +334,13 @@ function WeekView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (dat
     return d;
   });
 
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = today.toISOString().split('T')[0] ?? '';
 
   return (
     <div className="flex-1 overflow-auto">
       <div className="grid grid-cols-7 border-b border-[#1f1f1f]">
         {days.map(d => {
-          const dateStr = d.toISOString().split('T')[0];
+          const dateStr = d.toISOString().split('T')[0] ?? '';
           const isToday = dateStr === todayStr;
           return (
             <div key={dateStr} className="text-center py-3 border-r border-[#1a1a1a] last:border-r-0">
@@ -352,13 +352,13 @@ function WeekView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (dat
       </div>
       <div className="grid grid-cols-7">
         {days.map(d => {
-          const dateStr = d.toISOString().split('T')[0];
+          const dateStr = d.toISOString().split('T')[0] ?? '';
           const dayEvents = events.filter(e => e.date === dateStr);
           return (
             <div key={dateStr} className="min-h-[400px] border-r border-[#1a1a1a] last:border-r-0 p-2 space-y-1 cursor-pointer hover:bg-[#111] transition group"
               onClick={() => onAddEvent(dateStr)}>
               {dayEvents.map(ev => {
-                const colors = EVENT_COLORS[ev.color] || EVENT_COLORS.gray;
+                const colors = EVENT_COLORS[ev.color] ?? EVENT_COLORS['gray'] ?? { pill: '', dot: '' };
                 return (
                   <div key={ev.id} className={`text-xs px-2 py-1 rounded border ${colors.pill}`}>
                     <p className="font-semibold truncate">{ev.title}</p>
@@ -378,7 +378,7 @@ function WeekView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (dat
 
 function DayView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (date: string) => void }) {
   const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = today.toISOString().split('T')[0] ?? '';
   const dayEvents = events.filter(e => e.date === todayStr);
 
   return (
@@ -395,7 +395,7 @@ function DayView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (date
       ) : (
         <div className="space-y-3">
           {dayEvents.sort((a, b) => a.time.localeCompare(b.time)).map(ev => {
-            const colors = EVENT_COLORS[ev.color] || EVENT_COLORS.gray;
+            const colors = EVENT_COLORS[ev.color] ?? EVENT_COLORS['gray'] ?? { pill: '', dot: '' };
             return (
               <div key={ev.id} className={`p-4 rounded-xl border ${colors.pill}`}>
                 <div className="flex items-center gap-2 mb-1">
@@ -446,7 +446,7 @@ function DayDetailPanel({
           <p className="text-gray-600 text-sm text-center py-8">No events. Add one?</p>
         ) : (
           dayEvents.map(ev => {
-            const colors = EVENT_COLORS[ev.color] || EVENT_COLORS.gray;
+            const colors = EVENT_COLORS[ev.color] ?? EVENT_COLORS['gray'] ?? { pill: '', dot: '' };
             return (
               <div key={ev.id} className={`p-3 rounded-xl border ${colors.pill}`}>
                 <div className="flex items-center gap-1.5 mb-1">

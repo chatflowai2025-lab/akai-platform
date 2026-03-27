@@ -119,7 +119,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
     || message.match(/(?:create|write|draft|generate) (?:a |an )?post (?:about|on|for) (.+)/i);
 
   if (postTopicMatch) {
-    const topic = postTopicMatch[1].trim();
+    const topic = (postTopicMatch[1] ?? '').trim();
     return `Here's a LinkedIn post about **${topic}**:\n\n---\n\nMost people overcomplicate ${topic}.\n\nHere's what actually works:\n\n→ Start before you're ready. Momentum beats perfection every time.\n→ Focus on one metric that matters. Ignore the noise.\n→ Talk to your customers weekly. Not monthly. Weekly.\n\nI've seen businesses transform by applying just one of these. The compounding effect is real.\n\nWhat's your biggest challenge with ${topic} right now? Drop it in the comments — I read every one.\n\n---\n\nWant this adapted for Instagram or Facebook too? Or adjusted in tone?`;
   }
 
@@ -331,7 +331,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   // ── Web module responses ──────────────────────────────────────────────────
   if (msg.startsWith('fix the "') && msg.includes('" issue on my website')) {
     const issueMatch = message.match(/fix the "(.+?)" issue on my website/i);
-    const issue = issueMatch ? issueMatch[1] : 'this issue';
+    const issue = issueMatch?.[1] ?? 'this issue';
     const scoreType = issue.toLowerCase().includes('meta') || issue.toLowerCase().includes('seo') ? 'SEO' :
                       issue.toLowerCase().includes('image') || issue.toLowerCase().includes('lcp') ? 'Speed' : 'Mobile';
     const points = Math.floor(Math.random() * 8) + 5;
@@ -340,7 +340,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 
   if (msg.startsWith('auto-fix the top 3 issues on my website')) {
     const issuesMatch = message.match(/auto-fix the top 3 issues on my website: (.+)/i);
-    const issues = issuesMatch ? issuesMatch[1] : 'your top issues';
+    const issues = issuesMatch?.[1] ?? 'your top issues';
     return `Here's what I'd do for the top 3:\n\n1. **${issues.split(',')[0]?.trim() ?? 'Issue 1'}** — direct code fix, ~6 point gain\n2. **${issues.split(',')[1]?.trim() ?? 'Issue 2'}** — config change, ~8 point gain\n3. **${issues.split(',')[2]?.trim() ?? 'Issue 3'}** — asset optimisation, ~5 point gain\n\nEstimated total improvement: **+19 points** across Speed, SEO, and Mobile.\n\nShall I apply all three? I'll create a backup checkpoint before making any changes.`;
   }
 
@@ -388,7 +388,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   const proposalNameMatch = msg.match(/(?:write|create|generate|draft) (?:a )?proposal for ([a-z][a-z\s'-]{1,40})/i)
     || message.match(/(?:write|create|generate|draft) (?:a )?proposal for ([a-z][a-z\s'-]{1,40})/i);
   if (proposalNameMatch) {
-    const name = proposalNameMatch[1].trim();
+    const name = (proposalNameMatch[1] ?? '').trim();
     return `Head to **Proposals** → I'll pre-fill **${name}** for you.\n\nPick which modules to pitch, choose a tone, and I'll write the full proposal in seconds.`;
   }
 
@@ -576,7 +576,8 @@ export async function POST(req: NextRequest) {
         system: SYSTEM_PROMPT + contextBlock + moduleContext,
         messages,
       });
-      const text = response.content[0].type === 'text' ? response.content[0].text : '';
+      const content0 = response.content[0];
+      const text = content0?.type === 'text' ? content0.text : '';
       return NextResponse.json({ message: text });
     } else {
       return NextResponse.json({ message: await getMockResponse(message, history, userContext) });

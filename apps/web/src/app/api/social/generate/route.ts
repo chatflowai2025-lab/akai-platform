@@ -77,7 +77,7 @@ function getMockPosts(brief: string, tone = 'Professional'): PlatformPost[] {
       platform: 'Instagram',
       icon: '📸',
       content: instagram,
-      hashtags: hashtagSets[tone] ?? hashtagSets.Professional,
+      hashtags: hashtagSets[tone] ?? hashtagSets['Professional'] ?? '',
       characterCount: instagram.length,
     },
     {
@@ -162,7 +162,8 @@ Each post must be uniquely crafted for that platform's culture. Instagram is vis
       messages: [{ role: 'user', content: `Write social media posts about: ${brief.trim()}` }],
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const content0 = response.content[0];
+    const text = content0?.type === 'text' ? content0.text : '';
 
     let parsed: {
       instagram: { content: string; hashtags: string };

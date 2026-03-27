@@ -223,10 +223,10 @@ export default function SettingsPage() {
             identifier: gmailConn.email || undefined,
           },
           googleCalendar: { connected: gcalConnected, identifier: gcalEmail },
-          instagram: socialMap.instagram,
-          linkedin: socialMap.linkedin,
-          facebook: socialMap.facebook,
-          x: socialMap.x,
+          instagram: socialMap['instagram'] ?? { connected: false },
+          linkedin: socialMap['linkedin'] ?? { connected: false },
+          facebook: socialMap['facebook'] ?? { connected: false },
+          x: socialMap['x'] ?? { connected: false },
         });
       } catch (err) {
         console.error('[SETTINGS] load error', err);
@@ -329,7 +329,7 @@ export default function SettingsPage() {
     }
   };
 
-  const planInfo = PLAN_LABELS[planTier] || PLAN_LABELS.trial;
+  const planInfo = PLAN_LABELS[planTier] ?? PLAN_LABELS['trial'] ?? { label: planTier, color: '' };
 
   const saveAvatarColor = async (color: string) => {
     setAvatarColor(color);
@@ -403,7 +403,7 @@ export default function SettingsPage() {
                   className="w-14 h-14 rounded-full border-2 border-[#2a2a2a] flex items-center justify-center font-black text-xl text-black"
                   style={{ backgroundColor: avatarColor }}
                 >
-                  {(userProfile?.displayName || user?.email || 'A')[0].toUpperCase()}
+                  {(userProfile?.displayName || user?.email || 'A')[0]?.toUpperCase() ?? 'A'}
                 </div>
               )}
               {avatarUploading && (

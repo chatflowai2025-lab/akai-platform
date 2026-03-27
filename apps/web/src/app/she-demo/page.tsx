@@ -93,7 +93,7 @@ function BookingModal({
   const [guests, setGuests] = useState(2);
   const [submitted, setSubmitted] = useState(false);
 
-  const selectedDuration = durations[durationIdx];
+  const selectedDuration = durations[durationIdx] ?? durations[0] ?? { label: '2 hrs', hours: 2 };
   const totalPrice = vessel.pricePerHour * selectedDuration.hours;
 
   const handleSubmit = () => {

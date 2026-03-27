@@ -111,7 +111,8 @@ Return this exact JSON structure:
         messages: [{ role: 'user', content: prompt }],
       });
 
-      const text = response.content[0].type === 'text' ? response.content[0].text : '';
+      const content0 = response.content[0];
+      const text = content0?.type === 'text' ? content0.text : '';
 
       try {
         // Strip markdown code fences if present

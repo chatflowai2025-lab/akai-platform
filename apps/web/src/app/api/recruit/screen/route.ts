@@ -130,7 +130,8 @@ Be specific — reference actual content from the resume. strengths = what they 
         messages: [{ role: 'user', content: prompt }],
       });
 
-      const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+      const content0 = message.content[0];
+      const raw = content0?.type === 'text' ? content0.text : '';
       const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const result = JSON.parse(cleaned) as Partial<ScreenResponse>;
 
