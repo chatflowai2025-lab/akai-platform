@@ -1,6 +1,6 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { verifyToken } from '../middlewares/auth';
-const router = Router();
+const router: ExpressRouter = Router();
 
 // GET /api/teams/:teamId
 router.get('/:teamId', verifyToken, async (req, res) => {

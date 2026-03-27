@@ -1,6 +1,6 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { verifyToken } from '../middlewares/auth';
-const router = Router();
+const router: ExpressRouter = Router();
 
 // GET /api/auth/me — get current user from Firebase token
 router.get('/me', verifyToken, async (req, res) => {

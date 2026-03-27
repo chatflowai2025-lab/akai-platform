@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import healthRouter from './health';
 import authRouter from './auth';
 import chatRouter from './chat';
@@ -8,7 +8,7 @@ import recruitRouter from './modules/recruit';
 import webRouter from './modules/web';
 import calendarRouter from './calendar';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 router.use('/health', healthRouter);
 router.use('/healthz', healthRouter); // Railway health check alias

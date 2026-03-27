@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import OpenAI from 'openai';
 import type { OnboardingState, ChatMessage } from '@akai/shared-types';
 
-const router = Router();
+const router: ExpressRouter = Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = `You are MM (Money Maker), the AI business partner built into AKAI — the AI Business Operating System.
@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
     const actionMatch = rawResponse.match(/ACTION:\s*({.*})/s);
     if (actionMatch) {
       try {
-        const actionData = JSON.parse(actionMatch[1]);
+        const actionData = JSON.parse(actionMatch[1] ?? '{}');
         action = actionData.type;
         buttons = actionData.buttons;
         url = actionData.url;

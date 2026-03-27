@@ -1,6 +1,6 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { verifyToken } from '../../middlewares/auth';
-const router = Router();
+const router: ExpressRouter = Router();
 
 const BLAND_API_KEY = process.env.BLAND_API_KEY || '';
 const SOPHIE_VOICE = 'd66156cc-560b-4080-a195-32d245ad2d1a';

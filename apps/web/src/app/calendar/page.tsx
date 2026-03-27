@@ -705,7 +705,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           {(view === 'month' || view === 'week') && (
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
               <button onClick={prevMonth} className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">‹</button>
-              <h2 className="text-sm font-bold text-white">{monthName}</h2>
+              <h2 suppressHydrationWarning className="text-sm font-bold text-white">{monthName}</h2>
               <button onClick={nextMonth} className="text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-[#1a1a1a]">›</button>
             </div>
           )}

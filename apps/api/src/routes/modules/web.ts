@@ -1,6 +1,6 @@
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { verifyToken } from '../../middlewares/auth';
-const router = Router();
+const router: ExpressRouter = Router();
 
 // POST /api/modules/web/generate — generate site from description
 router.post('/generate', verifyToken, async (req, res) => {

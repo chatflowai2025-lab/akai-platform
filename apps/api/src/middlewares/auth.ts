@@ -8,7 +8,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
     return res.status(401).json({ error: 'Unauthorized — Bearer token required' });
   }
 
-  const token = authHeader.split('Bearer ')[1];
+  const token = authHeader.split('Bearer ')[1] ?? '';
 
   try {
     const admin = getFirebaseAdmin();

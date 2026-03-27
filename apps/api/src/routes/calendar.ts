@@ -1,10 +1,10 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type Router as ExpressRouter, type Request, type Response } from 'express';
 import { google } from 'googleapis';
 import { getFirebaseAdmin } from '../lib/firebase';
 import * as admin from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 // ── Middleware: simple API key check ─────────────────────────────────────────
 function requireApiKey(req: Request, res: Response, next: () => void): void {

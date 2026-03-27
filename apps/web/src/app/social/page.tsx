@@ -807,7 +807,7 @@ export default function SocialPage() {
                 </div>
               )}
 
-              <p className="text-xs text-gray-600">
+              <p suppressHydrationWarning className="text-xs text-gray-600">
                 {scheduleMode === 'now'
                   ? 'Copy your caption above to post directly in each platform\'s app.'
                   : `Scheduled for ${scheduleDate ? (() => { try { return new Date(scheduleDate).toLocaleString('en-AU'); } catch { return scheduleDate; } })() : 'selected time'}. Saved to your calendar.`}

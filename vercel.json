@@ -1,8 +1,5 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/email-poll",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "cd apps/web && next build",
+  "outputDirectory": "apps/web/.next"
 }
