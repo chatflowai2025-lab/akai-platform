@@ -228,7 +228,9 @@ export default function SettingsPage() {
     try {
       const db = getFirebaseDb();
       if (!db) throw new Error('Firestore not available');
-      const savePromise = setDoc(doc(db, 'users', user.uid), {
+
+      // Update main user doc
+      const userSave = setDoc(doc(db, 'users', user.uid), {
         businessName: bizForm.businessName,
         displayName: bizForm.businessName,
         campaignConfig: {
@@ -246,12 +248,21 @@ export default function SettingsPage() {
           phone: bizForm.phone,
         },
       }, { merge: true });
-      // Timeout after 8s
+
+      // Also update voiceConfig so Sophie uses the right businessName
+      const voiceSave = setDoc(doc(db, 'akai-platform', 'voiceConfig'), {
+        businessName: bizForm.businessName,
+        industry: bizForm.industry,
+        location: bizForm.location,
+        updatedAt: new Date().toISOString(),
+        updatedBy: user.uid,
+      }, { merge: true });
+
       const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 8000));
-      await Promise.race([savePromise, timeout]);
+      await Promise.race([Promise.all([userSave, voiceSave]), timeout]);
       setBizSaved(true);
       setBizError(null);
-      setTimeout(() => setBizSaved(false), 2500);
+      setTimeout(() => setBizSaved(false), 3000);
     } catch (err) {
       console.error('[SETTINGS] save biz error', err);
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -393,6 +404,12 @@ export default function SettingsPage() {
               {bizError}
             </div>
           )}
+          {bizSaved && (
+            <div className="flex items-center gap-2 text-sm bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-2 text-green-400 font-semibold animate-in fade-in">
+              <span>✅</span>
+              <span>Business profile saved — Sophie is now updated with your latest details.</span>
+            </div>
+          )}
           <button
             onClick={saveBizProfile}
             disabled={bizSaving}
@@ -400,8 +417,6 @@ export default function SettingsPage() {
           >
             {bizSaving ? (
               <><span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" /> Saving…</>
-            ) : bizSaved ? (
-              '✓ Saved!'
             ) : (
               'Save Business Profile'
             )}

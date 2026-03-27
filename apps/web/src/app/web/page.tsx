@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -261,11 +261,14 @@ function AuditPanel({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notified, setNotified] = useState(false);
+  const { sendMessage } = useDashboardChat();
 
   const runAudit = useCallback(async () => {
     setLoading(true);
     setError(null);
     setResult(null);
+    setNotified(false);
     try {
       const res = await fetch(`${RAILWAY_API}/api/website-mockup/audit`, {
         method: 'POST',
@@ -296,7 +299,7 @@ function AuditPanel({
         'Minify CSS and JavaScript files',
       ];
       const issues = [...gaps, ...wins].length > 0 ? [...gaps, ...wins] : fallbackIssues;
-      setResult({
+      const auditResult = {
         overallScore: (scores.overall ?? 0) * 10,
         speedScore: ((scores.speed ?? 0) * 10) || (data.speedScore ?? data.speed_score ?? data.performance ?? 72),
         seoScore: ((scores.seo ?? 0) * 10) || (data.seoScore ?? data.seo_score ?? 68),
@@ -308,13 +311,23 @@ function AuditPanel({
         quickWins: data.quickWins ?? [],
         issues,
         opportunityScore: data.opportunityScore,
-      });
+      };
+      setResult(auditResult);
+      // Notify via AK chat when audit completes
+      if (!notified) {
+        setNotified(true);
+        const overall = auditResult.overallScore || auditResult.seoScore;
+        const topWin = auditResult.quickWins?.[0]?.action || auditResult.issues?.[0] || 'Check the Web module for details';
+        try {
+          sendMessage(`Audit complete for ${url} — scored ${overall ? Math.round(overall) + '/100' : 'complete'}. Top opportunity: "${topWin}". View full report in the Web module → Audit tab.`);
+        } catch { /* non-fatal */ }
+      }
     } catch {
       setError("Couldn't reach the audit service. Check the URL and try again.");
     } finally {
       setLoading(false);
     }
-  }, [url]);
+  }, [url, notified, sendMessage]);
 
   useEffect(() => { runAudit(); }, [runAudit]);
 
@@ -342,9 +355,12 @@ function AuditPanel({
       {/* Main content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {loading && (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-sm mx-auto text-center">
             <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-gray-400">Analysing your site…</p>
+            <div>
+              <p className="text-sm text-white font-semibold">Auditing your site…</p>
+              <p className="text-xs text-gray-500 mt-1">Takes 10–20 seconds. You can navigate away — AK will notify you in chat when the report is ready.</p>
+            </div>
           </div>
         )}
 

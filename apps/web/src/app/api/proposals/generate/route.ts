@@ -10,6 +10,7 @@ interface GenerateRequest {
   modules: string[];
   tone: 'professional' | 'consultative' | 'direct' | 'friendly';
   existingPains?: string;
+  painPoints?: string;
 }
 
 const MODULE_PRICES: Record<string, number> = {

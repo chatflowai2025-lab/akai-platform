@@ -5,7 +5,55 @@ import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
 /* ─── Types ─── */
-type ModalType = 'demo' | 'healthcheck' | null;
+type ModalType = 'demo' | 'healthcheck' | 'youtube' | null;
+
+/* ─── Industry Sophie preview ─── */
+const INDUSTRY_PREVIEWS: Record<string, string> = {
+  Trades: "Hi, this is Sophie calling from {businessName}. I'm reaching out because you enquired about our services — do you have 2 minutes? I'd love to book you a free quote with our team this week.",
+  'Real Estate': "Hi, this is Sophie from {businessName}. I noticed you've been looking at properties in your area — I wanted to reach out personally. Do you have a moment? I can match you with listings that fit exactly what you're looking for.",
+  Legal: "Hi, this is Sophie calling on behalf of {businessName}. I'm following up on your enquiry — our team specialises in exactly what you need. Do you have 5 minutes? I can connect you with a solicitor today.",
+  Medical: "Hi, this is Sophie from {businessName}. I'm calling to follow up on your enquiry and help you book an appointment at a time that suits you. Are you free for a quick 2-minute chat?",
+  Finance: "Hi, this is Sophie calling from {businessName}. You enquired about our financial services — I'd love to connect you with one of our advisors. Do you have a couple of minutes now?",
+  Retail: "Hi, this is Sophie from {businessName}. Thanks for your interest — I'm calling to make sure you found what you were looking for and to let you know about our current offers. Got a moment?",
+  Other: "Hi, this is Sophie calling from {businessName}. I'm following up on your recent enquiry — do you have 2 minutes? I'd love to help you get started.",
+};
+
+function SophiePreview({ industry, businessName }: { industry: string; businessName: string }) {
+  const template = INDUSTRY_PREVIEWS[industry] || INDUSTRY_PREVIEWS.Other;
+  const preview = template.replace('{businessName}', businessName || 'your business');
+  return (
+    <div className="bg-black/40 border border-green-500/20 rounded-xl p-3 mt-1">
+      <p className="text-[11px] text-green-400 font-semibold mb-1.5 uppercase tracking-wider">📞 Sophie will say:</p>
+      <p className="text-sm text-white/80 italic leading-relaxed">&ldquo;{preview}&rdquo;</p>
+    </div>
+  );
+}
+
+/* ─── YouTube Demo Modal ─── */
+function YouTubeModal({ onClose }: { onClose: () => void }) {
+  return (
+    <Overlay onClose={onClose}>
+      <div className="glass rounded-2xl p-4 w-full max-w-2xl relative" onClick={e => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-4 text-white/40 hover:text-white text-xl leading-none z-10"
+        >
+          ×
+        </button>
+        <h2 className="text-lg font-bold text-white mb-3 pr-8">See AKAI in action</h2>
+        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+          <iframe
+            className="absolute inset-0 w-full h-full rounded-xl"
+            src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+            title="AKAI Demo"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </div>
+    </Overlay>
+  );
+}
 
 /* ─── Demo Call Modal ─── */
 function DemoModal({ onClose }: { onClose: () => void }) {
@@ -38,7 +86,10 @@ function DemoModal({ onClose }: { onClose: () => void }) {
     <Overlay onClose={onClose}>
       <ModalCard title="Try Live Agent Now" accent="#22c55e" onClose={onClose}>
         {status === 'success' ? (
-          <SuccessState msg="📞 We're calling you now!" sub="Expect a call within 60 seconds." />
+          <SuccessState
+            msg="📞 Sophie is calling you now!"
+            sub={`You'll receive a call within 60 seconds. Sophie is already personalised for ${form.industry || 'your industry'} — get ready!`}
+          />
         ) : (
           <>
             <StepIndicator current={step} total={3} />
@@ -97,6 +148,9 @@ function DemoModal({ onClose }: { onClose: () => void }) {
                   onChange={v => set('leadsPerMonth', v)}
                   options={['0–10', '10–50', '50–100', '100+']}
                 />
+                {form.industry && form.businessName && (
+                  <SophiePreview industry={form.industry} businessName={form.businessName} />
+                )}
                 {status === 'error' && (
                   <p className="text-red-400 text-sm">Something went wrong — try again.</p>
                 )}
@@ -355,6 +409,7 @@ export default function Hero() {
     <>
       {modal === 'demo' && <DemoModal onClose={() => setModal(null)} />}
       {modal === 'healthcheck' && <HealthCheckModal onClose={() => setModal(null)} />}
+      {modal === 'youtube' && <YouTubeModal onClose={() => setModal(null)} />}
 
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 overflow-hidden dot-grid">
 
@@ -405,6 +460,12 @@ export default function Hero() {
             className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-10 py-4 text-lg min-w-[240px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
           >
             Free Digital Health Check
+          </button>
+          <button
+            onClick={() => setModal('youtube')}
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-8 py-4 text-lg border border-white/10 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5"
+          >
+            ▶ Watch a demo
           </button>
           <Button href="#how-it-works" variant="secondary" size="lg">
             See how it works

@@ -30,6 +30,7 @@ function QuickStat({
   icon: string;
   loading?: boolean;
 }) {
+  const isZero = !loading && (value === '0' || value === '');
   return (
     <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 flex flex-col gap-2 hover:border-[#D4AF37]/20 transition-colors">
       <div className="flex items-center justify-between">
@@ -41,7 +42,7 @@ function QuickStat({
       ) : (
         <p className="text-3xl font-black text-white">{value}</p>
       )}
-      <p className="text-xs text-gray-600">all time</p>
+      <p className="text-xs text-gray-600">{isZero ? 'No data yet' : 'all time'}</p>
     </div>
   );
 }
@@ -332,7 +333,7 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Active modules */}
+            {/* Module quick-links */}
             <section>
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
                 Modules
@@ -342,43 +343,43 @@ export default function DashboardPage() {
                   icon="📞"
                   label="Sales"
                   status="live"
-                  description="AI-powered outbound sales calls & lead qualification"
+                  description="Sophie AI makes outbound calls, qualifies leads & books meetings 24/7"
                   href="/sales"
                 />
                 <ModuleCard
-                  icon="🎯"
-                  label="Recruit"
+                  icon="🎙️"
+                  label="Voice"
                   status="live"
-                  description="AI candidate screening and pipeline management"
-                  href="/recruit"
+                  description="Configure Sophie's voice, script, call hours & campaign settings"
+                  href="/voice"
                 />
                 <ModuleCard
                   icon="🌐"
                   label="Web"
-                  status="building"
-                  description="Landing pages and web content generation"
+                  status="live"
+                  description="Audit your site for speed, SEO & conversions — get instant fixes"
                   href="/web"
                 />
                 <ModuleCard
                   icon="✉️"
-                  label="Email"
-                  status="building"
-                  description="AI inbox monitoring, routing and response"
+                  label="Email Guard"
+                  status="live"
+                  description="AI monitors your inbox, generates proposals & replies automatically"
                   href="/email-guard"
                 />
                 <ModuleCard
-                  icon="📣"
-                  label="Ads"
+                  icon="📅"
+                  label="Calendar"
                   status="live"
-                  description="AI-generated Google & Meta Ads campaigns"
-                  href="/ads"
+                  description="Sync Google or Outlook Calendar — Sophie auto-books qualified leads"
+                  href="/calendar"
                 />
                 <ModuleCard
-                  icon="📱"
-                  label="Social"
-                  status="planned"
-                  description="Social content calendar and auto-posting"
-                  href="/social"
+                  icon="📄"
+                  label="Proposals"
+                  status="live"
+                  description="Generate personalised AI proposals in seconds — export or email"
+                  href="/proposals"
                 />
               </div>
             </section>

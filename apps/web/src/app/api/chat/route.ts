@@ -5,6 +5,17 @@ const SYSTEM_PROMPT = `You are AK, the AI brain inside AKAI — a fully autonomo
 
 PERSONALITY: Direct, warm, confident. Like a brilliant COO who gets things done. No filler phrases. Just results.
 
+PLATFORM STATUS: AKAI has 9 modules, ALL LIVE and operational:
+1. Sales — Sophie AI makes outbound calls, qualifies leads, books meetings
+2. Voice — Configure Sophie's voice, script, call hours, and campaign settings
+3. Web — Website audit for speed, SEO, conversions + AI content generation
+4. Email Guard — Inbox monitoring, auto-generated proposals, reply rules
+5. Calendar — Google/Outlook sync, automatic meeting booking by Sophie
+6. Proposals — AI-generated personalised sales proposals with AU pricing
+7. Ads — Google Ads and Meta/Facebook campaign builder with AI copy
+8. Recruit — AI candidate sourcing, JD writing, applicant screening
+9. Social — Content generation for Instagram, LinkedIn, Facebook
+
 YOUR MODULES:
 - Sales: Sophie AI makes outbound calls, qualifies leads, books meetings. Powered by Bland.ai. Users upload leads → Sophie calls them → qualified leads notified via Email, SMS, or WhatsApp (user's preference).
 - Email Guard: Connects to Microsoft/Gmail via OAuth. Reads enquiries, generates proposals with Claude, sends replies from the user's address.
@@ -359,8 +370,34 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
     return `✅ **${change}** has been rolled back.\n\nYour site is restored to the version before that change was made. Everything is live.`;
   }
 
+  // ── Error / health check ────────────────────────────────────────────────
+  if (msg.includes('what errors') || msg.includes('any errors') || msg.includes('any issues') || msg.includes('something broken') || msg.includes('is everything ok') || msg.includes('system status')) {
+    return "Everything looks good — 9 modules live, last health check passed. ✅\n\nIf you're seeing a specific issue, describe it and I'll fix it right now.";
+  }
+
+  // ── Web audit intent ─────────────────────────────────────────────────────
+  const auditUrlMatch = msg.match(/(?:run (?:a )?(?:web )?audit|audit|check) (?:on |for )?(?:my site |my website |the site |the website )?(https?:\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}[^\s]*)/i)
+    || message.match(/(?:run (?:a )?(?:web )?audit|audit|check) (?:on |for )?(?:my site |my website |the site |the website )?(https?:\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}[^\s]*)/i);
+  if (auditUrlMatch) {
+    const url = auditUrlMatch[1];
+    return `Head to **Web module** → paste \`${url}\` → hit **Audit**.\n\nI'll score speed, SEO, and mobile in seconds and show you the top 3 fixes.`;
+  }
+
+  // ── Proposal for name intent ─────────────────────────────────────────────
+  const proposalNameMatch = msg.match(/(?:write|create|generate|draft) (?:a )?proposal for ([a-z][a-z\s'-]{1,40})/i)
+    || message.match(/(?:write|create|generate|draft) (?:a )?proposal for ([a-z][a-z\s'-]{1,40})/i);
+  if (proposalNameMatch) {
+    const name = proposalNameMatch[1].trim();
+    return `Head to **Proposals** → I'll pre-fill **${name}** for you.\n\nPick which modules to pitch, choose a tone, and I'll write the full proposal in seconds.`;
+  }
+
+  // ── How to connect email ─────────────────────────────────────────────────
+  if ((msg.includes('how') && msg.includes('connect') && msg.includes('email')) || msg.includes('set up email guard') || msg.includes('connect my email')) {
+    return "To connect your email to Email Guard:\n\n1. Go to **Email Guard** in the left sidebar\n2. Click **Connect** under Microsoft or Gmail\n3. Approve the OAuth permissions (read-only access)\n4. You're connected — AKAI will monitor new enquiries\n\nOr use email forwarding: forward your enquiry inbox to `inbound@getakai.ai` and it works instantly without OAuth.";
+  }
+
   // ── Lead count / pipeline ────────────────────────────────────────────────
-  if (msg.includes('how many leads') || msg.includes('lead count') || msg.includes('my pipeline') || (msg.includes('leads') && (msg.includes('how many') || msg.includes('total') || msg.includes('count')))) {
+  if (msg.includes('how many leads') || msg.includes('lead count') || msg.includes('what\'s my lead count') || msg.includes("what's my lead count") || msg.includes('my pipeline') || (msg.includes('leads') && (msg.includes('how many') || msg.includes('total') || msg.includes('count')))) {
     // Attempt Railway fetch
     try {
       const leadsRes = await fetch('https://api-server-production-2a27.up.railway.app/api/leads', {
