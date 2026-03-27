@@ -304,9 +304,9 @@ function EmailGuardContent({
 
   // Handle OAuth return params (passed in from the Suspense boundary below)
   useEffect(() => {
-    if (initialConnectedParam === 'gmail' && initialEmailParam) {
+    if (initialConnectedParam === 'gmail') {
       setGmailConnected(true);
-      setGmailEmail(decodeURIComponent(initialEmailParam));
+      setGmailEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
       router.replace('/email-guard');
       safeSend(sendMessage, `My Gmail inbox is now connected. What can you do with it and what should I do first?`);
       triggerFirstPoll();

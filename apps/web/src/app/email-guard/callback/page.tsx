@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -11,10 +11,23 @@ function CallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
+  const attempted = useRef(false);
 
   useEffect(() => {
+    // Wait for auth to resolve
     if (loading) return;
-    if (!user) { router.replace('/login'); return; }
+    // Give auth an extra tick to settle if user is null (race condition)
+    if (!user) {
+      // Wait up to 3s for user to appear before giving up
+      const timeout = setTimeout(() => {
+        router.replace('/login');
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+
+    // Don't attempt twice
+    if (attempted.current) return;
+    attempted.current = true;
 
     const code = searchParams.get('code');
     if (!code) { router.replace('/email-guard?error=no_code'); return; }
@@ -27,7 +40,7 @@ function CallbackInner() {
       .then(r => r.json())
       .then(d => {
         if (d.success || d.email) {
-          router.replace('/email-guard?connected=gmail&email=' + encodeURIComponent(d.email || ''));
+          router.replace('/email-guard?connected=gmail&email=' + encodeURIComponent(d.email || 'connected'));
         } else {
           router.replace('/email-guard?error=' + encodeURIComponent(d.error || 'connection_failed'));
         }
