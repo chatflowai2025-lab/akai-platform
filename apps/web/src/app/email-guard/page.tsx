@@ -262,6 +262,7 @@ function EmailGuardContent({
   const [msEmail, setMsEmail] = useState<string | null>(null);
   const [gmailConnected, setGmailConnected] = useState(false);
   const [gmailEmail, setGmailEmail] = useState<string | null>(null);
+  const [gmailHasSendScope, setGmailHasSendScope] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
@@ -270,6 +271,9 @@ function EmailGuardContent({
   const [sending, setSending] = useState<string | null>(null);
   const [firstPollBanner, setFirstPollBanner] = useState<'checking' | 'done' | null>(null);
   const [firstPollCount, setFirstPollCount] = useState<number | null>(null);
+  // Send-permission modal state
+  const [sendPermModal, setSendPermModal] = useState<{ enquiry: Enquiry } | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Auto-poll on first connect — gives instant gratification
   const triggerFirstPoll = useCallback(async () => {
@@ -347,7 +351,15 @@ function EmailGuardContent({
 
     fetch(`${RAILWAY}/api/email/gmail/status?userId=${user.uid}`, { headers: { 'x-api-key': API_KEY } })
       .then(r => r.json())
-      .then(d => { if (d.connected) { setGmailConnected(true); setGmailEmail(d.email || null); } })
+      .then(d => {
+        if (d.connected) {
+          setGmailConnected(true);
+          setGmailEmail(d.email || null);
+          // Check if the stored scopes include gmail.send
+          const scopes: string = d.scopes || '';
+          setGmailHasSendScope(scopes.includes('gmail.send'));
+        }
+      })
       .catch(() => {});
 
     fetch(`${RAILWAY}/api/email/enquiries/${user.uid}`, { headers: { 'x-api-key': API_KEY } })
@@ -425,6 +437,12 @@ function EmailGuardContent({
   };
 
   const sendProposal = async (eq: Enquiry) => {
+    // If only Gmail is connected and it doesn't have send scope, prompt the user
+    if (gmailConnected && !msConnected && !gmailHasSendScope) {
+      setSendPermModal({ enquiry: eq });
+      return;
+    }
+
     setSending(eq.id);
     try {
       await fetch(`${RAILWAY}/api/email/${user.uid}/${eq.id}/send`, {
@@ -441,6 +459,15 @@ function EmailGuardContent({
     } finally {
       setSending(null);
     }
+  };
+
+  const copyProposal = (eq: Enquiry) => {
+    const text = eq.proposal?.body || '';
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedId(eq.id);
+      setTimeout(() => setCopiedId(null), 3000);
+    }).catch(() => {});
+    setSendPermModal(null);
   };
 
   const isConnected = msConnected || gmailConnected;
@@ -544,7 +571,7 @@ function EmailGuardContent({
               Connecting…
             </div>
           )}
-          <p className="text-xs text-gray-600 px-1">AKAI only reads emails to generate proposals. Disconnect anytime.</p>
+          <p className="text-xs text-gray-600 px-1">Connect Gmail to read enquiries and send proposals — you control what gets sent.</p>
         </div>
 
         {/* ── Pre-connect preview (shown only when not connected, not connecting) ── */}
@@ -612,6 +639,44 @@ function EmailGuardContent({
         {/* ── Rules Engine ─────────────────────────────────────────────── */}
         <RulesEngine userId={user.uid} />
 
+        {/* ── Send-permission modal ──────────────────────────────────── */}
+        {sendPermModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+            <div className="bg-[#111] border border-[#D4AF37]/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+              <div className="flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">⚠️</span>
+                <div>
+                  <p className="text-white font-bold text-base">Send access needed</p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    You&apos;ve connected Gmail for reading only. To send proposals directly from AKAI, we need
+                    permission to send on your behalf.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 pt-1">
+                <button
+                  onClick={connectGoogle}
+                  className="w-full px-4 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
+                >
+                  Grant send access →
+                </button>
+                <button
+                  onClick={() => copyProposal(sendPermModal.enquiry)}
+                  className="w-full px-4 py-3 border border-[#2a2a2a] text-gray-300 rounded-xl text-sm font-semibold hover:text-white hover:border-[#3a3a3a] transition"
+                >
+                  Copy proposal instead
+                </button>
+                <button
+                  onClick={() => setSendPermModal(null)}
+                  className="text-xs text-gray-600 hover:text-gray-400 transition text-center pt-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Enquiries list (shown when connected) ────────────────────── */}
         {isConnected && (
           <section>
@@ -653,13 +718,18 @@ function EmailGuardContent({
                           {eq.proposal.body}
                         </div>
                         {eq.status !== 'sent' && (
-                          <button
-                            onClick={() => sendProposal(eq)}
-                            disabled={sending === eq.id}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
-                          >
-                            {sending === eq.id ? '⏳ Sending...' : '✉️ Send this proposal'}
-                          </button>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <button
+                              onClick={() => sendProposal(eq)}
+                              disabled={sending === eq.id}
+                              className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
+                            >
+                              {sending === eq.id ? '⏳ Sending...' : '✉️ Send this proposal'}
+                            </button>
+                            {copiedId === eq.id && (
+                              <span className="text-xs text-green-400 font-semibold">✓ Copied to clipboard</span>
+                            )}
+                          </div>
                         )}
                       </div>
                     )}
