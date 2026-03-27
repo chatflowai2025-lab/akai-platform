@@ -666,7 +666,37 @@ function CTASection() {
 
 // ── AKAI Prospects Section ────────────────────────────────────────────────
 
-interface Prospect { id: number; name: string; email: string; phone: string; website: string; status: string; subject: string; }
+interface Prospect { id: number; name: string; email: string; phone: string; website: string; status: string; subject: string; industry?: string; location?: string; }
+
+function buildOutreachEmail(p: Prospect): { subject: string; body: string } {
+  const businessName = p.name || 'your business';
+  const industry = p.industry ? `in the ${p.industry} space` : 'in your industry';
+  const locationLine = p.location ? ` based in ${p.location}` : '';
+  const websiteLine = p.website ? `\n\nI had a look at ${p.website} — ` : '\n\n';
+  const websiteSegue = p.website
+    ? `${websiteLine}great work. I wanted to reach out about something that could directly impact your lead flow.`
+    : `${websiteLine}I came across ${businessName} and wanted to reach out directly.`;
+
+  const subject = p.subject || `Quick question — ${businessName}`;
+
+  const body = [
+    `Hi,`,
+    ``,
+    websiteSegue,
+    ``,
+    `We built AKAI for businesses like yours${locationLine} — ${industry}. The problem we solve: most businesses lose leads after hours, on weekends, or whenever the team is tied up. AKAI handles those enquiries instantly — qualifies them, books calls, and follows up automatically.`,
+    ``,
+    `No extra staff. No missed opportunities. Just more revenue from leads you're already getting.`,
+    ``,
+    `Would you be open to a 10-minute call this week? I'll show you exactly how it works for ${businessName}.`,
+    ``,
+    `Aaron Kersten`,
+    `Founder, AKAI`,
+    `getakai.ai | aaron@getakai.ai`,
+  ].join('\n');
+
+  return { subject, body };
+}
 
 const STATUS_STYLES: Record<string, { label: string; style: string }> = {
   not_contacted:  { label: 'Not contacted', style: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
@@ -759,7 +789,7 @@ function ProspectsSection() {
                     </select>
                     {p.email && (
                       <a
-                        href={`mailto:${p.email}?subject=${encodeURIComponent(p.subject || `Quick question — ${p.name}`)}&body=${encodeURIComponent(`Hi,\n\nI came across ${p.name} and wanted to reach out directly.\n\nWe built AKAI to solve a specific problem: most businesses lose leads after hours, on weekends, or whenever the team is tied up. AKAI handles those enquiries instantly — qualifies them, books calls, and follows up — so nothing falls through the cracks.\n\nNo extra staff. No missed opportunities.\n\nI think there's a real fit here. Would you be open to a 10-minute call this week? Happy to show you exactly how it works for businesses like yours.\n\nAaron Kersten\nFounder, AKAI\ngetakai.ai | aaron@getakai.ai`)}`}
+                        href={(() => { const { subject, body } = buildOutreachEmail(p); return `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; })()}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => updateStatus(p.id, 'contacted')}
