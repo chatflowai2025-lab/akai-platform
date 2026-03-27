@@ -286,6 +286,7 @@ export default function ProposalsPage() {
   const [showProspectPicker, setShowProspectPicker] = useState(false);
   const [prospects, setProspects] = useState<ProspectOption[]>([]);
   const [loadingProspects, setLoadingProspects] = useState(false);
+  const [prospectSearch, setProspectSearch] = useState('');
 
   // Generation state
   const [generating, setGenerating] = useState(false);
@@ -359,6 +360,7 @@ export default function ProposalsPage() {
     if (p.industry) setIndustry(p.industry);
     if (p.name && !contactName) setContactName(p.name);
     setShowProspectPicker(false);
+    setProspectSearch('');
   };
 
   const toggleModule = (id: string) => {
@@ -685,44 +687,33 @@ export default function ProposalsPage() {
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 w-full max-w-md max-h-[70vh] flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-white font-bold text-sm">Pick a prospect</h3>
-              <button onClick={() => setShowProspectPicker(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+              <button onClick={() => { setShowProspectPicker(false); setProspectSearch(''); }} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
             <input
               type="text"
               placeholder="Search prospects..."
               className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition mb-3"
-              onChange={e => {
-                const q = e.target.value.toLowerCase();
-                // Filter inline by searching existing loaded prospects
-                const filtered = prospects.filter(p =>
-                  p.name.toLowerCase().includes(q) ||
-                  (p.email || '').toLowerCase().includes(q) ||
-                  (p.website || '').toLowerCase().includes(q)
-                );
-                // Re-render with filtered — use a dataset attribute approach
-                const list = document.getElementById('prospect-list');
-                if (list) {
-                  list.querySelectorAll('[data-prospect]').forEach(el => {
-                    const name = (el.getAttribute('data-name') || '').toLowerCase();
-                    const email = (el.getAttribute('data-email') || '').toLowerCase();
-                    (el as HTMLElement).style.display = (name.includes(q) || email.includes(q)) ? '' : 'none';
-                  });
-                }
-              }}
+              value={prospectSearch}
+              onChange={e => setProspectSearch(e.target.value)}
             />
-            <div id="prospect-list" className="overflow-y-auto flex-1 space-y-1">
+            <div className="overflow-y-auto flex-1 space-y-1">
               {loadingProspects ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : prospects.length === 0 ? (
                 <p className="text-xs text-gray-500 text-center py-8">No prospects found</p>
-              ) : prospects.map(p => (
+              ) : prospects.filter(p => {
+                const q = prospectSearch.toLowerCase();
+                if (!q) return true;
+                return (
+                  p.name.toLowerCase().includes(q) ||
+                  (p.email || '').toLowerCase().includes(q) ||
+                  (p.website || '').toLowerCase().includes(q)
+                );
+              }).map(p => (
                 <button
                   key={p.id}
-                  data-prospect
-                  data-name={p.name}
-                  data-email={p.email || ''}
                   onClick={() => pickProspect(p)}
                   className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#1a1a1a] transition group"
                 >
