@@ -19,7 +19,7 @@ const INDUSTRY_PREVIEWS: Record<string, string> = {
 };
 
 function SophiePreview({ industry, businessName }: { industry: string; businessName: string }) {
-  const template = INDUSTRY_PREVIEWS[industry] || INDUSTRY_PREVIEWS.Other;
+  const template = INDUSTRY_PREVIEWS[industry] ?? INDUSTRY_PREVIEWS['Other'] ?? '';
   const preview = template.replace('{businessName}', businessName || 'your business');
   return (
     <div className="bg-black/40 border border-green-500/20 rounded-xl p-3 mt-1">
@@ -430,7 +430,7 @@ export default function Hero() {
 
         {/* Headline */}
         <h1 className="fade-up fade-up-2 text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight max-w-4xl">
-          Your AI
+          AK — Your AI
           <br />
           <span className="gradient-text">Business Partner</span>
         </h1>
