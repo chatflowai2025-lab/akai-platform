@@ -92,17 +92,25 @@ function HomepageChat() {
       )}
 
       {/* Toggle button */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-14 h-14 rounded-full bg-[#D4AF37] text-black flex items-center justify-center shadow-lg shadow-[#D4AF37]/30 hover:opacity-90 transition-all active:scale-95"
-        aria-label="Chat with AK"
-      >
+      <div className="flex items-center gap-3">
+        {!open && (
+          <div className="flex flex-col items-end">
+            <span className="text-sm font-bold text-white leading-none">AK</span>
+            <span className="text-[10px] text-white/40 leading-none whitespace-nowrap">Your AI Business Partner</span>
+          </div>
+        )}
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="w-14 h-14 rounded-full bg-[#D4AF37] text-black flex items-center justify-center shadow-lg shadow-[#D4AF37]/30 hover:opacity-90 transition-all active:scale-95"
+          aria-label="Chat with AK"
+        >
         {open ? (
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         ) : (
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3-3-3z" /></svg>
         )}
-      </button>
+        </button>
+      </div>
     </div>
   );
 }
