@@ -173,10 +173,10 @@ function InlineConnectPanel({
                 placeholder="https://yoursite.com"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
               <input value={wpUser} onChange={e => setWpUser(e.target.value)}
-                placeholder="WP Username"
+                placeholder="WP Username" autoComplete="username"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
               <input value={wpPass} onChange={e => setWpPass(e.target.value)} type="password"
-                placeholder="Application Password"
+                placeholder="Application Password" autoComplete="current-password"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
               <a href="https://wordpress.com/support/application-passwords/" target="_blank" rel="noreferrer"
                 className="block text-xs text-[#D4AF37]/70 hover:text-[#D4AF37] transition">
@@ -209,7 +209,7 @@ function InlineConnectPanel({
                 placeholder="https://github.com/user/repo"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
               <input value={ghToken} onChange={e => setGhToken(e.target.value)} type="password"
-                placeholder="Personal Access Token"
+                placeholder="Personal Access Token" autoComplete="off"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
               <button onClick={save} disabled={saving || !ghUrl.trim()}
                 className="w-full py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-40 transition">
