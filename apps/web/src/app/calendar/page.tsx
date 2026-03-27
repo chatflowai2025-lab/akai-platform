@@ -470,32 +470,39 @@ function DayDetailPanel({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConnected: (provider: string) => void }) {
   const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   const handleGoogleConnect = async () => {
     setConnecting(true);
+    setConnectError(null);
     try {
       const r = await fetch(
         `https://api-server-production-2a27.up.railway.app/api/calendar/google/auth-url?userId=${userId}`,
         { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
       );
+      if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { url } = await r.json();
       window.location.href = url;
     } catch {
+      setConnectError('Could not reach the Google Calendar service. Check your connection and try again.');
       setConnecting(false);
     }
   };
 
   const handleOutlookConnect = async () => {
     setConnecting(true);
+    setConnectError(null);
     try {
       // Microsoft OAuth via Railway
       const r = await fetch(
         `https://api-server-production-2a27.up.railway.app/api/email/microsoft/auth-url?userId=${userId}`,
         { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
       );
+      if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { authUrl } = await r.json() as { authUrl: string };
       window.location.href = authUrl;
     } catch {
+      setConnectError('Could not reach the Outlook Calendar service. Check your connection and try again.');
       setConnecting(false);
     }
   };
@@ -538,6 +545,9 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
             {connecting ? 'Connecting…' : 'Connect Outlook Calendar'}
           </button>
         </div>
+        {connectError && (
+          <p className="text-xs text-red-400 mt-3 text-center">{connectError}</p>
+        )}
       </div>
     </div>
   );
