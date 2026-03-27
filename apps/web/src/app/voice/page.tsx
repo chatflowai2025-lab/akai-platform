@@ -572,7 +572,7 @@ function SetupWizard({
 }) {
   const [step, setStep] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
-  const [testCallState, setTestCallState] = useState<'idle' | 'calling' | 'done'>('idle');
+  const [testCallState, setTestCallState] = useState<'idle' | 'calling' | 'done' | 'failed'>('idle');
   const [testPhone, setTestPhone] = useState('');
   const [testFeedback, setTestFeedback] = useState<'up' | 'down' | null>(null);
   const [improvementNote, setImprovementNote] = useState('');
@@ -616,9 +616,10 @@ function SetupWizard({
       });
     } catch (err) {
       console.error('[test call]', err);
-    } finally {
-      setTestCallState('done');
+      setTestCallState('failed');
+      return;
     }
+    setTestCallState('done');
   };
 
   const steps = [
@@ -993,6 +994,16 @@ function SetupWizard({
               : <p className="text-sm font-semibold text-blue-300">Calling {testPhone}…</p>
             }
             <p className="text-xs text-blue-400/60 mt-0.5">Sophie is calling you now. Pick up!</p>
+          </div>
+        </div>
+      )}
+
+      {testCallState === 'failed' && (
+        <div className="flex items-center gap-3 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+          <span className="text-red-400 text-xl flex-shrink-0">⚠️</span>
+          <div>
+            <p className="text-sm font-semibold text-red-300">Test call failed — couldn&apos;t reach the calling service.</p>
+            <p className="text-xs text-red-400/70 mt-0.5">Check your connection, then <button className="underline hover:text-red-300 transition-colors" onClick={() => setTestCallState('idle')}>try again</button>.</p>
           </div>
         </div>
       )}
