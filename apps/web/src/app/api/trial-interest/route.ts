@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
 const TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8320254721';
@@ -65,7 +66,24 @@ export async function POST(req: NextRequest) {
 
     const msg = `🔥 <b>New Trial Request</b>\n\n👤 ${name || 'Unknown'}\n📧 ${email}\n🏢 ${business || '—'}\n📞 ${phone || '—'}\n🏭 ${industry || '—'}\n🌐 ${website || '—'}`;
 
+    // Persist to Firestore (non-blocking — notifications fire in parallel)
+    const db = getAdminFirestore();
+    const leadRecord = {
+      name: name || '',
+      email,
+      business: business || '',
+      phone: phone || '',
+      industry: industry || '',
+      website: website || '',
+      source: 'homepage_modal',
+      createdAt: new Date().toISOString(),
+    };
+    const savePromise = db
+      ? db.collection('trialLeads').add(leadRecord).catch(() => {/* non-fatal */})
+      : Promise.resolve();
+
     await Promise.allSettled([
+      savePromise,
       notifyTelegram(msg),
       notifyEmail({ name, email, business, phone, industry, website }),
     ]);
