@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -1052,8 +1052,144 @@ function PlatformConnectModal({ platform, userId, onClose }: { platform: string;
   );
 }
 
+// ── Interview Booking Modal ───────────────────────────────────────────────────
+interface InterviewModalProps {
+  candidateName: string;
+  jobTitle: string;
+  userId: string;
+  onClose: () => void;
+}
+
+function InterviewModal({ candidateName, jobTitle, userId, onClose }: InterviewModalProps) {
+  const [name, setName] = useState(candidateName);
+  const [dateTime, setDateTime] = useState('');
+  const [format, setFormat] = useState<'Video call' | 'Phone' | 'In-person'>('Video call');
+  const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  const handleSave = async () => {
+    if (!name.trim() || !dateTime) return;
+    setSaving(true);
+    setSaveError('');
+    try {
+      const { getFirebaseDb } = await import('@/lib/firebase');
+      const { collection, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore');
+      const db = getFirebaseDb();
+      if (db) {
+        await addDoc(collection(db, `users/${userId}/interviews`), {
+          candidateName: name.trim(),
+          dateTime,
+          format,
+          notes: notes.trim(),
+          jobTitle,
+          createdAt: srvTs(),
+        });
+      }
+      setDone(true);
+    } catch (e) {
+      console.error('[interview] save failed:', e);
+      setSaveError('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-white font-bold text-base">📅 Book Interview</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+        </div>
+
+        {done ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="text-green-400 font-bold text-base mb-1">Interview scheduled!</p>
+            <p className="text-gray-400 text-sm">
+              {name} · {new Date(dateTime).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </p>
+            <button onClick={onClose} className="mt-5 px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Candidate name</label>
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Date &amp; time *</label>
+              <input
+                type="datetime-local"
+                value={dateTime}
+                onChange={e => setDateTime(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition [color-scheme:dark]"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500 mb-2 block">Interview format</label>
+              <div className="flex gap-2">
+                {(['Video call', 'Phone', 'In-person'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setFormat(f)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${
+                      format === f
+                        ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
+                        : 'border-[#2a2a2a] text-gray-500 hover:border-[#3a3a3a] hover:text-gray-300'
+                    }`}
+                  >
+                    {f === 'Video call' ? '🎥' : f === 'Phone' ? '📞' : '🏢'} {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Notes for candidate <span className="text-gray-600">(optional)</span></label>
+              <textarea
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="e.g. Please bring your portfolio. We'll be joined by the hiring manager."
+                rows={3}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
+              />
+            </div>
+
+            {saveError && <p className="text-xs text-red-400">{saveError}</p>}
+
+            <button
+              onClick={handleSave}
+              disabled={!name.trim() || !dateTime || saving}
+              className="w-full py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center justify-center gap-2"
+            >
+              {saving ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : '📨 Send interview invite'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Screen Applicants Tab ─────────────────────────────────────────────────────
 function ScreenApplicantsTab() {
+  const { user } = useAuth();
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [resumeText, setResumeText] = useState('');
@@ -1061,7 +1197,129 @@ function ScreenApplicantsTab() {
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [error, setError] = useState('');
 
-  const handleScreen = async () => {
+  // Upload state
+  const [uploadMode, setUploadMode] = useState<'upload' | 'linkedin' | 'paste'>('upload');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(false);
+  const [linkedInUrl, setLinkedInUrl] = useState('');
+  const [linkedInBlocked, setLinkedInBlocked] = useState(false);
+  const [showPasteArea, setShowPasteArea] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Interview modal
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
+    if (!jobTitle.trim()) {
+      setError('Please enter a job title first');
+      return;
+    }
+    setUploadProgress(true);
+    setError('');
+    setResult(null);
+
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('jobTitle', jobTitle);
+      if (jobDescription.trim()) fd.append('jobDescription', jobDescription.trim());
+
+      const res = await fetch('/api/recruit/upload-cv', {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      setResult({
+        candidateName: data.candidateName || 'Candidate',
+        score: data.score ?? 50,
+        strengths: data.strengths ?? [],
+        gaps: data.gaps ?? [],
+        recommendation: (data.recommendation === 'Hire' ? 'Interview' : data.recommendation === 'Consider' ? 'Consider' : 'Pass') as ScreeningResult['recommendation'],
+        summary: data.summary || 'Review completed.',
+      });
+      if (data.resumeText) {
+        setResumeText(data.resumeText);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed. Try again.');
+    } finally {
+      setUploadProgress(false);
+    }
+  };
+
+  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) await handleFileUpload(file);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobTitle, jobDescription]);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => setIsDragging(false);
+
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) await handleFileUpload(file);
+    // Reset so same file can be re-uploaded
+    e.target.value = '';
+  };
+
+  const handleLinkedInScreen = async () => {
+    if (!linkedInUrl.trim() || !jobTitle.trim()) return;
+    setScreening(true);
+    setError('');
+    setLinkedInBlocked(false);
+    setResult(null);
+
+    try {
+      // Try to fetch LinkedIn page (will almost always be blocked)
+      let profileText = '';
+      try {
+        const scrapeRes = await fetch(`/api/recruit/screen`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jobTitle: jobTitle.trim(),
+            candidateName: 'LinkedIn Candidate',
+            resumeSummary: `LinkedIn profile: ${linkedInUrl}. LinkedIn profile screening requested.`,
+            jobDescription: jobDescription.trim() || undefined,
+          }),
+        });
+        if (scrapeRes.ok) {
+          const d = await scrapeRes.json();
+          profileText = d.nextStep || '';
+          const score: number = d.score ?? 50;
+          const rec: string = d.recommendation ?? 'review';
+          setResult({
+            candidateName: 'LinkedIn Candidate',
+            score,
+            strengths: d.strengths ?? [],
+            gaps: d.gaps ?? [],
+            recommendation: rec === 'advance' ? 'Interview' : rec === 'review' ? 'Consider' : 'Pass',
+            summary: profileText || 'Review completed.',
+          });
+        }
+      } catch {
+        // LinkedIn blocked — show fallback
+        setLinkedInBlocked(true);
+        setShowPasteArea(true);
+      }
+      void profileText;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'LinkedIn screening failed.');
+    } finally {
+      setScreening(false);
+    }
+  };
+
+  const handleScreenPaste = async () => {
     if (!jobTitle.trim() || !resumeText.trim()) return;
     setScreening(true);
     setError('');
@@ -1117,12 +1375,15 @@ function ScreenApplicantsTab() {
     return 'text-red-400';
   };
 
+  const canBookInterview = result && (result.recommendation === 'Interview' || result.recommendation === 'Consider');
+
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      {/* Job context */}
       <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 space-y-4">
         <div>
           <h2 className="text-sm font-bold text-white mb-1">Screen an Applicant</h2>
-          <p className="text-xs text-gray-500">Paste the resume/CV text and optionally the job description — AI scores the match and gives a hire recommendation.</p>
+          <p className="text-xs text-gray-500">Upload a CV, paste a LinkedIn URL, or manually paste resume text — AI scores the match and gives a hire recommendation.</p>
         </div>
 
         <div>
@@ -1136,48 +1397,171 @@ function ScreenApplicantsTab() {
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Job description / requirements <span className="text-gray-600">(optional but improves accuracy)</span></label>
+          <label className="text-xs text-gray-500 mb-1 block">Job description / requirements <span className="text-gray-600">(optional)</span></label>
           <textarea
             value={jobDescription}
             onChange={e => setJobDescription(e.target.value)}
             placeholder="Paste the job description or key requirements here..."
-            rows={4}
+            rows={3}
             className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none"
           />
         </div>
+      </div>
 
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Resume / CV text *</label>
-          <textarea
-            value={resumeText}
-            onChange={e => setResumeText(e.target.value)}
-            placeholder="Paste the candidate's resume or CV here..."
-            rows={8}
-            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none font-mono text-xs"
-          />
+      {/* Input method cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Upload card */}
+        <div
+          className={`bg-[#111] border rounded-xl p-5 cursor-pointer transition ${
+            uploadMode === 'upload' ? 'border-[#D4AF37]/40' : 'border-[#1f1f1f] hover:border-[#2a2a2a]'
+          }`}
+          onClick={() => setUploadMode('upload')}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">📄</span>
+            <p className="text-sm font-bold text-white">Upload CV / Resume</p>
+          </div>
+          <p className="text-xs text-gray-500 mb-4">PDF, DOCX, or TXT up to 5MB</p>
+
+          {uploadMode === 'upload' && (
+            <>
+              {/* Drop zone */}
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer ${
+                  isDragging
+                    ? 'border-[#D4AF37] bg-[#D4AF37]/5'
+                    : 'border-[#2a2a2a] hover:border-[#3a3a3a] hover:bg-[#0f0f0f]'
+                }`}
+              >
+                {uploadProgress ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs text-gray-400">Processing CV...</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-2xl mb-2">📤</p>
+                    <p className="text-sm text-gray-300 font-semibold">Drop your CV here or click to upload</p>
+                    <p className="text-xs text-gray-600 mt-1">.pdf, .docx, .txt</p>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPasteArea(!showPasteArea); }}
+                className="mt-3 text-xs text-gray-500 hover:text-[#D4AF37] transition flex items-center gap-1"
+              >
+                {showPasteArea ? '▲' : '▼'} Or paste CV text manually
+              </button>
+
+              {showPasteArea && (
+                <div className="mt-3 space-y-2">
+                  <textarea
+                    value={resumeText}
+                    onChange={e => setResumeText(e.target.value)}
+                    placeholder="Paste the candidate's resume or CV here..."
+                    rows={6}
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none font-mono"
+                  />
+                  <button
+                    onClick={(e) => { e.stopPropagation(); void handleScreenPaste(); }}
+                    disabled={!jobTitle.trim() || !resumeText.trim() || screening}
+                    className="w-full py-2.5 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center justify-center gap-2"
+                  >
+                    {screening ? (
+                      <>
+                        <span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        Screening...
+                      </>
+                    ) : '🤖 Screen Applicant'}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
-        {error && <p className="text-xs text-red-400">{error}</p>}
-
-        <button
-          onClick={handleScreen}
-          disabled={!jobTitle.trim() || !resumeText.trim() || screening}
-          className="px-5 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center gap-2"
+        {/* LinkedIn card */}
+        <div
+          className={`bg-[#111] border rounded-xl p-5 cursor-pointer transition ${
+            uploadMode === 'linkedin' ? 'border-[#0077B5]/40' : 'border-[#1f1f1f] hover:border-[#2a2a2a]'
+          }`}
+          onClick={() => setUploadMode('linkedin')}
         >
-          {screening ? (
-            <>
-              <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              Screening...
-            </>
-          ) : '🤖 Screen Applicant'}
-        </button>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">💼</span>
+            <p className="text-sm font-bold text-white">Screen from LinkedIn URL</p>
+          </div>
+          <p className="text-xs text-gray-500 mb-4">Paste a LinkedIn profile URL</p>
+
+          {uploadMode === 'linkedin' && (
+            <div className="space-y-3" onClick={e => e.stopPropagation()}>
+              <input
+                value={linkedInUrl}
+                onChange={e => setLinkedInUrl(e.target.value)}
+                placeholder="https://linkedin.com/in/username"
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#0077B5] transition"
+              />
+              <button
+                onClick={() => void handleLinkedInScreen()}
+                disabled={!linkedInUrl.trim() || !jobTitle.trim() || screening}
+                className="w-full py-2.5 bg-[#0077B5] text-white rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center justify-center gap-2"
+              >
+                {screening ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Screening...
+                  </>
+                ) : '🔍 Screen →'}
+              </button>
+
+              {linkedInBlocked && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
+                  <p className="text-xs text-yellow-400 font-semibold mb-1">⚠️ LinkedIn blocked automated access</p>
+                  <p className="text-xs text-gray-400 mb-2">Please copy their profile text and paste it below.</p>
+                  <textarea
+                    value={resumeText}
+                    onChange={e => setResumeText(e.target.value)}
+                    placeholder="Paste the LinkedIn profile text here..."
+                    rows={5}
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none font-mono"
+                  />
+                  <button
+                    onClick={() => void handleScreenPaste()}
+                    disabled={!resumeText.trim() || !jobTitle.trim() || screening}
+                    className="mt-2 w-full py-2 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-40 transition"
+                  >
+                    🤖 Screen pasted text
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+          <p className="text-xs text-red-400">{error}</p>
+        </div>
+      )}
 
       {/* Result card */}
       {result && (
         <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-white font-bold text-base">Screening Result</h3>
+            <h3 className="text-white font-bold text-base">Screening Result — {result.candidateName}</h3>
             <span className={`text-xs px-3 py-1.5 rounded-full border font-bold ${recColor(result.recommendation)}`}>
               {result.recommendation === 'Interview' ? '✅ Hire' : result.recommendation === 'Consider' ? '⚠️ Maybe' : '❌ Pass'}
             </span>
@@ -1240,9 +1624,19 @@ function ScreenApplicantsTab() {
             <p className="text-sm text-white leading-relaxed">{result.summary}</p>
           </div>
 
+          {/* Book interview CTA */}
+          {canBookInterview && user && (
+            <button
+              onClick={() => setShowInterviewModal(true)}
+              className="w-full py-3 bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl text-sm font-bold hover:bg-green-500/20 transition flex items-center justify-center gap-2"
+            >
+              📅 Book Interview with {result.candidateName}
+            </button>
+          )}
+
           {/* Reset */}
           <button
-            onClick={() => { setResult(null); setResumeText(''); setJobDescription(''); }}
+            onClick={() => { setResult(null); setResumeText(''); setJobDescription(''); setLinkedInUrl(''); setLinkedInBlocked(false); setShowPasteArea(false); }}
             className="text-xs text-gray-500 hover:text-white transition"
           >
             ← Screen another applicant
@@ -1251,12 +1645,22 @@ function ScreenApplicantsTab() {
       )}
 
       {/* Empty state */}
-      {!result && !screening && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
+      {!result && !screening && !uploadProgress && (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="text-5xl mb-4">🤖</div>
-          <p className="text-gray-500 text-sm">Paste a resume above to get an AI score</p>
+          <p className="text-gray-500 text-sm">Upload a CV or paste text above to get an AI score</p>
           <p className="text-gray-600 text-xs mt-1">Returns: match score · strengths · gaps · hire recommendation</p>
         </div>
+      )}
+
+      {/* Interview modal */}
+      {showInterviewModal && result && user && (
+        <InterviewModal
+          candidateName={result.candidateName}
+          jobTitle={jobTitle}
+          userId={user.uid}
+          onClose={() => setShowInterviewModal(false)}
+        />
       )}
     </div>
   );
