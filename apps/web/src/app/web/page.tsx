@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
-import { doc, setDoc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, addDoc, increment, updateDoc } from 'firebase/firestore';
 
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
@@ -251,6 +251,38 @@ function InlineConnectPanel({
 }
 
 // ── Audit Panel ───────────────────────────────────────────────────────────────
+const AUDIT_LIMITS: Record<string, number> = { trial: 3, starter: 5, growth: 20, scale: Infinity, enterprise: Infinity };
+const AUDIT_LIMIT_DEFAULT = 5;
+
+async function getAuditUsage(userId: string): Promise<{ count: number; plan: string; limit: number }> {
+  try {
+    const db = getFirebaseDb();
+    if (!db) return { count: 0, plan: 'trial', limit: AUDIT_LIMIT_DEFAULT };
+    const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const snap = await getDoc(doc(db, 'users', userId, 'usage', `web-audits-${month}`));
+    const data = snap.exists() ? snap.data() : {};
+    const userSnap = await getDoc(doc(db, 'users', userId));
+    const plan = (userSnap.exists() ? userSnap.data()?.plan : 'trial') ?? 'trial';
+    const limit = AUDIT_LIMITS[plan] ?? AUDIT_LIMIT_DEFAULT;
+    return { count: data.count ?? 0, plan, limit };
+  } catch { return { count: 0, plan: 'trial', limit: AUDIT_LIMIT_DEFAULT }; }
+}
+
+async function incrementAuditUsage(userId: string) {
+  try {
+    const db = getFirebaseDb();
+    if (!db) return;
+    const month = new Date().toISOString().slice(0, 7);
+    const ref = doc(db, 'users', userId, 'usage', `web-audits-${month}`);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      await updateDoc(ref, { count: increment(1), lastUsed: new Date().toISOString() });
+    } else {
+      await setDoc(ref, { count: 1, lastUsed: new Date().toISOString() });
+    }
+  } catch { /* non-fatal */ }
+}
+
 function AuditPanel({
   url,
   onDisconnect,
@@ -263,11 +295,22 @@ function AuditPanel({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [auditUsage, setAuditUsage] = useState<{ count: number; plan: string; limit: number } | null>(null);
   // Use a ref for the notified flag — avoids re-render → useCallback recreation → useEffect re-fire loop
   const notifiedRef = useRef(false);
   const { sendMessage } = useDashboardChat();
 
+  // Load usage on mount
+  useEffect(() => {
+    if (userId) getAuditUsage(userId).then(setAuditUsage);
+  }, [userId]);
+
   const runAudit = useCallback(async () => {
+    // Check usage limit
+    if (userId && auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit) {
+      setError(`You've used all ${auditUsage.limit} web audits for this month. Upgrade to run more.`);
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
@@ -316,6 +359,10 @@ function AuditPanel({
         opportunityScore: data.opportunityScore,
       };
       setResult(auditResult);
+      // Track usage
+      if (userId) {
+        incrementAuditUsage(userId).then(() => getAuditUsage(userId).then(setAuditUsage));
+      }
       // Notify via AK chat when audit completes (guarded by ref to prevent duplicate sends)
       if (!notifiedRef.current) {
         notifiedRef.current = true;
@@ -345,7 +392,7 @@ function AuditPanel({
     } finally {
       setLoading(false);
     }
-  }, [url, userId, sendMessage]);
+  }, [url, userId, sendMessage, auditUsage]);
 
   useEffect(() => { runAudit(); }, [runAudit]);
 
@@ -355,9 +402,14 @@ function AuditPanel({
       <div className="flex items-center gap-4 px-6 py-3 border-b border-[#1f1f1f] bg-[#0a0a0a] flex-shrink-0">
         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
         <span className="text-sm text-gray-300 font-medium truncate flex-1">{url}</span>
+        {auditUsage && isFinite(auditUsage.limit) && (
+          <span className={`text-xs px-2 py-1 rounded-lg border ${auditUsage.count >= auditUsage.limit ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-white/30 bg-white/5 border-white/10'}`}>
+            {auditUsage.count}/{auditUsage.limit} audits
+          </span>
+        )}
         <button
           onClick={runAudit}
-          disabled={loading}
+          disabled={loading || (!!auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit)}
           className="px-4 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 rounded-xl text-sm hover:border-[#D4AF37]/30 hover:text-white disabled:opacity-40 transition flex-shrink-0"
         >
           {loading ? '⏳ Auditing…' : '🔄 Re-audit'}
