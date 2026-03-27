@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { checkRequestScope } from '@/lib/safety-gates';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 
 interface ConversationMessage {
   role: 'user' | 'assistant';
@@ -145,6 +147,36 @@ export async function POST(req: NextRequest) {
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
+    }
+
+    // Safety gate — widget visitors are treated as 'trial' plan
+    const widgetUserId = clientId || 'widget-anonymous';
+    const safetyCheck = checkRequestScope(widgetUserId, message, 'trial');
+    if (!safetyCheck.allowed) {
+      // Alert to Discord #ak-mm
+      const alertMsg = `🚨 **Safety Gate Triggered (Chat Widget)**\n\n**ClientId:** ${widgetUserId}\n**Plan:** trial\n**Message:** ${message.substring(0, 200)}\n**Reason:** ${safetyCheck.reason}\n**Time:** ${new Date().toISOString()}`;
+      fetch('https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: alertMsg }),
+      }).catch(() => {});
+
+      // Log to Firestore
+      const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
+      const db = getAdminFirestore();
+      if (db) {
+        db.collection('security_events').add({
+          userId: widgetUserId,
+          userPlan: 'trial',
+          message: message.substring(0, 500),
+          reason: safetyCheck.reason,
+          timestamp: new Date().toISOString(),
+          ip,
+          source: 'chat-widget',
+        }).catch(() => {});
+      }
+
+      return NextResponse.json({ error: safetyCheck.reason }, { status: 403 });
     }
 
     const config = await getClientConfig(clientId);

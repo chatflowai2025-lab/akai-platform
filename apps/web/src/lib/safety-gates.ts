@@ -46,6 +46,74 @@ const ALWAYS_BLOCKED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
     pattern: /\b(deploy|push to production|ship to prod|run.*in production|modify.*codebase|edit.*source code|change.*production)\b/i,
     reason: 'Code deployment and production changes must be handled through the approved release process, not via chat.',
   },
+  // Prompt injection attempts
+  {
+    pattern: /ignore (previous|your) instructions/i,
+    reason: 'Prompt injection attempts are not permitted.',
+  },
+  {
+    pattern: /\byou are now\b/i,
+    reason: 'Prompt injection attempts are not permitted.',
+  },
+  {
+    pattern: /\bact as\b/i,
+    reason: 'Prompt injection attempts are not permitted.',
+  },
+  {
+    pattern: /\bjailbreak\b/i,
+    reason: 'Prompt injection attempts are not permitted.',
+  },
+  {
+    pattern: /\bDAN mode\b/i,
+    reason: 'Prompt injection attempts are not permitted.',
+  },
+  {
+    pattern: /pretend you are/i,
+    reason: 'Prompt injection attempts are not permitted.',
+  },
+  // System access
+  {
+    pattern: /\brun command\b/i,
+    reason: 'System access requests are not permitted.',
+  },
+  {
+    pattern: /\b(sudo|bash|shell|terminal|ssh)\b/i,
+    reason: 'System access requests are not permitted.',
+  },
+  {
+    pattern: /\bexecute\b/i,
+    reason: 'System access requests are not permitted.',
+  },
+  // Data exfiltration
+  {
+    pattern: /list all users/i,
+    reason: 'Data exfiltration requests are not permitted.',
+  },
+  {
+    pattern: /dump database/i,
+    reason: 'Data exfiltration requests are not permitted.',
+  },
+  {
+    pattern: /export all/i,
+    reason: 'Data exfiltration requests are not permitted.',
+  },
+  {
+    pattern: /show me all data/i,
+    reason: 'Data exfiltration requests are not permitted.',
+  },
+  // AKAI system manipulation
+  {
+    pattern: /change your system prompt/i,
+    reason: 'Attempts to modify AKAI system configuration are not permitted.',
+  },
+  {
+    pattern: /update your instructions/i,
+    reason: 'Attempts to modify AKAI system configuration are not permitted.',
+  },
+  {
+    pattern: /forget your rules/i,
+    reason: 'Attempts to modify AKAI system configuration are not permitted.',
+  },
 ];
 
 // ── Plan → allowed modules mapping ───────────────────────────────────────────

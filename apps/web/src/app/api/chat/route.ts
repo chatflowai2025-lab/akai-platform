@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkRequestScope, type UserPlan } from '@/lib/safety-gates';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 
 const SYSTEM_PROMPT = `You are AK, the AI brain inside AKAI — a fully autonomous AI business operating system that runs businesses 24/7.
 
@@ -565,6 +566,28 @@ export async function POST(req: NextRequest) {
     const userPlan = (userContext.plan ?? 'trial') as UserPlan;
     const safetyCheck = checkRequestScope(userId, message, userPlan);
     if (!safetyCheck.allowed) {
+      // Alert to Discord #ak-mm when safety gate is tripped
+      const alertMsg = `🚨 **Safety Gate Triggered**\n\n**User:** ${userId}\n**Plan:** ${userPlan}\n**Message:** ${message.substring(0, 200)}\n**Reason:** ${safetyCheck.reason}\n**Time:** ${new Date().toISOString()}`;
+      fetch('https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: alertMsg }),
+      }).catch(() => {}); // fire and forget, never block the response
+
+      // Log blocked attempt to Firestore
+      const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
+      const db = getAdminFirestore();
+      if (db) {
+        db.collection('security_events').add({
+          userId,
+          userPlan,
+          message: message.substring(0, 500),
+          reason: safetyCheck.reason,
+          timestamp: new Date().toISOString(),
+          ip,
+        }).catch(() => {}); // fire and forget
+      }
+
       return NextResponse.json(
         { error: safetyCheck.reason },
         { status: 403 }
