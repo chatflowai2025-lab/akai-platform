@@ -30,7 +30,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true); // start true — checking auth state
+  const [loading, setLoading] = useState(false); // start false — show buttons immediately, set true only during active auth ops
 
   const cleanError = (msg: string) => {
     if (msg.includes('user-not-found') || msg.includes('wrong-password') || msg.includes('invalid-credential')) return 'Invalid email or password.';
