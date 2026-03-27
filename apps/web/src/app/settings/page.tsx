@@ -76,6 +76,7 @@ export default function SettingsPage() {
   const [notifSaving, setNotifSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [notifSaved, setNotifSaved] = useState(false);
   const [notifError, setNotifError] = useState<string | null>(null);
 
@@ -367,6 +368,7 @@ export default function SettingsPage() {
   const deleteAccount = async () => {
     if (deleteConfirm !== 'DELETE' || !user) return;
     setDeleting(true);
+    setDeleteError(null);
     try {
       const db = getFirebaseDb();
       if (db) {
@@ -378,6 +380,7 @@ export default function SettingsPage() {
       window.location.href = '/login';
     } catch (err) {
       console.error('[DELETE ACCOUNT]', err);
+      setDeleteError('Failed to delete account. Please try again or contact support.');
       setDeleting(false);
     }
   };
@@ -960,6 +963,7 @@ export default function SettingsPage() {
             >
               {deleting ? '⏳ Deleting...' : '🗑️ Delete My Account'}
             </button>
+            {deleteError && <p className="text-xs text-red-400 mt-1">{deleteError}</p>}
           </div>
         </div>
       </Section>
