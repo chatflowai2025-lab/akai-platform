@@ -1,11 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests',
+  // Includes both root e2e tests AND web app tests (critical-flows + connected-state)
+  testDir: '.',
+  testMatch: ['tests/**/*.spec.ts', 'apps/web/tests/**/*.spec.ts'],
   timeout: 30000,
   retries: 0,
   use: {
-    baseURL: 'http://localhost:3099',
+    baseURL: process.env.BASE_URL || 'http://localhost:3099',
     headless: true,
   },
   projects: [
