@@ -85,11 +85,22 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     if (!db) return;
     getDoc(doc(db, 'users', user.uid)).then(snap => {
       const d = snap.data();
+      const gmailConnected = d?.gmail?.connected === true;
+      const msConnected = d?.inboxConnection?.connected === true || d?.microsoft?.connected === true;
+      const sophieConfigured = d?.voiceConfig?.configured === true || d?.campaignConfig?.businessName;
       setUserContext({
         ...(d?.campaignConfig || {}),
         email: user.email || '',
         displayName: user.displayName || d?.displayName || '',
-        businessName: d?.businessName || d?.campaignConfig?.businessName || '',
+        businessName: d?.businessName || d?.campaignConfig?.businessName || d?.onboarding?.businessName || '',
+        industry: d?.onboarding?.industry || d?.campaignConfig?.industry || '',
+        location: d?.onboarding?.location || '',
+        gmailConnected: gmailConnected ? 'true' : 'false',
+        gmailEmail: d?.gmail?.email || '',
+        microsoftConnected: msConnected ? 'true' : 'false',
+        microsoftEmail: d?.inboxConnection?.email || d?.microsoft?.email || '',
+        sophieConfigured: sophieConfigured ? 'true' : 'false',
+        plan: d?.plan || d?.planTier || 'trial',
       });
     }).catch(() => {});
   }, [user]);

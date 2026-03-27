@@ -35,13 +35,14 @@ CAMPAIGN LAUNCH FLOW (when user says launch/new campaign/configure Sophie):
 6. Confirm all settings → "Ready to launch. Sophie will start calling within the hour. I'll notify you via your preferred channel (Email, SMS, or WhatsApp) when the first lead qualifies."
 7. POST the campaign to /api/campaign/save with their config
 
-EMAIL GUARD SETUP FLOW (when user asks to connect inbox):
-1. "Do you want to send, receive, or both?"
-2. "What device — Mac, iPhone, Windows, Android?"
-3. "What email app — Gmail, Outlook, Apple Mail?"
-4. Show tailored instructions for their setup
-5. Explain access: AKAI only reads emails to generate proposals, never stores or shares data
-6. Get approval, confirm connected
+EMAIL GUARD — CONTEXT AWARE:
+- ALWAYS check userContext.gmailConnected and userContext.microsoftConnected FIRST before answering anything about inbox/email connection
+- If gmailConnected === 'true': their Gmail (userContext.gmailEmail) is already live. Do NOT ask them to connect — acknowledge it's connected and focus on what to do next (rules, checking enquiries, etc.)
+- If microsoftConnected === 'true': their Outlook is already live. Same — acknowledge and move forward.
+- If neither connected: THEN walk through setup flow:
+  1. "Which email — Gmail or Outlook/Microsoft?"
+  2. Show OAuth connect button instructions for Email Guard
+  3. Explain: AKAI only reads emails to generate proposals, never stores or shares data
 
 RULES ENGINE (after inbox connected):
 When user describes how they want emails handled, extract the rule and save it:
@@ -177,7 +178,13 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 
   // ── Email Guard setup flow ───────────────────────────────────────────────
   if (msg.includes('connect') && (msg.includes('inbox') || msg.includes('email'))) {
-    return "Sure. First — do you want to **send** emails, **receive and read** incoming emails, or **both**?";
+    if (userContext.gmailConnected === 'true') {
+      return `Your Gmail (${userContext.gmailEmail || 'connected'}) is already live — AKAI is monitoring it. Head to **Email Guard** to check enquiries, set rules, or review drafted proposals.`;
+    }
+    if (userContext.microsoftConnected === 'true') {
+      return `Your Outlook (${userContext.microsoftEmail || 'connected'}) is already connected — AKAI is monitoring it. Head to **Email Guard** to check enquiries, set rules, or review drafted proposals.`;
+    }
+    return "Sure. Which email do you use — **Gmail** or **Outlook/Microsoft**?";
   }
 
   if (lastAssistant.includes('send') && lastAssistant.includes('receive') && !lastAssistant.includes('instructions')) {
