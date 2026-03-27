@@ -79,6 +79,7 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || '';
       if (BETA_MODE && !isWhitelisted(userEmail)) {
@@ -122,7 +123,14 @@ export default function LoginPage() {
             const db = getFirebaseDb();
             if (db) {
               const snap = await getDoc(doc(db, 'users', user.uid));
-              const onboardingComplete = snap.exists() && snap.data()?.onboardingComplete === true;
+              const data = snap.exists() ? snap.data() : null;
+              // Consider onboarding complete if: flag set, OR user has business data, OR user has any prior sessions
+              const onboardingComplete = data?.onboardingComplete === true || 
+                !!data?.businessName || 
+                !!data?.onboarding?.businessName ||
+                !!data?.campaignConfig?.businessName ||
+                !!data?.gmail?.connected ||
+                !!data?.googleCalendarConnected;
               router.replace(onboardingComplete ? '/dashboard' : '/onboard');
               return;
             }
