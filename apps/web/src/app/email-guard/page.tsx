@@ -759,12 +759,19 @@ function EmailGuardContent({
 
                         {/* Preview mode — HTML email */}
                         {(previewMode[eq.id] ?? 'preview') === 'preview' && eq.proposal.htmlBody ? (
-                          <div className="rounded-xl overflow-hidden border border-[#2a2a2a]">
+                          <div className="rounded-xl overflow-hidden border border-[#2a2a2a] w-full">
                             <iframe
                               srcDoc={eq.proposal.htmlBody}
                               title="Email preview"
-                              style={{ width: '100%', height: '520px', border: 'none', background: '#fff' }}
+                              style={{ width: '100%', minHeight: '400px', height: 'auto', border: 'none', background: '#fff', display: 'block' }}
                               sandbox="allow-same-origin"
+                              onLoad={(e) => {
+                                const iframe = e.currentTarget;
+                                try {
+                                  const h = iframe.contentDocument?.body?.scrollHeight;
+                                  if (h) iframe.style.height = h + 'px';
+                                } catch {}
+                              }}
                             />
                           </div>
                         ) : (
