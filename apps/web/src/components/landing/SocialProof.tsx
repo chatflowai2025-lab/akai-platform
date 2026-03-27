@@ -4,7 +4,7 @@
 
 const TESTIMONIALS = [
   {
-    quote: 'Set up the Sales module on a Tuesday. By Thursday Sophie had already booked 3 consultations. I wasn\'t expecting it to work that fast.',
+    quote: 'Set up the Sales skill on a Tuesday. By Thursday Sophie had already booked 3 consultations. I wasn\'t expecting it to work that fast.',
     name: 'Michael T.',
     company: 'Plumbing & Gas',
     location: 'Sydney',

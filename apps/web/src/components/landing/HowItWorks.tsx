@@ -8,7 +8,7 @@ const STEPS = [
   {
     number: '02',
     title: 'AKAI builds your stack',
-    description: 'We configure your website, lead pipeline, calling system, and selected modules automatically.',
+    description: 'We configure your website, lead pipeline, calling system, and selected skills automatically.',
     accent: 'from-[#D4AF37]/20 to-transparent',
   },
   {

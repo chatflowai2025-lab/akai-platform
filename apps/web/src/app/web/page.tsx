@@ -367,7 +367,7 @@ function AuditPanel({
       if (!notifiedRef.current) {
         notifiedRef.current = true;
         const overall = auditResult.overallScore || auditResult.seoScore;
-        const topWin = auditResult.quickWins?.[0]?.action || auditResult.issues?.[0] || 'Check the Web module for details';
+        const topWin = auditResult.quickWins?.[0]?.action || auditResult.issues?.[0] || 'Check the Web skill for details';
         const msg = `🌐 **Audit complete for ${url}** — scored ${overall ? Math.round(overall) + '/100' : 'N/A'}.\n\nTop opportunity: "${topWin}"\n\n[View full report →](/web)`;
         try {
           sendMessage(msg);

@@ -320,7 +320,7 @@ function MobileMenuDrawer({ open, onClose }: { open: boolean; onClose: () => voi
       <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={onClose} />
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0f0f0f] border-t border-[#2a2a2a] rounded-t-2xl md:hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#1f1f1f]">
-          <span className="text-sm font-bold text-white">All Modules</span>
+          <span className="text-sm font-bold text-white">All Skills</span>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none" aria-label="Close">×</button>
         </div>
         <div className="grid grid-cols-3 gap-px bg-[#1f1f1f] max-h-[60vh] overflow-y-auto">

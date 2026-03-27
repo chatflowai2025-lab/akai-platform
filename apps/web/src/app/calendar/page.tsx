@@ -80,7 +80,7 @@ function getMockEvents(): CalEvent[] {
       time: '09:00',
       duration: 30,
       type: 'Meeting',
-      notes: 'Weekly team alignment — all modules',
+      notes: 'Weekly team alignment — all skills',
       inviteViaAk: false,
       color: 'purple',
     },

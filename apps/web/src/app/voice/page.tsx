@@ -1047,7 +1047,7 @@ function SetupWizard({
         <div className="space-y-4">
           <div className="px-5 py-4 bg-green-500/10 border border-green-500/20 rounded-2xl">
             <p className="text-sm font-semibold text-green-300">🎉 Sophie is ready!</p>
-            <p className="text-xs text-green-400/70 mt-1">Upload your leads in the Sales module to start calling.</p>
+            <p className="text-xs text-green-400/70 mt-1">Upload your leads in the Sales skill to start calling.</p>
           </div>
           <button
             onClick={onComplete}

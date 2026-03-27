@@ -304,7 +304,7 @@ function ProposalPreview({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#1f1f1f]">
-                    <th className="text-left px-4 py-2.5 text-xs text-gray-500 uppercase tracking-wider">Module</th>
+                    <th className="text-left px-4 py-2.5 text-xs text-gray-500 uppercase tracking-wider">Skill</th>
                     <th className="text-right px-4 py-2.5 text-xs text-gray-500 uppercase tracking-wider">Monthly</th>
                     <th className="text-right px-4 py-2.5 text-xs text-gray-500 uppercase tracking-wider">Setup</th>
                   </tr>
@@ -661,7 +661,7 @@ export default function ProposalsPage() {
                 </div>
               </section>
 
-              {/* Section 2 — Modules */}
+              {/* Section 2 — Skills */}
               <section>
                 <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">What are you pitching?</h2>
                 <div className="space-y-1.5">
@@ -753,7 +753,7 @@ export default function ProposalsPage() {
                           className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-[#111] transition group"
                         >
                           <p className="text-xs text-gray-300 group-hover:text-white transition truncate">{p.businessName}</p>
-                          <p className="text-[11px] text-gray-600">{p.modules.length} module{p.modules.length !== 1 ? 's' : ''}</p>
+                          <p className="text-[11px] text-gray-600">{p.modules.length} skill{p.modules.length !== 1 ? 's' : ''}</p>
                         </button>
                       ))}
                     </div>
@@ -785,7 +785,7 @@ export default function ProposalsPage() {
                     Fill in the details and hit Generate →
                   </h2>
                   <p className="text-gray-500 text-sm max-w-xs mx-auto">
-                    AKAI writes a personalised proposal based on the prospect&apos;s industry, your selected modules, and the tone you pick.
+                    AKAI writes a personalised proposal based on the prospect&apos;s industry, your selected skills, and the tone you pick.
                   </p>
                   <div className="mt-6 flex flex-wrap gap-2 justify-center text-xs text-gray-600">
                     <span className="px-2 py-1 bg-[#111] rounded-full border border-[#1f1f1f]">AI-generated content</span>

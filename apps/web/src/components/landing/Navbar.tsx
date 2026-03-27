@@ -31,7 +31,7 @@ export default function Navbar({ onOpenCapture }: { onOpenCapture?: () => void }
         {/* Nav links */}
         <div className="hidden md:flex items-center gap-8 text-sm text-white/40">
           <a href="#how-it-works" className="hover:text-white transition-colors duration-200">How It Works</a>
-          <a href="#modules" className="hover:text-white transition-colors duration-200">Modules</a>
+          <a href="#modules" className="hover:text-white transition-colors duration-200">Skills</a>
           <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
         </div>
 

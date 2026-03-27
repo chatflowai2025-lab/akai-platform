@@ -112,7 +112,7 @@ function EmptyFeed() {
       </div>
       <p className="text-white/60 font-semibold text-sm">No activity yet</p>
       <p className="text-gray-600 text-xs mt-1 max-w-[200px]">
-        Once your Sales module is active, events will appear here.
+        Once your Sales skill is active, events will appear here.
       </p>
     </div>
   );
@@ -283,7 +283,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-xl font-black text-white">
               {businessName ? (
-                <>Welcome to AKAI, <span className="text-[#D4AF37]">{businessName}</span>! Your Sales module is ready. 🚀</>
+                <>Welcome to AKAI, <span className="text-[#D4AF37]">{businessName}</span>! Your Sales skill is ready. 🚀</>
               ) : (
                 <>Welcome back, <span className="text-[#D4AF37]">{displayName}</span> 👋</>
               )}
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                   href="/sales"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition"
                 >
-                  ⚙️ Configure Sales Module
+                  ⚙️ Configure Sales Skill
                 </a>
                 <a
                   href="/sales#leads"
@@ -394,10 +394,10 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Module quick-links */}
+            {/* Skill quick-links */}
             <section>
               <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
-                Modules
+                Skills
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <ModuleCard

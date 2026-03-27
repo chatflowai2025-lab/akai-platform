@@ -429,7 +429,7 @@ const PLATFORMS: Platform[] = [
   { id: 'linkedin', name: 'LinkedIn', tagline: 'Professional network', color: '#0077B5', bgColor: 'rgba(0,119,181,0.1)', borderColor: 'rgba(0,119,181,0.3)', emoji: '💼' },
   { id: 'indeed', name: 'Indeed', tagline: 'Global job board', color: '#2164F3', bgColor: 'rgba(33,100,243,0.1)', borderColor: 'rgba(33,100,243,0.3)', emoji: '🌐' },
   { id: 'jora', name: 'Jora', tagline: 'Australian job search', color: '#00B4B4', bgColor: 'rgba(0,180,180,0.1)', borderColor: 'rgba(0,180,180,0.3)', emoji: '🔍' },
-  { id: 'website', name: 'Your Website', tagline: 'Post via Web module', color: '#D4AF37', bgColor: 'rgba(212,175,55,0.1)', borderColor: 'rgba(212,175,55,0.3)', emoji: '🌍' },
+  { id: 'website', name: 'Your Website', tagline: 'Post via Web skill', color: '#D4AF37', bgColor: 'rgba(212,175,55,0.1)', borderColor: 'rgba(212,175,55,0.3)', emoji: '🌍' },
   { id: 'all', name: 'All Platforms', tagline: 'Post everywhere at once', color: '#9B59B6', bgColor: 'rgba(155,89,182,0.1)', borderColor: 'rgba(155,89,182,0.3)', emoji: '🚀' },
 ];
 

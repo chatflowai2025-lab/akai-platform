@@ -77,7 +77,7 @@ export default function Sidebar() {
 
       {/* Modules Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        <p className="text-xs text-gray-600 uppercase tracking-wider px-3 mb-3">Modules</p>
+        <p className="text-xs text-gray-600 uppercase tracking-wider px-3 mb-3">Skills</p>
         {MODULES.map(mod => {
           const active = isActive(mod.href, mod.external);
           const linkProps = mod.external

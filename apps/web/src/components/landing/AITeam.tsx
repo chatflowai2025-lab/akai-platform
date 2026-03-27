@@ -9,7 +9,7 @@ const AGENTS = [
     color: 'from-yellow-500/20 to-amber-500/20',
     border: 'border-yellow-500/20',
     accent: 'text-yellow-400',
-    what: 'Sets strategy, prioritises work, allocates resources across every module.',
+    what: 'Sets strategy, prioritises work, allocates resources across every skill.',
     does: ['Defines weekly goals', 'Routes work to the right agents', 'Reviews results and adjusts'],
   },
   {

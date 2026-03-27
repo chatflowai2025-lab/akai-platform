@@ -44,7 +44,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">4. AI calling and communications</h2>
-            <p>When you use our Sales module, Sophie AI may call leads on your behalf. All calls are conducted in compliance with Australian Spam Act 2003 and Privacy Act 1988 requirements. Do Not Call Register compliance is built into the platform.</p>
+            <p>When you use our Sales skill, Sophie AI may call leads on your behalf. All calls are conducted in compliance with Australian Spam Act 2003 and Privacy Act 1988 requirements. Do Not Call Register compliance is built into the platform.</p>
           </section>
 
           <section>

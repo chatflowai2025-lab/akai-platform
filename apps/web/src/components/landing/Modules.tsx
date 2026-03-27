@@ -72,7 +72,7 @@ const MODULES: Module[] = [
     name: 'Proposals',
     status: 'live',
     tagline: 'AI writes personalised proposals for any prospect in seconds.',
-    features: ['Prospect picker', 'Module selector', 'ROI projections', 'One-click email send'],
+    features: ['Prospect picker', 'Skill selector', 'ROI projections', 'One-click email send'],
     price: 'Included',
     href: '/proposals',
     emoji: '📄',
@@ -158,11 +158,11 @@ export default function Modules() {
             <span className="gradient-text">Every function.</span>
           </h2>
           <p className="text-white/40 text-lg max-w-xl mx-auto">
-            Each module is a complete AI-powered business function. Use one or combine all nine.
+            Each skill is a complete AI-powered business function. Use one or combine all nine.
           </p>
         </div>
 
-        {/* 9-module grid: 3 columns */}
+        {/* 9-skill grid: 3 columns */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {MODULES.map(mod => (
             <ModuleCard key={mod.name} mod={mod} />
