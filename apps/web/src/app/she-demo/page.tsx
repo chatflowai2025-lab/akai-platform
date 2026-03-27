@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 const vessels = [
   {
@@ -112,9 +113,11 @@ function BookingModal({
       >
         {/* Hero image */}
         <div className="relative">
-          <img
+          <Image
             src={vessel.photo}
             alt={vessel.name}
+            width={702}
+            height={420}
             className="w-full h-56 object-cover rounded-t-2xl"
           />
           <button
@@ -271,10 +274,11 @@ function VesselCard({
     >
       {/* Photo */}
       <div className="relative overflow-hidden h-52">
-        <img
+        <Image
           src={vessel.photo}
           alt={vessel.name}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-300 hover:scale-105"
         />
         {/* Available badge */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 shadow-sm">

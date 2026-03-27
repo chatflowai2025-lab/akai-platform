@@ -11,7 +11,7 @@ const nextConfig = {
   transpilePackages: ['@akai/shared-types'],
   serverExternalPackages: ['undici', '@anthropic-ai/sdk', 'firebase-admin'],
   images: {
-    ...(isGitHubPages ? { unoptimized: true } : { domains: ['firebasestorage.googleapis.com'] }),
+    ...(isGitHubPages ? { unoptimized: true } : { domains: ['firebasestorage.googleapis.com', 'www.sydneyharbourexclusive.com'] }),
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
