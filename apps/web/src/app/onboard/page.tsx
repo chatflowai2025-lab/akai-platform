@@ -203,6 +203,12 @@ export default function OnboardPage() {
       }
     } catch (err) {
       console.error('[ONBOARD]', err);
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: "Sorry, something went wrong. Please try again in a moment.",
+        timestamp: new Date().toISOString(),
+      }]);
     } finally {
       setChatLoading(false);
     }
