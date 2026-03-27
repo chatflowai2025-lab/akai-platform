@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { isSafeMode } from '@/lib/beta-config';
 import { getFirebaseDb } from '@/lib/firebase';
 import {
   collection,
@@ -534,6 +535,13 @@ export default function ProposalsPage() {
 
   const handleEmail = useCallback(async () => {
     if (!generatedMarkdown) return;
+
+    // Safe mode — simulate send without emailing anyone
+    if (isSafeMode(user?.email ?? '')) {
+      setToast('Safe mode: Email simulated — no message sent (beta testing mode).');
+      return;
+    }
+
     const subjectLine = `AKAI Proposal for ${businessName}`;
     const htmlVersion = buildProposalEmailHtml({ businessName, industry, markdown: generatedMarkdown, website });
 

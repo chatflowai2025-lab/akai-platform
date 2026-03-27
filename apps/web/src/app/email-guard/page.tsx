@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { isSafeMode } from '@/lib/beta-config';
 
 // ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
 function safeSend(sendMessage: (t: string) => void, text: string) {
@@ -238,7 +239,7 @@ function ConnectHelp() {
 // useDashboardChat() works here because this component is a child of DashboardLayout.
 
 interface EmailGuardContentProps {
-  user: { uid: string };
+  user: { uid: string; email?: string | null };
   initialCode: string | null;
   initialState: string | null;
   initialConnectedParam: string | null;
@@ -441,6 +442,15 @@ function EmailGuardContent({
   };
 
   const sendProposal = async (eq: Enquiry) => {
+    // Safe mode — simulate send without emailing anyone
+    if (isSafeMode(user.email ?? '')) {
+      setSending(eq.id);
+      await new Promise(r => setTimeout(r, 1000));
+      setEnquiries(prev => prev.map(e => e.id === eq.id ? { ...e, status: 'sent' as const } : e));
+      setSending(null);
+      return;
+    }
+
     // If only Gmail is connected and it doesn't have send scope, prompt the user
     if (gmailConnected && !msConnected && !gmailHasSendScope) {
       setSendPermModal({ enquiry: eq });
@@ -808,7 +818,7 @@ function EmailGuardContent({
 
 // ── OAuth param reader — needs Suspense boundary for useSearchParams ──────
 
-function EmailGuardWithParams({ user }: { user: { uid: string } }) {
+function EmailGuardWithParams({ user }: { user: { uid: string; email?: string | null } }) {
   const searchParams = useSearchParams();
 
   const code = searchParams.get('code');
