@@ -342,12 +342,23 @@ export async function POST(req: NextRequest) {
     const userHtml = buildUserEmail(name, website, businessType || '', recs, auditData);
     const aaronHtml = buildAaronEmail(name, email, phone, website, businessType, auditList, auditData);
 
-    await Promise.all([
+    const emailResults = await Promise.allSettled([
       sendEmail(email, `✅ Your Free Digital Health Check — ${website}`, userHtml, resendKey),
       sendEmail('mrakersten@gmail.com', `🔥 New Health Check Lead: ${name || email}`, aaronHtml, resendKey),
     ]);
 
-    return NextResponse.json({ success: true });
+    const emailErrors = emailResults
+      .filter(r => r.status === 'rejected')
+      .map(r => (r as PromiseRejectedResult).reason?.message ?? 'unknown');
+
+    if (emailErrors.length > 0) {
+      console.warn('[health-check] Email send errors (non-fatal):', emailErrors);
+    }
+
+    return NextResponse.json({
+      success: true,
+      ...(emailErrors.length > 0 ? { emailWarning: 'Report generated; email delivery may be delayed.' } : {}),
+    });
   } catch (err) {
     console.error('[health-check] Error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
