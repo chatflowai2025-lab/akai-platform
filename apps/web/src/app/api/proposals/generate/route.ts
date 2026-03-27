@@ -162,7 +162,7 @@ At an average ${industry} deal size of ${roi.avgDealSize}, capturing just 3 extr
 export async function POST(req: NextRequest) {
   try {
     const body: GenerateRequest = await req.json();
-    const { businessName, contactName, industry, location, website, modules, tone, existingPains } = body;
+    const { businessName, contactName, industry, location, website, modules, tone, existingPains, painPoints } = body;
 
     if (!businessName || !industry || !modules || modules.length === 0) {
       return NextResponse.json({ error: 'businessName, industry, and modules are required' }, { status: 400 });
@@ -187,54 +187,60 @@ export async function POST(req: NextRequest) {
       friendly: 'approachable and conversational — like a knowledgeable friend who wants them to win',
     };
 
-    const systemPrompt = `You are AKAI's proposal writer. Generate compelling, personalised sales proposals for AKAI's AI services.
+    const systemPrompt = `You are AKAI's senior proposal writer. Generate compelling, personalised sales proposals that win clients.
 
-AKAI modules and pricing:
-- Sales (Sophie AI calling): $297/mo
-- Voice (AI outbound): $197/mo  
-- Web (Website audit + builder): $197/mo
-- Social (Content generation): $147/mo
-- Ads (Google + Meta ads): $397/mo
-- Recruit (AI hiring): $247/mo
+AKAI PLATFORM — 9 live modules with Australian pricing (AUD):
+- Sales (Sophie AI outbound calling): $297/mo — Sophie calls leads, qualifies them, books meetings 24/7
+- Voice (AI voice configuration): $197/mo — Custom voice scripts, call hours, campaign logic
+- Web (Website audit + builder): $197/mo — Speed, SEO, mobile audit + AI content generation
+- Email Guard (Inbox AI): $247/mo — Monitors inbox, auto-generates proposals, sets reply rules
+- Calendar (Booking automation): $147/mo — Google/Outlook sync, auto-schedules meetings
+- Proposals (AI proposal engine): $197/mo — Personalised proposals in seconds, export to PDF/email
+- Social (Content generation): $147/mo — Instagram, LinkedIn, Facebook content calendar
+- Ads (Google + Meta campaigns): $397/mo — AI-written ad copy, campaign builder, launch ready
+- Recruit (AI hiring): $247/mo — Candidate sourcing, JD writing, automated applicant screening
 
 Tone: ${toneDescriptions[tone] || toneDescriptions.professional}
 
+CRITICAL RULES:
+- Reference specific AKAI module names (e.g. "Sophie AI", "Email Guard", "Proposals module") — not generic AI terms
+- Every challenge and solution must explicitly reference the prospect's industry: ${industry}
+- ROI projections must use realistic AU ${industry} benchmarks (deal sizes, lead volumes, conversion rates)
+- Pricing is in AUD — never use USD
+- Keep it tight and punchy — C-level executives read fast
+
 Return ONLY valid JSON with this exact structure:
 {
-  "executiveSummary": "2-3 sentences specific to this business and industry",
-  "challenges": ["challenge 1", "challenge 2", "challenge 3"],
+  "executiveSummary": "2-3 sentences specific to this business and industry, reference specific modules",
+  "challenges": ["challenge 1 — specific to ${industry}", "challenge 2", "challenge 3"],
   "solutions": [
-    { "module": "module name", "description": "what it does SPECIFICALLY for this industry/business" }
+    { "module": "AKAI module name", "description": "what this specific module does for ${industry} businesses" }
   ],
   "roiProjection": {
-    "leadsPerMonth": "range e.g. 15-25",
-    "avgDealSize": "$X,XXX",
-    "projectedRevenue": "$XX,XXX+",
-    "rationale": "one sentence explanation"
+    "leadsPerMonth": "realistic range for ${industry} e.g. 15-25",
+    "avgDealSize": "realistic AU ${industry} deal size e.g. $2,500",
+    "projectedRevenue": "realistic annual uplift e.g. $180,000+",
+    "rationale": "one specific sentence using ${industry} benchmarks and AKAI module names"
   },
   "nextSteps": ["step 1", "step 2", "step 3"]
-}
+}`;
 
-Rules:
-- Make every sentence specific to ${industry} — no generic filler
-- Challenges must be real pain points ${industry} businesses face
-- Solutions describe what the module does FOR THIS SPECIFIC BUSINESS, not generic features
-- ROI projection uses realistic ${industry} benchmarks
-- Keep it tight — executives read fast`;
-
+    const combinedPains = [existingPains, painPoints].filter(Boolean).join('; ');
     const userPrompt = `Generate a proposal for:
 - Business: ${businessName}
 ${contactName ? `- Contact: ${contactName}` : ''}
 - Industry: ${industry}
 ${location ? `- Location: ${location}` : ''}
 ${website ? `- Website: ${website}` : ''}
-- Selected modules: ${moduleList}
-- Total investment: $${total}/mo
-${existingPains ? `- Known pain points: ${existingPains}` : ''}`;
+- Selected AKAI modules: ${moduleList}
+- Total investment: AUD $${total}/mo
+${combinedPains ? `- Known pain points and challenges: ${combinedPains}` : ''}
+
+Remember: use specific AKAI module names in solutions, realistic AU ${industry} numbers in ROI, all pricing in AUD.`;
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 1500,
+      max_tokens: 2000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
