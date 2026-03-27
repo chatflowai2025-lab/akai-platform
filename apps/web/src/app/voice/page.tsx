@@ -335,10 +335,17 @@ function ScriptStep({ config, setConfig, userProfile, userId, onBack, onNext }: 
     if (config.script.openingLine.includes('{{businessName}}') || config.script.openingLine.includes('[BusinessName]')) {
       setConfig({ ...config, script: { ...config.script, openingLine: `Hi, is that {{name}}? This is Sophie calling from ${biz}.` } });
     }
+    // Show fallbacks immediately so user sees options right away
+    const fallback = getFallbackSuggestions(ind, biz, loc);
+    setSuggestions(fallback);
+    if (!selectedHook) setSelectedHook(fallback.hooks[0] ?? null);
+    if (!selectedQ) setSelectedQ(fallback.questions[0] ?? null);
+    setGenerating(false);
+    // Then try to enhance with AI in the background
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${RAILWAY_API}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
         body: JSON.stringify({
           message: `Generate Sophie AI calling script suggestions for this business. Business: "${biz}". Industry: "${ind}". Location: "${loc}".
 
@@ -375,13 +382,7 @@ Hooks should be specific to ${ind} in ${loc}. Questions should help qualify if t
       }
       throw new Error('Invalid response');
     } catch {
-      // Use industry-aware fallbacks
-      const fallback = getFallbackSuggestions(ind, biz, loc);
-      setSuggestions(fallback);
-      if (!selectedHook) setSelectedHook(fallback.hooks[0]);
-      if (!selectedQ) setSelectedQ(fallback.questions[0]);
-    } finally {
-      setGenerating(false);
+      // Fallbacks already shown above — nothing to do
     }
   };
 
@@ -650,12 +651,12 @@ function SetupWizard({
             </div>
             <div className="flex gap-3">
               <span className="text-[11px] font-bold text-blue-400 pt-0.5 flex-shrink-0 w-14">Lead</span>
-              <p className="text-sm text-white/80 leading-relaxed">"Sure, what's it about?"</p>
+              <p className="text-sm text-white/80 leading-relaxed">&ldquo;Sure, what&apos;s it about?&rdquo;</p>
             </div>
             <div className="flex gap-3">
               <span className="text-[11px] font-bold text-[#D4AF37] pt-0.5 flex-shrink-0 w-14">Sophie</span>
               <p className="text-sm text-white/80 leading-relaxed">
-                "We automate your inbound lead qualification so your team only talks to people who are ready to buy. Does that sound relevant to what you're working on?"
+                &ldquo;We automate your inbound lead qualification so your team only talks to people who are ready to buy. Does that sound relevant to what you&apos;re working on?&rdquo;
               </p>
             </div>
           </div>
@@ -822,7 +823,7 @@ function SetupWizard({
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${!config.useOwnNumber ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a]'}`}>
               {!config.useOwnNumber && <span className="w-2 h-2 rounded-full bg-black" />}
             </div>
-            <span className="text-sm font-bold text-white">Use AKAI's number</span>
+            <span className="text-sm font-bold text-white">Use AKAI&apos;s number</span>
           </div>
           <p className="text-[#D4AF37] font-mono text-sm mb-1">+61 468 075 948</p>
           <p className="text-xs text-gray-500">Calls come from our number. Simple setup.</p>
@@ -855,7 +856,7 @@ function SetupWizard({
             />
           )}
           {config.useOwnNumber && (
-            <p className="text-xs text-yellow-500/70 mt-1.5">We'll verify this — takes 1–2 business days</p>
+            <p className="text-xs text-yellow-500/70 mt-1.5">We&apos;ll verify this — takes 1–2 business days</p>
           )}
         </button>
       </div>
@@ -876,7 +877,7 @@ function SetupWizard({
     <div key="step4" className="space-y-6">
       <div>
         <h2 className="text-2xl font-black text-white">Rules &amp; compliance</h2>
-        <p className="text-gray-500 mt-1 text-sm">Sophie operates within Australian law. Here's how.</p>
+        <p className="text-gray-500 mt-1 text-sm">Sophie operates within Australian law. Here&apos;s how.</p>
       </div>
 
       <div className="space-y-4">
@@ -889,7 +890,7 @@ function SetupWizard({
             <div>
               <p className="text-sm font-bold text-white mb-1">DNC Register — Always on</p>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Sophie will automatically check every number against Australia's Do Not Call Register before calling. We never call registered numbers.
+                Sophie will automatically check every number against Australia&apos;s Do Not Call Register before calling. We never call registered numbers.
               </p>
             </div>
           </div>
@@ -906,7 +907,7 @@ function SetupWizard({
             {config.consentConfirmed && <span className="text-black text-xs font-black">✓</span>}
           </div>
           <p className="text-sm text-gray-300 leading-relaxed">
-            I confirm that the leads I'm calling have either given consent to be contacted, or are business numbers (B2B calls don't require consent under the SPAM Act).
+            I confirm that the leads I&apos;m calling have either given consent to be contacted, or are business numbers (B2B calls don&apos;t require consent under the SPAM Act).
           </p>
         </label>
 
@@ -914,7 +915,7 @@ function SetupWizard({
         <div className="flex items-center justify-between bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5">
           <div>
             <p className="text-sm font-bold text-white">Record calls for review</p>
-            <p className="text-xs text-gray-500 mt-0.5">Listen back to calls to improve Sophie's performance</p>
+            <p className="text-xs text-gray-500 mt-0.5">Listen back to calls to improve Sophie&apos;s performance</p>
           </div>
           <button
             onClick={() => setConfig({ ...config, recordCalls: !config.recordCalls })}
@@ -954,7 +955,7 @@ function SetupWizard({
     <div key="step5" className="space-y-6">
       <div>
         <h2 className="text-2xl font-black text-white">Test call — before going live</h2>
-        <p className="text-gray-500 mt-1 text-sm">Before Sophie calls anyone on your list, she'll call YOU first.</p>
+        <p className="text-gray-500 mt-1 text-sm">Before Sophie calls anyone on your list, she&apos;ll call YOU first.</p>
       </div>
 
       {testCallState === 'idle' && (
