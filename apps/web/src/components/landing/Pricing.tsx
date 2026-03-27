@@ -49,6 +49,25 @@ const PLANS = [
     highlight: false,
     badge: null,
   },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    period: '',
+    description: 'Dedicated environment. Custom integrations. Full white-label.',
+    features: [
+      'Dedicated cloud environment',
+      'Custom API integrations',
+      'White-label under your brand',
+      'Multi-location & multi-tenant',
+      'Enterprise SLA (99.99% uptime)',
+      'Dedicated success team',
+      'Volume pricing available',
+      'On-site onboarding option',
+    ],
+    cta: 'Contact us →',
+    highlight: false,
+    badge: 'Enterprise',
+  },
 ];
 
 export default function Pricing() {
