@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sydney Day Charter — Find Your Perfect Boat</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ocean: #0066cc;
+    --ocean-dark: #004fa3;
+    --ocean-light: #3388dd;
+    --sky: #e8f4ff;
+    --sky-mid: #cce4f8;
+    --white: #ffffff;
+    --off-white: #f8fbff;
+    --text: #1a2540;
+    --text-mid: #4a5a7a;
+    --text-muted: #8898b8;
+    --border: #e2ecf8;
+    --green: #00b96b;
+    --amber: #f59e0b;
+    --card-shadow: 0 4px 24px rgba(0,100,200,0.08);
+    --card-hover: 0 12px 40px rgba(0,100,200,0.15);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--off-white);
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,100,200,0.06);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .nav-logo-mark {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+  }
+
+  .nav-logo-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .nav-logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+    font-weight: 400;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--ocean); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-login {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-mid);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s;
+  }
+
+  .nav-login:hover { color: var(--ocean); }
+
+  .nav-signup {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: var(--ocean);
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .nav-signup:hover { background: var(--ocean-dark); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 80px 40px 90px;
+    text-align: center;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      #e8f4ff 0%,
+      #cce4ff 15%,
+      #aad4ff 30%,
+      #7ab8ff 45%,
+      #4d9fff 55%,
+      #2288ff 65%,
+      #0066cc 75%,
+      #004fa3 85%,
+      #003380 100%
+    );
+    background-size: 400% 400%;
+    animation: heroGradient 12s ease infinite;
+  }
+
+  @keyframes heroGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,255,255,0.15) 0%, transparent 60%);
+  }
+
+  .hero-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 60px;
+  }
+
+  .hero-wave svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 700px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  .hero-title {
+    font-size: clamp(36px, 5.5vw, 64px);
+    font-weight: 800;
+    color: white;
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 36px;
+    font-weight: 400;
+  }
+
+  /* SEARCH BAR */
+  .search-bar {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    overflow: hidden;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .search-segment {
+    flex: 1;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .search-segment:hover { background: var(--off-white); }
+  .search-segment:last-of-type { border-right: none; }
+
+  .search-seg-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .search-seg-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .search-sep {
+    width: 1px;
+    background: var(--border);
+    margin: 12px 0;
+    flex-shrink: 0;
+  }
+
+  .search-submit {
+    background: var(--ocean);
+    color: white;
+    border: none;
+    padding: 0 28px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+    min-width: 100px;
+  }
+
+  .search-submit:hover { background: var(--ocean-dark); }
+
+  .hero-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .hero-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+  }
+
+  /* FILTERS & CONTENT */
+  .content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .results-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .results-count {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 3px;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    background: white;
+    border: 1.5px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--ocean);
+    color: var(--ocean);
+  }
+
+  .filter-btn.active {
+    background: var(--ocean);
+    border-color: var(--ocean);
+    color: white;
+  }
+
+  .filter-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  .sort-select {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    background: white;
+    border: 1.5px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* COMPARE BAR */
+  .compare-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--text);
+    color: white;
+    padding: 16px 40px;
+    z-index: 200;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  }
+
+  .compare-bar.active { display: flex; }
+
+  .compare-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .compare-bar-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .compare-slots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .compare-slot {
+    background: rgba(255,255,255,0.1);
+    border: 1.5px dashed rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .compare-slot.filled {
+    background: rgba(255,255,255,0.15);
+    border-style: solid;
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .compare-slot-remove {
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 14px;
+    transition: opacity 0.2s;
+  }
+
+  .compare-slot-remove:hover { opacity: 1; }
+
+  .compare-go-btn {
+    background: var(--ocean);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+  }
+
+  .compare-go-btn:hover { background: var(--ocean-light); }
+
+  .compare-clear {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: color 0.2s;
+  }
+
+  .compare-clear:hover { color: white; }
+
+  /* LISTING GRID */
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+    margin-bottom: 60px;
+  }
+
+  .listing-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    border: 1.5px solid transparent;
+    transition: all 0.25s;
+    position: relative;
+  }
+
+  .listing-card:hover {
+    box-shadow: var(--card-hover);
+    transform: translateY(-3px);
+    border-color: var(--sky-mid);
+  }
+
+  .listing-card.compare-selected {
+    border-color: var(--ocean);
+    box-shadow: 0 0 0 3px rgba(0,102,204,0.15), var(--card-hover);
+  }
+
+  .card-img {
+    height: 210px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .img-ribbon { background: linear-gradient(140deg, #4a90e2 0%, #357abd 40%, #1e5aa0 70%, #0d3a75 100%); }
+  .img-monreve { background: linear-gradient(140deg, #7c3aed 0%, #5b21b6 40%, #3d1580 70%, #1e0a4a 100%); }
+  .img-birchgrove { background: linear-gradient(140deg, #059669 0%, #047857 40%, #065f46 70%, #022c22 100%); }
+  .img-speedboat { background: linear-gradient(140deg, #d97706 0%, #b45309 40%, #92400e 70%, #3d1a05 100%); }
+  .img-riviera { background: linear-gradient(140deg, #2563eb 0%, #1d4ed8 40%, #1e40af 70%, #0a1a6e 100%); }
+  .img-sunseeker { background: linear-gradient(140deg, #0891b2 0%, #0e7490 40%, #155e75 70%, #0a3040 100%); }
+
+  .card-img-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .card-boat-emoji {
+    font-size: 56px;
+    opacity: 0.4;
+    filter: blur(0.5px);
+  }
+
+  .card-compare-check {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 28px;
+    height: 28px;
+    background: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.2s;
+    font-size: 14px;
+    z-index: 5;
+    border: 2px solid transparent;
+  }
+
+  .card-compare-check:hover {
+    border-color: var(--ocean);
+  }
+
+  .listing-card.compare-selected .card-compare-check {
+    background: var(--ocean);
+    border-color: var(--ocean);
+    color: white;
+  }
+
+  .card-badges {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-instant {
+    background: var(--green);
+    color: white;
+  }
+
+  .badge-request {
+    background: var(--amber);
+    color: white;
+  }
+
+  .badge-verified {
+    background: white;
+    color: var(--ocean);
+    border: 1.5px solid rgba(0,102,204,0.2);
+  }
+
+  .badge-popular {
+    background: rgba(255,255,255,0.9);
+    color: var(--text);
+  }
+
+  .card-body {
+    padding: 18px 20px 20px;
+  }
+
+  .card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+
+  .card-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .card-rating-wrap {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  .card-stars {
+    color: var(--amber);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .card-rating-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card-review-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .card-tag {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ocean);
+    background: var(--sky);
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+  }
+
+  .card-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-price-area {}
+
+  .price-main {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .price-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .book-btn-inst {
+    background: var(--ocean);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+  }
+
+  .book-btn-inst:hover { background: var(--ocean-dark); }
+
+  .book-btn-req {
+    background: white;
+    color: var(--ocean);
+    border: 1.5px solid var(--ocean);
+    padding: 10px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .book-btn-req:hover {
+    background: var(--sky);
+  }
+
+  /* COMPARE MODAL */
+  .compare-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,37,64,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    overflow-y: auto;
+    padding: 40px 20px;
+  }
+
+  .compare-modal-overlay.active { display: block; }
+
+  .compare-modal {
+    background: white;
+    border-radius: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+  }
+
+  .compare-modal-header {
+    padding: 28px 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .compare-modal-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .compare-modal-close {
+    width: 36px;
+    height: 36px;
+    background: var(--off-white);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .compare-modal-close:hover { background: var(--border); }
+
+  .compare-table-wrap {
+    overflow-x: auto;
+    padding: 32px 36px;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  .compare-table th {
+    text-align: center;
+    padding: 16px 20px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .compare-table th:first-child {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    width: 160px;
+  }
+
+  .compare-table td {
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 14px;
+    color: var(--text-mid);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-table td:first-child {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .compare-table tr:hover td { background: var(--off-white); }
+
+  .compare-table .yes { color: var(--green); font-size: 18px; }
+  .compare-table .no { color: #d1d5db; font-size: 18px; }
+  .compare-table .price-cell { font-size: 18px; font-weight: 800; color: var(--text); }
+  .compare-table .book-cell { padding: 20px; }
+
+  /* REVIEWS */
+  .reviews-section {
+    background: white;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 64px 40px;
+    margin-bottom: 60px;
+  }
+
+  .reviews-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .reviews-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .reviews-title {
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .reviews-aggregate {
+    text-align: right;
+  }
+
+  .reviews-score {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .reviews-stars-big {
+    font-size: 16px;
+    color: var(--amber);
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .reviews-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .review-card {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+
+  .review-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .review-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .av-blue { background: linear-gradient(135deg, #0066cc, #3388dd); }
+  .av-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .av-green { background: linear-gradient(135deg, #059669, #34d399); }
+  .av-orange { background: linear-gradient(135deg, #d97706, #fbbf24); }
+  .av-teal { background: linear-gradient(135deg, #0891b2, #38bdf8); }
+  .av-red { background: linear-gradient(135deg, #dc2626, #f87171); }
+
+  .review-meta { flex: 1; }
+
+  .review-name { font-size: 14px; font-weight: 600; }
+  .review-vessel { font-size: 12px; color: var(--text-muted); }
+
+  .review-stars { color: var(--amber); font-size: 12px; letter-spacing: 1px; }
+
+  .review-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
+  .review-text {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  /* BOOKING MODAL */
+  .bk-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,37,64,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .bk-overlay.active { display: flex; }
+
+  .bk-modal {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+  }
+
+  .bk-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .bk-vessel-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .bk-vessel-type {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .bk-close {
+    background: var(--off-white);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+  }
+
+  .bk-close:hover { background: var(--border); }
+
+  .bk-body { padding: 24px 32px 32px; }
+
+  .bk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .bk-field { margin-bottom: 14px; }
+
+  .bk-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .bk-input {
+    width: 100%;
+    background: var(--off-white);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .bk-input:focus { border-color: var(--ocean); background: white; }
+  .bk-input::placeholder { color: var(--text-muted); }
+  select.bk-input option { background: white; }
+
+  .bk-price-block {
+    background: var(--sky);
+    border: 1.5px solid var(--sky-mid);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .bk-price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--text-mid);
+    margin-bottom: 8px;
+  }
+
+  .bk-price-row:last-child {
+    margin-bottom: 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--sky-mid);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  .bk-submit {
+    width: 100%;
+    background: var(--ocean);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .bk-submit:hover { background: var(--ocean-dark); }
+
+  .bk-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .bk-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .bk-success {
+    display: none;
+    text-align: center;
+    padding: 48px 32px;
+  }
+
+  .bk-success.active { display: block; }
+
+  .bk-success-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 18px;
+    color: white;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--text);
+    color: rgba(255,255,255,0.7);
+    padding: 60px 40px 36px;
+  }
+
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .footer-brand { color: white; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .footer-brand-sub { color: var(--ocean-light); font-size: 12px; letter-spacing: 0.5px; margin-bottom: 14px; }
+  .footer-brand-desc { font-size: 13px; line-height: 1.7; max-width: 280px; }
+
+  .footer-col-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: white;
+    margin-bottom: 16px;
+  }
+
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 10px; }
+  .footer-links a {
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: white; }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 60px 20px 80px; }
+    .search-bar { flex-wrap: wrap; border-radius: 12px; }
+    .search-segment { flex: 1; min-width: 140px; }
+    .content-wrapper { padding: 36px 20px; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    footer { padding: 48px 20px 28px; }
+    .compare-table-wrap { padding: 20px; }
+    .compare-modal-header { padding: 20px; }
+  }
+
+  @media (max-width: 600px) {
+    .listings-grid { grid-template-columns: 1fr; }
+    .reviews-grid { grid-template-columns: 1fr; }
+    .search-submit { width: 100%; padding: 14px; }
+    .compare-bar { padding: 14px 20px; }
+    .footer-top { grid-template-columns: 1fr; gap: 28px; }
+    .bk-row { grid-template-columns: 1fr; }
+    .bk-header, .bk-body { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">⚓</div>
+    <div>
+      <span class="nav-logo-name">Sydney Day Charter</span>
+      <span class="nav-logo-sub">by Sydney Harbour Exclusive</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Discover</a></li>
+    <li><a href="#">How it works</a></li>
+    <li><a href="#">Gift cards</a></li>
+    <li><a href="#">Help</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-login">Log in</button>
+    <button class="nav-signup">Sign up</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🏆 #1 Rated Charter Fleet in Sydney</div>
+    <h1 class="hero-title">Find your perfect<br>harbour charter</h1>
+    <p class="hero-sub">6 vessels · Instant booking · Licensed crew included</p>
+
+    <div class="search-bar">
+      <div class="search-segment">
+        <div class="search-seg-label">Where</div>
+        <div class="search-seg-value">Sydney Harbour</div>
+      </div>
+      <div class="search-segment">
+        <div class="search-seg-label">When</div>
+        <input type="date" style="border:none; background:transparent; font-family:Inter,sans-serif; font-size:14px; font-weight:600; color:#1a2540; outline:none; width:100%;">
+      </div>
+      <div class="search-segment">
+        <div class="search-seg-label">How many</div>
+        <select style="border:none; background:transparent; font-family:Inter,sans-serif; font-size:14px; font-weight:600; color:#1a2540; outline:none; width:100%; appearance:none;">
+          <option>Any size</option>
+          <option>2–4 guests</option>
+          <option>5–10 guests</option>
+          <option>11–20 guests</option>
+          <option>21–25 guests</option>
+        </select>
+      </div>
+      <button class="search-submit">Search 🔍</button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">⚡ Instant confirmation available</div>
+      <div class="hero-stat">★ 4.97 average rating</div>
+      <div class="hero-stat">✓ 200+ happy guests</div>
+    </div>
+  </div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z" fill="#f8fbff"/>
+    </svg>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-wrapper">
+
+  <!-- FILTERS & RESULTS HEADER -->
+  <div class="results-header">
+    <div>
+      <div class="results-title">Available Charter Experiences</div>
+      <div class="results-count">6 vessels · Sydney Harbour · All dates</div>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterToggle(this, 'all')">All boats</button>
+      <button class="filter-btn" onclick="filterToggle(this, 'small')">👥 Up to 6</button>
+      <button class="filter-btn" onclick="filterToggle(this, 'medium')">👥 7–15</button>
+      <button class="filter-btn" onclick="filterToggle(this, 'large')">👥 16–25</button>
+      <div class="filter-divider"></div>
+      <button class="filter-btn" onclick="filterToggle(this, 'instant')">⚡ Instant Book</button>
+      <button class="filter-btn" onclick="filterToggle(this, 'under600')">💲 Under $600/hr</button>
+      <div class="filter-divider"></div>
+      <select class="sort-select">
+        <option>Sort: Recommended</option>
+        <option>Price: Low to High</option>
+        <option>Rating: Highest</option>
+        <option>Capacity: Largest</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- LISTINGS GRID -->
+  <div class="listings-grid" id="listingsGrid">
+
+    <!-- The Ribbon -->
+    <div class="listing-card" id="card-ribbon" data-capacity="12" data-price="550" data-instant="true">
+      <div class="card-img img-ribbon">
+        <div class="card-compare-check" onclick="toggleCompare(event, 'The Ribbon', 'card-ribbon')">✓</div>
+        <div class="card-img-label"><div class="card-boat-emoji">⛵</div></div>
+        <div class="card-badges">
+          <span class="badge badge-instant">⚡ Instant Book</span>
+          <span class="badge badge-verified">👨‍✈️ Captain Verified</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">The Ribbon</div>
+          <div class="card-rating-wrap">
+            <span class="card-stars">★★★★★</span>
+            <span class="card-rating-num">4.97</span>
+            <span class="card-review-count">(42)</span>
+          </div>
+        </div>
+        <div class="card-desc">Classic harbour cruiser · Up to 12 guests · Circular Quay departure</div>
+        <div class="card-tags">
+          <span class="card-tag">Sunset cruise</span>
+          <span class="card-tag">Birthdays</span>
+          <span class="card-tag">Corporate</span>
+        </div>
+        <div class="card-meta">
+          <span class="meta-item">👥 Up to 12</span>
+          <span class="meta-item">⏱ 2–8 hrs</span>
+          <span class="meta-item">👨‍✈️ Crew incl.</span>
+        </div>
+        <div class="card-bottom-row">
+          <div class="card-price-area">
+            <div class="price-main">$550<span style="font-size:14px; font-weight:500; color:#8898b8">/hr</span></div>
+            <div class="price-sub">Crew & fuel included</div>
+          </div>
+          <button class="book-btn-inst" onclick="openBooking('The Ribbon', 'Classic Harbour Cruiser', 550, true)">Book Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mon Reve -->
+    <div class="listing-card" id="card-monreve" data-capacity="20" data-price="700" data-instant="true">
+      <div class="card-img img-monreve">
+        <div class="card-compare-check" onclick="toggleCompare(event, 'Mon Reve', 'card-monreve')">✓</div>
+        <div class="card-img-label"><div class="card-boat-emoji">🛥️</div></div>
+        <div class="card-badges">
+          <span class="badge badge-instant">⚡ Instant Book</span>
+          <span class="badge badge-verified">👨‍✈️ Captain Verified</span>
+          <span class="badge badge-popular">🔥 Most Popular</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">Mon Reve</div>
+          <div class="card-rating-wrap">
+            <span class="card-stars">★★★★★</span>
+            <span class="card-rating-num">5.0</span>
+            <span class="card-review-count">(67)</span>
+          </div>
+        </div>
+        <div class="card-desc">Luxury motor yacht · Up to 20 guests · Sydney's top-rated vessel</div>
+        <div class="card-tags">
+          <span class="card-tag">Proposals</span>
+          <span class="card-tag">Luxury</span>
+          <span class="card-tag">Events</span>
+        </div>
+        <div class="card-meta">
+          <span class="meta-item">👥 Up to 20</span>
+          <span class="meta-item">⏱ 2–8 hrs</span>
+          <span class="meta-item">👨‍✈️ Crew incl.</span>
+        </div>
+        <div class="card-bottom-row">
+          <div class="card-price-area">
+            <div class="price-main">$700<span style="font-size:14px; font-weight:500; color:#8898b8">/hr</span></div>
+            <div class="price-sub">Crew & fuel included</div>
+          </div>
+          <button class="book-btn-inst" onclick="openBooking('Mon Reve', 'Luxury Motor Yacht', 700, true)">Book Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Birchgrove -->
+    <div class="listing-card" id="card-birchgrove" data-capacity="8" data-price="480" data-instant="true">
+      <div class="card-img img-birchgrove">
+        <div class="card-compare-check" onclick="toggleCompare(event, 'Birchgrove', 'card-birchgrove')">✓</div>
+        <div class="card-img-label"><div class="card-boat-emoji">⛵</div></div>
+        <div class="card-badges">
+          <span class="badge badge-instant">⚡ Instant Book</span>
+          <span class="badge badge-verified">👨‍✈️ Captain Verified</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">Birchgrove</div>
+          <div class="card-rating-wrap">
+            <span class="card-stars">★★★★★</span>
+            <span class="card-rating-num">4.93</span>
+            <span class="card-review-count">(29)</span>
+          </div>
+        </div>
+        <div class="card-desc">Heritage timber vessel · Up to 8 guests · Intimate & characterful</div>
+        <div class="card-tags">
+          <span class="card-tag">Intimate</span>
+          <span class="card-tag">Heritage</span>
+          <span class="card-tag">Weekends</span>
+        </div>
+        <div class="card-meta">
+          <span class="meta-item">👥 Up to 8</span>
+          <span class="meta-item">⏱ 2–6 hrs</span>
+          <span class="meta-item">👨‍✈️ Crew incl.</span>
+        </div>
+        <div class="card-bottom-row">
+          <div class="card-price-area">
+            <div class="price-main">$480<span style="font-size:14px; font-weight:500; color:#8898b8">/hr</span></div>
+            <div class="price-sub">Crew & fuel included</div>
+          </div>
+          <button class="book-btn-inst" onclick="openBooking('Birchgrove', 'Heritage Timber Vessel', 480, true)">Book Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wooden Speedboat -->
+    <div class="listing-card" id="card-speedboat" data-capacity="4" data-price="350" data-instant="true">
+      <div class="card-img img-speedboat">
+        <div class="card-compare-check" onclick="toggleCompare(event, 'The Wooden Speedboat', 'card-speedboat')">✓</div>
+        <div class="card-img-label"><div class="card-boat-emoji">🚤</div></div>
+        <div class="card-badges">
+          <span class="badge badge-instant">⚡ Instant Book</span>
+          <span class="badge badge-verified">👨‍✈️ Captain Verified</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">The Wooden Speedboat</div>
+          <div class="card-rating-wrap">
+            <span class="card-stars">★★★★★</span>
+            <span class="card-rating-num">4.98</span>
+            <span class="card-review-count">(54)</span>
+          </div>
+        </div>
+        <div class="card-desc">Classic timber speedboat · Up to 4 guests · Best value on the harbour</div>
+        <div class="card-tags">
+          <span class="card-tag">Best Value</span>
+          <span class="card-tag">Couples</span>
+          <span class="card-tag">Thrill</span>
+        </div>
+        <div class="card-meta">
+          <span class="meta-item">👥 Up to 4</span>
+          <span class="meta-item">⏱ 1–4 hrs</span>
+          <span class="meta-item">👨‍✈️ Crew incl.</span>
+        </div>
+        <div class="card-bottom-row">
+          <div class="card-price-area">
+            <div class="price-main">$350<span style="font-size:14px; font-weight:500; color:#8898b8">/hr</span></div>
+            <div class="price-sub">Crew & fuel included</div>
+          </div>
+          <button class="book-btn-inst" onclick="openBooking('The Wooden Speedboat', 'Classic Timber Speedboat', 350, true)">Book Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Riviera 50ft -->
+    <div class="listing-card" id="card-riviera" data-capacity="15" data-price="650" data-instant="false">
+      <div class="card-img img-riviera">
+        <div class="card-compare-check" onclick="toggleCompare(event, 'Riviera 50ft', 'card-riviera')">✓</div>
+        <div class="card-img-label"><div class="card-boat-emoji">🛥️</div></div>
+        <div class="card-badges">
+          <span class="badge badge-request">📅 Request</span>
+          <span class="badge badge-verified">👨‍✈️ Captain Verified</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">Riviera 50ft</div>
+          <div class="card-rating-wrap">
+            <span class="card-stars">★★★★★</span>
+            <span class="card-rating-num">4.95</span>
+            <span class="card-review-count">(38)</span>
+          </div>
+        </div>
+        <div class="card-desc">Sports cruiser yacht · Up to 15 guests · Power meets sophistication</div>
+        <div class="card-tags">
+          <span class="card-tag">Corporate</span>
+          <span class="card-tag">Sports</span>
+          <span class="card-tag">Groups</span>
+        </div>
+        <div class="card-meta">
+          <span class="meta-item">👥 Up to 15</span>
+          <span class="meta-item">⏱ 2–8 hrs</span>
+          <span class="meta-item">👨‍✈️ Crew incl.</span>
+        </div>
+        <div class="card-bottom-row">
+          <div class="card-price-area">
+            <div class="price-main">$650<span style="font-size:14px; font-weight:500; color:#8898b8">/hr</span></div>
+            <div class="price-sub">Crew & fuel included</div>
+          </div>
+          <button class="book-btn-req" onclick="openBooking('Riviera 50ft', 'Sports Cruiser Yacht', 650, false)">Request →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sunseeker -->
+    <div class="listing-card" id="card-sunseeker" data-capacity="25" data-price="800" data-instant="false">
+      <div class="card-img img-sunseeker">
+        <div class="card-compare-check" onclick="toggleCompare(event, 'Sunseeker', 'card-sunseeker')">✓</div>
+        <div class="card-img-label"><div class="card-boat-emoji">🛥️</div></div>
+        <div class="card-badges">
+          <span class="badge badge-request">📅 Request</span>
+          <span class="badge badge-verified">👨‍✈️ Captain Verified</span>
+          <span class="badge badge-popular" style="background: rgba(201,168,76,0.15); color: #8b6a1c; border: 1px solid rgba(201,168,76,0.3);">👑 Flagship</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">Sunseeker</div>
+          <div class="card-rating-wrap">
+            <span class="card-stars">★★★★★</span>
+            <span class="card-rating-num">5.0</span>
+            <span class="card-review-count">(23)</span>
+          </div>
+        </div>
+        <div class="card-desc">Sunseeker superyacht · Up to 25 guests · The ultimate Sydney experience</div>
+        <div class="card-tags">
+          <span class="card-tag">Superyacht</span>
+          <span class="card-tag">Flagship</span>
+          <span class="card-tag">Luxury</span>
+        </div>
+        <div class="card-meta">
+          <span class="meta-item">👥 Up to 25</span>
+          <span class="meta-item">⏱ 3–8 hrs</span>
+          <span class="meta-item">👨‍✈️ Full crew</span>
+        </div>
+        <div class="card-bottom-row">
+          <div class="card-price-area">
+            <div class="price-main">$800<span style="font-size:14px; font-weight:500; color:#8898b8">/hr</span></div>
+            <div class="price-sub">Full crew & fuel incl.</div>
+          </div>
+          <button class="book-btn-req" onclick="openBooking('Sunseeker', 'Sunseeker Superyacht', 800, false)">Request →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="reviews-section">
+  <div class="reviews-inner">
+    <div class="reviews-header">
+      <h2 class="reviews-title">What guests are saying</h2>
+      <div class="reviews-aggregate">
+        <div class="reviews-score">4.97</div>
+        <div class="reviews-stars-big">★ ★ ★ ★ ★</div>
+        <div class="reviews-count">Based on 253 verified reviews</div>
+      </div>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar av-blue">S</div>
+          <div class="review-meta">
+            <div class="review-name">Sophie T.</div>
+            <div class="review-vessel">Mon Reve · Sunset Cruise</div>
+          </div>
+          <div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-date">March 2025</div>
+          </div>
+        </div>
+        <div class="review-text">"Absolutely magical. We used Mon Reve for our engagement and Will's team made it completely effortless. The Opera House backdrop as he got down on one knee — I'll never forget it."</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar av-orange">M</div>
+          <div class="review-meta">
+            <div class="review-name">Marcus L.</div>
+            <div class="review-vessel">The Wooden Speedboat · 2hr tour</div>
+          </div>
+          <div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-date">Feb 2025</div>
+          </div>
+        </div>
+        <div class="review-text">"The speedboat is an absolute showstopper. Booked it for my wife's birthday and she literally screamed when she saw it. Flying past the Harbour Bridge in something that beautiful is just unreal."</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar av-purple">C</div>
+          <div class="review-meta">
+            <div class="review-name">Claire D.</div>
+            <div class="review-vessel">Sunseeker · Corporate Charter</div>
+          </div>
+          <div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-date">Jan 2025</div>
+          </div>
+        </div>
+        <div class="review-text">"Took our leadership team of 22 on the Sunseeker for our annual strategy day. 10/10 for everything — the crew were exceptional, catering was top tier, and productivity actually went UP on the water."</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar av-green">J</div>
+          <div class="review-meta">
+            <div class="review-name">James R.</div>
+            <div class="review-vessel">The Ribbon · Birthday Party</div>
+          </div>
+          <div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-date">Dec 2024</div>
+          </div>
+        </div>
+        <div class="review-text">"Booked The Ribbon for my 40th. The booking was instant, confirmation came through in minutes, and the captain was an absolute legend. Worth every single dollar."</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar av-teal">A</div>
+          <div class="review-meta">
+            <div class="review-name">Amelia K.</div>
+            <div class="review-vessel">Birchgrove · Anniversary</div>
+          </div>
+          <div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-date">Nov 2024</div>
+          </div>
+        </div>
+        <div class="review-text">"Birchgrove is simply gorgeous. The timber decks, the attention to detail, the intimacy — it felt like stepping into another era. Our 10th anniversary couldn't have been more perfect."</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar av-red">T</div>
+          <div class="review-meta">
+            <div class="review-name">Tom W.</div>
+            <div class="review-vessel">Riviera 50ft · Client Event</div>
+          </div>
+          <div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-date">Oct 2024</div>
+          </div>
+        </div>
+        <div class="review-text">"Used the Riviera to entertain a major client from overseas. Their jaws dropped. Closed a $2M deal on the water. Best entertainment budget spend of the year by a mile."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE BAR -->
+<div class="compare-bar" id="compareBar">
+  <div class="compare-bar-left">
+    <div class="compare-bar-title">Compare boats:</div>
+    <div class="compare-slots" id="compareSlots">
+      <div class="compare-slot" id="slot0">Add a boat</div>
+      <div class="compare-slot" id="slot1">Add a boat</div>
+      <div class="compare-slot" id="slot2">Add a boat</div>
+    </div>
+  </div>
+  <div style="display:flex; gap:12px; align-items:center;">
+    <button class="compare-clear" onclick="clearCompare()">Clear all</button>
+    <button class="compare-go-btn" onclick="openCompareModal()">Compare →</button>
+  </div>
+</div>
+
+<!-- COMPARE MODAL -->
+<div class="compare-modal-overlay" id="compareModalOverlay">
+  <div class="compare-modal">
+    <div class="compare-modal-header">
+      <div class="compare-modal-title">Boat Comparison</div>
+      <button class="compare-modal-close" onclick="closeCompareModal()">✕</button>
+    </div>
+    <div class="compare-table-wrap">
+      <table class="compare-table" id="compareTable">
+        <!-- filled by JS -->
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="bk-overlay" id="bkOverlay">
+  <div class="bk-modal">
+    <div id="bkFormState">
+      <div class="bk-header">
+        <div>
+          <div class="bk-vessel-name" id="bkName">—</div>
+          <div class="bk-vessel-type" id="bkType">—</div>
+        </div>
+        <button class="bk-close" onclick="closeBooking()">✕</button>
+      </div>
+      <div class="bk-body">
+        <div class="bk-row">
+          <div class="bk-field">
+            <label class="bk-label">Date</label>
+            <input type="date" class="bk-input">
+          </div>
+          <div class="bk-field">
+            <label class="bk-label">Start Time</label>
+            <input type="time" class="bk-input" value="10:00">
+          </div>
+        </div>
+        <div class="bk-row">
+          <div class="bk-field">
+            <label class="bk-label">Duration</label>
+            <select class="bk-input" id="bkDuration" onchange="recalcPrice()">
+              <option value="2">2 hours</option>
+              <option value="3">3 hours</option>
+              <option value="4">4 hours</option>
+              <option value="6">6 hours</option>
+              <option value="8">Full Day (8hrs)</option>
+            </select>
+          </div>
+          <div class="bk-field">
+            <label class="bk-label">Guests</label>
+            <select class="bk-input">
+              <option>2 guests</option>
+              <option>4 guests</option>
+              <option>6 guests</option>
+              <option>10 guests</option>
+              <option>15+ guests</option>
+            </select>
+          </div>
+        </div>
+        <div class="bk-row">
+          <div class="bk-field">
+            <label class="bk-label">First Name</label>
+            <input type="text" class="bk-input" placeholder="First name">
+          </div>
+          <div class="bk-field">
+            <label class="bk-label">Last Name</label>
+            <input type="text" class="bk-input" placeholder="Last name">
+          </div>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label">Email</label>
+          <input type="email" class="bk-input" placeholder="you@email.com">
+        </div>
+        <div class="bk-field">
+          <label class="bk-label">Mobile</label>
+          <input type="tel" class="bk-input" placeholder="+61 4xx xxx xxx">
+        </div>
+
+        <div class="bk-price-block">
+          <div class="bk-price-row">
+            <span id="bkPriceLabel">$550 × 2 hrs</span>
+            <span id="bkPriceSub">$1,100</span>
+          </div>
+          <div class="bk-price-row">
+            <span>Crew & fuel</span>
+            <span>Included ✓</span>
+          </div>
+          <div class="bk-price-row">
+            <span>Total</span>
+            <span id="bkTotal" style="color: var(--ocean)">$1,100</span>
+          </div>
+        </div>
+
+        <button class="bk-submit" id="bkSubmitBtn" onclick="submitBooking()">⚡ Book Now — Instant Confirmation</button>
+
+        <div class="bk-trust">
+          <div class="bk-trust-item">🔒 Secure</div>
+          <div class="bk-trust-item">✓ Free cancel 48h</div>
+          <div class="bk-trust-item">⚡ Instant confirm</div>
+          <div class="bk-trust-item">👨‍✈️ Crew included</div>
+        </div>
+      </div>
+    </div>
+    <div class="bk-success" id="bkSuccess">
+      <div class="bk-success-icon">✓</div>
+      <h2 style="font-size:22px; font-weight:700; margin-bottom:8px;" id="bkSuccessTitle">Booking Confirmed!</h2>
+      <p style="font-size:14px; color:#4a5a7a; margin-bottom:20px;">Confirmation sent to your email. Your captain will contact you 24 hours before departure.</p>
+      <p style="font-size:13px; color:#8898b8;">Sydney Harbour Exclusive · 1800 HARBOUR</p>
+      <button class="bk-submit" style="margin-top:24px;" onclick="closeBooking()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">Sydney Day Charter</div>
+        <div class="footer-brand-sub">by Sydney Harbour Exclusive</div>
+        <div class="footer-brand-desc">The easiest way to book a private harbour charter in Sydney. Instant booking, licensed crew, unforgettable experiences. 2–25 guests welcome.</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Our Fleet</div>
+        <ul class="footer-links">
+          <li><a href="#">The Ribbon</a></li>
+          <li><a href="#">Mon Reve</a></li>
+          <li><a href="#">Birchgrove</a></li>
+          <li><a href="#">The Wooden Speedboat</a></li>
+          <li><a href="#">Riviera 50ft</a></li>
+          <li><a href="#">Sunseeker</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Experiences</div>
+        <ul class="footer-links">
+          <li><a href="#">Sunset Cruises</a></li>
+          <li><a href="#">Proposals</a></li>
+          <li><a href="#">Birthday Parties</a></li>
+          <li><a href="#">Corporate Events</a></li>
+          <li><a href="#">New Year's Eve</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <ul class="footer-links">
+          <li><a href="#">How it works</a></li>
+          <li><a href="#">Cancellation policy</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Gift cards</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Sydney Harbour Exclusive · Sydney Day Charter</div>
+      <div>Circular Quay, Sydney NSW 2000 · ★★★★★ 4.97 (253 reviews)</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // COMPARE FEATURE
+  let compareList = []; // [{name, cardId}]
+
+  function toggleCompare(e, name, cardId) {
+    e.stopPropagation();
+    const card = document.getElementById(cardId);
+    const isSelected = card.classList.contains('compare-selected');
+
+    if (!isSelected && compareList.length >= 3) {
+      alert('Maximum 3 boats to compare. Remove one first.');
+      return;
+    }
+
+    if (isSelected) {
+      compareList = compareList.filter(c => c.cardId !== cardId);
+      card.classList.remove('compare-selected');
+    } else {
+      compareList.push({ name, cardId });
+      card.classList.add('compare-selected');
+    }
+
+    updateCompareBar();
+  }
+
+  function updateCompareBar() {
+    const bar = document.getElementById('compareBar');
+    if (compareList.length === 0) {
+      bar.classList.remove('active');
+      return;
+    }
+    bar.classList.add('active');
+
+    for (let i = 0; i < 3; i++) {
+      const slot = document.getElementById('slot' + i);
+      if (compareList[i]) {
+        slot.className = 'compare-slot filled';
+        slot.innerHTML = compareList[i].name + ' <span class="compare-slot-remove" onclick="removeCompare(\'' + compareList[i].cardId + '\')">✕</span>';
+      } else {
+        slot.className = 'compare-slot';
+        slot.innerHTML = 'Add a boat';
+      }
+    }
+  }
+
+  function removeCompare(cardId) {
+    const card = document.getElementById(cardId);
+    card.classList.remove('compare-selected');
+    compareList = compareList.filter(c => c.cardId !== cardId);
+    updateCompareBar();
+  }
+
+  function clearCompare() {
+    compareList.forEach(c => document.getElementById(c.cardId).classList.remove('compare-selected'));
+    compareList = [];
+    updateCompareBar();
+  }
+
+  const boatData = {
+    'The Ribbon': { capacity: 12, price: '$550/hr', hours: '2–8', type: 'Classic Cruiser', instant: true, crew: true, fuel: true, catering: false, rating: '4.97 ★ (42)' },
+    'Mon Reve': { capacity: 20, price: '$700/hr', hours: '2–8', type: 'Motor Yacht', instant: true, crew: true, fuel: true, catering: true, rating: '5.0 ★ (67)' },
+    'Birchgrove': { capacity: 8, price: '$480/hr', hours: '2–6', type: 'Heritage Timber', instant: true, crew: true, fuel: true, catering: false, rating: '4.93 ★ (29)' },
+    'The Wooden Speedboat': { capacity: 4, price: '$350/hr', hours: '1–4', type: 'Speedboat', instant: true, crew: true, fuel: true, catering: false, rating: '4.98 ★ (54)' },
+    'Riviera 50ft': { capacity: 15, price: '$650/hr', hours: '2–8', type: 'Sports Cruiser', instant: false, crew: true, fuel: true, catering: true, rating: '4.95 ★ (38)' },
+    'Sunseeker': { capacity: 25, price: '$800/hr', hours: '3–8', type: 'Superyacht', instant: false, crew: true, fuel: true, catering: true, rating: '5.0 ★ (23)' },
+  };
+
+  function openCompareModal() {
+    if (compareList.length < 2) {
+      alert('Select at least 2 boats to compare.');
+      return;
+    }
+
+    const boats = compareList.map(c => boatData[c.name] ? { name: c.name, ...boatData[c.name] } : null).filter(Boolean);
+    const rows = [
+      ['Type', b => b.type],
+      ['Max Capacity', b => b.capacity + ' guests'],
+      ['Duration', b => b.hours + ' hours'],
+      ['Price', b => b.price, true],
+      ['Booking Type', b => b.instant ? '<span style="color:#00b96b; font-weight:600">⚡ Instant</span>' : '<span style="color:#f59e0b; font-weight:600">📅 Request</span>'],
+      ['Crew Included', b => b.crew ? '<span class="yes">✓</span>' : '<span class="no">✗</span>'],
+      ['Fuel Included', b => b.fuel ? '<span class="yes">✓</span>' : '<span class="no">✗</span>'],
+      ['Catering Available', b => b.catering ? '<span class="yes">✓</span>' : '<span class="no">✗</span>'],
+      ['Rating', b => b.rating],
+    ];
+
+    let html = '<thead><tr><th></th>' + boats.map(b => '<th>' + b.name + '</th>').join('') + '</tr></thead><tbody>';
+
+    rows.forEach(([label, fn, isPrice]) => {
+      html += '<tr><td>' + label + '</td>' + boats.map(b => '<td' + (isPrice ? ' class="price-cell"' : '') + '>' + fn(b) + '</td>').join('') + '</tr>';
+    });
+
+    html += '<tr><td></td>' + boats.map(b => '<td class="book-cell"><button class="book-btn-inst" style="font-size:12px; padding:8px 16px" onclick="openBooking(\'' + b.name + '\', \'' + b.type + '\', ' + parseInt(b.price) + ', ' + b.instant + '); closeCompareModal();">' + (b.instant ? '⚡ Book Now' : '📅 Request') + '</button></td>').join('') + '</tr>';
+
+    html += '</tbody>';
+    document.getElementById('compareTable').innerHTML = html;
+    document.getElementById('compareModalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCompareModal() {
+    document.getElementById('compareModalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // BOOKING MODAL
+  let currentBookingPrice = 550;
+  let currentInstant = true;
+
+  function openBooking(name, type, price, instant) {
+    currentBookingPrice = price;
+    currentInstant = instant;
+    document.getElementById('bkName').textContent = name;
+    document.getElementById('bkType').textContent = type + ' · Sydney Harbour';
+    document.getElementById('bkFormState').style.display = 'block';
+    document.getElementById('bkSuccess').classList.remove('active');
+    document.getElementById('bkSubmitBtn').textContent = instant ? '⚡ Book Now — Instant Confirmation' : '📅 Send Request';
+    recalcPrice();
+    document.getElementById('bkOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function recalcPrice() {
+    const hrs = parseInt(document.getElementById('bkDuration').value);
+    const total = currentBookingPrice * hrs;
+    document.getElementById('bkPriceLabel').textContent = '$' + currentBookingPrice + ' × ' + hrs + ' hr' + (hrs > 1 ? 's' : '');
+    document.getElementById('bkPriceSub').textContent = '$' + total.toLocaleString();
+    document.getElementById('bkTotal').textContent = '$' + total.toLocaleString();
+  }
+
+  function submitBooking() {
+    const name = document.getElementById('bkName').textContent;
+    document.getElementById('bkSuccessTitle').textContent = currentInstant ? 'Booking Confirmed! 🎉' : 'Request Sent!';
+    document.getElementById('bkFormState').style.display = 'none';
+    document.getElementById('bkSuccess').classList.add('active');
+  }
+
+  function closeBooking() {
+    document.getElementById('bkOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('bkOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeBooking();
+  });
+
+  document.getElementById('compareModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCompareModal();
+  });
+
+  // FILTER
+  function filterToggle(btn, filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.listing-card');
+    cards.forEach(card => {
+      const capacity = parseInt(card.dataset.capacity);
+      const price = parseInt(card.dataset.price);
+      const instant = card.dataset.instant === 'true';
+
+      let show = true;
+      if (filter === 'small') show = capacity <= 6;
+      else if (filter === 'medium') show = capacity >= 7 && capacity <= 15;
+      else if (filter === 'large') show = capacity >= 16;
+      else if (filter === 'instant') show = instant;
+      else if (filter === 'under600') show = price < 600;
+
+      card.style.display = show ? 'block' : 'none';
+    });
+  }
+</script>
+</body>
+</html>
