@@ -172,10 +172,12 @@ export default function LoginPage() {
           }
         })
         .catch((err: unknown) => {
-          const msg = err instanceof Error ? err.message : '';
+          const msg = err instanceof Error ? err.message : String(err);
           // Ignore no-redirect-present errors (normal on fresh page loads)
-          if (msg && !msg.includes('no-auth-event') && !msg.includes('No pending')) {
+          if (msg && !msg.includes('no-auth-event') && !msg.includes('No pending') && !msg.includes('no-redirect-error')) {
+            console.error('[MS login] getRedirectResult error:', msg);
             setError(cleanError(msg));
+            setLoading(false);
           }
         });
     };
