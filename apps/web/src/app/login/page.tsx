@@ -95,7 +95,8 @@ export default function LoginPage() {
     }
   };
 
-  // If already signed in (e.g. after redirect), go straight to dashboard
+  // If already signed in (e.g. after redirect), go straight to dashboard immediately.
+  // Firestore profile check and onboarding routing happen on the dashboard — not here.
   useEffect(() => {
     let attempts = 0;
     const tryAuth = async () => {
@@ -104,37 +105,19 @@ export default function LoginPage() {
         if (attempts++ < 10) setTimeout(tryAuth, 300);
         return;
       }
-      // Only clear stale session if not coming from OAuth redirect
+      // Only set loading if coming from OAuth redirect (code= in URL)
       const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
-      
+
       const unsub = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          // Already signed in — check whitelist then redirect
+          // Already signed in — check whitelist, then redirect immediately (no Firestore wait)
           const userEmail = user.email || '';
           if (BETA_MODE && !isWhitelisted(userEmail)) {
             await auth.signOut();
             setLoading(false);
             return;
           }
-          // Check if new user needs onboarding
-          try {
-            const { getFirebaseDb } = await import('@/lib/firebase');
-            const { doc, getDoc } = await import('firebase/firestore');
-            const db = getFirebaseDb();
-            if (db) {
-              const snap = await getDoc(doc(db, 'users', user.uid));
-              const data = snap.exists() ? snap.data() : null;
-              // Consider onboarding complete if: flag set, OR user has business data, OR user has any prior sessions
-              const onboardingComplete = data?.onboardingComplete === true || 
-                !!data?.businessName || 
-                !!data?.onboarding?.businessName ||
-                !!data?.campaignConfig?.businessName ||
-                !!data?.gmail?.connected ||
-                !!data?.googleCalendarConnected;
-              router.replace(onboardingComplete ? '/dashboard' : '/onboard');
-              return;
-            }
-          } catch { /* fallback to dashboard if Firestore unavailable */ }
+          // Redirect immediately — onboarding check runs on the dashboard
           router.replace('/dashboard');
         } else if (hasOAuthCode) {
           // OAuth callback with no user yet — wait for it

@@ -132,6 +132,49 @@ export default function DashboardPage() {
     lastUpdated: null,
   });
 
+  // Background: ensure Firestore profile exists and check onboarding status.
+  // Runs after mount — non-blocking, won't delay the dashboard render.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const { getFirebaseDb } = await import('@/lib/firebase');
+        const { doc, getDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
+        const db = getFirebaseDb();
+        if (!db) return;
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          // New user — create profile (normally handled by useAuth, but catch edge cases)
+          await setDoc(ref, {
+            email: user.email,
+            displayName: user.displayName,
+            createdAt: serverTimestamp(),
+            lastLoginAt: serverTimestamp(),
+            onboardingComplete: false,
+          });
+          // New user with no profile → send to onboarding
+          router.replace('/onboard');
+          return;
+        }
+        const data = snap.data();
+        const onboardingComplete =
+          data?.onboardingComplete === true ||
+          !!data?.businessName ||
+          !!data?.onboarding?.businessName ||
+          !!data?.campaignConfig?.businessName ||
+          !!data?.gmail?.connected ||
+          !!data?.googleCalendarConnected;
+        if (!onboardingComplete) {
+          router.replace('/onboard');
+        }
+      } catch {
+        // Non-fatal — stay on dashboard
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
+
   // Trigger one-time welcome email on first dashboard load
   useEffect(() => {
     if (!user) return;
