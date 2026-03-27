@@ -79,6 +79,7 @@ export default function LoginPage() {
       const auth = getFirebaseAuth();
       if (!auth) throw new Error('Auth not available');
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || '';
       if (BETA_MODE && !isWhitelisted(userEmail)) {
@@ -193,7 +194,7 @@ export default function LoginPage() {
       if (!auth) throw new Error('Auth not available');
       const provider = new OAuthProvider('microsoft.com');
       const msTenant = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID ?? 'common';
-      provider.setCustomParameters({ tenant: msTenant });
+      provider.setCustomParameters({ prompt: 'select_account', tenant: msTenant });
       provider.addScope('email');
       provider.addScope('profile');
       // Use redirect — more reliable than popup (no popup blocker issues)
