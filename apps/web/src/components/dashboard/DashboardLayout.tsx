@@ -90,6 +90,42 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Poll for email enquiry notifications and inject into chat
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const poll = async () => {
+      try {
+        const db = getFirebaseDb();
+        if (!db) return;
+        const { collection, query, where, getDocs, updateDoc, doc } = await import('firebase/firestore');
+        const q = query(
+          collection(db, 'users', user.uid, 'chatNotifications'),
+          where('read', '==', false)
+        );
+        const snap = await getDocs(q);
+        for (const d of snap.docs) {
+          const data = d.data() as { message: string; type: string };
+          if (data.message && active) {
+            setMessages(p => [...p, {
+              id: `notif-${d.id}`,
+              role: 'assistant' as const,
+              content: data.message,
+              timestamp: new Date().toISOString(),
+              ...(data.type === 'email_enquiry' ? {
+                buttons: [{ label: 'View in Email Guard →', action: 'navigate', url: '/email-guard' }]
+              } : {})
+            }]);
+            await updateDoc(doc(db, 'users', user.uid, 'chatNotifications', d.id), { read: true });
+          }
+        }
+      } catch { /* non-fatal */ }
+    };
+    poll();
+    const interval = setInterval(poll, 30000); // check every 30s
+    return () => { active = false; clearInterval(interval); };
+  }, [user]);
+
   const handleFileUpload = async (file: File) => {
     if (!user) return;
     setUploading(true);
