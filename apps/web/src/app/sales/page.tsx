@@ -759,7 +759,7 @@ function ProspectsSection() {
                     </select>
                     {p.email && (
                       <a
-                        href={`mailto:${p.email}?subject=${encodeURIComponent(p.subject || `Introduction — AKAI for ${p.name}`)}&body=${encodeURIComponent(`Hi,\n\nI wanted to reach out about AKAI — an AI system that helps ${p.name} capture more leads automatically, even when you're busy or closed.\n\nWould you have 10 minutes this week for a quick call?\n\nBest,\nAaron\nAKAI — getakai.ai`)}`}
+                        href={`mailto:${p.email}?subject=${encodeURIComponent(p.subject || `Quick question — ${p.name}`)}&body=${encodeURIComponent(`Hi,\n\nI came across ${p.name} and wanted to reach out directly.\n\nWe built AKAI to solve a specific problem: most businesses lose leads after hours, on weekends, or whenever the team is tied up. AKAI handles those enquiries instantly — qualifies them, books calls, and follows up — so nothing falls through the cracks.\n\nNo extra staff. No missed opportunities.\n\nI think there's a real fit here. Would you be open to a 10-minute call this week? Happy to show you exactly how it works for businesses like yours.\n\nAaron Kersten\nFounder, AKAI\ngetakai.ai | aaron@getakai.ai`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => updateStatus(p.id, 'contacted')}
