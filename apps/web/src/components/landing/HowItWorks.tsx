@@ -45,7 +45,7 @@ export default function HowItWorks() {
 
         {/* Steps */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {STEPS.map((step, i) => (
+          {STEPS.map((step) => (
             <div
               key={step.number}
               className="relative glass card-hover rounded-2xl p-8 overflow-hidden group"

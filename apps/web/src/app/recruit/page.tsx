@@ -10,7 +10,7 @@ function safeSend(sendMessage: (t: string) => void, text: string) {
   try { sendMessage(text); } catch { /* chat not ready */ }
 }
 import { getFirebaseDb } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Candidate {
@@ -116,7 +116,6 @@ function generateScreeningResult(jobTitle: string): ScreeningResult {
 
 // ── Find Candidates Tab ───────────────────────────────────────────────────────
 function FindCandidatesTab() {
-  const { sendMessage } = useDashboardChat();
   const [jobTitle, setJobTitle] = useState('');
   const [location, setLocation] = useState('');
   const [skills, setSkills] = useState('');
@@ -478,7 +477,7 @@ function PostJobTab() {
   });
 
   // JD state
-  const [generatedJD, setGeneratedJD] = useState('');
+  const [_generatedJD, setGeneratedJD] = useState('');
   const [editedJD, setEditedJD] = useState('');
 
   // Platform state

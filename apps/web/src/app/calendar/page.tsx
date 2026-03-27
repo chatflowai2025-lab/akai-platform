@@ -467,6 +467,7 @@ function DayDetailPanel({
 
 // ─── Connect Calendar Banner ──────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConnected: (provider: string) => void }) {
   const [connecting, setConnecting] = useState(false);
 

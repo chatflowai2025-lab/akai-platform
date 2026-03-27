@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import type { ChatMessage } from '@/lib/shared-types';
 import ChatBubble from '@/components/ui/ChatBubble';
 import Button from '@/components/ui/Button';

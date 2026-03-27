@@ -56,7 +56,7 @@ export default function SettingsPage() {
 
   // Business profile
   const [bizForm, setBizForm] = useState({ businessName: '', industry: '', location: '', website: '', phone: '' });
-  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [, setProfileLoaded] = useState(false);
   const [bizSaving, setBizSaving] = useState(false);
   const [bizSaved, setBizSaved] = useState(false);
   const [bizError, setBizError] = useState<string | null>(null);

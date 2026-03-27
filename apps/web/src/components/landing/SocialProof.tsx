@@ -1,11 +1,6 @@
 'use client';
 
-const STATS = [
-  { value: '9', label: 'AI agents working 24/7' },
-  { value: '< 60s', label: 'to first call' },
-  { value: 'AU-first', label: 'Built for Australian SMBs' },
-  { value: '0', label: 'hiring. No training. No waiting.' },
-];
+// STATS reserved for future social-proof metrics section
 
 const TESTIMONIALS = [
   {

@@ -779,7 +779,7 @@ export default function ChatModulePage() {
 
   const handleAddChat = () => setStep('connect');
 
-  const handleConnected = () => {
+  const _handleConnected = () => {
     // Update config with domain, mark enabled, save
     const newConfig: ChatConfig = { ...config, domain: scannedDomain, enabled: true };
     setConfig(newConfig);

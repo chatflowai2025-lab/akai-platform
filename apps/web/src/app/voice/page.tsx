@@ -75,13 +75,7 @@ const DEFAULT_CONFIG: VoiceConfig = {
   active: true,
 };
 
-const MOCK_CALLS: RecentCall[] = [
-  { id: '1', leadName: 'James Mitchell', phone: '+61412345678', outcome: 'Qualified', duration: '3m 22s', time: '10:14 AM' },
-  { id: '2', leadName: 'Sarah Chen', phone: '+61423456789', outcome: 'Not interested', duration: '1m 05s', time: '10:32 AM' },
-  { id: '3', leadName: 'David Nguyen', phone: '+61434567890', outcome: 'Voicemail', duration: '0m 28s', time: '11:01 AM' },
-  { id: '4', leadName: 'Lisa Thompson', phone: '+61445678901', outcome: 'Qualified', duration: '4m 18s', time: '11:45 AM' },
-  { id: '5', leadName: 'Mark Williams', phone: '+61456789012', outcome: 'No answer', duration: '0m 00s', time: '12:03 PM' },
-];
+// MOCK_CALLS reserved for future recent-calls display feature
 
 // ── Outcome badge ─────────────────────────────────────────────────────────
 
@@ -294,7 +288,6 @@ function ScriptStep({ config, setConfig, userProfile, userId, onBack, onNext }: 
 
   const businessName = manualBiz || 'your business';
   const industry = manualIndustry || 'your industry';
-  const location = manualLocation || 'your area';
 
   const [suggestions, setSuggestions] = useState<{ hooks: string[]; questions: string[] } | null>(null);
   const [generating, setGenerating] = useState(false);

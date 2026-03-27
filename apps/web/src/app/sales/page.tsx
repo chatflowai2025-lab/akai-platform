@@ -321,7 +321,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
   const [campaignName, setCampaignName] = useState('Campaign 1');
   const [launching, setLaunching] = useState(false);
   const [dncResult, setDncResult] = useState<{ safe: string[]; blocked: string[] } | null>(null);
-  const [dncChecking, setDncChecking] = useState(false);
+  const [_dncChecking, setDncChecking] = useState(false);
   const [launchResult, setLaunchResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const leadLimit = PLAN_LEAD_LIMITS[plan] ?? 50;
@@ -381,7 +381,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
     e.target.value = '';
   };
 
-  const checkDNC = async () => {
+  const _checkDNC = async () => {
     const phones = uploadedLeads.map(l => l.phone).filter(Boolean);
     if (!phones.length) return;
     setDncChecking(true);

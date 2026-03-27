@@ -4,7 +4,7 @@ import { useEffect, useRef, createContext, useContext, useState, useCallback } f
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
-import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
 import { isSafeMode } from '@/lib/beta-config';

@@ -9,11 +9,8 @@ interface Message {
   content: string;
 }
 
-interface LeadData {
-  name: string;
-  email: string;
-  phone?: string;
-}
+// LeadData interface reserved for future lead capture integration
+// interface LeadData { name: string; email: string; phone?: string; }
 
 interface ClientConfig {
   businessName: string;

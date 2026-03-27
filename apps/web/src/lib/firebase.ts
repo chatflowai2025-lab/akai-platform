@@ -57,13 +57,14 @@ export const db: Firestore = new Proxy({} as Firestore, {
     return (d as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
-export default new Proxy({} as FirebaseApp, {
+const firebaseAppProxy = new Proxy({} as FirebaseApp, {
   get(_target, prop) {
     const app = getFirebaseApp();
     if (!app) throw new Error('Firebase App not available (SSR)');
     return (app as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
+export default firebaseAppProxy;
 
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 

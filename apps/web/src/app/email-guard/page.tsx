@@ -487,7 +487,7 @@ function EmailGuardContent({
   };
 
   const isConnected = msConnected || gmailConnected;
-  const connectedEmail = msEmail || gmailEmail;
+  const _connectedEmail = msEmail || gmailEmail;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
