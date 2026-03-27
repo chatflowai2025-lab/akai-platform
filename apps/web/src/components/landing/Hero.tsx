@@ -438,9 +438,11 @@ export default function Hero() {
         </h1>
 
         {/* Sub */}
-        <p className="fade-up fade-up-3 text-xl text-white/40 max-w-2xl mb-3 leading-relaxed">
-          Sales · Voice · Recruit · Web · Ads · Social · Email Guard · Calendar · Proposals
-        </p>
+        <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-x-4 gap-y-1 max-w-2xl mb-3">
+          {['Sales','Voice','Recruit','Web','Ads','Social','Email Guard','Calendar','Proposals'].map(m => (
+            <span key={m} className="text-sm text-white/40 font-medium">{m}</span>
+          ))}
+        </div>
         <p className="fade-up fade-up-3 text-lg text-white/60 max-w-2xl mb-10 leading-relaxed">
           Describe your business. AKAI builds it, runs it, and grows it —
           <span className="text-white"> while you close deals.</span>
