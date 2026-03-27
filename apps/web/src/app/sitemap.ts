@@ -12,7 +12,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: 'https://getakai.ai/login',
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.5,
+      priority: 0.8,
+    },
+    {
+      url: 'https://getakai.ai/privacy',
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: 'https://getakai.ai/terms',
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
     },
   ];
 }
