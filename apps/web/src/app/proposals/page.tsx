@@ -576,7 +576,7 @@ export default function ProposalsPage() {
 
     // Fallback: mailto
     window.location.href = `mailto:${to}?subject=${subjectEnc}&body=${bodyEnc}`;
-  }, [generatedMarkdown, businessName, industry, website, contactEmail]);
+  }, [generatedMarkdown, businessName, industry, website, contactEmail, user?.email]);
 
   const handleCopy = useCallback(async () => {
     if (!generatedMarkdown) return;

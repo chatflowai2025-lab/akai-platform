@@ -243,7 +243,7 @@ export default function SettingsPage() {
       if (!db) throw new Error('Firestore not available');
 
       // Update main user doc — this is the authoritative write
-      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 8000));
+      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 15000));
       await Promise.race([
         setDoc(doc(db, 'users', user.uid), {
           businessName: bizForm.businessName,
