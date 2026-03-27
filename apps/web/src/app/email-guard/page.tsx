@@ -30,7 +30,7 @@ interface EmailRule {
   triggerType: 'keyword' | 'all';
   keyword?: string;
   action: 'draft' | 'auto-send' | 'hold';
-  notification: 'telegram' | 'sms' | 'none';
+  notification: 'discord' | 'sms' | 'none';
   isDefault?: boolean;
 }
 
@@ -45,14 +45,14 @@ function RulesEngine({ userId }: { userId: string }) {
     triggerType: 'all',
     keyword: '',
     action: 'draft',
-    notification: 'telegram',
+    notification: 'discord',
   });
 
   const DEFAULT_RULE: EmailRule = {
     id: 'default',
     triggerType: 'all',
     action: 'draft',
-    notification: 'telegram',
+    notification: 'discord',
     isDefault: true,
   };
 
@@ -76,7 +76,7 @@ function RulesEngine({ userId }: { userId: string }) {
       const d = await res.json();
       const saved: EmailRule = d.rule || { ...newRule, id: Date.now().toString() };
       setRules(prev => [...prev, saved]);
-      setNewRule({ triggerType: 'all', keyword: '', action: 'draft', notification: 'telegram' });
+      setNewRule({ triggerType: 'all', keyword: '', action: 'draft', notification: 'discord' });
       setShowAddForm(false);
     } catch {
       // silently add locally
@@ -95,7 +95,7 @@ function RulesEngine({ userId }: { userId: string }) {
   };
 
   const actionLabel = (a: string) => ({ draft: 'Draft proposal', 'auto-send': 'Auto-send', hold: 'Hold' })[a] || a;
-  const notifLabel = (n: string) => ({ telegram: 'Notify Telegram', sms: 'Notify SMS', none: 'No notification' })[n] || n;
+  const notifLabel = (n: string) => ({ discord: 'Notify Discord', sms: 'Notify SMS', none: 'No notification' })[n] || n;
   const triggerLabel = (r: EmailRule) => r.triggerType === 'all' ? 'All enquiries' : `Keyword: "${r.keyword}"`;
 
   const allRules = [DEFAULT_RULE, ...rules];
@@ -156,10 +156,10 @@ function RulesEngine({ userId }: { userId: string }) {
               <label className="text-xs text-gray-600 block mb-1">Notification</label>
               <select
                 value={newRule.notification}
-                onChange={e => setNewRule(r => ({ ...r, notification: e.target.value as 'telegram' | 'sms' | 'none' }))}
+                onChange={e => setNewRule(r => ({ ...r, notification: e.target.value as 'discord' | 'sms' | 'none' }))}
                 className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D4AF37] transition"
               >
-                <option value="telegram">Notify Telegram</option>
+                <option value="discord">Notify Discord</option>
                 <option value="sms">Notify SMS</option>
                 <option value="none">No notification</option>
               </select>
