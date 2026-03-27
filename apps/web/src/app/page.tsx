@@ -12,7 +12,7 @@ import Footer from '@/components/landing/Footer';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
-const INITIAL: Msg = { role: 'assistant', content: "Hey! I'm AK. Ask me anything about AKAI — pricing, how it works, or just tell me what your business needs." };
+const INITIAL: Msg = { role: 'assistant', content: "Hey! I'm AK — your AI Business Partner. Ask me anything about AKAI — pricing, how it works, or just tell me what your business needs." };
 
 function HomepageChat() {
   const [open, setOpen] = useState(false);
@@ -52,7 +52,7 @@ function HomepageChat() {
           <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1f1f1f] bg-[#0d0d0d]">
             <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-black text-sm">AK</div>
             <div>
-              <p className="text-sm font-bold text-white">AK — AKAI</p>
+              <p className="text-sm font-bold text-white">AK — Your AI Business Partner</p>
               <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /><span className="text-[10px] text-gray-500">Online now</span></div>
             </div>
             <button onClick={() => setOpen(false)} className="ml-auto text-gray-500 hover:text-white transition text-lg leading-none">×</button>
