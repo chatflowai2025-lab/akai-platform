@@ -95,11 +95,132 @@ function QuickAction({
   );
 }
 
-// ── Activity Feed ─────────────────────────────────────────────────────────
-// Must be rendered inside DashboardLayout so useDashboardChat() works.
+// ── Pipeline helpers ──────────────────────────────────────────────────────
 
-function ActivityFeed({ leads }: { leads: Lead[] }) {
+function timeSince(dateStr?: string): string {
+  if (!dateStr) return '';
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  } catch { return ''; }
+}
+
+function getLeadColumn(lead: Lead): 'new' | 'called' | 'qualified' | 'booked' {
+  if (lead.meeting_booked || lead.status === 'booked') return 'booked';
+  if (lead.status === 'qualified') return 'qualified';
+  if (lead.call_made || lead.status === 'contacted' || lead.status === 'called') return 'called';
+  return 'new';
+}
+
+// ── Pipeline Board ────────────────────────────────────────────────────────
+
+interface PipelineBoardProps {
+  leads: Lead[];
+  onStatusChange: (leadId: string, status: string, meetingBooked?: boolean) => void;
+}
+
+interface LeadCardProps {
+  lead: Lead;
+  onStatusChange: (leadId: string, status: string, meetingBooked?: boolean) => void;
+}
+
+function LeadCard({ lead, onStatusChange }: LeadCardProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const statusColors: Record<string, string> = {
+    new: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+    contacted: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    called: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    qualified: 'bg-green-500/10 text-green-400 border-green-500/20',
+    booked: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  };
+
+  const currentStatus = lead.meeting_booked ? 'booked' : (lead.status || 'new');
+  const colorClass = statusColors[currentStatus] || statusColors.new;
+
+  return (
+    <>
+      <button
+        onClick={() => setModalOpen(true)}
+        className="w-full text-left p-3 bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl hover:border-[#D4AF37]/30 transition-colors group"
+      >
+        <div className="flex items-start gap-2 mb-2">
+          <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">
+            {(lead.name || '?')[0].toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">{lead.name || 'Unknown'}</p>
+            {lead.phone && <p className="text-[11px] text-gray-500 truncate">{lead.phone}</p>}
+            {lead.email && <p className="text-[11px] text-gray-600 truncate">{lead.email}</p>}
+          </div>
+        </div>
+        <div className="flex items-center justify-between mt-1.5">
+          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${colorClass}`}>
+            {currentStatus}
+          </span>
+          {lead.created_at && (
+            <span className="text-[10px] text-gray-600" suppressHydrationWarning>
+              {timeSince(lead.created_at)}
+            </span>
+          )}
+        </div>
+      </button>
+
+      {/* Status update modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setModalOpen(false)}>
+          <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 w-full max-w-xs" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-sm">{lead.name || 'Lead'}</h3>
+              <button onClick={() => setModalOpen(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+            {lead.phone && <p className="text-xs text-gray-500 mb-1">📞 {lead.phone}</p>}
+            {lead.email && <p className="text-xs text-gray-600 mb-4">✉️ {lead.email}</p>}
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Move to column</p>
+            <div className="space-y-2">
+              {[
+                { label: 'New Lead', status: 'new', meetingBooked: false },
+                { label: 'Called', status: 'contacted', meetingBooked: false },
+                { label: 'Qualified', status: 'qualified', meetingBooked: false },
+                { label: 'Booked', status: 'booked', meetingBooked: true },
+              ].map(opt => (
+                <button
+                  key={opt.status}
+                  onClick={() => {
+                    if (lead.id) onStatusChange(lead.id, opt.status, opt.meetingBooked);
+                    setModalOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm border transition-colors ${
+                    currentStatus === opt.status
+                      ? 'border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37]'
+                      : 'border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#3a3a3a]'
+                  }`}
+                >
+                  {opt.label}
+                  {currentStatus === opt.status && ' ✓'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function PipelineBoard({ leads, onStatusChange }: PipelineBoardProps) {
   const { sendMessage } = useDashboardChat();
+
+  const columns = [
+    { id: 'new', label: 'New Lead', color: 'border-gray-600/30 text-gray-400', dot: 'bg-gray-400' },
+    { id: 'called', label: 'Called', color: 'border-blue-500/30 text-blue-400', dot: 'bg-blue-400' },
+    { id: 'qualified', label: 'Qualified', color: 'border-green-500/30 text-green-400', dot: 'bg-green-400' },
+    { id: 'booked', label: 'Booked', color: 'border-purple-500/30 text-purple-400', dot: 'bg-purple-400' },
+  ];
 
   if (!leads || leads.length === 0) {
     return (
@@ -107,7 +228,7 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
         <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4 text-2xl">
           📭
         </div>
-        <p className="text-white/60 font-semibold text-sm">No calls made yet.</p>
+        <p className="text-white/60 font-semibold text-sm">No leads yet.</p>
         <p className="text-gray-600 text-xs mt-2 max-w-[260px]">
           Add leads above and launch your first campaign to get Sophie calling.
         </p>
@@ -134,44 +255,30 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
   }
 
   return (
-    <div className="space-y-2">
-      {leads.slice(0, 10).map((lead, i) => (
-        <div
-          key={lead.id ?? i}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#0d0d0d] border border-[#1a1a1a] hover:border-[#2a2a2a] transition-colors"
-        >
-          <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-sm flex-shrink-0">
-            {lead.meeting_booked ? '📅' : lead.call_made ? '📞' : '🎯'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-white/70 truncate">
-              {lead.meeting_booked
-                ? 'Meeting booked'
-                : lead.call_made
-                ? 'Call completed'
-                : 'New lead captured'}
-            </p>
-            {lead.created_at && (
-              <p className="text-[11px] text-gray-600 mt-0.5" suppressHydrationWarning>
-                {(() => { try { return new Date(lead.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch { return ''; } })()}
-              </p>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {columns.map(col => {
+        const colLeads = leads.filter(l => getLeadColumn(l) === col.id);
+        return (
+          <div key={col.id} className="flex flex-col gap-2">
+            <div className={`flex items-center gap-2 pb-2 border-b ${col.color}`}>
+              <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+              <span className="text-xs font-semibold uppercase tracking-wider">{col.label}</span>
+              <span className="ml-auto text-xs opacity-60">{colLeads.length}</span>
+            </div>
+            {colLeads.length === 0 ? (
+              <div className="flex items-center justify-center py-8 border border-dashed border-[#2a2a2a] rounded-xl">
+                <p className="text-xs text-gray-700 text-center px-2">No leads here yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {colLeads.map((lead, i) => (
+                  <LeadCard key={lead.id ?? i} lead={lead} onStatusChange={onStatusChange} />
+                ))}
+              </div>
             )}
           </div>
-          <div className="flex-shrink-0">
-            <span
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                lead.status === 'qualified'
-                  ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                  : lead.status === 'contacted'
-                  ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                  : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-              }`}
-            >
-              {lead.status ?? 'new'}
-            </span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -821,10 +928,11 @@ export default function SalesPage() {
           </div>
         </section>
 
-        {/* Recent activity */}
+        {/* CRM Pipeline Board */}
         <section id="leads">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Recent activity</h2>
+            <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pipeline</h2>
+            <span className="text-xs text-gray-600">{leads.length} total lead{leads.length !== 1 ? 's' : ''}</span>
           </div>
           <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-4 min-h-[160px]">
             {statsLoading ? (
@@ -832,7 +940,22 @@ export default function SalesPage() {
                 <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
-              <ActivityFeed leads={leads} />
+              <PipelineBoard
+                leads={leads}
+                onStatusChange={(leadId, status, meetingBooked) => {
+                  setLeads(prev => prev.map(l =>
+                    l.id === leadId
+                      ? { ...l, status, meeting_booked: meetingBooked ?? l.meeting_booked, call_made: (status === 'contacted' || status === 'called' || status === 'qualified' || meetingBooked) ? true : l.call_made }
+                      : l
+                  ));
+                  // Persist to Railway
+                  fetch(`${RAILWAY_API}/api/leads/${leadId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+                    body: JSON.stringify({ status, meeting_booked: meetingBooked }),
+                  }).catch(() => {});
+                }}
+              />
             )}
           </div>
         </section>

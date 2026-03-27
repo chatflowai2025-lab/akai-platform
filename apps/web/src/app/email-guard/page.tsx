@@ -24,6 +24,203 @@ interface Enquiry {
   matchedRule?: string;
 }
 
+interface EmailRule {
+  id?: string;
+  triggerType: 'keyword' | 'all';
+  keyword?: string;
+  action: 'draft' | 'auto-send' | 'hold';
+  notification: 'telegram' | 'sms' | 'none';
+  isDefault?: boolean;
+}
+
+// ── Rules Engine UI ───────────────────────────────────────────────────────
+
+function RulesEngine({ userId }: { userId: string }) {
+  const [rules, setRules] = useState<EmailRule[]>([]);
+  const [loadingRules, setLoadingRules] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newRule, setNewRule] = useState<Omit<EmailRule, 'id'>>({
+    triggerType: 'all',
+    keyword: '',
+    action: 'draft',
+    notification: 'telegram',
+  });
+
+  const DEFAULT_RULE: EmailRule = {
+    id: 'default',
+    triggerType: 'all',
+    action: 'draft',
+    notification: 'telegram',
+    isDefault: true,
+  };
+
+  useEffect(() => {
+    fetch(`${RAILWAY}/api/email/rules/${userId}`, { headers: { 'x-api-key': API_KEY } })
+      .then(r => r.json())
+      .then(d => setRules(d.rules || []))
+      .catch(() => setRules([]))
+      .finally(() => setLoadingRules(false));
+  }, [userId]);
+
+  const saveRule = async () => {
+    if (newRule.triggerType === 'keyword' && !newRule.keyword?.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`${RAILWAY}/api/email/rules/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+        body: JSON.stringify(newRule),
+      });
+      const d = await res.json();
+      const saved: EmailRule = d.rule || { ...newRule, id: Date.now().toString() };
+      setRules(prev => [...prev, saved]);
+      setNewRule({ triggerType: 'all', keyword: '', action: 'draft', notification: 'telegram' });
+      setShowAddForm(false);
+    } catch {
+      // silently add locally
+      setRules(prev => [...prev, { ...newRule, id: Date.now().toString() }]);
+      setShowAddForm(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteRule = async (id: string) => {
+    setRules(prev => prev.filter(r => r.id !== id));
+    fetch(`${RAILWAY}/api/email/rules/${userId}/${id}`, {
+      method: 'DELETE', headers: { 'x-api-key': API_KEY },
+    }).catch(() => {});
+  };
+
+  const actionLabel = (a: string) => ({ draft: 'Draft proposal', 'auto-send': 'Auto-send', hold: 'Hold' })[a] || a;
+  const notifLabel = (n: string) => ({ telegram: 'Notify Telegram', sms: 'Notify SMS', none: 'No notification' })[n] || n;
+  const triggerLabel = (r: EmailRule) => r.triggerType === 'all' ? 'All enquiries' : `Keyword: "${r.keyword}"`;
+
+  const allRules = [DEFAULT_RULE, ...rules];
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Rules Engine</h2>
+        <button
+          onClick={() => setShowAddForm(v => !v)}
+          className="text-xs px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg font-semibold hover:bg-[#D4AF37]/20 transition"
+        >
+          + Add rule
+        </button>
+      </div>
+
+      {/* Add rule form */}
+      {showAddForm && (
+        <div className="bg-[#111] border border-[#D4AF37]/20 rounded-xl p-4 mb-4 space-y-3">
+          <p className="text-xs text-[#D4AF37] font-semibold uppercase tracking-wider">New Rule</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Trigger</label>
+              <select
+                value={newRule.triggerType}
+                onChange={e => setNewRule(r => ({ ...r, triggerType: e.target.value as 'keyword' | 'all' }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D4AF37] transition"
+              >
+                <option value="all">All enquiries</option>
+                <option value="keyword">Keyword match</option>
+              </select>
+            </div>
+            {newRule.triggerType === 'keyword' && (
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">Keyword</label>
+                <input
+                  type="text"
+                  value={newRule.keyword}
+                  onChange={e => setNewRule(r => ({ ...r, keyword: e.target.value }))}
+                  placeholder="e.g. quote, urgent"
+                  className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                />
+              </div>
+            )}
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Action</label>
+              <select
+                value={newRule.action}
+                onChange={e => setNewRule(r => ({ ...r, action: e.target.value as 'draft' | 'auto-send' | 'hold' }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D4AF37] transition"
+              >
+                <option value="draft">Draft proposal</option>
+                <option value="auto-send">Auto-send</option>
+                <option value="hold">Hold</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 block mb-1">Notification</label>
+              <select
+                value={newRule.notification}
+                onChange={e => setNewRule(r => ({ ...r, notification: e.target.value as 'telegram' | 'sms' | 'none' }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D4AF37] transition"
+              >
+                <option value="telegram">Notify Telegram</option>
+                <option value="sms">Notify SMS</option>
+                <option value="none">No notification</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={saveRule}
+              disabled={saving || (newRule.triggerType === 'keyword' && !newRule.keyword?.trim())}
+              className="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 transition disabled:opacity-40"
+            >
+              {saving ? 'Saving…' : 'Save Rule'}
+            </button>
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="px-4 py-2 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs hover:text-white transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Rules list */}
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+        {loadingRules ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="divide-y divide-[#1a1a1a]">
+            {allRules.map((rule, i) => (
+              <div key={rule.id ?? i} className="flex items-center gap-3 px-4 py-3">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${rule.isDefault ? 'bg-[#D4AF37]' : 'bg-blue-400'}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white font-medium truncate">
+                    {triggerLabel(rule)}
+                    <span className="text-gray-500 mx-1.5">→</span>
+                    {actionLabel(rule.action)}
+                    <span className="text-gray-500 mx-1.5">→</span>
+                    <span className="text-gray-400">{notifLabel(rule.notification)}</span>
+                  </p>
+                  {rule.isDefault && <p className="text-[11px] text-gray-600 mt-0.5">Default rule — always active</p>}
+                </div>
+                {!rule.isDefault && rule.id && (
+                  <button
+                    onClick={() => deleteRule(rule.id!)}
+                    className="text-gray-600 hover:text-red-400 transition text-sm flex-shrink-0"
+                    title="Delete rule"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ── Help button — rendered inside DashboardLayout so context is available ──
 function ConnectHelp() {
   const { sendMessage } = useDashboardChat();
@@ -71,6 +268,30 @@ function EmailGuardContent({
   const [polling, setPolling] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sending, setSending] = useState<string | null>(null);
+  const [firstPollBanner, setFirstPollBanner] = useState<'checking' | 'done' | null>(null);
+  const [firstPollCount, setFirstPollCount] = useState<number | null>(null);
+
+  // Auto-poll on first connect — gives instant gratification
+  const triggerFirstPoll = useCallback(async () => {
+    setFirstPollBanner('checking');
+    try {
+      await fetch(`${RAILWAY}/api/email/poll/${user.uid}`, {
+        method: 'POST',
+        headers: { 'x-api-key': API_KEY },
+      });
+      const d = await fetch(`${RAILWAY}/api/email/enquiries/${user.uid}`, {
+        headers: { 'x-api-key': API_KEY },
+      }).then(r => r.json());
+      const found: Enquiry[] = d.enquiries || [];
+      setEnquiries(found);
+      setFirstPollCount(found.length);
+      setFirstPollBanner('done');
+      // Auto-hide banner after 8 seconds
+      setTimeout(() => setFirstPollBanner(null), 8000);
+    } catch {
+      setFirstPollBanner(null);
+    }
+  }, [user.uid]);
 
   // Handle OAuth return params (passed in from the Suspense boundary below)
   useEffect(() => {
@@ -79,6 +300,7 @@ function EmailGuardContent({
       setGmailEmail(decodeURIComponent(initialEmailParam));
       router.replace('/email-guard');
       safeSend(sendMessage, 'My inbox is now connected — what can you do with it?');
+      triggerFirstPoll();
       return;
     }
     if (initialErrorParam) {
@@ -106,6 +328,7 @@ function EmailGuardContent({
             setMsEmail(d.email || null);
             router.replace('/email-guard');
             safeSend(sendMessage, 'My inbox is now connected — what can you do with it?');
+            triggerFirstPoll();
           } else {
             setConnectError(d.error || 'Connection failed.');
           }
@@ -234,6 +457,24 @@ function EmailGuardContent({
         {/* ConnectHelp uses useDashboardChat() — works here because we're inside DashboardLayout */}
         <ConnectHelp />
       </header>
+
+      {/* First-poll banner */}
+      {firstPollBanner === 'checking' && (
+        <div className="flex items-center gap-3 px-8 py-3 bg-[#D4AF37]/10 border-b border-[#D4AF37]/20">
+          <div className="w-3.5 h-3.5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <p className="text-sm text-[#D4AF37] font-medium">Checking your inbox for the first time…</p>
+        </div>
+      )}
+      {firstPollBanner === 'done' && (
+        <div className="flex items-center gap-3 px-8 py-3 bg-green-500/10 border-b border-green-500/20">
+          <span className="text-green-400 text-sm flex-shrink-0">✓</span>
+          <p className="text-sm text-green-400 font-medium">
+            {firstPollCount && firstPollCount > 0
+              ? `Found ${firstPollCount} enquir${firstPollCount === 1 ? 'y' : 'ies'} — proposals are ready below.`
+              : "No new enquiries — we'll check again in 5 minutes."}
+          </p>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-3xl">
 
@@ -367,6 +608,9 @@ function EmailGuardContent({
             </p>
           </section>
         )}
+
+        {/* ── Rules Engine ─────────────────────────────────────────────── */}
+        <RulesEngine userId={user.uid} />
 
         {/* ── Enquiries list (shown when connected) ────────────────────── */}
         {isConnected && (

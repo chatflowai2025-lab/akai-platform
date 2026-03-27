@@ -983,24 +983,76 @@ function SetupWizard({
 
 // ── Active View ───────────────────────────────────────────────────────────
 
-function ActiveView({ config, setConfig, onEditScript, onEditSchedule }: {
+interface CampaignStatus {
+  totalCalls?: number;
+  qualified?: number;
+  meetingsBooked?: number;
+  avgDuration?: string;
+  status?: string;
+  recentCalls?: RecentCall[];
+}
+
+function ActiveView({ config, setConfig, onEditScript, onEditSchedule, userId }: {
   config: VoiceConfig;
   setConfig: (c: VoiceConfig) => void;
   onEditScript: () => void;
   onEditSchedule: () => void;
+  userId: string;
 }) {
   const { sendMessage } = useDashboardChat();
+  const [campaignStatus, setCampaignStatus] = useState<CampaignStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${RAILWAY_API}/api/campaign/status?userId=${userId}`, {
+      headers: { 'x-api-key': RAILWAY_API_KEY },
+    })
+      .then(r => r.json())
+      .then(d => setCampaignStatus(d))
+      .catch(() => setCampaignStatus(null))
+      .finally(() => setStatusLoading(false));
+  }, [userId]);
+
+  const recentCalls: RecentCall[] = (campaignStatus?.recentCalls && campaignStatus.recentCalls.length > 0)
+    ? campaignStatus.recentCalls.slice(0, 10)
+    : [];
+
+  // Campaign status badge
+  const campaignBadge = (() => {
+    const s = campaignStatus?.status;
+    if (!s || s === 'no_leads') return { label: 'No leads loaded', style: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', dot: 'bg-yellow-400' };
+    if (s === 'paused') return { label: 'Paused', style: 'bg-red-500/10 text-red-400 border-red-500/20', dot: 'bg-red-400' };
+    return { label: 'Active', style: 'bg-green-500/10 text-green-400 border-green-500/20', dot: 'bg-green-400 animate-pulse' };
+  })();
+
+  const stats = [
+    { label: 'Calls today', value: statusLoading ? '—' : String(campaignStatus?.totalCalls ?? 0), icon: '📞' },
+    { label: 'Qualified', value: statusLoading ? '—' : String(campaignStatus?.qualified ?? 0), icon: '✅' },
+    { label: 'Meetings booked', value: statusLoading ? '—' : String(campaignStatus?.meetingsBooked ?? 0), icon: '📅' },
+    { label: 'Avg duration', value: statusLoading ? '—' : (campaignStatus?.avgDuration ?? '—'), icon: '⏱' },
+  ];
 
   return (
     <div className="flex-1 space-y-6">
+      {/* Campaign status banner */}
+      <div className="flex items-center justify-between bg-[#111] border border-[#1f1f1f] rounded-xl px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${campaignBadge.style}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${campaignBadge.dot}`} />
+            {campaignBadge.label}
+          </span>
+          {campaignStatus?.status === 'no_leads' && (
+            <a href="/sales#lead-upload" className="text-xs text-[#D4AF37] hover:underline transition">
+              Upload leads →
+            </a>
+          )}
+        </div>
+        {statusLoading && <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />}
+      </div>
+
       {/* Campaign stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Calls today', value: '12', icon: '📞' },
-          { label: 'Qualified', value: '3', icon: '✅' },
-          { label: 'Meetings booked', value: '1', icon: '📅' },
-          { label: 'Avg duration', value: '2m 45s', icon: '⏱' },
-        ].map(stat => (
+        {stats.map(stat => (
           <div key={stat.label} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">{stat.label}</span>
@@ -1016,20 +1068,40 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule }: {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Recent calls</h3>
         </div>
-        <div className="space-y-2">
-          {MOCK_CALLS.map(call => (
-            <div key={call.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#0d0d0d] border border-[#1a1a1a]">
-              <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-sm flex-shrink-0">
-                {call.leadName[0]}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white">{call.leadName}</p>
-                <p className="text-xs text-gray-600">{call.phone} · {call.time} · {call.duration}</p>
-              </div>
-              <OutcomeBadge outcome={call.outcome} />
+        {statusLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : recentCalls.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center text-xl">🎙️</div>
+            <div>
+              <p className="text-white/60 font-semibold text-sm">Sophie hasn&apos;t made any calls yet</p>
+              <p className="text-gray-600 text-xs mt-1">Upload leads in Sales to get started</p>
             </div>
-          ))}
-        </div>
+            <a
+              href="/sales#lead-upload"
+              className="text-xs text-[#D4AF37] border border-[#D4AF37]/30 px-3 py-1.5 rounded-lg hover:bg-[#D4AF37]/10 transition"
+            >
+              Upload leads →
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {recentCalls.map(call => (
+              <div key={call.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#0d0d0d] border border-[#1a1a1a]">
+                <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-sm flex-shrink-0">
+                  {call.leadName[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white">{call.leadName}</p>
+                  <p className="text-xs text-gray-600">{call.phone} · {call.time} · {call.duration}</p>
+                </div>
+                <OutcomeBadge outcome={call.outcome} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Controls */}
@@ -1038,7 +1110,7 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule }: {
           onClick={onEditScript}
           className="px-4 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 rounded-xl text-sm font-semibold hover:text-white hover:border-[#3a3a3a] transition-colors"
         >
-          ✏️ Edit Sophie's script
+          ✏️ Edit Sophie&apos;s script
         </button>
         <button
           onClick={onEditSchedule}

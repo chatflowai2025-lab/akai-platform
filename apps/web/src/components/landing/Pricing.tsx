@@ -1,50 +1,53 @@
 const PLANS = [
   {
     name: 'Starter',
-    price: '$297',
+    price: '$147',
     period: '/mo',
     description: 'One AI module, fully operational.',
     features: [
-      '1 AKAI module',
-      '500 leads/mo',
-      'AI automation',
-      'Basic dashboard',
+      '1 AKAI module of your choice',
+      'Social is the most popular starter',
+      'AI automation included',
+      'Full dashboard access',
       'Email support',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Start free trial →',
     highlight: false,
+    badge: null,
   },
   {
     name: 'Growth',
-    price: '$597',
+    price: '$497',
     period: '/mo',
     description: 'Three modules, full automation stack.',
     features: [
-      '3 AKAI modules',
-      '2,000 leads/mo',
-      'Team seats (5)',
+      '3 AKAI modules of your choice',
+      'Sales + Email Guard + Social recommended',
+      'Team seats (up to 5)',
       'Advanced analytics',
       'Priority support',
-      'Onboarding call',
+      'Onboarding call included',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Start free trial →',
     highlight: true,
+    badge: 'Most Popular',
   },
   {
     name: 'Scale',
-    price: '$1,197',
+    price: '$1,497',
     period: '/mo',
-    description: 'All 5 modules, unlimited everything.',
+    description: 'All 9 modules. Unlimited everything.',
     features: [
-      'All 5 AKAI modules',
-      'Unlimited leads',
+      'All 9 AKAI modules',
+      'Sales, Voice, Web, Email Guard, Calendar',
+      'Proposals, Ads, Recruit & Social',
       'Unlimited team seats',
       'Dedicated account manager',
-      'White-label option',
-      'SLA guarantee',
+      'White-label option + SLA guarantee',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Start free trial →',
     highlight: false,
+    badge: null,
   },
 ];
 
@@ -82,20 +85,21 @@ export default function Pricing() {
               )}
 
               {/* Most Popular badge */}
-              {plan.highlight && (
+              {plan.badge && (
                 <div className="absolute -top-px left-1/2 -translate-x-1/2">
                   <div className="bg-[#D4AF37] text-black text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-b-lg">
-                    Most Popular
+                    {plan.badge}
                   </div>
                 </div>
               )}
 
-              <div className="relative mt-4">
+              <div className="relative mt-4 flex flex-col flex-1">
                 {/* Plan name */}
                 <div className="text-xs text-white/40 uppercase tracking-widest mb-3">{plan.name}</div>
 
                 {/* Price */}
                 <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-xs text-white/30 font-semibold mr-0.5">from</span>
                   <span className={`text-5xl font-black tracking-tight ${plan.highlight ? 'gradient-text' : 'text-white'}`}>
                     {plan.price}
                   </span>
@@ -120,7 +124,7 @@ export default function Pricing() {
 
                 {/* CTA */}
                 <a
-                  href="/onboard"
+                  href="/login?tab=signup"
                   className={`block w-full text-center py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-200 ${
                     plan.highlight
                       ? 'bg-[#D4AF37] text-black hover:opacity-90 glow-gold-sm'
@@ -134,13 +138,21 @@ export default function Pricing() {
           ))}
         </div>
 
-        {/* Enterprise line */}
-        <p className="text-center text-white/20 text-sm mt-10">
-          Need a custom plan?{' '}
-          <a href="mailto:hello@getakai.ai" className="text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors">
+        {/* Enterprise / Custom */}
+        <div className="mt-6 rounded-2xl glass border border-white/[0.06] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="text-white font-bold text-sm">Custom — Enterprise</p>
+            <p className="text-white/40 text-sm mt-0.5">
+              Multi-location, white-label, custom integrations, volume pricing. We&apos;ll build a plan around your team.
+            </p>
+          </div>
+          <a
+            href="mailto:hello@getakai.ai"
+            className="flex-shrink-0 px-5 py-2.5 rounded-xl border border-[#D4AF37]/40 text-[#D4AF37] text-sm font-semibold hover:bg-[#D4AF37]/10 transition-all"
+          >
             Talk to us →
           </a>
-        </p>
+        </div>
       </div>
     </section>
   );

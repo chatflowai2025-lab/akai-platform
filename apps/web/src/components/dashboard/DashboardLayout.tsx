@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef, createContext, useContext, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
 import { isSafeMode } from '@/lib/beta-config';
+import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import type { ChatMessage } from '@/lib/shared-types';
 
 // ── Chat context ──────────────────────────────────────────────────────────────
@@ -35,6 +36,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
   const { user } = useAuth();
 
   // Handle messages injected from page buttons (e.g. quick-action buttons)
@@ -173,6 +175,9 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     setLoading(true);
 
     try {
+      // Derive currentModule from pathname (e.g. /email-guard → 'email-guard')
+      const currentModule = pathname?.split('/').filter(Boolean)[0] || '';
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -181,6 +186,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
           state: chatState,
           history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
           userContext,
+          currentModule,
         }),
       });
       let data: { state?: unknown; message?: string; buttons?: unknown; action?: string; url?: string; error?: string } = {};
@@ -202,7 +208,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     } finally {
       setLoading(false);
     }
-  }, [loading, chatState, messages, router, user]);
+  }, [loading, chatState, messages, router, user, pathname]);
 
   const send = () => { const t = input.trim(); setInput(''); sendRaw(t); };
 
@@ -466,8 +472,9 @@ export default function DashboardLayout({
 
   if (loading || !user) {
     return (
-      <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      <div className="h-screen w-screen bg-[#0a0a0a] flex overflow-hidden">
+        <div className="w-[220px] flex-shrink-0 bg-[#080808] border-r border-[#1f1f1f] animate-pulse" />
+        <PageSkeleton />
       </div>
     );
   }

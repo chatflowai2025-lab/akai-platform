@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
 import AITeam from '@/components/landing/AITeam';
+import SocialProof from '@/components/landing/SocialProof';
 import HowItWorks from '@/components/landing/HowItWorks';
 import Modules from '@/components/landing/Modules';
 import Pricing from '@/components/landing/Pricing';
@@ -112,6 +113,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <AITeam />
+      <SocialProof />
       <HowItWorks />
       <Modules />
       <Pricing />

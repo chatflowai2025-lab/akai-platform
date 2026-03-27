@@ -139,10 +139,12 @@ export default function DashboardPage() {
 
     async function fetchStats() {
       try {
-        // Get Firebase ID token for authenticated requests
+        // Get Firebase ID token — needed by leads route to identify user
+        const idToken = await user!.getIdToken().catch(() => '');
         const authHeaders = {
           'x-api-key': API_KEY,
           'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         };
 
         // Fetch leads and campaign status in parallel

@@ -91,6 +91,7 @@ interface ChatRequest {
   history?: ChatMessage[];
   userContext?: Record<string, string>;
   state?: Record<string, unknown>;
+  currentModule?: string;
 }
 
 // ── Smart mock response engine ────────────────────────────────────────────────
@@ -542,7 +543,16 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [], userContext = {} } = body;
+    const { message, history = [], userContext = {}, currentModule } = body;
+
+    // Build module-specific context suffix
+    const moduleContextMap: Record<string, string> = {
+      sales: '\n\nMODULE CONTEXT: User is currently in the Sales module. Prioritise responses about Sophie AI, outbound calling, lead qualification, campaign configuration, and pipeline management. Suggest Sales-specific actions first.',
+      voice: '\n\nMODULE CONTEXT: User is currently in the Voice module. Prioritise responses about Sophie\'s script, voice settings, call hours, Bland.ai configuration, and test calls. Help them configure and optimise Sophie.',
+      web: '\n\nMODULE CONTEXT: User is currently in the Web module. Prioritise responses about website audits, speed/SEO/mobile scores, AI content generation, and website fixes. Suggest running an audit or fixing specific issues.',
+      'email-guard': '\n\nMODULE CONTEXT: User is currently in the Email Guard module. Prioritise responses about inbox connection, proposal generation, email rules (draft/auto-send/hold), and enquiry management.',
+    };
+    const moduleContext = currentModule && moduleContextMap[currentModule] ? moduleContextMap[currentModule] : '';
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
@@ -563,7 +573,7 @@ export async function POST(req: NextRequest) {
       const response = await client.messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 400,
-        system: SYSTEM_PROMPT + contextBlock,
+        system: SYSTEM_PROMPT + contextBlock + moduleContext,
         messages,
       });
       const text = response.content[0].type === 'text' ? response.content[0].text : '';
