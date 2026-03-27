@@ -140,9 +140,7 @@ export default function DashboardPage() {
     async function fetchStats() {
       try {
         // Get Firebase ID token for authenticated requests
-        const idToken = await user!.getIdToken();
         const authHeaders = {
-          Authorization: `Bearer ${idToken}`,
           'x-api-key': API_KEY,
           'Content-Type': 'application/json',
         };
