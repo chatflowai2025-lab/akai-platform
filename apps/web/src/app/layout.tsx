@@ -6,13 +6,30 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AKAI — The AI Business Operating System',
-  description: 'Describe your business. We\'ll build it, run it, and grow it. AI-powered sales, recruitment, web, ads, and social — all in one platform.',
-  keywords: ['AI business', 'AI sales', 'AI recruitment', 'AI website builder', 'AKAI'],
+  title: 'AKAI — Your AI Business Partner',
+  description: 'AKAI runs your business 24/7 with 9 specialised AI agents. Sales, Recruitment, Web, Ads, Social, Email and more. Start free.',
+  keywords: ['AI business', 'AI sales', 'AI recruitment', 'AI website builder', 'AKAI', 'AI agents', 'business automation'],
+  metadataBase: new URL('https://getakai.ai'),
+  alternates: {
+    canonical: 'https://getakai.ai',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'AKAI — The AI Business Operating System',
-    description: 'Your AI business partner. Sales, recruitment, web, ads, social — all automated.',
+    title: 'AKAI — Your AI Business Partner',
+    description: 'AKAI runs your business 24/7 with 9 specialised AI agents. Sales, Recruitment, Web, Ads, Social, Email and more. Start free.',
+    url: 'https://getakai.ai',
+    siteName: 'AKAI',
+    images: [{ url: 'https://getakai.ai/og-image.png', width: 1200, height: 630, alt: 'AKAI — Your AI Business Partner' }],
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AKAI — Your AI Business Partner',
+    description: 'AKAI runs your business 24/7 with 9 specialised AI agents. Start free.',
+    images: ['https://getakai.ai/og-image.png'],
   },
 };
 
