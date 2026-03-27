@@ -94,9 +94,9 @@ function HomepageChat() {
       {/* Toggle button */}
       <div className="flex items-center gap-3">
         {!open && (
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end bg-black/60 backdrop-blur-sm rounded-xl px-3 py-1.5">
             <span className="text-sm font-bold text-white leading-none">AK</span>
-            <span className="text-[10px] text-white/40 leading-none whitespace-nowrap">Your AI Business Partner</span>
+            <span className="text-xs text-white/70 leading-none whitespace-nowrap">Your AI Business Partner</span>
           </div>
         )}
         <button
