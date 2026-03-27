@@ -1259,6 +1259,7 @@ function VoicePageInner() {
   const [config, setConfig] = useState<VoiceConfig>(DEFAULT_CONFIG);
   const [configLoading, setConfigLoading] = useState(true);
   const [editMode, setEditMode] = useState<'none' | 'script' | 'schedule'>('none');
+  const [configSaveError, setConfigSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -1292,6 +1293,7 @@ function VoicePageInner() {
 
   const saveConfig = async (newConfig: VoiceConfig) => {
     setConfig(newConfig);
+    setConfigSaveError(null);
     if (!user) return;
     try {
       const db = getFirebaseDb();
@@ -1300,6 +1302,7 @@ function VoicePageInner() {
       await setDoc(ref, newConfig);
     } catch (err) {
       console.error('[voice] Failed to save config', err);
+      setConfigSaveError('Settings saved locally but failed to sync. Changes may not persist.');
     }
   };
 
@@ -1344,6 +1347,12 @@ function VoicePageInner() {
         </div>
       </header>
 
+      {configSaveError && (
+        <div className="px-8 py-2 bg-red-500/10 border-b border-red-500/20 text-red-400 text-xs flex items-center justify-between">
+          <span>⚠️ {configSaveError}</span>
+          <button onClick={() => setConfigSaveError(null)} className="text-red-400/60 hover:text-red-400 ml-4">×</button>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto p-8">
         {configLoading ? (
           <div className="flex items-center justify-center h-64">
