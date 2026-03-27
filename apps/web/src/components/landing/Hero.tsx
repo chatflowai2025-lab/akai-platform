@@ -449,33 +449,25 @@ export default function Hero() {
         </p>
 
         {/* CTA row */}
-        <div className="fade-up fade-up-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-2xl">
-          <Button href={ctaHref} size="lg" className="glow-gold-sm w-full sm:w-auto min-w-[200px] min-h-[52px]">
+        <div className="fade-up fade-up-4 flex flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-3xl">
+          <Button href={ctaHref} size="lg" className="glow-gold-sm min-w-[180px] min-h-[52px]">
             Start Free Trial →
           </Button>
           <button
             onClick={() => setModal('demo')}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-8 py-3.5 text-base w-full sm:w-auto min-w-[200px] min-h-[52px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20"
           >
             🎙️ Try Live Agent Now
           </button>
           <button
             onClick={() => setModal('healthcheck')}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-8 py-3.5 text-base w-full sm:w-auto min-w-[220px] min-h-[52px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
           >
             Free Digital Health Check
           </button>
-          <div className="flex gap-3 w-full sm:w-auto justify-center">
-            <button
-              onClick={() => setModal('youtube')}
-              className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-white/10 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5"
-            >
-              ▶ Watch a demo
-            </button>
-            <Button href="#how-it-works" variant="secondary" size="lg" className="min-h-[52px]">
-              How it works
-            </Button>
-          </div>
+          <Button href="#how-it-works" variant="secondary" size="lg" className="min-h-[52px]">
+            How it works
+          </Button>
         </div>
 
         {/* Social proof stats bar */}
