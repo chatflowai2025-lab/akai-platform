@@ -232,7 +232,7 @@ export default function SettingsPage() {
         console.error('[SETTINGS] load error', err);
       }
     })();
-  }, [user]);
+  }, [user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveBizProfile = async () => {
     if (!user?.uid || bizSaving) return;
