@@ -937,9 +937,9 @@ function PostJobTab() {
                     {(postedJob.salaryMin || postedJob.salaryMax) && (
                       <p suppressHydrationWarning className="text-xs text-[#D4AF37] mt-1 font-semibold">
                         {postedJob.salaryMin && postedJob.salaryMax
-                          ? `$${Number(postedJob.salaryMin).toLocaleString()} – $${Number(postedJob.salaryMax).toLocaleString()} AUD`
+                          ? (() => { try { return `$${Number(postedJob.salaryMin).toLocaleString()} – $${Number(postedJob.salaryMax).toLocaleString()} AUD`; } catch { return `$${postedJob.salaryMin} – $${postedJob.salaryMax} AUD`; } })()
                           : postedJob.salaryMin
-                          ? `From $${Number(postedJob.salaryMin).toLocaleString()} AUD`
+                          ? (() => { try { return `From $${Number(postedJob.salaryMin).toLocaleString()} AUD`; } catch { return `From $${postedJob.salaryMin} AUD`; } })()
                           : ''}
                       </p>
                     )}

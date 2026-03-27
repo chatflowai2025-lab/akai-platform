@@ -6,6 +6,8 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
+function safeSend(fn: (t: string) => void, text: string) { try { fn(text); } catch { /* chat not ready */ } }
+
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
 const RAILWAY_API_KEY = 'aiclozr_api_key_2026_prod';
 
@@ -73,7 +75,7 @@ function QuickAction({
 }) {
   const { sendMessage } = useDashboardChat();
   const handleClick = chatPrompt
-    ? (e: React.MouseEvent) => { e.preventDefault(); sendMessage(chatPrompt); }
+    ? (e: React.MouseEvent) => { e.preventDefault(); safeSend(sendMessage, chatPrompt); }
     : undefined;
   return (
     <a
@@ -121,7 +123,7 @@ function ActivityFeed({ leads }: { leads: Lead[] }) {
             ↑ Add leads now
           </a>
           <button
-            onClick={() => sendMessage('I want to launch a new outbound sales campaign')}
+            onClick={() => safeSend(sendMessage, 'I want to launch a new outbound sales campaign')}
             className="px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
           >
             Ask AK to launch campaign →
@@ -545,7 +547,7 @@ function CTASection() {
           <p className="text-gray-500 text-sm mt-1">Upload leads above or ask AK to get Sophie calling for you.</p>
         </div>
         <button
-          onClick={() => sendMessage('I want to close more deals — help me launch a campaign with Sophie AI')}
+          onClick={() => safeSend(sendMessage, 'I want to close more deals — help me launch a campaign with Sophie AI')}
           className="relative flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
         >
           Ask AK →

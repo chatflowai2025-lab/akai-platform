@@ -76,6 +76,7 @@ export default function SettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [notifSaved, setNotifSaved] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
 
   // Sophie voice
   const [selectedVoice, setSelectedVoice] = useState('sophie-au');
@@ -263,6 +264,7 @@ export default function SettingsPage() {
   const saveNotifications = async () => {
     if (!user?.uid || notifSaving) return;
     setNotifSaving(true);
+    setNotifError(null);
     try {
       const db = getFirebaseDb();
       if (db) {
@@ -284,6 +286,8 @@ export default function SettingsPage() {
       setTimeout(() => setNotifSaved(false), 2500);
     } catch (err) {
       console.error('[SETTINGS] save notif error', err);
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setNotifError(`Save failed: ${msg}. Please try again.`);
     } finally {
       setNotifSaving(false);
     }
@@ -710,6 +714,9 @@ export default function SettingsPage() {
               'Save Notifications'
             )}
           </button>
+          {notifError && (
+            <p className="text-red-400 text-xs mt-2">{notifError}</p>
+          )}
         </Section>
 
         {/* Sophie AI Voice Settings */}

@@ -429,7 +429,7 @@ function DayDetailPanel({
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f]">
         <div>
           <p suppressHydrationWarning className="text-sm font-bold text-white">
-            {d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}
+            {(() => { try { return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }); } catch { return ''; } })()}
           </p>
           <p className="text-xs text-gray-500">{dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}</p>
         </div>

@@ -62,7 +62,7 @@ type Tone = typeof TONES[number];
 
 function formatScheduledDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  try { return d.toLocaleDateString('en-AU', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return d.toISOString().slice(0,16); }
 }
 
 // ── Coming Soon Modals ────────────────────────────────────────────────────────
