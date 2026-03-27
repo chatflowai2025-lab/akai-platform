@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
 /* ─── Types ─── */
-type ModalType = 'demo' | 'healthcheck' | 'youtube' | 'trial' | null;
+type ModalType = 'demo' | 'healthcheck' | 'youtube' | null;
 
 /* ─── Industry Sophie preview ─── */
 const INDUSTRY_PREVIEWS: Record<string, string> = {
@@ -26,60 +26,6 @@ function SophiePreview({ industry, businessName }: { industry: string; businessN
       <p className="text-[11px] text-green-400 font-semibold mb-1.5 uppercase tracking-wider">📞 Sophie will say:</p>
       <p className="text-sm text-white/80 italic leading-relaxed">&ldquo;{preview}&rdquo;</p>
     </div>
-  );
-}
-
-/* ─── Trial Capture Modal ─── */
-function TrialCaptureModal({ onClose }: { onClose: () => void }) {
-  const [form, setForm] = useState({ name: '', email: '', business: '', phone: '' });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('sending');
-    try {
-      await fetch('/api/trial-interest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      setStatus('done');
-    } catch {
-      setStatus('error');
-    }
-  };
-
-  if (status === 'done') return (
-    <Overlay onClose={onClose}>
-      <div className="text-center py-8">
-        <p className="text-4xl mb-4">🎉</p>
-        <h2 className="text-xl font-bold text-white mb-2">You&apos;re on the list!</h2>
-        <p className="text-white/50 text-sm mb-6">We&apos;ll be in touch within 24 hours to get you started.</p>
-        <button onClick={onClose} className="bg-[#D4AF37] text-black font-bold px-6 py-3 rounded-xl text-sm">Close</button>
-      </div>
-    </Overlay>
-  );
-
-  return (
-    <Overlay onClose={onClose}>
-      <h2 className="text-xl font-bold text-white mb-1">Start your free trial</h2>
-      <p className="text-white/40 text-sm mb-6">Leave your details and we&apos;ll connect with you to get AKAI set up for your business.</p>
-      <form onSubmit={submit} className="space-y-3">
-        <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-          placeholder="Your name *" className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#D4AF37]" />
-        <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-          placeholder="Email address *" className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#D4AF37]" />
-        <input value={form.business} onChange={e => setForm(f => ({ ...f, business: e.target.value }))}
-          placeholder="Business name" className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#D4AF37]" />
-        <input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-          placeholder="Phone number" className="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#D4AF37]" />
-        {status === 'error' && <p className="text-red-400 text-sm">Something went wrong — please try again.</p>}
-        <button type="submit" disabled={status === 'sending'}
-          className="w-full bg-[#D4AF37] hover:bg-[#F59E0B] text-black font-bold py-3 rounded-xl transition text-sm disabled:opacity-50">
-          {status === 'sending' ? 'Sending...' : 'Get Started →'}
-        </button>
-      </form>
-    </Overlay>
   );
 }
 
@@ -455,7 +401,7 @@ function SuccessState({ msg, sub }: { msg: string; sub: string }) {
 }
 
 /* ─── Main Hero ─── */
-export default function Hero() {
+export default function Hero({ onOpenCapture }: { onOpenCapture?: () => void }) {
   const { user, loading } = useAuth();
   const [modal, setModal] = useState<ModalType>(null);
 
@@ -464,7 +410,6 @@ export default function Hero() {
       {modal === 'demo' && <DemoModal onClose={() => setModal(null)} />}
       {modal === 'healthcheck' && <HealthCheckModal onClose={() => setModal(null)} />}
       {modal === 'youtube' && <YouTubeModal onClose={() => setModal(null)} />}
-      {modal === 'trial' && <TrialCaptureModal onClose={() => setModal(null)} />}
 
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 overflow-hidden dot-grid">
 
@@ -504,7 +449,7 @@ export default function Hero() {
         <div className="fade-up fade-up-4 flex flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-3xl">
           <Button
             href={!loading && user ? '/dashboard' : undefined}
-            onClick={!loading && user ? undefined : () => setModal('trial')}
+            onClick={!loading && user ? undefined : () => onOpenCapture?.()}
             size="lg"
             className="glow-gold-sm min-w-[180px] min-h-[52px]"
           >
@@ -517,7 +462,7 @@ export default function Hero() {
             🎙️ Try Live Agent Now
           </button>
           <button
-            onClick={() => setModal('healthcheck')}
+            onClick={() => onOpenCapture?.()}
             className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
           >
             Free Digital Health Check

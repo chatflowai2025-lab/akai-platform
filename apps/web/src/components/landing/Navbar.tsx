@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function Navbar() {
+export default function Navbar({ onOpenCapture }: { onOpenCapture?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const { user, loading } = useAuth();
 
@@ -13,8 +13,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const ctaHref = !loading && user ? '/dashboard' : '/login';
 
   return (
     <nav
@@ -37,21 +35,26 @@ export default function Navbar() {
           <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
         </div>
 
-        {/* CTA — Sign In / Sign Up when logged out, Dashboard when logged in */}
+        {/* CTA — logged-out visitors get capture modal, logged-in users go to dashboard */}
         <div className="flex items-center gap-3">
           {!loading && !user && (
             <>
               <a href="/login" className="text-sm text-white/60 hover:text-white transition-colors duration-200 hidden md:block">
                 Sign In
               </a>
-              <Button href="/login?tab=signup" size="sm">
-                Create Account →
+              <Button onClick={() => onOpenCapture?.()} size="sm">
+                Get Started →
               </Button>
             </>
           )}
-          {(loading || user) && (
-            <Button href={ctaHref} size="sm">
-              {!loading && user ? 'Dashboard →' : 'Get Started →'}
+          {!loading && user && (
+            <Button href="/dashboard" size="sm">
+              Dashboard →
+            </Button>
+          )}
+          {loading && (
+            <Button onClick={() => onOpenCapture?.()} size="sm">
+              Get Started →
             </Button>
           )}
         </div>

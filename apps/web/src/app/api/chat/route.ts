@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { checkRequestScope, type UserPlan } from '@/lib/safety-gates';
 
 const SYSTEM_PROMPT = `You are AK, the AI brain inside AKAI — a fully autonomous AI business operating system that runs businesses 24/7.
 
@@ -558,6 +559,17 @@ export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
     const { message, history = [], userContext = {}, currentModule } = body;
+
+    // ── Safety gate ───────────────────────────────────────────────────────────
+    const userId = userContext.uid ?? userContext.userId ?? 'anonymous';
+    const userPlan = (userContext.plan ?? 'trial') as UserPlan;
+    const safetyCheck = checkRequestScope(userId, message, userPlan);
+    if (!safetyCheck.allowed) {
+      return NextResponse.json(
+        { error: safetyCheck.reason },
+        { status: 403 }
+      );
+    }
 
     // Build module-specific context suffix
     const moduleContextMap: Record<string, string> = {

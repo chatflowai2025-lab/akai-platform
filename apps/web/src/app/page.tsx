@@ -9,6 +9,7 @@ import HowItWorks from '@/components/landing/HowItWorks';
 import Modules from '@/components/landing/Modules';
 import Pricing from '@/components/landing/Pricing';
 import Footer from '@/components/landing/Footer';
+import LeadCaptureModal from '@/components/LeadCaptureModal';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
@@ -116,17 +117,20 @@ function HomepageChat() {
 }
 
 export default function Home() {
+  const [captureOpen, setCaptureOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
-      <Navbar />
-      <Hero />
+      <Navbar onOpenCapture={() => setCaptureOpen(true)} />
+      <Hero onOpenCapture={() => setCaptureOpen(true)} />
       <AITeam />
       <SocialProof />
       <HowItWorks />
       <Modules />
-      <Pricing />
+      <Pricing onOpenCapture={() => setCaptureOpen(true)} />
       <Footer />
       <HomepageChat />
+      <LeadCaptureModal isOpen={captureOpen} onClose={() => setCaptureOpen(false)} />
     </main>
   );
 }
