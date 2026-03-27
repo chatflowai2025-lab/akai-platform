@@ -596,7 +596,7 @@ function SetupWizard({
       .join(' ');
 
     try {
-      await fetch(`${RAILWAY_API}/api/campaign/launch`, {
+      const res = await fetch(`${RAILWAY_API}/api/campaign/launch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
         body: JSON.stringify({
@@ -606,6 +606,11 @@ function SetupWizard({
           campaignName: 'Sophie Test Call',
         }),
       });
+      if (!res.ok) {
+        console.error('[test call] non-ok response', res.status);
+        setTestCallState('failed');
+        return;
+      }
     } catch (err) {
       console.error('[test call]', err);
       setTestCallState('failed');

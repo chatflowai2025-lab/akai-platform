@@ -117,7 +117,7 @@ function DemoModal({ onClose }: { onClose: () => void }) {
                   label="Industry *"
                   value={form.industry}
                   onChange={v => set('industry', v)}
-                  options={['Trades', 'Real Estate', 'Legal', 'Medical', 'Finance', 'Retail', 'Other']}
+                  options={['Trades', 'Real Estate', 'Legal', 'Medical & Health', 'Finance', 'Retail', 'Hospitality', 'Construction', 'Technology', 'Other']}
                 />
                 <div className="flex gap-3">
                   <BackBtn onClick={() => setStep(1)} />
