@@ -111,7 +111,7 @@ export default function SettingsPage() {
   const [forwardCopied, setForwardCopied] = useState(false);
 
   const webhookUrl = 'https://api-server-production-2a27.up.railway.app/api/mail-guard/inbound';
-  const forwardAddress = 'inbound@aiclozr.com';
+  const forwardAddress = 'inbound@getakai.ai';
 
   const copy = (text: string, setCopied: (v: boolean) => void) => {
     navigator.clipboard.writeText(text);
