@@ -41,14 +41,16 @@ function YouTubeModal({ onClose }: { onClose: () => void }) {
           ×
         </button>
         <h2 className="text-lg font-bold text-white mb-3 pr-8">See AKAI in action</h2>
-        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-          <iframe
-            className="absolute inset-0 w-full h-full rounded-xl"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
-            title="AKAI Demo"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+        <div className="relative w-full rounded-xl overflow-hidden bg-black/60" style={{ paddingBottom: '56.25%' }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#D4AF37] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+            <p className="text-white/60 text-sm font-medium">Demo video coming soon</p>
+            <p className="text-white/30 text-xs">Book a live walkthrough — we&apos;ll show you exactly how AKAI works for your business</p>
+          </div>
         </div>
       </div>
     </Overlay>
@@ -370,7 +372,7 @@ function NavBtn({
       onClick={onClick}
       disabled={disabled}
       style={!gold && accent && !disabled ? { background: accent } : undefined}
-      className={`flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed
+      className={`flex-1 min-h-[44px] py-3 px-4 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed
         ${gold ? 'bg-[#D4AF37] text-black hover:opacity-90' : accent ? 'text-white hover:opacity-90' : 'bg-white/10 text-white hover:bg-white/20'}`}
     >
       {label}
@@ -382,7 +384,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="px-4 py-2.5 rounded-xl text-sm text-white/40 hover:text-white border border-white/10 hover:border-white/30 transition-all"
+      className="min-h-[44px] px-4 py-3 rounded-xl text-sm text-white/40 hover:text-white border border-white/10 hover:border-white/30 transition-all"
     >
       ← Back
     </button>
@@ -436,59 +438,61 @@ export default function Hero() {
         </h1>
 
         {/* Sub */}
-        <p className="fade-up fade-up-3 text-xl text-white/40 max-w-xl mb-3 leading-relaxed">
-          Sales · Recruit · Web · Ads · Social · Email
+        <p className="fade-up fade-up-3 text-xl text-white/40 max-w-2xl mb-3 leading-relaxed">
+          Sales · Voice · Recruit · Web · Ads · Social · Email Guard · Calendar · Proposals
         </p>
         <p className="fade-up fade-up-3 text-lg text-white/60 max-w-2xl mb-10 leading-relaxed">
           Describe your business. AKAI builds it, runs it, and grows it —
           <span className="text-white"> while you close deals.</span>
         </p>
 
-        {/* CTA row — 4 buttons */}
-        <div className="fade-up fade-up-4 flex flex-wrap justify-center gap-4 items-center mb-20">
-          <Button href={ctaHref} size="lg" className="glow-gold-sm min-w-[200px]">
+        {/* CTA row */}
+        <div className="fade-up fade-up-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-2xl">
+          <Button href={ctaHref} size="lg" className="glow-gold-sm w-full sm:w-auto min-w-[200px] min-h-[52px]">
             Start Free Trial →
           </Button>
           <button
             onClick={() => setModal('demo')}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-10 py-4 text-lg min-w-[200px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-8 py-3.5 text-base w-full sm:w-auto min-w-[200px] min-h-[52px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20"
           >
             🎙️ Try Live Agent Now
           </button>
           <button
             onClick={() => setModal('healthcheck')}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-10 py-4 text-lg min-w-[240px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-8 py-3.5 text-base w-full sm:w-auto min-w-[220px] min-h-[52px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
           >
             Free Digital Health Check
           </button>
-          <button
-            onClick={() => setModal('youtube')}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-8 py-4 text-lg border border-white/10 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5"
-          >
-            ▶ Watch a demo
-          </button>
-          <Button href="#how-it-works" variant="secondary" size="lg">
-            See how it works
-          </Button>
+          <div className="flex gap-3 w-full sm:w-auto justify-center">
+            <button
+              onClick={() => setModal('youtube')}
+              className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-white/10 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5"
+            >
+              ▶ Watch a demo
+            </button>
+            <Button href="#how-it-works" variant="secondary" size="lg" className="min-h-[52px]">
+              How it works
+            </Button>
+          </div>
         </div>
 
         {/* Social proof stats bar */}
         <div className="fade-up fade-up-4 w-full max-w-3xl">
           <div className="glass rounded-2xl px-8 py-5 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.06]">
             <div className="flex flex-col items-center gap-1 px-4">
-              <span className="text-3xl font-black text-white tracking-tight">7,000+</span>
-              <span className="text-xs text-white/40 uppercase tracking-wider">Businesses</span>
+              <span className="text-3xl font-black text-white tracking-tight">9</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">AI Specialists</span>
             </div>
             <div className="flex flex-col items-center gap-1 px-4">
-              <span className="text-3xl font-black text-white tracking-tight">94%</span>
-              <span className="text-xs text-white/40 uppercase tracking-wider">Response Rate</span>
+              <span className="text-3xl font-black text-white tracking-tight">24/7</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">Always Running</span>
             </div>
             <div className="flex flex-col items-center gap-1 px-4">
               <span className="text-3xl font-black gradient-text tracking-tight">&lt;60s</span>
-              <span className="text-xs text-white/40 uppercase tracking-wider">Response Time</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">First Response</span>
             </div>
             <div className="flex flex-col items-center gap-1 px-4">
-              <span className="text-3xl font-black gradient-text tracking-tight">$297</span>
+              <span className="text-3xl font-black gradient-text tracking-tight">$147</span>
               <span className="text-xs text-white/40 uppercase tracking-wider">From /mo</span>
             </div>
           </div>

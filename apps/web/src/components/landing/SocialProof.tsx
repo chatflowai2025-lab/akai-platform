@@ -9,25 +9,28 @@ const STATS = [
 
 const TESTIMONIALS = [
   {
-    quote: 'AKAI found us 12 qualified leads in the first week.',
+    quote: 'Set up the Sales module on a Tuesday. By Thursday Sophie had already booked 3 consultations. I wasn\'t expecting it to work that fast.',
     name: 'Michael T.',
-    company: 'Plumbing business',
+    company: 'Plumbing & Gas',
     location: 'Sydney',
     initials: 'MT',
+    tag: 'Early Access',
   },
   {
-    quote: 'Sophie called 50 leads while I slept. 8 booked meetings by morning.',
+    quote: 'I was sceptical about AI calling leads, but Sophie handled objections better than some of my junior staff. 8 meetings booked while I was asleep.',
     name: 'Sarah L.',
-    company: 'Mortgage broker',
+    company: 'Mortgage Broker',
     location: 'Melbourne',
     initials: 'SL',
+    tag: 'Early Access',
   },
   {
-    quote: "The web audit found 3 gaps we'd missed for 2 years.",
+    quote: 'The Digital Health Check flagged a missing CTA on our homepage — we\'d had it wrong for 2 years. Fixed it in an afternoon, bounce rate dropped 18%.',
     name: 'James K.',
-    company: 'Recruitment agency',
+    company: 'Recruitment Agency',
     location: 'Brisbane',
     initials: 'JK',
+    tag: 'Early Access',
   },
 ];
 
@@ -61,9 +64,12 @@ export default function SocialProof() {
 
         {/* Testimonials */}
         <div>
-          <p className="text-center text-xs text-white/20 uppercase tracking-widest mb-8 font-semibold">
-            What our customers say
-          </p>
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <p className="text-center text-xs text-white/20 uppercase tracking-widest font-semibold">
+              Early Access Feedback
+            </p>
+            <span className="text-[10px] bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">Beta</span>
+          </div>
           <div className="grid md:grid-cols-3 gap-4">
             {TESTIMONIALS.map(t => (
               <div
@@ -71,12 +77,17 @@ export default function SocialProof() {
                 className="glass rounded-2xl p-6 flex flex-col gap-4 card-hover"
               >
                 {/* Stars */}
-                <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map(s => (
-                    <svg key={s} className="w-3.5 h-3.5 text-[#D4AF37]" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-0.5">
+                    {[1,2,3,4,5].map(s => (
+                      <svg key={s} className="w-3.5 h-3.5 text-[#D4AF37]" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  {t.tag && (
+                    <span className="text-[10px] text-white/20 border border-white/10 px-2 py-0.5 rounded-full">{t.tag}</span>
+                  )}
                 </div>
 
                 {/* Quote */}

@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import TrialBadge from '@/components/dashboard/TrialBadge';
 import { useAuth } from '@/hooks/useAuth';
 
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
@@ -131,6 +132,22 @@ export default function DashboardPage() {
     lastUpdated: null,
   });
 
+  // Trigger one-time welcome email on first dashboard load
+  useEffect(() => {
+    if (!user) return;
+    // Fire-and-forget — don't await, don't block dashboard
+    fetch('/api/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email || '',
+        name: user.displayName || '',
+      }),
+    }).catch(() => {}); // Non-fatal
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
+
   // Fetch real sales stats from Railway API
   useEffect(() => {
     if (!user) return;
@@ -230,7 +247,8 @@ export default function DashboardPage() {
             </h1>
             <p className="text-xs text-gray-600 mt-0.5">{userEmail}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <TrialBadge user={user} />
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/10">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs text-green-400 font-semibold">Sales live</span>

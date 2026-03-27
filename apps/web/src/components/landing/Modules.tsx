@@ -158,7 +158,7 @@ export default function Modules() {
             <span className="gradient-text">Every function.</span>
           </h2>
           <p className="text-white/40 text-lg max-w-xl mx-auto">
-            Each module is a complete AI-powered business function. Use one or combine all five.
+            Each module is a complete AI-powered business function. Use one or combine all nine.
           </p>
         </div>
 

@@ -115,6 +115,18 @@ export default function LoginPage() {
             setLoading(false);
             return;
           }
+          // Check if new user needs onboarding
+          try {
+            const { getFirebaseDb } = await import('@/lib/firebase');
+            const { doc, getDoc } = await import('firebase/firestore');
+            const db = getFirebaseDb();
+            if (db) {
+              const snap = await getDoc(doc(db, 'users', user.uid));
+              const onboardingComplete = snap.exists() && snap.data()?.onboardingComplete === true;
+              router.replace(onboardingComplete ? '/dashboard' : '/onboard');
+              return;
+            }
+          } catch { /* fallback to dashboard if Firestore unavailable */ }
           router.replace('/dashboard');
         } else if (hasOAuthCode) {
           // OAuth callback with no user yet — wait for it

@@ -236,44 +236,53 @@ export default function SettingsPage() {
   const saveBizProfile = async () => {
     if (!user?.uid || bizSaving) return;
     setBizSaving(true);
+    setBizError(null);
+    console.log('[SETTINGS] saveBizProfile called', { uid: user?.uid, bizForm });
     try {
       const db = getFirebaseDb();
       if (!db) throw new Error('Firestore not available');
 
-      // Update main user doc
-      const userSave = setDoc(doc(db, 'users', user.uid), {
-        businessName: bizForm.businessName,
-        displayName: bizForm.businessName,
-        campaignConfig: {
+      // Update main user doc — this is the authoritative write
+      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 8000));
+      await Promise.race([
+        setDoc(doc(db, 'users', user.uid), {
           businessName: bizForm.businessName,
-          industry: bizForm.industry,
-          location: bizForm.location,
-          website: bizForm.website,
-          phone: bizForm.phone,
-        },
-        onboarding: {
-          businessName: bizForm.businessName,
-          industry: bizForm.industry,
-          location: bizForm.location,
-          website: bizForm.website,
-          phone: bizForm.phone,
-        },
-      }, { merge: true });
+          displayName: bizForm.businessName,
+          campaignConfig: {
+            businessName: bizForm.businessName,
+            industry: bizForm.industry,
+            location: bizForm.location,
+            website: bizForm.website,
+            phone: bizForm.phone,
+          },
+          onboarding: {
+            businessName: bizForm.businessName,
+            industry: bizForm.industry,
+            location: bizForm.location,
+            website: bizForm.website,
+            phone: bizForm.phone,
+          },
+        }, { merge: true }),
+        timeout,
+      ]);
 
-      // Also update voiceConfig so Sophie uses the right businessName
-      const voiceSave = setDoc(doc(db, 'users', user.uid, 'voiceConfig', 'config'), {
+      console.log('[SETTINGS] save result', { success: true });
+      setBizSaved(true);
+      setBizError(null);
+      setTimeout(() => setBizSaved(false), 3000);
+
+      // Fire-and-forget: also update voiceConfig subcollection so Sophie has latest context.
+      // This is intentionally NOT awaited — a failure here must NOT block the main save UX.
+      setDoc(doc(db, 'users', user.uid, 'voiceConfig', 'config'), {
         businessName: bizForm.businessName,
         industry: bizForm.industry,
         location: bizForm.location,
         updatedAt: new Date().toISOString(),
         updatedBy: user.uid,
-      }, { merge: true });
-
-      const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Save timed out')), 8000));
-      await Promise.race([Promise.all([userSave, voiceSave]), timeout]);
-      setBizSaved(true);
-      setBizError(null);
-      setTimeout(() => setBizSaved(false), 3000);
+      }, { merge: true }).catch((err) => {
+        // Non-fatal — voiceConfig is a best-effort secondary write
+        console.warn('[SETTINGS] voiceConfig secondary write failed (non-fatal):', err);
+      });
     } catch (err) {
       console.error('[SETTINGS] save biz error', err);
       const msg = err instanceof Error ? err.message : 'Unknown error';
