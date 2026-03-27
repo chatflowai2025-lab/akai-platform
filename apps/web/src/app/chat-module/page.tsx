@@ -240,9 +240,11 @@ function HasChatStep({
 function ConnectStep({
   domain,
   onBack,
+  onConnected,
 }: {
   domain: string;
   onBack: () => void;
+  onConnected?: () => void;
 }) {
   const { sendMessage } = useDashboardChat();
   const [method, setMethod] = useState<ConnectMethod | null>(null);
@@ -255,16 +257,19 @@ function ConnectStep({
   const handleWordPress = () => {
     safeSend(sendMessage, `I want to add AI chat to my WordPress site at ${wpUrl || domain}`);
     setSubmitted(true);
+    onConnected?.();
   };
 
   const handleGitHub = () => {
     safeSend(sendMessage, `I want to add AI chat to my GitHub site — repo: ${ghRepo || domain}`);
     setSubmitted(true);
+    onConnected?.();
   };
 
   const handleOther = () => {
     safeSend(sendMessage, `I want to add AI chat to my website at ${domain} — it's not WordPress or GitHub`);
     setSubmitted(true);
+    onConnected?.();
   };
 
   if (submitted) {
@@ -779,7 +784,7 @@ export default function ChatModulePage() {
 
   const handleAddChat = () => setStep('connect');
 
-  const _handleConnected = () => {
+  const handleConnected = () => {
     // Update config with domain, mark enabled, save
     const newConfig: ChatConfig = { ...config, domain: scannedDomain, enabled: true };
     setConfig(newConfig);
@@ -845,6 +850,7 @@ export default function ChatModulePage() {
             <ConnectStep
               domain={scannedDomain}
               onBack={() => setStep('no-chat')}
+              onConnected={handleConnected}
             />
           )}
           {step === 'live' && (

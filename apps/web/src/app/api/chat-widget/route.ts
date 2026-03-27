@@ -35,7 +35,7 @@ interface LeadData {
 }
 
 // Default config when Firestore is unavailable
-function getDefaultConfig(clientId: string): ClientConfig {
+function getDefaultConfig(_clientId: string): ClientConfig {
   return {
     businessName: 'this business',
     industry: 'services',
@@ -141,7 +141,7 @@ function getMockResponse(message: string, history: ConversationMessage[], config
 export async function POST(req: NextRequest) {
   try {
     const body: WidgetChatRequest = await req.json();
-    const { message, clientId, conversationHistory = [], visitorInfo = {} } = body;
+    const { message, clientId, conversationHistory = [] } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
