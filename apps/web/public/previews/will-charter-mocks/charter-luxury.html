@@ -1687,5 +1687,368 @@
     if (e.target === this) closeEnquiry();
   });
 </script>
+<!-- AK Chat Widget by AKAI -->
+<style>
+  #ak-chat-widget * { box-sizing: border-box; }
+  #ak-chat-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  #ak-chat-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #ak-chat-label .ak-label-name {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    line-height: 1.2;
+  }
+  #ak-chat-label .ak-label-sub {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    line-height: 1.2;
+  }
+  #ak-chat-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #D4AF37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(212,175,55,0.45), 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  #ak-chat-btn:hover { transform: scale(1.07); box-shadow: 0 6px 28px rgba(212,175,55,0.6), 0 2px 10px rgba(0,0,0,0.35); }
+  #ak-chat-btn svg { transition: opacity 0.15s, transform 0.15s; }
+  #ak-chat-panel {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 380px;
+    height: 480px;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.65), 0 4px 16px rgba(0,0,0,0.4);
+    z-index: 99998;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.92) translateY(16px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  #ak-chat-panel.ak-open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+  #ak-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid #222;
+    background: #161616;
+    flex-shrink: 0;
+  }
+  .ak-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #D4AF37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    flex-shrink: 0;
+  }
+  .ak-header-info { flex: 1; }
+  .ak-header-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .ak-header-sub { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.3; }
+  .ak-status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
+    animation: ak-pulse 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes ak-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+  #ak-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+  #ak-messages::-webkit-scrollbar { width: 4px; }
+  #ak-messages::-webkit-scrollbar-track { background: transparent; }
+  #ak-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .ak-msg {
+    display: flex;
+    max-width: 88%;
+    animation: ak-fadein 0.18s ease;
+  }
+  @keyframes ak-fadein { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+  .ak-msg.ak-bot { align-self: flex-start; }
+  .ak-msg.ak-user { align-self: flex-end; }
+  .ak-bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .ak-msg.ak-bot .ak-bubble {
+    background: #1e1e1e;
+    color: #e8e8e8;
+    border-bottom-left-radius: 4px;
+    border: 1px solid #2a2a2a;
+  }
+  .ak-msg.ak-user .ak-bubble {
+    background: #D4AF37;
+    color: #111;
+    font-weight: 600;
+    border-bottom-right-radius: 4px;
+  }
+  .ak-typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 14px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+    align-self: flex-start;
+  }
+  .ak-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #888;
+    animation: ak-bounce 1.1s ease-in-out infinite;
+  }
+  .ak-dot:nth-child(2) { animation-delay: 0.18s; }
+  .ak-dot:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes ak-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+  #ak-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px 14px;
+    border-top: 1px solid #222;
+    background: #161616;
+    flex-shrink: 0;
+  }
+  #ak-input {
+    flex: 1;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 9px 13px;
+    font-size: 13.5px;
+    color: #e8e8e8;
+    outline: none;
+    font-family: inherit;
+    resize: none;
+    transition: border-color 0.15s;
+    line-height: 1.4;
+  }
+  #ak-input::placeholder { color: rgba(255,255,255,0.25); }
+  #ak-input:focus { border-color: #D4AF37; }
+  #ak-send {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: #D4AF37;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+  #ak-send:hover { background: #e0bc3f; transform: scale(1.05); }
+  #ak-send:active { transform: scale(0.96); }
+</style>
+
+<div id="ak-chat-widget">
+  <div id="ak-chat-fab" onclick="akToggle()">
+    <div id="ak-chat-label">
+      <span class="ak-label-name">AK</span>
+      <span class="ak-label-sub">Your AI Business Partner</span>
+    </div>
+    <div id="ak-chat-btn">
+      <svg id="ak-icon-chat" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="#111" fill-opacity="0.9"/>
+        <circle cx="8" cy="10" r="1.5" fill="#D4AF37"/>
+        <circle cx="12" cy="10" r="1.5" fill="#D4AF37"/>
+        <circle cx="16" cy="10" r="1.5" fill="#D4AF37"/>
+      </svg>
+      <svg id="ak-icon-close" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+        <path d="M15 5L5 15M5 5L15 15" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div id="ak-chat-panel">
+    <div id="ak-chat-header">
+      <div class="ak-avatar">AK</div>
+      <div class="ak-header-info">
+        <div class="ak-header-name">AK</div>
+        <div class="ak-header-sub">Your AI Business Partner</div>
+      </div>
+      <div class="ak-status-dot"></div>
+    </div>
+    <div id="ak-messages"></div>
+    <div id="ak-input-row">
+      <input id="ak-input" type="text" placeholder="Cmd+Enter or click →" autocomplete="off" />
+      <button id="ak-send" onclick="akSend()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M2 9H16M16 9L10 3M16 9L10 15" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var akOpen = false;
+  var akGreeted = false;
+
+  window.akToggle = function() {
+    akOpen = !akOpen;
+    var panel = document.getElementById('ak-chat-panel');
+    var iconChat = document.getElementById('ak-icon-chat');
+    var iconClose = document.getElementById('ak-icon-close');
+    var label = document.getElementById('ak-chat-label');
+    if (akOpen) {
+      panel.classList.add('ak-open');
+      iconChat.style.display = 'none';
+      iconClose.style.display = 'block';
+      label.style.opacity = '0';
+      label.style.pointerEvents = 'none';
+      if (!akGreeted) {
+        akGreeted = true;
+        setTimeout(function() {
+          akAddMsg('bot', 'Hi! I\'m AK \uD83D\uDC4B Looking to book a Sydney Harbour charter? I can help you pick the right boat, check availability, or answer any questions.');
+        }, 300);
+      }
+      setTimeout(function() { document.getElementById('ak-input').focus(); }, 350);
+    } else {
+      panel.classList.remove('ak-open');
+      iconChat.style.display = 'block';
+      iconClose.style.display = 'none';
+      label.style.opacity = '';
+      label.style.pointerEvents = '';
+    }
+  };
+
+  window.akSend = function() {
+    var input = document.getElementById('ak-input');
+    var text = input.value.trim();
+    if (!text) return;
+    akAddMsg('user', text);
+    input.value = '';
+    akRespond(text);
+  };
+
+  function akAddMsg(type, text) {
+    var msgs = document.getElementById('ak-messages');
+    var div = document.createElement('div');
+    div.className = 'ak-msg ak-' + type;
+    var bubble = document.createElement('div');
+    bubble.className = 'ak-bubble';
+    bubble.textContent = text;
+    div.appendChild(bubble);
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function akRespond(text) {
+    var msgs = document.getElementById('ak-messages');
+    var typing = document.createElement('div');
+    typing.className = 'ak-typing';
+    typing.id = 'ak-typing-indicator';
+    typing.innerHTML = '<div class="ak-dot"></div><div class="ak-dot"></div><div class="ak-dot"></div>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    var lower = text.toLowerCase();
+    var response;
+    var boatNames = ['ribbon', 'mon reve', 'birchgrove', 'riviera', 'sunseeker', 'speedboat'];
+    var matchedBoat = boatNames.find(function(b) { return lower.indexOf(b) !== -1; });
+
+    if (lower.match(/price|cost|how much/)) {
+      response = 'Pricing depends on the vessel and duration. The Wooden Speedboat starts from $350/hr, the Riviera 50ft from $650/hr, and the Sunseeker from $800/hr. All include a licensed captain and fuel. Want me to get a custom quote for your group?';
+    } else if (lower.match(/how many|capacity|guests|people/)) {
+      response = 'Our smaller fleet handles 2\u201325 guests. The speedboat is perfect for 2\u20138, Mon Reve suits up to 12, and the Riviera handles up to 20. How many guests are you planning for?';
+    } else if (lower.match(/availab|book|date/)) {
+      response = 'I can check availability for you! What date and time were you thinking, and how many guests? I\'ll confirm within the hour.';
+    } else if (matchedBoat) {
+      var boatDisplay = matchedBoat === 'mon reve' ? 'Mon Reve' : matchedBoat.charAt(0).toUpperCase() + matchedBoat.slice(1);
+      response = 'Great choice! ' + boatDisplay + ' is one of our most popular vessels. Want me to hold a provisional booking while you decide?';
+    } else if (lower.match(/wedding|birthday|corporate|event/)) {
+      response = 'We specialise in private events on the harbour \uD83E\uDD42 We can arrange catering, decorations, a photographer, and a custom route. What\'s the occasion?';
+    } else if (lower.match(/cancel|refund|policy/)) {
+      response = 'We have a 48-hour cancellation policy for a full refund. For events within 48 hours, we offer a credit for a future booking. Any other questions?';
+    } else if (lower.match(/contact|phone|call|speak/)) {
+      response = 'You can reach the Sydney Harbour Exclusive team at +61 2 9555 1234 or email bookings@sydneyharbourexclusive.com \u2014 or I can arrange a callback. Which works best?';
+    } else {
+      response = "Great question! For anything specific about our fleet or bookings, I'd recommend speaking with our team directly. Want me to arrange a callback or get you a custom quote?";
+    }
+
+    setTimeout(function() {
+      var t = document.getElementById('ak-typing-indicator');
+      if (t) t.remove();
+      akAddMsg('bot', response);
+    }, 800);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      if (document.activeElement && document.activeElement.id === 'ak-input') {
+        akSend();
+      }
+    }
+    if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'ak-input') {
+      akSend();
+    }
+  });
+})();
+</script>
+<!-- End AK Chat Widget -->
+
 </body>
 </html>
