@@ -18,7 +18,7 @@ export const useDashboardChat = () => useContext(ChatContext);
 
 const INITIAL: ChatMessage = {
   id: '1', role: 'assistant',
-  content: "Hey! I'm AK. Ask me anything — connect your inbox, launch a campaign, or just tell me what you need.",
+  content: "Hey! I'm AK — your AI Business Partner. Ask me anything, launch a campaign, or just tell me what you need.",
   timestamp: '2026-01-01T00:00:00.000Z', // static to avoid SSR/client hydration mismatch
 };
 
@@ -226,7 +226,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
         <div className="px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs flex-shrink-0">AK</div>
-            <span className="font-semibold text-sm text-white">Ask AK</span>
+            <div className="flex flex-col"><span className="font-semibold text-sm text-white leading-none">AK</span><span className="text-[10px] text-gray-500 leading-none">Your AI Business Partner</span></div>
             <span className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
           </div>
         </div>
@@ -390,7 +390,7 @@ function MobileChatOverlay({
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f] flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">AK</div>
-          <span className="font-semibold text-sm text-white">Ask AK</span>
+          <div className="flex flex-col"><span className="font-semibold text-sm text-white leading-none">AK</span><span className="text-[10px] text-gray-500 leading-none">Your AI Business Partner</span></div>
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         </div>
         <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>

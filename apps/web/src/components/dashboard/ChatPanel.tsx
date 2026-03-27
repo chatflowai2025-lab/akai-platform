@@ -7,7 +7,7 @@ import ChatBubble from '@/components/ui/ChatBubble';
 const INITIAL: ChatMessage = {
   id: '1',
   role: 'assistant',
-  content: "Hey! I'm AK. Ask me anything — run a call campaign, check your pipeline, or just ask what's working.",
+  content: "Hey! I'm AK — your AI Business Partner. Ask me anything, run a campaign, or check what's working.",
   timestamp: new Date().toISOString(),
 };
 
