@@ -52,7 +52,7 @@ function buildWelcomeEmail(name: string, email: string): string {
       <div style="background:#1a1400;border:1px solid #D4AF37;border-radius:10px;padding:16px 20px;margin:0 0 28px;display:flex;align-items:center;gap:12px;">
         <span style="font-size:22px;">🔥</span>
         <div>
-          <p style="color:#D4AF37;font-weight:800;font-size:14px;margin:0 0 2px;">7-day free trial — no card needed</p>
+          <p style="color:#D4AF37;font-weight:800;font-size:14px;margin:0 0 2px;">14-day free trial — no card needed</p>
           <p style="color:#888;font-size:12px;margin:0;">Cancel anytime. No setup fees. Full platform access from day one.</p>
         </div>
       </div>

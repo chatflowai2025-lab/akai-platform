@@ -356,7 +356,7 @@ export default function ONGroupDemoPage() {
               </div>
             ))}
           </div>
-          <p className="text-sm text-gray-500 mb-2">7-day free trial. No card required.</p>
+          <p className="text-sm text-gray-500 mb-2">14-day free trial. No card required.</p>
         </div>
       </section>
 

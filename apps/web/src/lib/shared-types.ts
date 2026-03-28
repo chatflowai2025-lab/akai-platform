@@ -187,7 +187,7 @@ export const BILLING_PLANS: BillingPlan[] = [
     price: 0,
     billingCycle: 'monthly',
     modulesIncluded: 1,
-    features: ['1 module free for 7 days', 'Up to 10 leads', 'Basic dashboard'],
+    features: ['1 module free for 14 days', 'Up to 10 leads', 'Basic dashboard'],
   },
   {
     tier: 'starter',

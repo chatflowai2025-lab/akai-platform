@@ -87,7 +87,7 @@ export default function TrialBadge({ user }: TrialBadgeProps) {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10">
       <span className="text-xs text-[#D4AF37] font-semibold whitespace-nowrap">
-        🔥 7-day trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
+        🔥 14-day trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
       </span>
       <a
         href="/settings#upgrade"
