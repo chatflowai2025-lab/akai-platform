@@ -13,7 +13,7 @@ Alternatives if needed: @getakai · @akaiplatform
 
 ### Bio (160 chars max)
 ```
-Your AI executive team. 9 specialists. Sales, email, recruits, proposals — all running 24/7. $599/mo. No staff. No excuses. → getakai.ai
+Your AI executive team. 10 specialists. Sales, email, recruits, proposals — all running 24/7. $599/mo. No staff. No excuses. → getakai.ai
 ```
 *(137 chars)*
 
@@ -49,7 +49,7 @@ AKAI fixes this. getakai.ai
 ```
 Your AI team is live.
 
-9 specialists. $599/mo.
+10 specialists. $599/mo.
 Sales · Email · Recruiter · Web · Proposals · Calendar · Ads · Social · Finance
 
 Everything a $13k/mo agency does.
@@ -93,7 +93,7 @@ getakai.ai
 
 **Post 5 — THE ONE-LINER**
 ```
-Your AI team is live. 9 specialists. $599/mo.
+Your AI team is live. 10 specialists. $599/mo.
 
 The question isn't whether you can afford it.
 It's whether you can afford not to.
@@ -368,7 +368,7 @@ I spent 20 years watching enterprises waste millions on tools SMBs could never a
 
 So I built the enterprise toolkit for the rest of them.
 
-9 AI specialists. $599/mo.
+10 AI specialists. $599/mo.
 
 The playing field just levelled.
 ```
@@ -398,7 +398,7 @@ Running 24/7 from day one.
 This is what happens when you stop waiting for permission to build something real.
 
 AKAI is live.
-9 AI specialists.
+10 AI specialists.
 Your business, running after hours.
 
 getakai.ai
@@ -468,7 +468,7 @@ Most SMBs are running with one hand tied behind their back.
 Not because they're not good enough.
 Because they can't afford the team that enterprise has.
 
-Here's what changes when you get 9 AI specialists for $599/mo: 🧵
+Here's what changes when you get 10 AI specialists for $599/mo: 🧵
 ```
 *(232 chars)*
 
