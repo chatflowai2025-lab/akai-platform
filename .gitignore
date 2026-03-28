@@ -39,3 +39,11 @@ coverage/
 # Misc
 .vercel
 .railway
+# Next.js build output (shouldn't be committed)
+/_next/
+/dashboard/
+/onboard/
+*.txt
+404.html
+404/
+.nojekyll
