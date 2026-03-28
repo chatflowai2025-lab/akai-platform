@@ -25,7 +25,7 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="flex items-center">
-          <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+          <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
         </a>
 
         {/* Nav links */}

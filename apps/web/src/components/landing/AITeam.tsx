@@ -53,7 +53,7 @@ const AGENTS = [
     icon: '💰',
     color: 'from-amber-500/20 to-yellow-500/20',
     border: 'border-amber-500/20',
-    accent: 'text-amber-400',
+    accent: 'text-[#D4AF37]',
     what: 'Tracks revenue, invoices, and margins. Flags issues before they become problems.',
     does: ['Revenue tracking', 'Invoice generation', 'Margin analysis'],
   },

@@ -430,7 +430,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
 
         {/* Headline */}
         <h1 className="fade-up fade-up-2 text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight max-w-4xl">
-          <span className="text-white">AK</span><span className="text-[#F59E0B]"> Your AI</span>
+          <span className="text-white">AK</span><span className="text-[#D4AF37]"> Your AI</span>
           <br />
           <span className="gradient-text">Business Partner</span>
         </h1>

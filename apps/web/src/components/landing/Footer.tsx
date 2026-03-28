@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex flex-col gap-2">
             <a href="/" className="flex items-center">
-              <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+              <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
             </a>
             <p className="text-white/30 text-xs">Your AI Business Partner</p>
             <a href="mailto:hello@getakai.ai" className="text-white/20 text-xs hover:text-white/50 transition-colors mt-1">
@@ -42,7 +42,7 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/20">
           <p>© 2026 AKAI · <a href="https://getakai.ai" className="hover:text-white/50 transition-colors">getakai.ai</a> · Made in Sydney 🇦🇺</p>
           <p>
-            Built on <span className="text-[#F59E0B]/60">AI</span>. Powered by results.
+            Built on <span className="text-[#D4AF37]/60">AI</span>. Powered by results.
           </p>
         </div>
       </div>

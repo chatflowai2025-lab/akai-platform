@@ -50,7 +50,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-6 py-5 border-b border-[#1f1f1f]">
         <Link href="/dashboard" className="flex items-center justify-between">
-          <span className="text-xl font-black tracking-tight">AK<span className="text-[#F59E0B]">AI</span></span>
+          <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
           <button
             className="md:hidden text-gray-400 hover:text-white p-1"
             onClick={() => setMobileOpen(false)}
