@@ -131,8 +131,33 @@ function TrustBar() {
   );
 }
 
+/* ─── Rotating hero banners ─── */
+const HERO_BANNERS = [
+  { white: 'Stop Losing Deals', gold: 'While You Sleep.' },
+  { white: 'Your AI Team.', gold: 'Zero Salaries.' },
+  { white: 'Stop Paying Agencies', gold: '$13,000 a Month.' },
+  { white: 'Every Lead. Every', gold: 'Follow-Up. Automated.' },
+  { white: 'From Finding', gold: 'To Closing.' },
+];
+
 /* ─── Hero ─── */
 function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
+  const [bannerIdx, setBannerIdx] = useState(0);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setBannerIdx(i => (i + 1) % HERO_BANNERS.length);
+        setFading(false);
+      }, 400);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const banner = HERO_BANNERS[bannerIdx]!;
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 overflow-hidden">
       {/* Background glow */}
@@ -149,12 +174,24 @@ function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpen
         <span className="text-gray-500">AI business automation from Sydney to New York</span>
       </div>
 
-      {/* Headline */}
-      <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-6 leading-[0.9] tracking-tight max-w-5xl">
-        <span className="text-white">Stop Losing Deals</span>
-        <br />
-        <span className="text-[#D4AF37]">While You Sleep.</span>
-      </h1>
+      {/* Rotating headline */}
+      <div className="transition-opacity duration-400 max-w-5xl w-full" style={{ opacity: fading ? 0 : 1 }}>
+        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-6 leading-[0.9] tracking-tight">
+          <span className="text-white block">{banner.white}</span>
+          <span className="text-[#D4AF37] block">{banner.gold}</span>
+        </h1>
+      </div>
+
+      {/* Dot nav */}
+      <div className="flex gap-2 mb-6">
+        {HERO_BANNERS.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setFading(true); setTimeout(() => { setBannerIdx(i); setFading(false); }, 400); }}
+            className={`h-1.5 rounded-full transition-all duration-300 ${i === bannerIdx ? 'bg-[#D4AF37] w-6' : 'bg-white/20 w-1.5 hover:bg-white/40'}`}
+          />
+        ))}
+      </div>
 
       {/* Sub */}
       <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed">
