@@ -513,7 +513,7 @@ function ProposalPreview({
             <h1 className="text-2xl font-black text-white mt-6 uppercase tracking-wide">
               PROPOSAL FOR {businessName.toUpperCase()}
             </h1>
-            <p className="text-sm text-gray-400 mt-2">Prepared by AKAI — {date}</p>
+            <p suppressHydrationWarning className="text-sm text-gray-400 mt-2">Prepared by AKAI — {date}</p>
             {contactName && <p className="text-sm text-gray-500 mt-1">Attention: {contactName}</p>}
           </div>
 

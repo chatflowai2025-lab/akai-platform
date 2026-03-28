@@ -176,7 +176,7 @@ function TodayColumn({ items, loading, onRefresh }: { items: FeedItem[]; loading
                 <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-200 leading-snug">{item.insight}</p>
-                  <p className="text-[10px] text-gray-600 mt-0.5">
+                  <p suppressHydrationWarning className="text-[10px] text-gray-600 mt-0.5">
                     {item.timestamp ? formatTime(item.timestamp) : ''}
                   </p>
                 </div>
