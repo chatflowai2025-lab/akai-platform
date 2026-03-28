@@ -84,6 +84,15 @@ const AGENTS = [
     what: 'Keeps every client happy, informed, and coming back — without you having to chase anyone.',
     does: ['Client communications', 'Proposal generation', 'Relationship tracking'],
   },
+  {
+    role: 'Email Guard',
+    icon: '📧',
+    color: 'from-indigo-500/20 to-blue-500/20',
+    border: 'border-indigo-500/20',
+    accent: 'text-indigo-400',
+    what: 'Reads every enquiry, writes the proposal, sends it — before you\'ve even seen the email.',
+    does: ['Inbox monitoring', 'Instant proposal generation', 'Follow-up sequences'],
+  },
 ];
 
 export default function AITeam() {
@@ -101,7 +110,7 @@ export default function AITeam() {
             ✦ Your AI Business Team
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            9 specialists.<br />
+            10 specialists.<br />
             <span className="text-[#D4AF37]">No hiring.</span>
           </h2>
           <p className="text-gray-400 mt-4 text-lg max-w-2xl mx-auto leading-relaxed">

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
 const TG_CHAT = '8320254721';
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const RAILWAY_API_KEY = 'aiclozr_api_key_2026_prod';
+const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 async function sendEmail(to: string, subject: string, html: string, resendKey: string) {
   // Primary: Railway SMTP relay (Gmail — proven deliverable)

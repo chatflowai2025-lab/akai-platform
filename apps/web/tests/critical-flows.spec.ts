@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+// BASE_URL is provided by Playwright's baseURL config (playwright.config.ts → baseURL: process.env.BASE_URL || 'http://localhost:3099')
+// Using relative paths (e.g. '/settings') lets Playwright resolve against baseURL automatically.
 
 /**
  * Mock Firebase auth state so protected routes render instead of redirecting to /login.
@@ -38,7 +39,7 @@ async function mockFirebaseAuth(page: import('@playwright/test').Page) {
 // ── Test 1: Settings form persists on type ──────────────────────────────────
 test('Settings form — input persists on type (not wiped)', async ({ page }) => {
   await mockFirebaseAuth(page);
-  await page.goto(`${BASE_URL}/settings`);
+  await page.goto('/settings');
 
   // Either the settings page loaded, or we were redirected to /login
   const url = page.url();
@@ -77,7 +78,7 @@ test('Settings form — input persists on type (not wiped)', async ({ page }) =>
 // ── Test 2: AK chat sends without crash ─────────────────────────────────────
 test('AK chat — sends message without crash', async ({ page }) => {
   await mockFirebaseAuth(page);
-  await page.goto(`${BASE_URL}/dashboard`);
+  await page.goto('/dashboard');
 
   const url = page.url();
 
@@ -143,7 +144,7 @@ test('AK chat — sends message without crash', async ({ page }) => {
 // ── Test 3: Voice onboarding step 1 loads ───────────────────────────────────
 test('Voice page — step 1 loads (not blank/error)', async ({ page }) => {
   await mockFirebaseAuth(page);
-  await page.goto(`${BASE_URL}/voice`);
+  await page.goto('/voice');
 
   const url = page.url();
 
@@ -185,7 +186,7 @@ test('Voice page — step 1 loads (not blank/error)', async ({ page }) => {
 // ── Test 4: Web audit shows feedback on URL submit ───────────────────────────
 test('Web audit — shows loading feedback after URL submit', async ({ page }) => {
   await mockFirebaseAuth(page);
-  await page.goto(`${BASE_URL}/web`);
+  await page.goto('/web');
 
   const url = page.url();
 

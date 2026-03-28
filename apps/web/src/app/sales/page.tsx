@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 function safeSend(fn: (t: string) => void, text: string) { try { fn(text); } catch { /* chat not ready */ } }
 
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const RAILWAY_API_KEY = 'aiclozr_api_key_2026_prod';
+const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
