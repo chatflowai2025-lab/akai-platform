@@ -528,7 +528,7 @@ function EmailGuardContent({
     setSending(eq.id);
     try {
       const currentBody = editedBody[eq.id] ?? eq.proposal?.body ?? '';
-      await fetch(`${RAILWAY}/api/email/${user.uid}/${eq.id}/send`, {
+      await fetch(`${RAILWAY}/api/email/enquiries/${user.uid}/${eq.id}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
         body: JSON.stringify({
