@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
-const RAILWAY = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
 
 // ── Types ─────────────────────────────────────────────────────────────────

@@ -421,7 +421,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     setConnectError(null);
     try {
       const r = await fetch(
-        `https://api-server-production-2a27.up.railway.app/api/calendar/oauth-url?userId=${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/oauth-url?userId=${userId}`,
         { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
       );
       if (!r.ok) throw new Error(`Server error ${r.status}`);
@@ -438,7 +438,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     setConnectError(null);
     try {
       const r = await fetch(
-        `https://api-server-production-2a27.up.railway.app/api/calendar/ms-auth-url?userId=${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/ms-auth-url?userId=${userId}`,
         { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
       );
       if (!r.ok) throw new Error(`Server error ${r.status}`);
@@ -501,7 +501,7 @@ function BookingsView({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://api-server-production-2a27.up.railway.app/api/calendar/appointments/${userId}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/appointments/${userId}`, {
       headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
     })
       .then(r => r.json())
@@ -646,7 +646,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   useEffect(() => {
     if (!calConnected || calProvider !== 'google') return;
 
-    fetch(`https://api-server-production-2a27.up.railway.app/api/calendar/list?userId=${user.uid}&days=30`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/list?userId=${user.uid}&days=30`, {
       headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
     })
       .then(r => r.ok ? r.json() : null)
@@ -677,7 +677,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     if (!calConnected || calProvider !== 'outlook') return;
 
     // Fetch Outlook calendar events via Railway API
-    fetch(`https://api-server-production-2a27.up.railway.app/api/calendar/outlook-events?userId=${user.uid}&days=30`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/outlook-events?userId=${user.uid}&days=30`, {
       headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
     })
       .then(r => r.ok ? r.json() : null)
@@ -789,8 +789,8 @@ function CalendarContent({ user }: { user: { uid: string } }) {
                 onClick={async () => {
                   if (!confirm('Disconnect calendar?')) return;
                   const endpoint = calProvider === 'outlook'
-                    ? `https://api-server-production-2a27.up.railway.app/api/email/microsoft/disconnect`
-                    : `https://api-server-production-2a27.up.railway.app/api/calendar/disconnect`;
+                    ? `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/email/microsoft/disconnect`
+                    : `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/disconnect`;
                   await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-api-key': 'aiclozr_api_key_2026_prod' },

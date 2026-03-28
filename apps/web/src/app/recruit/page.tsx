@@ -764,7 +764,6 @@ function PostJobTab() {
   });
 
   // JD state
-  const [_generatedJD, setGeneratedJD] = useState('');
   const [editedJD, setEditedJD] = useState('');
 
   // Platform state
@@ -802,13 +801,11 @@ function PostJobTab() {
 
       const data = await res.json();
       const jd = data.jd || '';
-      setGeneratedJD(jd);
       setEditedJD(jd);
       setStep('review');
     } catch {
       // fallback
       const fallback = `# ${form.title}\n\n## About the Company\n\nWe're a growing business looking for exceptional talent.\n\n## Role Overview\n\n${form.description || `We're looking for a talented ${form.title} to join our team.`}\n\n## Key Responsibilities\n\n- Lead core responsibilities for this role\n- Collaborate with cross-functional teams\n- Drive results and continuous improvement\n- Build strong stakeholder relationships\n- Contribute to team culture\n\n## What We're Looking For\n\n- Proven experience in a similar role\n- Strong communication skills\n- Results-driven mindset\n- Team player with initiative\n\n## What We Offer\n\n- Salary: ${form.salaryMin && form.salaryMax ? `$${form.salaryMin}–$${form.salaryMax} AUD` : 'Competitive'}\n- ${form.employmentType} position\n- ${form.isRemote ? 'Remote' : form.location || 'Australia'}\n- Supportive team environment\n\n## How to Apply\n\nSubmit your resume and cover letter. We'll be in touch within 5 business days.`;
-      setGeneratedJD(fallback);
       setEditedJD(fallback);
       setStep('review');
     }
@@ -896,7 +893,6 @@ function PostJobTab() {
   const handleStartOver = () => {
     setStep('form');
     setForm({ title: '', location: '', isRemote: false, employmentType: 'Full-time', salaryMin: '', salaryMax: '', description: '' });
-    setGeneratedJD('');
     setEditedJD('');
     setSelectedPlatforms(new Set());
     setPostedJob(null);

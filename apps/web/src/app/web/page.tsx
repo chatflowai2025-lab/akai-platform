@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, setDoc, getDoc, collection, addDoc, increment, updateDoc } from 'firebase/firestore';
 
-const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
 
 // ── Types ─────────────────────────────────────────────────────────────────────

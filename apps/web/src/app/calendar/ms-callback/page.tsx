@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
-const RAILWAY = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
 
 function MSCalCallbackInner() {

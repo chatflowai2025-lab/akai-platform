@@ -23,7 +23,7 @@ async function notifyTelegram(text: string) {
 
 async function saveLeadToRailway(lead: Record<string, string>) {
   try {
-    await fetch('https://api-server-production-2a27.up.railway.app/api/leads', {
+    await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/leads', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': 'aiclozr_api_key_2026_prod' },
       body: JSON.stringify({

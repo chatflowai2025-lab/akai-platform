@@ -13,7 +13,7 @@ function safeSend(sendMessage: (t: string) => void, text: string) {
   try { sendMessage(text); } catch { /* chat not ready */ }
 }
 
-const RAILWAY = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
 
 interface Enquiry {

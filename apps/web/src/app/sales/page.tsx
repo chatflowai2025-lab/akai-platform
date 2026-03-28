@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 function safeSend(fn: (t: string) => void, text: string) { try { fn(text); } catch { /* chat not ready */ } }
 
-const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const RAILWAY_API_KEY = 'aiclozr_api_key_2026_prod';
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -650,7 +650,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
   const [campaignName, setCampaignName] = useState('Campaign 1');
   const [launching, setLaunching] = useState(false);
   const [dncResult, setDncResult] = useState<{ safe: string[]; blocked: string[] } | null>(null);
-  const [_dncChecking, setDncChecking] = useState(false);
+
   const [launchResult, setLaunchResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const leadLimit = PLAN_LEAD_LIMITS[plan] ?? 50;
@@ -708,24 +708,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
     e.target.value = '';
   };
 
-  const _checkDNC = async () => {
-    const phones = uploadedLeads.map(l => l.phone).filter(Boolean);
-    if (!phones.length) return;
-    setDncChecking(true);
-    try {
-      const res = await fetch(`${RAILWAY_API}/api/dncr/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
-        body: JSON.stringify({ numbers: phones }),
-      });
-      const data = await res.json();
-      setDncResult({ safe: data.safe || [], blocked: data.blocked || [] });
-    } catch {
-      setDncResult(null);
-    } finally {
-      setDncChecking(false);
-    }
-  };
+
 
   const launchCampaign = async () => {
     if (uploadedLeads.length === 0 || launching) return;

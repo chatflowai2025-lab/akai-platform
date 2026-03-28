@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
-const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface CompetitorSnapshot {
@@ -634,7 +634,6 @@ interface HealthReport {
 }
 
 function WebAuditInline({
-  userId: _userId,
   userEmail,
   displayName,
 }: {

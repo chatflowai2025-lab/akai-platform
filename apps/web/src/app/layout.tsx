@@ -90,7 +90,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="dns-prefetch" href="//api-server-production-2a27.up.railway.app" />
+        <link rel="dns-prefetch" href={`//${(process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app').replace(/^https?:\/\//, '')}`} />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
       </head>
       <body className={`${inter.className} bg-[#0a0a0a] text-white antialiased`}>

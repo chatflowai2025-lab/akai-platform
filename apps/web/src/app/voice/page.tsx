@@ -13,7 +13,7 @@ import { isSafeMode } from '@/lib/beta-config';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const RAILWAY_API_KEY = 'aiclozr_api_key_2026_prod';
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -580,44 +580,7 @@ function SetupWizard({
     setConfig({ ...config, schedule: { ...config.schedule, days } });
   };
 
-  const fireTestCall = async () => {
-    if (!testPhone) return;
 
-    if (isSafeMode(userEmail)) {
-      setTestCallState('calling');
-      await new Promise(r => setTimeout(r, 2000));
-      setTestCallState('done');
-      return;
-    }
-
-    setTestCallState('calling');
-    const script = [config.script.openingLine, config.script.hook, config.script.qualifyingQuestion, config.script.cta]
-      .filter(Boolean)
-      .join(' ');
-
-    try {
-      const res = await fetch(`${RAILWAY_API}/api/campaign/launch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
-        body: JSON.stringify({
-          leads: [{ name: userName || 'Test User', phone: testPhone }],
-          script,
-          userId: userEmail,
-          campaignName: 'Sophie Test Call',
-        }),
-      });
-      if (!res.ok) {
-        console.error('[test call] non-ok response', res.status);
-        setTestCallState('failed');
-        return;
-      }
-    } catch (err) {
-      console.error('[test call]', err);
-      setTestCallState('failed');
-      return;
-    }
-    setTestCallState('done');
-  };
 
   const steps = [
     // Step 0: Meet Sophie

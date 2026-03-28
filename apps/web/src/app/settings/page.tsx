@@ -138,7 +138,7 @@ export default function SettingsPage() {
   const [webhookCopied, setWebhookCopied] = useState(false);
   const [forwardCopied, setForwardCopied] = useState(false);
 
-  const webhookUrl = 'https://api-server-production-2a27.up.railway.app/api/mail-guard/inbound';
+  const webhookUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/mail-guard/inbound';
   const forwardAddress = 'inbound@getakai.ai';
 
   const copy = (text: string, setCopied: (v: boolean) => void) => {
@@ -239,7 +239,7 @@ export default function SettingsPage() {
       }
     })();
     // Load referral data
-    fetch(`https://api-server-production-2a27.up.railway.app/api/analytics/referral/${user.uid}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/analytics/referral/${user.uid}`, {
       headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' },
     })
       .then(r => r.json())

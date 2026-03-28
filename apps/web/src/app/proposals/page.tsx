@@ -828,7 +828,7 @@ export default function ProposalsPage() {
 
     // Try Railway API first
     try {
-      const res = await fetch('https://api-server-production-2a27.up.railway.app/api/email/send', {
+      const res = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/email/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

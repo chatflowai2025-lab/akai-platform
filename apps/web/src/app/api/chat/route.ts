@@ -133,7 +133,7 @@ interface ChatRequest {
 }
 
 // ── Smart mock response engine ────────────────────────────────────────────────
-async function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}, currentModule?: string): Promise<string> {
+async function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}, _currentModule?: string): Promise<string> {
   const msg = message.toLowerCase().trim();
   const lastAssistant = history.filter(h => h.role === 'assistant').pop()?.content?.toLowerCase() ?? '';
   const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
@@ -517,7 +517,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   if (msg.includes('how many leads') || msg.includes('lead count') || msg.includes('what\'s my lead count') || msg.includes("what's my lead count") || msg.includes('my pipeline') || (msg.includes('leads') && (msg.includes('how many') || msg.includes('total') || msg.includes('count')))) {
     // Attempt Railway fetch
     try {
-      const leadsRes = await fetch('https://api-server-production-2a27.up.railway.app/api/leads', {
+      const leadsRes = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/leads', {
         headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' },
         signal: AbortSignal.timeout(4000),
       });
