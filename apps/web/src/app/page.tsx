@@ -755,7 +755,7 @@ function IntelligenceSection() {
               The AI that learns <span className="text-[#D4AF37]">while you sleep</span>
             </h2>
             <p className="text-gray-500 text-lg max-w-xl mx-auto">
-              Six modules. One brain. Every failure becomes a lesson. Every win becomes a pattern.
+              Four modules. One brain. Every failure becomes a lesson. Every win becomes a pattern.
             </p>
           </div>
 
