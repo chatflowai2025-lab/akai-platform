@@ -97,12 +97,7 @@ const STATUS_COL_HEADER: Record<ProposalStatus, string> = {
   Lost: 'border-red-500',
 };
 
-const MOCK_PROPOSALS: PipelineProposal[] = [
-  { id: 'p1', clientName: 'Metro Plumbing', service: 'Sales AI + Web Audit', amount: 1497, dateSent: '2026-03-20', status: 'Won', notes: 'Full AKAI suite — closed after demo' },
-  { id: 'p2', clientName: 'Blue Sky Cafe', service: 'Social AI Package', amount: 447, dateSent: '2026-03-24', status: 'Sent', notes: 'Instagram + content gen' },
-  { id: 'p3', clientName: 'TechStart Ltd', service: 'Web Audit + SEO', amount: 297, dateSent: '2026-03-25', status: 'Opened', notes: 'Viewed twice, follow up today' },
-  { id: 'p4', clientName: 'Harbour Yachts', service: 'Full Suite', amount: 1997, dateSent: '', status: 'Draft', notes: 'High value — marine sector' },
-];
+const MOCK_PROPOSALS: PipelineProposal[] = [];
 
 // ── Module config ─────────────────────────────────────────────────────────────
 const MODULES: ModuleOption[] = [
@@ -229,9 +224,9 @@ function PipelineTab() {
     localStorage.setItem('akai_proposals', JSON.stringify(proposals));
   }, [proposals]);
 
-  const wonCount = proposals.filter(p => p.status === 'Won').length + 2;
-  const sentCount = proposals.filter(p => p.status !== 'Draft').length + 5;
-  const totalCount = proposals.length + 8;
+  const wonCount = proposals.filter(p => p.status === 'Won').length;
+  const sentCount = proposals.filter(p => p.status !== 'Draft').length;
+  const totalCount = proposals.length;
   const winRate = sentCount > 0 ? ((wonCount / sentCount) * 100).toFixed(1) : '0.0';
 
   const addProposal = () => {
