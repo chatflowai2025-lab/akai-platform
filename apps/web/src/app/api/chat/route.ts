@@ -666,7 +666,15 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [], userContext = {}, currentModule } = body;
+    const { message, history = [], userContext = {} } = body;
+    // Lock currentModule — homepage visitors can only use homepage_sales context.
+    // Authenticated users get their module from userContext.uid presence.
+    const isAuthenticated = !!(userContext.uid ?? userContext.userId);
+    const ALLOWED_MODULES = ['homepage_sales','dashboard','sales','voice','web','email-guard','calendar','ads','social','recruit','proposals','health'];
+    const rawModule = body.currentModule ?? '';
+    const currentModule = ALLOWED_MODULES.includes(rawModule)
+      ? (isAuthenticated ? rawModule : 'homepage_sales') // unauthenticated always gets homepage context
+      : 'homepage_sales';
 
     // ── Safety gate ───────────────────────────────────────────────────────────
     const userId = userContext.uid ?? userContext.userId ?? 'anonymous';
