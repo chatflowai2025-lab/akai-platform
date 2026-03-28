@@ -169,12 +169,18 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
         >
           Start free →
         </button>
-        <Link
-          href="/she-demo"
+        <button
+          onClick={() => {
+            document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+              const btn = document.getElementById('demo-play-btn');
+              if (btn) btn.click();
+            }, 600);
+          }}
           className="inline-flex items-center justify-center gap-2 bg-[#111] border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition-all min-w-[180px]"
         >
           Watch it work →
-        </Link>
+        </button>
       </div>
 
       {/* Stats bar */}
@@ -446,6 +452,7 @@ function HowItWorksAnimated() {
                   <p className="text-gray-500 text-sm max-w-sm">See how AKAI handles a real lead from first email to closed deal — automatically.</p>
                 </div>
                 <button
+                  id="demo-play-btn"
                   onClick={start}
                   className="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-3 text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20"
                 >
@@ -784,7 +791,7 @@ export default function Home() {
       <Navbar onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />
       <Hero onOpenCapture={() => setCaptureOpen(true)} />
       <TrustBar />
-      <HowItWorksAnimated />
+      <div id="demo"><HowItWorksAnimated /></div>
       <HowAKAILearns />
       <AgentTeam />
       <Modules />
