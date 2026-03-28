@@ -6,6 +6,13 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  manifest: '/manifest.json',
+  themeColor: '#0a0a0a',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'AKAI',
+  },
   verification: {
     google: 'VNpyDRPV_WUxGG6u5z3kJNFGVq0xvXp5QCLcb5hENvI',
   },

@@ -8,6 +8,17 @@ import { useAuth } from '@/hooks/useAuth';
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
 
 // ── Types ────────────────────────────────────────────────────────────────────
+interface CompetitorSnapshot {
+  url: string;
+  name: string;
+  lastChecked: string;
+  contentHash: string;
+  pricing?: string[];
+  features?: string[];
+  hasChanged: boolean;
+  changesSummary?: string;
+}
+
 interface ActivityItem {
   icon: string;
   text: string;
@@ -123,6 +134,11 @@ export default function HealthPage() {
   const [recentFailures, setRecentFailures] = useState<FailureRecord[]>([]);
   const [failuresLoading, setFailuresLoading] = useState(true);
 
+  // Competitor watch state
+  const [competitors, setCompetitors] = useState<CompetitorSnapshot[]>([]);
+  const [competitorsLoading, setCompetitorsLoading] = useState(true);
+  const [checkRunning, setCheckRunning] = useState(false);
+
   // Diagnostics state
   const [diagRunning, setDiagRunning] = useState(false);
   const [diagDone, setDiagDone] = useState(false);
@@ -225,6 +241,42 @@ export default function HealthPage() {
       }
     })();
   }, [user]);
+
+  // ── Fetch competitor snapshots ───────────────────────────────────────────
+  const fetchCompetitors = useCallback(async () => {
+    if (!user) return;
+    setCompetitorsLoading(true);
+    try {
+      const r = await fetch(`${RAILWAY_API}/api/analytics/competitors/${user.uid}`);
+      if (!r.ok) throw new Error('no data');
+      const data = await r.json();
+      setCompetitors(Array.isArray(data.competitors) ? data.competitors : []);
+    } catch {
+      setCompetitors([]);
+    } finally {
+      setCompetitorsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => { fetchCompetitors(); }, [fetchCompetitors]);
+
+  const runCompetitorCheck = useCallback(async () => {
+    if (!user || checkRunning) return;
+    setCheckRunning(true);
+    try {
+      const r = await fetch(`${RAILWAY_API}/api/analytics/check-competitors`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid }),
+      });
+      if (!r.ok) throw new Error('check failed');
+      await fetchCompetitors();
+    } catch {
+      // silently fail — UI keeps showing old data
+    } finally {
+      setCheckRunning(false);
+    }
+  }, [user, checkRunning, fetchCompetitors]);
 
   // ── Fetch prevention gates ───────────────────────────────────────────────
   useEffect(() => {
@@ -492,6 +544,63 @@ export default function HealthPage() {
               ))
             )}
           </div>
+        </section>
+
+        {/* ── Competitor Watch ───────────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">🔍 Competitor Watch</h2>
+            <button
+              onClick={runCompetitorCheck}
+              disabled={checkRunning}
+              className="bg-[#D4AF37] hover:bg-[#F59E0B] text-black font-bold px-4 py-2 rounded-xl transition disabled:opacity-60 text-xs"
+            >
+              {checkRunning ? 'Checking…' : 'Run check'}
+            </button>
+          </div>
+
+          {competitorsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4 h-28 animate-pulse" />
+              ))}
+            </div>
+          ) : competitors.length === 0 ? (
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 text-center">
+              <p className="text-gray-400 font-semibold text-sm">No competitor data yet — run a check to start monitoring</p>
+              <p className="text-gray-600 text-xs mt-1">Tracks pricing changes across Jasper AI, Copy.ai, Gong, Salesloft, Apollo.io, HubSpot.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {competitors.map((comp, i) => (
+                <div key={i} className={`bg-[#111] border rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors ${comp.hasChanged ? 'border-yellow-500/40' : 'border-[#1f1f1f]'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold text-white">{comp.name}</span>
+                    {comp.hasChanged && (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full border bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                        Changed ⚡
+                      </span>
+                    )}
+                  </div>
+                  <a href={comp.url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#D4AF37]/60 hover:text-[#D4AF37] truncate block mb-2">
+                    {comp.url}
+                  </a>
+                  {comp.pricing && comp.pricing.length > 0 && (
+                    <p className="text-xs text-gray-400 mb-1">
+                      <span className="text-gray-600">Pricing: </span>
+                      {comp.pricing.slice(0, 4).join(' · ')}
+                    </p>
+                  )}
+                  {comp.changesSummary && (
+                    <p className="text-xs text-yellow-400/80 mt-1">{comp.changesSummary}</p>
+                  )}
+                  <p suppressHydrationWarning className="text-xs text-gray-700 mt-2">
+                    Last checked: {comp.lastChecked ? new Date(comp.lastChecked).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'never'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ── Web health check (existing functionality, now secondary) ────────── */}

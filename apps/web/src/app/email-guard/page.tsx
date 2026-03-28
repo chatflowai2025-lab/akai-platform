@@ -25,6 +25,15 @@ interface Enquiry {
   status: 'proposal_draft' | 'sent' | 'held';
   proposal?: { body: string; htmlBody?: string; vertical?: string; generatedAt: string };
   matchedRule?: string;
+  abTestId?: string;
+  abVariantA?: string;
+  abVariantB?: string;
+  abVariantASubject?: string;
+  abVariantBSubject?: string;
+  abStatus?: string;
+  leadScore?: number;
+  leadTier?: 'cold' | 'warm' | 'hot' | 'fire';
+  leadSignals?: string[];
 }
 
 interface EmailRule {
@@ -282,6 +291,7 @@ function EmailGuardContent({
   const [previewMode, setPreviewMode] = useState<Record<string, 'preview' | 'edit'>>({});
   // Edited proposal text per enquiry
   const [editedBody, setEditedBody] = useState<Record<string, string>>({});
+  const [abVariantTab, setAbVariantTab] = useState<Record<string, 'A' | 'B'>>({});
 
   // Template performance panel
   interface VerticalPerf { vertical: string; sentCount: number; replyRate: number; lastUpdated: string; }
@@ -527,14 +537,22 @@ function EmailGuardContent({
 
     setSending(eq.id);
     try {
-      const currentBody = editedBody[eq.id] ?? eq.proposal?.body ?? '';
+      const activeVariant = abVariantTab[eq.id] ?? 'A';
+      const variantBody = activeVariant === 'B' && eq.abVariantB ? eq.abVariantB : null;
+      const variantSubject = activeVariant === 'B' && eq.abVariantBSubject ? eq.abVariantBSubject
+        : activeVariant === 'A' && eq.abVariantASubject ? eq.abVariantASubject
+        : null;
+      const currentBody = editedBody[eq.id] ?? variantBody ?? eq.proposal?.body ?? '';
+      const currentSubject = variantSubject ?? `Re: ${eq.subject}`;
       await fetch(`${RAILWAY}/api/email/enquiries/${user.uid}/${eq.id}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
         body: JSON.stringify({
           proposalBody: currentBody,
           proposalHtmlBody: eq.proposal?.htmlBody || null,
-          subject: `Re: ${eq.subject}`,
+          subject: currentSubject,
+          abVariant: activeVariant,
+          abTestId: eq.abTestId,
         }),
       });
       setEnquiries(prev => prev.map(e => e.id === eq.id ? { ...e, status: 'sent' as const } : e));
@@ -877,9 +895,20 @@ function EmailGuardContent({
                         <p className="text-xs text-gray-500 truncate">{eq.from}</p>
                         <p className="text-xs text-gray-600 mt-1 truncate">{eq.body?.slice(0, 80)}…</p>
                       </div>
-                      <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full ${eq.status === 'sent' ? 'bg-green-500/10 text-green-400' : 'bg-[#D4AF37]/10 text-[#D4AF37]'}`}>
-                        {eq.status === 'sent' ? '✓ Sent' : 'Proposal ready'}
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {eq.leadScore && (
+                          <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-semibold ${
+                            eq.leadScore >= 8 ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            eq.leadScore >= 6 ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                            'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                          }`}>
+                            {eq.leadScore >= 8 ? '🔥' : eq.leadScore >= 6 ? '⚡' : '❄️'} {eq.leadScore}/10
+                          </span>
+                        )}
+                        <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full ${eq.status === 'sent' ? 'bg-green-500/10 text-green-400' : 'bg-[#D4AF37]/10 text-[#D4AF37]'}`}>
+                          {eq.status === 'sent' ? '✓ Sent' : 'Proposal ready'}
+                        </span>
+                      </div>
                     </div>
                     {selectedId === eq.id && eq.proposal && (
                       <div className="border-t border-[#1f1f1f] p-4 space-y-3">
@@ -912,8 +941,44 @@ function EmailGuardContent({
                           )}
                         </div>
 
-                        {/* Preview mode — HTML email */}
-                        {(previewMode[eq.id] ?? 'preview') === 'preview' && eq.proposal.htmlBody ? (
+                        {/* A/B variant selector */}
+                        {eq.abVariantB && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 bg-[#1a1a1a] rounded-lg p-1">
+                                <button
+                                  onClick={() => { setAbVariantTab(prev => ({ ...prev, [eq.id]: 'A' })); setEditedBody(prev => { const n = { ...prev }; delete n[eq.id]; return n; }); }}
+                                  className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
+                                    (abVariantTab[eq.id] ?? 'A') === 'A'
+                                      ? 'bg-[#D4AF37] text-black'
+                                      : 'text-gray-500 hover:text-white'
+                                  }`}
+                                >
+                                  Variant A
+                                </button>
+                                <button
+                                  onClick={() => { setAbVariantTab(prev => ({ ...prev, [eq.id]: 'B' })); setEditedBody(prev => { const n = { ...prev }; delete n[eq.id]; return n; }); }}
+                                  className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
+                                    abVariantTab[eq.id] === 'B'
+                                      ? 'bg-[#D4AF37] text-black'
+                                      : 'text-gray-500 hover:text-white'
+                                  }`}
+                                >
+                                  Variant B
+                                </button>
+                              </div>
+                              <span className="text-xs text-gray-500">🧪 A/B testing active — AKAI will learn from the response</span>
+                            </div>
+                            {(abVariantTab[eq.id] ?? 'A') === 'A' ? (
+                              <p className="text-xs text-gray-600">Formal · longer · <em>{eq.abVariantASubject}</em></p>
+                            ) : (
+                              <p className="text-xs text-gray-600">Casual · punchy · <em>{eq.abVariantBSubject}</em></p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Preview mode — HTML email (only for Variant A) */}
+                        {(previewMode[eq.id] ?? 'preview') === 'preview' && eq.proposal.htmlBody && (abVariantTab[eq.id] ?? 'A') === 'A' ? (
                           <div className="rounded-xl overflow-hidden border border-[#2a2a2a] w-full">
                             <iframe
                               srcDoc={eq.proposal.htmlBody}
@@ -930,11 +995,11 @@ function EmailGuardContent({
                             />
                           </div>
                         ) : (
-                          /* Edit mode — plain text textarea */
+                          /* Edit mode or Variant B — plain text textarea */
                           <textarea
                             className="w-full bg-[#0a0a0a] rounded-xl p-4 text-sm text-white/80 leading-relaxed border border-[#2a2a2a] focus:outline-none focus:border-[#D4AF37]/50 resize-none font-mono"
                             rows={12}
-                            value={editedBody[eq.id] ?? eq.proposal.body}
+                            value={editedBody[eq.id] ?? ((abVariantTab[eq.id] === 'B' && eq.abVariantB) ? eq.abVariantB : eq.proposal.body)}
                             onChange={e => setEditedBody(prev => ({ ...prev, [eq.id]: e.target.value }))}
                           />
                         )}
