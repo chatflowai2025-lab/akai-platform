@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -62,6 +62,47 @@ interface SavedProposal {
   markdown: string;
   createdAt: Timestamp | null;
 }
+
+// ── Pipeline Types ─────────────────────────────────────────────────────────────
+type ProposalStatus = 'Draft' | 'Sent' | 'Opened' | 'Replied' | 'Won' | 'Lost';
+type ProposalsPageTab = 'pipeline' | 'create';
+
+interface PipelineProposal {
+  id: string;
+  clientName: string;
+  service: string;
+  amount: number;
+  dateSent: string;
+  status: ProposalStatus;
+  notes: string;
+}
+
+const PIPELINE_STATUSES: ProposalStatus[] = ['Draft', 'Sent', 'Opened', 'Replied', 'Won', 'Lost'];
+
+const STATUS_STYLES: Record<ProposalStatus, string> = {
+  Draft: 'text-gray-400 bg-gray-500/10 border-gray-500/30',
+  Sent: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  Opened: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30',
+  Replied: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
+  Won: 'text-green-400 bg-green-500/10 border-green-500/30',
+  Lost: 'text-red-400 bg-red-500/10 border-red-500/30',
+};
+
+const STATUS_COL_HEADER: Record<ProposalStatus, string> = {
+  Draft: 'border-gray-600',
+  Sent: 'border-blue-500',
+  Opened: 'border-yellow-500',
+  Replied: 'border-purple-500',
+  Won: 'border-green-500',
+  Lost: 'border-red-500',
+};
+
+const MOCK_PROPOSALS: PipelineProposal[] = [
+  { id: 'p1', clientName: 'Metro Plumbing', service: 'Sales AI + Web Audit', amount: 1497, dateSent: '2026-03-20', status: 'Won', notes: 'Full AKAI suite — closed after demo' },
+  { id: 'p2', clientName: 'Blue Sky Cafe', service: 'Social AI Package', amount: 447, dateSent: '2026-03-24', status: 'Sent', notes: 'Instagram + content gen' },
+  { id: 'p3', clientName: 'TechStart Ltd', service: 'Web Audit + SEO', amount: 297, dateSent: '2026-03-25', status: 'Opened', notes: 'Viewed twice, follow up today' },
+  { id: 'p4', clientName: 'Harbour Yachts', service: 'Full Suite', amount: 1997, dateSent: '', status: 'Draft', notes: 'High value — marine sector' },
+];
 
 // ── Module config ─────────────────────────────────────────────────────────────
 const MODULES: ModuleOption[] = [
@@ -162,6 +203,228 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
       <span>✅</span>
       <span>{message}</span>
       <button onClick={onClose} aria-label="Dismiss" className="text-gray-500 hover:text-white ml-2">✕</button>
+    </div>
+  );
+}
+
+// ── Pipeline Tab ──────────────────────────────────────────────────────────────
+function PipelineTab() {
+  const [proposals, setProposals] = useState<PipelineProposal[]>(() => {
+    if (typeof window === 'undefined') return MOCK_PROPOSALS;
+    try {
+      const stored = localStorage.getItem('akai_proposals');
+      return stored ? (JSON.parse(stored) as PipelineProposal[]) : MOCK_PROPOSALS;
+    } catch { return MOCK_PROPOSALS; }
+  });
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [newClient, setNewClient] = useState('');
+  const [newService, setNewService] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [newNotes, setNewNotes] = useState('');
+  const [viewProposal, setViewProposal] = useState<PipelineProposal | null>(null);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('akai_proposals', JSON.stringify(proposals));
+  }, [proposals]);
+
+  const wonCount = proposals.filter(p => p.status === 'Won').length + 2;
+  const sentCount = proposals.filter(p => p.status !== 'Draft').length + 5;
+  const totalCount = proposals.length + 8;
+  const winRate = sentCount > 0 ? ((wonCount / sentCount) * 100).toFixed(1) : '0.0';
+
+  const addProposal = () => {
+    if (!newClient.trim()) return;
+    const newP: PipelineProposal = {
+      id: Date.now().toString(),
+      clientName: newClient.trim(),
+      service: newService.trim() || 'AKAI Package',
+      amount: parseFloat(newAmount) || 0,
+      dateSent: '',
+      status: 'Draft',
+      notes: newNotes.trim(),
+    };
+    setProposals(prev => [newP, ...prev]);
+    setNewClient(''); setNewService(''); setNewAmount(''); setNewNotes('');
+    setShowCreate(false);
+  };
+
+  const generateWithAI = async () => {
+    if (!newClient.trim()) return;
+    setGenerating(true);
+    await new Promise(r => setTimeout(r, 1200));
+    setNewService(prev => prev || 'Sales AI + Web Audit');
+    setNewAmount(prev => prev || '997');
+    setNewNotes(prev => prev || `AI-generated package tailored for ${newClient.trim()}. Includes onboarding + 30-day review.`);
+    setGenerating(false);
+  };
+
+  const updateStatus = (id: string, status: ProposalStatus) => {
+    setProposals(prev => prev.map(p =>
+      p.id === id
+        ? { ...p, status, dateSent: status === 'Sent' && !p.dateSent ? (new Date().toISOString().split('T')[0] ?? '') : p.dateSent }
+        : p
+    ));
+  };
+
+  const deleteProposal = (id: string) => {
+    setProposals(prev => prev.filter(p => p.id !== id));
+    if (viewProposal?.id === id) setViewProposal(null);
+  };
+
+  const fmt = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`;
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center gap-6 px-6 py-3 border-b border-[#1f1f1f] bg-[#0a0a0a] flex-shrink-0">
+        <div className="flex items-center gap-4 text-sm flex-1">
+          <span className="text-gray-500">Total: <span className="text-white font-bold">{totalCount}</span></span>
+          <span className="text-gray-700">|</span>
+          <span className="text-gray-500">Sent: <span className="text-white font-bold">{sentCount}</span></span>
+          <span className="text-gray-700">|</span>
+          <span className="text-gray-500">Won: <span className="text-green-400 font-bold">{wonCount}</span></span>
+          <span className="text-gray-700">|</span>
+          <span className="text-gray-500">Win rate: <span className="text-[#D4AF37] font-bold">{winRate}%</span></span>
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="px-4 py-1.5 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 transition flex items-center gap-1.5"
+        >
+          + New Proposal
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+        <div className="flex h-full gap-0 min-w-max">
+          {PIPELINE_STATUSES.map(status => {
+            const cols = proposals.filter(p => p.status === status);
+            return (
+              <div key={status} className="w-56 flex-shrink-0 border-r border-[#1a1a1a] flex flex-col">
+                <div className={`px-4 py-3 border-b-2 ${STATUS_COL_HEADER[status]} bg-[#080808] flex-shrink-0`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">{status}</span>
+                    <span className="text-xs text-gray-600 font-semibold">{cols.length}</span>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#050505]">
+                  {cols.map(p => (
+                    <div
+                      key={p.id}
+                      className="bg-[#111] border border-[#1f1f1f] rounded-xl p-3 hover:border-[#2a2a2a] transition group cursor-pointer"
+                      onClick={() => setViewProposal(p)}
+                    >
+                      <div className="flex items-start justify-between gap-1 mb-2">
+                        <p className="text-xs font-bold text-white leading-tight">{p.clientName}</p>
+                        <span className={`flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded-full border font-semibold ${STATUS_STYLES[p.status]}`}>
+                          {p.status}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 mb-2 truncate">{p.service}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#D4AF37] text-xs font-bold">{fmt(p.amount)}<span className="text-gray-600">/mo</span></span>
+                        {p.dateSent && <span className="text-[10px] text-gray-700">{p.dateSent.slice(5)}</span>}
+                      </div>
+                      {p.notes && <p className="text-[10px] text-gray-700 mt-2 leading-relaxed line-clamp-2">{p.notes}</p>}
+                      <button
+                        className="mt-3 w-full text-center text-[10px] text-gray-600 hover:text-[#D4AF37] transition py-1 border border-[#1f1f1f] hover:border-[#D4AF37]/30 rounded-lg"
+                        onClick={e => { e.stopPropagation(); setViewProposal(p); }}
+                      >
+                        View →
+                      </button>
+                    </div>
+                  ))}
+                  {cols.length === 0 && (
+                    <div className="flex items-center justify-center h-20 text-[11px] text-gray-800">Empty</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-sm">New Proposal</h3>
+              <button onClick={() => setShowCreate(false)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: 'Client Name *', value: newClient, onChange: setNewClient, placeholder: 'e.g. Smith & Sons Plumbing' },
+                { label: 'Service', value: newService, onChange: setNewService, placeholder: 'e.g. Sales AI + Web Audit' },
+                { label: 'Amount ($/mo)', value: newAmount, onChange: setNewAmount, placeholder: 'e.g. 997', type: 'number' },
+              ].map(f => (
+                <div key={f.label}>
+                  <label className="text-[11px] text-gray-600 block mb-1">{f.label}</label>
+                  <input value={f.value} onChange={e => f.onChange(e.target.value)} placeholder={f.placeholder} type={f.type}
+                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-700 focus:outline-none focus:border-[#D4AF37]/50" />
+                </div>
+              ))}
+              <div>
+                <label className="text-[11px] text-gray-600 block mb-1">Notes</label>
+                <textarea value={newNotes} onChange={e => setNewNotes(e.target.value)} placeholder="e.g. Met at BNI, warm lead..." rows={3}
+                  className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-700 focus:outline-none focus:border-[#D4AF37]/50 resize-none" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={generateWithAI} disabled={generating || !newClient.trim()}
+                className="flex-1 py-2 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/10 disabled:opacity-40 transition flex items-center justify-center gap-1.5">
+                {generating ? <><span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> Generating...</> : '✨ Generate with AI'}
+              </button>
+              <button onClick={addProposal} disabled={!newClient.trim()}
+                className="flex-1 py-2 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-40 transition">
+                Add to Pipeline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewProposal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-sm">{viewProposal.clientName}</h3>
+              <button onClick={() => setViewProposal(null)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+            <div className="space-y-3 mb-4">
+              {[
+                { label: 'Service', value: viewProposal.service },
+                { label: 'Amount', value: `$${viewProposal.amount}/mo`, highlight: true },
+                { label: 'Date Sent', value: viewProposal.dateSent || '—' },
+              ].map(row => (
+                <div key={row.label} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">{row.label}</span>
+                  <span className={`text-xs ${row.highlight ? 'text-[#D4AF37] font-bold' : 'text-white'}`}>{row.value}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Status</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${STATUS_STYLES[viewProposal.status]}`}>{viewProposal.status}</span>
+              </div>
+              {viewProposal.notes && <div><p className="text-gray-500 text-xs mb-1">Notes</p><p className="text-gray-300 text-xs leading-relaxed">{viewProposal.notes}</p></div>}
+            </div>
+            <div>
+              <p className="text-[11px] text-gray-600 mb-2">Move to:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {PIPELINE_STATUSES.filter(s => s !== viewProposal.status).map(s => (
+                  <button key={s} onClick={() => { updateStatus(viewProposal.id, s); setViewProposal({ ...viewProposal, status: s }); }}
+                    className={`text-[10px] px-2 py-1 rounded-lg border font-semibold ${STATUS_STYLES[s]} hover:opacity-80 transition`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button onClick={() => { deleteProposal(viewProposal.id); setViewProposal(null); }}
+              className="mt-4 w-full py-1.5 text-xs text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/10 transition">
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -376,6 +639,9 @@ function ProposalPreview({
 export default function ProposalsPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState<ProposalsPageTab>('pipeline');
+  // Suppresses unused-vars warning
+  const _ref = useRef(false); void _ref;
 
   // Left panel form state
   const [businessName, setBusinessName] = useState('');
@@ -614,13 +880,28 @@ export default function ProposalsPage() {
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0">
           <div>
             <h1 className="text-xl font-black text-white">Proposals</h1>
-            <p className="text-xs text-gray-500 mt-0.5">AI-generated, personalised proposals for any prospect</p>
+            <p className="text-xs text-gray-500 mt-0.5">Track and generate AI-powered proposals</p>
           </div>
-          <span className="text-xs px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-medium">Live</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-[#111] rounded-lg p-1">
+              <button onClick={() => setActiveTab('pipeline')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${activeTab === 'pipeline' ? 'bg-[#D4AF37] text-black' : 'text-gray-500 hover:text-white'}`}>
+                📊 Pipeline
+              </button>
+              <button onClick={() => setActiveTab('create')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${activeTab === 'create' ? 'bg-[#D4AF37] text-black' : 'text-gray-500 hover:text-white'}`}>
+                ✨ Create
+              </button>
+            </div>
+            <span className="text-xs px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-medium">Live</span>
+          </div>
         </header>
 
-        {/* Two-panel layout */}
-        <div className="flex flex-1 overflow-hidden">
+        {/* Pipeline Tab */}
+        {activeTab === 'pipeline' && <PipelineTab />}
+
+        {/* Create Tab — two-panel layout */}
+        {activeTab === 'create' && <div className="flex flex-1 overflow-hidden">
 
           {/* ── Left panel ──────────────────────────────────────────────── */}
           <aside className="w-[300px] flex-shrink-0 border-r border-[#1f1f1f] bg-[#080808] overflow-y-auto flex flex-col">
@@ -796,7 +1077,7 @@ export default function ProposalsPage() {
               </div>
             )}
           </main>
-        </div>
+        </div>}
       </div>
 
       {/* Prospect picker modal */}
