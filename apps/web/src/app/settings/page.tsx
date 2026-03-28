@@ -51,6 +51,13 @@ interface NotifPrefs {
   signalNumber: string;
 }
 
+interface ReferralData {
+  code: string | null;
+  referralCount: number;
+  creditsEarned: number;
+  referralUrl: string;
+}
+
 export default function SettingsPage() {
   const { user, userProfile } = useAuth();
 
@@ -117,6 +124,10 @@ export default function SettingsPage() {
     facebook: { connected: false },
     x: { connected: false },
   });
+
+  // Referral
+  const [referral, setReferral] = useState<ReferralData | null>(null);
+  const [referralCopied, setReferralCopied] = useState(false);
 
   // Email Guard
   const [webhookCopied, setWebhookCopied] = useState(false);
@@ -234,6 +245,13 @@ export default function SettingsPage() {
         console.error('[SETTINGS] load error', err);
       }
     })();
+    // Load referral data
+    fetch(`https://api-server-production-2a27.up.railway.app/api/analytics/referral/${user.uid}`, {
+      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' },
+    })
+      .then(r => r.json())
+      .then((data: ReferralData) => setReferral(data))
+      .catch(() => {});
   }, [user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveBizProfile = async () => {
@@ -964,6 +982,71 @@ export default function SettingsPage() {
             ✉️ View Email Guard →
           </a>
         </Section>
+
+      {/* Refer a Friend */}
+      <Section title="Refer a Friend">
+        <p className="text-sm text-gray-400 leading-relaxed">
+          Refer a business to AKAI → they get <strong className="text-white">1 month free</strong> · you get <strong className="text-white">1 month free</strong>.
+        </p>
+        {referral?.code ? (
+          <div className="space-y-4">
+            {/* Referral link */}
+            <div className="flex items-center gap-2">
+              <input
+                readOnly
+                value={`getakai.ai/?ref=${referral.code}`}
+                className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-[#D4AF37] font-mono focus:outline-none focus:border-[#D4AF37] transition-colors"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://getakai.ai/?ref=${referral.code}`);
+                  setReferralCopied(true);
+                  setTimeout(() => setReferralCopied(false), 2000);
+                }}
+                className="px-4 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition flex-shrink-0"
+              >
+                {referralCopied ? '✅ Copied!' : 'Copy'}
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-4 py-3 px-4 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl">
+              <div className="text-center flex-1">
+                <p className="text-2xl font-black text-white">{referral.referralCount}</p>
+                <p className="text-xs text-gray-500 mt-0.5">businesses referred</p>
+              </div>
+              <div className="w-px h-10 bg-[#2a2a2a]" />
+              <div className="text-center flex-1">
+                <p className="text-2xl font-black text-[#D4AF37]">{referral.creditsEarned}</p>
+                <p className="text-xs text-gray-500 mt-0.5">credits earned</p>
+              </div>
+            </div>
+
+            {/* Share buttons */}
+            <div className="flex items-center gap-3">
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://getakai.ai/?ref=${referral.code}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-[#0a66c2]/10 border border-[#0a66c2]/30 text-[#0a66c2] rounded-xl text-sm font-medium hover:bg-[#0a66c2]/20 transition"
+              >
+                💼 Share on LinkedIn
+              </a>
+              <a
+                href={`mailto:?subject=Try AKAI free for a month&body=Hey! I've been using AKAI for my business and thought you'd love it. Use my referral link for a free month: https://getakai.ai/?ref=${referral.code}`}
+                className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition"
+              >
+                ✉️ Share via Email
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="w-3.5 h-3.5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+            Loading your referral link…
+          </div>
+        )}
+      </Section>
 
       {/* Danger Zone */}
       <Section title="Danger Zone">

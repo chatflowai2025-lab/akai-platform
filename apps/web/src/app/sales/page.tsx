@@ -1067,12 +1067,252 @@ function ProspectsSection() {
   );
 }
 
+// ── Outbound Prospects Tab ────────────────────────────────────────────────
+
+interface OutboundProspect {
+  id: string;
+  businessName: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  location: string;
+  vertical: string;
+  enrichmentScore: number;
+  outreachStatus: 'queued' | 'contacted' | 'replied' | 'converted' | 'rejected';
+  createdAt?: string;
+}
+
+const TARGET_VERTICALS_LIST = [
+  'luxury kitchens', 'interior design', 'yacht charter', 'marine',
+  'legal', 'accounting', 'real estate', 'recruitment', 'construction', 'landscaping',
+];
+
+const OUTREACH_STATUS_BADGES: Record<string, { label: string; style: string }> = {
+  queued:    { label: '🟡 Queued',    style: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  contacted: { label: '📧 Contacted', style: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  replied:   { label: '💬 Replied',   style: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  converted: { label: '✅ Converted', style: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  rejected:  { label: '❌ Rejected',  style: 'bg-red-500/10 text-red-400 border-red-500/20' },
+};
+
+function EnrichmentBar({ score }: { score: number }) {
+  const pct = Math.round((score / 10) * 100);
+  const color = score >= 7 ? 'bg-green-400' : score >= 4 ? 'bg-yellow-400' : 'bg-gray-500';
+  return (
+    <div className="flex items-center gap-2" title={`Enrichment: ${score}/10`}>
+      <div className="w-16 h-1.5 bg-[#2a2a2a] rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-[10px] text-gray-500">{score}/10</span>
+    </div>
+  );
+}
+
+function OutboundProspectsTab({ userId }: { userId: string }) {
+  const [prospects, setProspects] = useState<OutboundProspect[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [contactingId, setContactingId] = useState<string | null>(null);
+  const [outreachSentId, setOutreachSentId] = useState<string | null>(null);
+  const [form, setForm] = useState({ businessName: '', website: '', location: 'Sydney', vertical: '', email: '' });
+  const [adding, setAdding] = useState(false);
+
+  const fetchProspects = async () => {
+    try {
+      const res = await fetch(`${RAILWAY_API}/api/analytics/prospects/${userId}`, {
+        headers: { 'x-api-key': RAILWAY_API_KEY },
+      });
+      const data = await res.json();
+      setProspects(data.prospects ?? []);
+    } catch {
+      setProspects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchProspects(); }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAdd = async () => {
+    if (!form.businessName) return;
+    setAdding(true);
+    try {
+      const res = await fetch(`${RAILWAY_API}/api/analytics/prospects/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setAddModalOpen(false);
+        setForm({ businessName: '', website: '', location: 'Sydney', vertical: '', email: '' });
+        await fetchProspects();
+      }
+    } catch { /* ignore */ }
+    setAdding(false);
+  };
+
+  const handleContact = async (prospect: OutboundProspect) => {
+    setContactingId(prospect.id);
+    try {
+      const res = await fetch(`${RAILWAY_API}/api/analytics/prospects/${userId}/${prospect.id}/contact`, {
+        method: 'POST',
+        headers: { 'x-api-key': RAILWAY_API_KEY },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setOutreachSentId(prospect.id);
+        setProspects(prev => prev.map(p => p.id === prospect.id ? { ...p, outreachStatus: 'contacted' } : p));
+        setTimeout(() => setOutreachSentId(null), 3000);
+      }
+    } catch { /* ignore */ }
+    setContactingId(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-500">{prospects.length} prospects in outbound queue</p>
+        <button
+          onClick={() => setAddModalOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-xl text-xs font-bold hover:bg-[#D4AF37]/20 transition-colors"
+        >
+          + Add prospect
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-14">
+          <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : prospects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-14 text-center">
+          <p className="text-3xl mb-3">🎯</p>
+          <p className="text-white font-bold text-sm mb-1">No outbound prospects yet</p>
+          <p className="text-gray-600 text-xs max-w-[260px]">Add Australian SMBs to research, enrich, and contact at scale.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {prospects.map(p => {
+            const badge = OUTREACH_STATUS_BADGES[p.outreachStatus] ?? OUTREACH_STATUS_BADGES.queued!;
+            const isContacting = contactingId === p.id;
+            const sentSuccess = outreachSentId === p.id;
+            return (
+              <div key={p.id} className="flex items-start gap-3 p-3 bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl hover:border-[#D4AF37]/20 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">
+                  {p.businessName[0]?.toUpperCase() ?? '?'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{p.businessName}</p>
+                      <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                        <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">{p.vertical}</span>
+                        <span className="text-[10px] text-gray-600">📍 {p.location}</span>
+                        {p.email && <span className="text-[10px] text-gray-500 truncate max-w-[160px]">✉️ {p.email}</span>}
+                        {p.phone && <span className="text-[10px] text-gray-600">📞 {p.phone}</span>}
+                        {p.website && <a href={p.website.startsWith('http') ? p.website : `https://${p.website}`} target="_blank" rel="noopener noreferrer" className="text-[10px] text-gray-600 hover:text-white transition truncate max-w-[120px]">🌐 {p.website}</a>}
+                      </div>
+                      <div className="mt-1.5">
+                        <EnrichmentBar score={p.enrichmentScore} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.style}`}>{badge.label}</span>
+                      {sentSuccess ? (
+                        <span className="text-[11px] text-green-400 font-semibold">Outreach sent ✉️</span>
+                      ) : p.email && p.outreachStatus === 'queued' ? (
+                        <button
+                          onClick={() => handleContact(p)}
+                          disabled={isContacting}
+                          className="flex items-center gap-1 text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition-colors disabled:opacity-50 font-semibold"
+                        >
+                          {isContacting ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : 'Contact →'}
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add Prospect Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setAddModalOpen(false)}>
+          <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-white font-bold text-sm">Add Prospect</h3>
+              <button onClick={() => setAddModalOpen(false)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Business name *"
+                value={form.businessName}
+                onChange={e => setForm(f => ({ ...f, businessName: e.target.value }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+              />
+              <input
+                type="url"
+                placeholder="Website (optional)"
+                value={form.website}
+                onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+              />
+              <input
+                type="text"
+                placeholder="Location (e.g. Mosman, Sydney)"
+                value={form.location}
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+              />
+              <select
+                value={form.vertical}
+                onChange={e => setForm(f => ({ ...f, vertical: e.target.value }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+              >
+                <option value="">Select vertical...</option>
+                {TARGET_VERTICALS_LIST.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+              <input
+                type="email"
+                placeholder="Email (for outreach)"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+              />
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setAddModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-sm font-semibold hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdd}
+                disabled={adding || !form.businessName}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {adding ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Add & Enrich'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────
 
 export default function SalesPage() {
   const router = useRouter();
   const { user, loading, userProfile } = useAuth();
-  const [pipelineTab, setPipelineTab] = useState<'pipeline' | 'calllog'>('pipeline');
+  const [pipelineTab, setPipelineTab] = useState<'pipeline' | 'calllog' | 'outbound'>('pipeline');
   const [callLogKey, setCallLogKey] = useState(0);
 
   const [stats, setStats] = useState<SalesStats>({
@@ -1199,7 +1439,7 @@ export default function SalesPage() {
           </div>
         </section>
 
-        {/* Pipeline + Call Log tabs */}
+        {/* Pipeline + Call Log + Outbound tabs */}
         <section id="leads">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-1">
@@ -1214,6 +1454,12 @@ export default function SalesPage() {
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${pipelineTab === 'calllog' ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30' : 'text-gray-500 hover:text-white border border-transparent'}`}
               >
                 📋 Call Log
+              </button>
+              <button
+                onClick={() => setPipelineTab('outbound')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${pipelineTab === 'outbound' ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30' : 'text-gray-500 hover:text-white border border-transparent'}`}
+              >
+                🎯 Prospects
               </button>
             </div>
             {pipelineTab === 'pipeline' && (
@@ -1244,8 +1490,10 @@ export default function SalesPage() {
                   }}
                 />
               )
-            ) : (
+            ) : pipelineTab === 'calllog' ? (
               <CallLogTab key={callLogKey} />
+            ) : (
+              <OutboundProspectsTab userId={user.uid} />
             )}
           </div>
         </section>

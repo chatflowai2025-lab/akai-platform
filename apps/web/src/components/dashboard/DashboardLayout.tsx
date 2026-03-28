@@ -59,6 +59,9 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
   const [userContext, setUserContext] = useState<Record<string, string>>({});
   const [recentHistory, setRecentHistory] = useState<string[]>([]);
+  const [showMemory, setShowMemory] = useState(false);
+  const [memoryTurns, setMemoryTurns] = useState<Array<{ userMessage: string; akResponse: string; timestamp: string; date: string }>>([]);
+  const [memoryLoading, setMemoryLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -277,6 +280,27 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     } catch { /* non-fatal */ }
   }, [user]);
 
+  const fetchMemory = useCallback(async () => {
+    if (!user) return;
+    setMemoryLoading(true);
+    try {
+      const res = await fetch(`/api/chat/memory?userId=${user.uid}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMemoryTurns(data.turns || []);
+      }
+    } catch { /* non-fatal */ } finally {
+      setMemoryLoading(false);
+    }
+  }, [user]);
+
+  const toggleMemory = useCallback(() => {
+    setShowMemory(prev => {
+      if (!prev) fetchMemory();
+      return !prev;
+    });
+  }, [fetchMemory]);
+
   const isOnlyInitialMessage = messages.length === 1 && messages[0]?.id === '1';
 
   return (
@@ -286,7 +310,12 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs flex-shrink-0">AK</div>
             <div className="flex flex-col"><span className="font-semibold text-sm text-white leading-none">AK</span><span className="text-[10px] text-gray-500 leading-none">Your AI Business Partner</span></div>
-            <span className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+            <button
+              onClick={toggleMemory}
+              title="View conversation memory"
+              className={`ml-auto text-xs px-2 py-1 rounded-lg border transition flex-shrink-0 ${showMemory ? 'border-[#D4AF37]/60 bg-[#D4AF37]/10 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500 hover:text-gray-300 hover:border-[#3a3a3a]'}`}
+            >🧠</button>
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
           </div>
         </div>
 
@@ -375,6 +404,33 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
 
           <div ref={bottomRef} />
         </div>
+
+        {/* Memory Panel */}
+        {showMemory && (
+          <div className="border-t border-[#1f1f1f] flex-shrink-0 max-h-64 overflow-y-auto bg-[#060606]">
+            <div className="px-3 py-2 flex items-center justify-between border-b border-[#1a1a1a]">
+              <span className="text-[10px] text-[#D4AF37] font-semibold uppercase tracking-wider">🧠 Memory</span>
+              <button onClick={fetchMemory} disabled={memoryLoading} className="text-[10px] text-gray-500 hover:text-gray-300 transition">{memoryLoading ? '⏳' : '↻ Refresh'}</button>
+            </div>
+            {memoryLoading && <div className="px-3 py-4 text-xs text-gray-600 text-center">Loading memory...</div>}
+            {!memoryLoading && memoryTurns.length === 0 && <div className="px-3 py-4 text-xs text-gray-600 text-center">No conversation history yet.</div>}
+            {!memoryLoading && memoryTurns.length > 0 && (
+              <div className="divide-y divide-[#1a1a1a]">
+                {memoryTurns.slice(0, 10).map((turn, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { sendRaw(turn.userMessage); setShowMemory(false); }}
+                    className="w-full text-left px-3 py-2 hover:bg-[#1a1a1a] transition group"
+                  >
+                    <div className="text-[10px] text-gray-600 mb-0.5">{new Date(turn.timestamp).toLocaleString('en-AU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="text-xs text-gray-300 truncate group-hover:text-white">You: {turn.userMessage?.slice(0, 80)}</div>
+                    <div className="text-xs text-gray-600 truncate mt-0.5">AK: {turn.akResponse?.slice(0, 80)}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Input */}
         <div className="p-3 border-t border-[#1f1f1f] flex-shrink-0">

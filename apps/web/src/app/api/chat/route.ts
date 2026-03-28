@@ -620,6 +620,33 @@ SALES CONVERSATION RULES:
       return NextResponse.json({ error: 'message is required' }, { status: 400 });
     }
 
+    // Fetch recent conversation memory from Firestore
+    let conversationMemory = '';
+    if (userId !== 'anonymous') {
+      try {
+        const db = getAdminFirestore();
+        if (db) {
+          const recentTurns: Array<{ userMessage: string; akResponse: string; timestamp: string }> = [];
+          for (let i = 0; i < 3; i++) {
+            const date = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+            const snap = await db.collection('conversations').doc(userId)
+              .collection(date)
+              .orderBy('timestamp', 'desc')
+              .limit(5)
+              .get();
+            snap.docs.forEach(doc => recentTurns.push(doc.data() as { userMessage: string; akResponse: string; timestamp: string }));
+          }
+          recentTurns.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+          if (recentTurns.length > 0) {
+            conversationMemory = '\n\nRecent conversation history:\n' +
+              recentTurns.slice(-5).map(t =>
+                `User: ${t.userMessage?.slice(0, 100)}\nAK: ${t.akResponse?.slice(0, 150)}`
+              ).join('\n---\n');
+          }
+        }
+      } catch { /* non-fatal */ }
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (apiKey) {
@@ -635,14 +662,51 @@ SALES CONVERSATION RULES:
       const response = await client.messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 400,
-        system: SYSTEM_PROMPT + contextBlock + moduleContext,
+        system: SYSTEM_PROMPT + contextBlock + moduleContext + conversationMemory,
         messages,
       });
       const content0 = response.content[0];
       const text = content0?.type === 'text' ? content0.text : '';
+
+      // Save conversation turn to memory
+      if (userId !== 'anonymous') {
+        try {
+          const db = getAdminFirestore();
+          if (db) {
+            const date = new Date().toISOString().slice(0, 10);
+            db.collection('conversations').doc(userId)
+              .collection(date).add({
+                userMessage: message,
+                akResponse: text,
+                timestamp: new Date().toISOString(),
+                intent: null,
+              }).catch(() => {});
+          }
+        } catch { /* non-fatal */ }
+      }
+
       return NextResponse.json({ message: text });
     } else {
-      return NextResponse.json({ message: await getMockResponse(message, history, userContext) });
+      const mockResponse = await getMockResponse(message, history, userContext);
+
+      // Save mock response to memory too
+      if (userId !== 'anonymous') {
+        try {
+          const db = getAdminFirestore();
+          if (db) {
+            const date = new Date().toISOString().slice(0, 10);
+            db.collection('conversations').doc(userId)
+              .collection(date).add({
+                userMessage: message,
+                akResponse: mockResponse,
+                timestamp: new Date().toISOString(),
+                intent: null,
+              }).catch(() => {});
+          }
+        } catch { /* non-fatal */ }
+      }
+
+      return NextResponse.json({ message: mockResponse });
     }
   } catch (err: unknown) {
     console.error('[/api/chat]', err);

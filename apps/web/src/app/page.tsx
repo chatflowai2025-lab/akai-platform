@@ -786,6 +786,13 @@ export default function Home() {
   const [captureOpen, setCaptureOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
+  // Persist referral code from ?ref= query param for later use on signup
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) localStorage.setItem('akai_ref_code', ref);
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />

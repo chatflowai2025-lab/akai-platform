@@ -42,6 +42,21 @@ async function syncUserProfile(user: User): Promise<UserProfile> {
       onboardingComplete: false,
     };
     await setDoc(ref, profile);
+
+    // Check for referral code in URL or localStorage
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref') || localStorage.getItem('akai_ref_code');
+      if (refCode) {
+        fetch('https://api-server-production-2a27.up.railway.app/api/analytics/referral/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': 'aiclozr_api_key_2026_prod' },
+          body: JSON.stringify({ referralCode: refCode, newUserId: user.uid, newUserEmail: user.email }),
+        }).catch(() => {});
+        localStorage.removeItem('akai_ref_code');
+      }
+    }
+
     return { uid: user.uid, ...profile };
   } else {
     // Existing user — update lastLoginAt
