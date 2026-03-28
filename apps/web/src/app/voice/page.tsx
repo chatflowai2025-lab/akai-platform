@@ -548,7 +548,7 @@ function SetupWizard({
   setConfig,
   onComplete,
   userEmail,
-  userName,
+  userName: _userName,
   userProfile,
   userId,
   leadsSource,

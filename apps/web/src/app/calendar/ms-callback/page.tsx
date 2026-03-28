@@ -62,7 +62,7 @@ function MSCalCallbackInner() {
           console.error('[calendar/ms-callback] error:', d);
           router.replace('/calendar?error=' + encodeURIComponent(d.error || 'ms_calendar_failed'));
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error('[calendar/ms-callback] fetch error:', e);
         router.replace('/calendar?error=ms_calendar_failed');
       }

@@ -649,7 +649,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
   const [campaignName, setCampaignName] = useState('Campaign 1');
   const [launching, setLaunching] = useState(false);
-  const [dncResult, setDncResult] = useState<{ safe: string[]; blocked: string[] } | null>(null);
+  const [dncResult] = useState<{ safe: string[]; blocked: string[] } | null>(null);
 
   const [launchResult, setLaunchResult] = useState<{ success: boolean; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

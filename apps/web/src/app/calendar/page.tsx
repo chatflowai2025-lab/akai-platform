@@ -12,6 +12,32 @@ import { collection, doc, setDoc, getDocs, serverTimestamp } from 'firebase/fire
 type EventType = 'Call' | 'Meeting' | 'Task' | 'Reminder';
 type CalendarView = 'month' | 'week' | 'day' | 'bookings';
 
+interface RawCalApiEvent {
+  id?: string;
+  summary?: string;
+  subject?: string;
+  description?: string;
+  bodyPreview?: string;
+  body?: { content?: string };
+  start?: { date?: string; dateTime?: string };
+  end?: { dateTime?: string };
+}
+
+interface Appointment {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  slot?: string;
+  status?: string;
+  message?: string;
+  googleEventId?: string;
+  date?: string;
+  time?: string;
+  notes?: string;
+  [key: string]: unknown;
+}
+
 interface CalEvent {
   id: string;
   title: string;
@@ -497,7 +523,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
 // ─── Bookings View ────────────────────────────────────────────────────────────
 
 function BookingsView({ userId }: { userId: string }) {
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -522,7 +548,7 @@ function BookingsView({ userId }: { userId: string }) {
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-3">
       <h3 className="text-sm font-bold text-white mb-4">📋 Booked appointments</h3>
-      {appointments.map((apt: any) => (
+      {appointments.map((apt: Appointment) => (
         <div key={apt.id} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -652,7 +678,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data?.events?.length) return;
-        const gcalEvents: CalEvent[] = data.events.map((e: any) => ({
+        const gcalEvents: CalEvent[] = data.events.map((e: RawCalApiEvent) => ({
           id: e.id || `gcal-${Math.random()}`,
           title: e.summary || '(No title)',
           date: (e.start?.date || e.start?.dateTime || '').slice(0, 10),
@@ -683,7 +709,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data?.events?.length) return;
-        const outlookEvents: CalEvent[] = data.events.map((e: any) => ({
+        const outlookEvents: CalEvent[] = data.events.map((e: RawCalApiEvent) => ({
           id: e.id || `outlook-${Math.random()}`,
           title: e.subject || '(No title)',
           date: (e.start?.dateTime || e.start?.date || '').slice(0, 10),
