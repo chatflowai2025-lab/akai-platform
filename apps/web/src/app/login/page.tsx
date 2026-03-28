@@ -1,7 +1,7 @@
 'use client';
 
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
@@ -18,7 +18,7 @@ import { BETA_MODE, BETA_CONTACT_EMAIL, isWhitelisted } from '@/lib/beta-config'
 
 type Tab = 'signin' | 'signup';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isWelcome = searchParams?.get('welcome') === 'true';
@@ -288,5 +288,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><span className="text-white/40 text-sm">Loading...</span></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
