@@ -476,7 +476,7 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
     setConnectError(null);
     try {
       const r = await fetch(
-        `https://api-server-production-2a27.up.railway.app/api/calendar/oauth-url`,
+        `https://api-server-production-2a27.up.railway.app/api/calendar/oauth-url?userId=${userId}`,
         { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
       );
       if (!r.ok) throw new Error(`Server error ${r.status}`);
