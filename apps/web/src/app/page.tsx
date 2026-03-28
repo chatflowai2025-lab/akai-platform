@@ -161,7 +161,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
       </p>
 
       {/* CTAs */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center mb-16">
+      <div className="flex flex-col sm:flex-row gap-3 items-center mb-10">
         <button
           onClick={onOpenCapture}
           aria-label="Start free trial"
@@ -184,23 +184,21 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
       </div>
 
       {/* Stats bar */}
-      <div className="w-full max-w-3xl bg-[#111] border border-[#1f1f1f] rounded-2xl px-8 py-5 grid grid-cols-2 md:grid-cols-4 divide-x divide-[#1f1f1f]">
-        <div className="flex flex-col items-center gap-1 px-4">
-          <span className="text-3xl font-black text-white">6</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wider">AI Modules</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 px-4">
-          <span className="text-3xl font-black text-white">24/7</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wider">Always On</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 px-4">
-          <span className="text-3xl font-black text-[#D4AF37]">&lt;60s</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wider">First Response</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 px-4">
-          <span className="text-3xl font-black text-[#D4AF37]">∞</span>
-          <span className="text-xs text-gray-500 uppercase tracking-wider">Learns Daily</span>
-        </div>
+      <div className="w-full max-w-3xl bg-[#111] border border-[#1f1f1f] rounded-2xl px-6 py-5 flex flex-wrap justify-center gap-y-4">
+        {[
+          { value: '6', label: 'AI Modules', gold: false },
+          { value: '24/7', label: 'Always On', gold: false },
+          { value: '<60s', label: 'First Response', gold: true },
+          { value: '∞', label: 'Learns Daily', gold: true },
+        ].map((stat, i, arr) => (
+          <div key={stat.label} className="flex items-center">
+            <div className="flex flex-col items-center gap-1 px-6">
+              <span className={`text-3xl font-black ${stat.gold ? 'text-[#D4AF37]' : 'text-white'}`}>{stat.value}</span>
+              <span className="text-xs text-gray-500 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
+            </div>
+            {i < arr.length - 1 && <span className="w-px h-8 bg-[#2a2a2a] hidden sm:block" />}
+          </div>
+        ))}
       </div>
     </section>
   );
