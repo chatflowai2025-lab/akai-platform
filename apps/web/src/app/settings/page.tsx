@@ -761,6 +761,7 @@ export default function SettingsPage() {
                 <div className="px-4 pb-4">
                   <input
                     type="tel"
+                    autoComplete="tel"
                     value={notifPrefs.smsNumber}
                     onChange={e => setNotifPrefs(p => ({ ...p, smsNumber: e.target.value }))}
                     placeholder="+61 4XX XXX XXX"
@@ -794,6 +795,7 @@ export default function SettingsPage() {
                 <div className="px-4 pb-4">
                   <input
                     type="tel"
+                    autoComplete="tel"
                     value={notifPrefs.whatsappNumber}
                     onChange={e => setNotifPrefs(p => ({ ...p, whatsappNumber: e.target.value }))}
                     placeholder="+61 4XX XXX XXX"
@@ -861,6 +863,7 @@ export default function SettingsPage() {
                 <div className="px-4 pb-4">
                   <input
                     type="tel"
+                    autoComplete="tel"
                     value={notifPrefs.signalNumber}
                     onChange={e => setNotifPrefs(p => ({ ...p, signalNumber: e.target.value }))}
                     placeholder="+61 4XX XXX XXX"
