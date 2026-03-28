@@ -28,7 +28,7 @@ function LoginContent() {
     }
     return 'signin';
   });
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(searchParams?.get('email') ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false); // start false — show buttons immediately, set true only during active auth ops
