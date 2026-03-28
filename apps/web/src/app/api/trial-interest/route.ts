@@ -61,10 +61,10 @@ async function notifyEmail(params: {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, business, phone, industry, website } = await req.json();
+    const { name, email, business, phone, industry, website, plan } = await req.json();
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 
-    const msg = `🔥 <b>New Trial Request</b>\n\n👤 ${name || 'Unknown'}\n📧 ${email}\n🏢 ${business || '—'}\n📞 ${phone || '—'}\n🏭 ${industry || '—'}\n🌐 ${website || '—'}`;
+    const msg = `🔥 <b>New Trial Request</b>${plan ? ` — <b>${plan} plan</b>` : ''}\n\n👤 ${name || 'Unknown'}\n📧 ${email}\n🏢 ${business || '—'}\n📞 ${phone || '—'}\n🏭 ${industry || '—'}\n🌐 ${website || '—'}\n💰 Plan: ${plan || 'Not selected'}`;
 
     // Persist to Firestore (non-blocking — notifications fire in parallel)
     const db = getAdminFirestore();

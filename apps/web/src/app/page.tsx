@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import Modules from '@/components/landing/Modules';
+import Pricing from '@/components/landing/Pricing';
 import LeadCaptureModal from '@/components/LeadCaptureModal';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
@@ -820,7 +821,13 @@ function AKAIFooter() {
 /* ─── Main Page ─── */
 export default function Home() {
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [capturePlan, setCapturePlan] = useState<string | undefined>(undefined);
   const [chatOpen, setChatOpen] = useState(false);
+
+  const openCapture = (plan?: string) => {
+    setCapturePlan(plan);
+    setCaptureOpen(true);
+  };
 
   // Persist referral code from ?ref= query param for later use on signup
   useEffect(() => {
@@ -831,18 +838,19 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
-      <Navbar onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />
-      <Hero onOpenCapture={() => setCaptureOpen(true)} />
+      <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
+      <Hero onOpenCapture={() => openCapture()} />
       <TrustBar />
       <div id="demo"><HowItWorksAnimated /></div>
       <HowAKAILearns />
       <AgentTeam />
       <Modules />
       <IntelligenceSection />
-      <PricingCTA onOpenCapture={() => setCaptureOpen(true)} />
+      <Pricing onOpenCapture={(plan) => openCapture(plan)} />
+      <PricingCTA onOpenCapture={() => openCapture()} />
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
-      <LeadCaptureModal isOpen={captureOpen} onClose={() => setCaptureOpen(false)} />
+      <LeadCaptureModal isOpen={captureOpen} onClose={() => { setCaptureOpen(false); setCapturePlan(undefined); }} selectedPlan={capturePlan} />
     </main>
   );
 }

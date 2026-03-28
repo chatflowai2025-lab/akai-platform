@@ -22,9 +22,10 @@ const INDUSTRIES = [
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  selectedPlan?: string;
 }
 
-export default function LeadCaptureModal({ isOpen, onClose }: Props) {
+export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Props) {
   const [form, setForm] = useState({
     firstName: '',
     businessName: '',
@@ -61,6 +62,7 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
           phone: form.phone,
           industry: form.industry,
           website: form.website,
+          plan: selectedPlan || 'Trial',
         }),
       });
       if (!res.ok) throw new Error('Failed');
@@ -97,10 +99,13 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
               <span className="text-3xl">🎉</span>
             </div>
             <h2 className="text-xl font-bold text-white mb-3">
-              Thanks {form.firstName}!
+              You&apos;re in, {form.firstName}! 🎉
             </h2>
+            <p className="text-white/60 text-sm leading-relaxed mb-3">
+              {selectedPlan ? `${selectedPlan} plan — 14-day free trial starting now.` : '14-day free trial starting now.'}
+            </p>
             <p className="text-white/60 text-sm leading-relaxed mb-6">
-              We&apos;re analysing your business and will send your personalised report within 24 hours.
+              Aaron will reach out personally within a few hours to get your AKAI team live. In the meantime, AK will be in touch to answer any questions.
             </p>
             <button
               onClick={handleClose}
@@ -112,10 +117,12 @@ export default function LeadCaptureModal({ isOpen, onClose }: Props) {
         ) : (
           /* ── Form ── */
           <>
-            <h2 className="text-xl font-bold text-white mb-1">Start your free trial</h2>
+            <h2 className="text-xl font-bold text-white mb-1">
+              {selectedPlan ? `Start ${selectedPlan} — 14 days free` : 'Start your free trial'}
+            </h2>
             <div className="h-0.5 w-12 rounded-full bg-[#D4AF37] mb-4" />
             <p className="text-white/40 text-sm mb-6 leading-relaxed">
-              Tell us about your business and we&apos;ll get AKAI running for you within 24 hours.
+              Tell us about your business. Aaron will reach out personally to get your AI team live.
             </p>
 
             <form onSubmit={submit} className="space-y-3">

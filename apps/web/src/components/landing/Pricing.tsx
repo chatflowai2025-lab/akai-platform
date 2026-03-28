@@ -86,7 +86,7 @@ const PLANS = [
   },
 ];
 
-export default function Pricing({ onOpenCapture }: { onOpenCapture?: () => void }) {
+export default function Pricing({ onOpenCapture }: { onOpenCapture?: (plan?: string) => void }) {
   return (
     <section id="pricing" className="relative py-32 px-6 overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
@@ -181,7 +181,7 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: () => void 
 
                 {/* CTA */}
                 <button
-                  onClick={() => onOpenCapture?.()}
+                  onClick={() => onOpenCapture?.(plan.name)}
                   className={`block w-full text-center py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-200 ${
                     plan.highlight
                       ? 'bg-[#D4AF37] text-black hover:opacity-90 glow-gold-sm'
