@@ -283,6 +283,11 @@ function EmailGuardContent({
   // Edited proposal text per enquiry
   const [editedBody, setEditedBody] = useState<Record<string, string>>({});
 
+  // Template performance panel
+  interface VerticalPerf { vertical: string; sentCount: number; replyRate: number; lastUpdated: string; }
+  const [perfData, setPerfData] = useState<VerticalPerf[]>([]);
+  const [perfOpen, setPerfOpen] = useState(false);
+
   // Auto-poll on first connect — gives instant gratification
   const triggerFirstPoll = useCallback(async () => {
     setFirstPollBanner('checking');
@@ -427,6 +432,12 @@ function EmailGuardContent({
             }
           }).catch(() => {});
       })
+      .catch(() => {});
+
+    // Load template performance data
+    fetch(`${RAILWAY}/api/analytics/template-performance/${user.uid}`, { headers: { 'x-api-key': API_KEY } })
+      .then(r => r.json())
+      .then(d => { if (d.verticals?.length) setPerfData(d.verticals); })
       .catch(() => {});
   }, [user.uid]);
 
@@ -676,6 +687,60 @@ function EmailGuardContent({
                 </button>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* ── What's Working — Template Performance Panel ──────────────────── */}
+        {isConnected && (
+          <section>
+            <button
+              onClick={() => setPerfOpen(o => !o)}
+              className="flex items-center gap-2 w-full text-left mb-2"
+            >
+              <span className="text-sm font-bold text-white">📈 What&apos;s working</span>
+              <span className="text-xs text-gray-500 ml-auto">{perfOpen ? '▲ hide' : '▼ show'}</span>
+            </button>
+            {perfOpen && (
+              <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4">
+                {perfData.length === 0 ? (
+                  <p className="text-xs text-gray-500">Send a few proposals to see performance data</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-gray-500 border-b border-[#1f1f1f]">
+                          <th className="text-left pb-2 font-semibold">Vertical</th>
+                          <th className="text-right pb-2 font-semibold">Sent</th>
+                          <th className="text-right pb-2 font-semibold">Reply Rate</th>
+                          <th className="text-right pb-2 font-semibold">Trend</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...perfData]
+                          .sort((a, b) => b.replyRate - a.replyRate)
+                          .slice(0, 4)
+                          .map((v, i) => {
+                            const isTop = i === 0 && v.replyRate > 0;
+                            return (
+                              <tr
+                                key={v.vertical}
+                                className={`border-b border-[#1a1a1a] last:border-0 ${isTop ? 'text-[#D4AF37]' : 'text-white'}`}
+                              >
+                                <td className="py-2 capitalize">{v.vertical} {isTop ? '🏆' : ''}</td>
+                                <td className="py-2 text-right text-gray-400">{v.sentCount}</td>
+                                <td className="py-2 text-right">{Math.round((v.replyRate || 0) * 100)}%</td>
+                                <td className="py-2 text-right text-gray-400">
+                                  {v.replyRate > 0.3 ? '↑↑' : v.replyRate > 0.15 ? '↑' : v.sentCount > 0 ? '—' : '·'}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 

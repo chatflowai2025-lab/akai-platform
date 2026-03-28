@@ -14,6 +14,26 @@ interface ActivityItem {
   time: string;
 }
 
+interface PreventionGate {
+  failureType: string;
+  count: number;
+  status: 'monitoring' | 'critical';
+  lastOccurrence: string;
+  prevention: string;
+  rootCause: string;
+}
+
+interface FailureRecord {
+  id: string;
+  timestamp: string;
+  failureType: string;
+  status: string;
+  rootCause?: string;
+  prevention?: string;
+  isRepeat?: boolean;
+  occurrenceCount?: number;
+}
+
 interface ModuleHealth {
   name: string;
   icon: string;
@@ -96,6 +116,12 @@ export default function HealthPage() {
   const [activityLoading, setActivityLoading] = useState(true);
   const [modules, setModules] = useState<ModuleHealth[]>([]);
   const [modulesLoading, setModulesLoading] = useState(true);
+
+  // Prevention gates state
+  const [gates, setGates] = useState<PreventionGate[]>([]);
+  const [gatesLoading, setGatesLoading] = useState(true);
+  const [recentFailures, setRecentFailures] = useState<FailureRecord[]>([]);
+  const [failuresLoading, setFailuresLoading] = useState(true);
 
   // Diagnostics state
   const [diagRunning, setDiagRunning] = useState(false);
@@ -198,6 +224,34 @@ export default function HealthPage() {
         setModulesLoading(false);
       }
     })();
+  }, [user]);
+
+  // ── Fetch prevention gates ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    setGatesLoading(true);
+    fetch(`${RAILWAY_API}/api/analytics/prevention-gates/${user.uid}`)
+      .then(async r => {
+        if (!r.ok) throw new Error('no data');
+        const data = await r.json();
+        setGates(Array.isArray(data.gates) ? data.gates : []);
+      })
+      .catch(() => setGates([]))
+      .finally(() => setGatesLoading(false));
+  }, [user]);
+
+  // ── Fetch recent failures ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    setFailuresLoading(true);
+    fetch(`${RAILWAY_API}/api/analytics/failure-report/${user.uid}`)
+      .then(async r => {
+        if (!r.ok) throw new Error('no data');
+        const data = await r.json();
+        setRecentFailures(Array.isArray(data.failures) ? data.failures.slice(0, 5) : []);
+      })
+      .catch(() => setRecentFailures([]))
+      .finally(() => setFailuresLoading(false));
   }, [user]);
 
   // ── Run diagnostics ──────────────────────────────────────────────────────
@@ -368,6 +422,76 @@ export default function HealthPage() {
               {modules.map((mod, i) => <ModuleCard key={i} mod={mod} />)}
             </div>
           )}
+        </section>
+
+        {/* ── Prevention Gates ───────────────────────────────────────────────── */}
+        <section>
+          <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">🛡️ Prevention Gates</h2>
+
+          {/* Gate cards */}
+          {gatesLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4 h-28 animate-pulse" />
+              ))}
+            </div>
+          ) : gates.length === 0 ? (
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 text-center mb-6">
+              <p className="text-green-400 font-semibold text-sm">No failures recorded — AKAI is running clean ✅</p>
+              <p className="text-gray-600 text-xs mt-1">Prevention gates activate automatically when failures are detected.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {gates.map((gate, i) => (
+                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold text-white">{gate.failureType.replace(/_/g, ' ')}</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                      gate.status === 'critical'
+                        ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                        : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                    }`}>
+                      {gate.status === 'critical' ? '🚨 critical' : '👁️ monitoring'} · {gate.count}×
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-1">
+                    Last: {gate.lastOccurrence ? new Date(gate.lastOccurrence).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'unknown'}
+                  </p>
+                  <p className="text-xs text-[#D4AF37]/80 mt-2">→ {gate.prevention}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Recent failures */}
+          <h3 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Recent failures</h3>
+          <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl divide-y divide-[#1f1f1f]">
+            {failuresLoading ? (
+              <div className="p-6 flex justify-center">
+                <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : recentFailures.length === 0 ? (
+              <div className="p-6 text-center text-gray-600 text-sm">No failures in the last 7 days.</div>
+            ) : (
+              recentFailures.map((f, i) => (
+                <div key={i} className="px-5 py-3 hover:bg-white/[0.02] transition">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold text-white">{f.failureType.replace(/_/g, ' ')}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      f.status === 'analyzed' ? 'bg-blue-500/10 text-blue-400' :
+                      f.status === 'prevented' ? 'bg-green-500/10 text-green-400' :
+                      'bg-gray-500/10 text-gray-400'
+                    }`}>{f.status}</span>
+                  </div>
+                  {f.rootCause && <p className="text-xs text-gray-500">{f.rootCause}</p>}
+                  <p className="text-xs text-gray-700 mt-0.5">
+                    {f.timestamp ? new Date(f.timestamp).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
+                    {f.isRepeat && <span className="ml-2 text-red-400">⚠ repeat</span>}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
         </section>
 
         {/* ── Web health check (existing functionality, now secondary) ────────── */}

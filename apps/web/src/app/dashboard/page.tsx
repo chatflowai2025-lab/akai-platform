@@ -6,6 +6,33 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TrialBadge from '@/components/dashboard/TrialBadge';
 import { useAuth } from '@/hooks/useAuth';
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function timeAgo(timestamp: string): string {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+// ── Intelligence Feed types ───────────────────────────────────────────────────
+interface FeedItem {
+  id: string;
+  type: string;
+  insight: string;
+  timestamp: string;
+  outcome: string;
+  priority: number;
+}
+
+interface FeedData {
+  items: FeedItem[];
+  generatedAt: string;
+  loading: boolean;
+}
+
 // ── Intelligence panel types ──────────────────────────────────────────────────
 interface Insight {
   type: string;
@@ -25,6 +52,64 @@ const INSIGHT_EMOJI: Record<string, string> = {
   bookings: '📅',
   email: '✉️',
 };
+
+// ── Intelligence Feed component ───────────────────────────────────────────────
+function IntelligenceFeed({ items, loading, onRefresh }: { items: FeedItem[]; loading: boolean; onRefresh: () => void }) {
+  const visible = items.slice(0, 8);
+
+  return (
+    <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-black text-white">⚡ Intelligence Feed</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-gray-600 bg-[#1a1a1a] px-2 py-0.5 rounded-full">Last 24h</span>
+          <button
+            onClick={onRefresh}
+            className="text-[11px] text-gray-500 hover:text-white transition px-2 py-0.5 rounded border border-[#2a2a2a] hover:border-[#3a3a3a]"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-12 bg-[#1a1a1a] rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : visible.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <p className="text-gray-500 text-sm">🤫 All quiet — AKAI is watching for activity</p>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+          {visible.map(item => {
+            const borderColor =
+              item.type === 'failure_recorded'
+                ? 'border-l-red-500'
+                : item.outcome === 'success'
+                ? 'border-l-[#D4AF37]'
+                : 'border-l-[#2a2a2a]';
+            return (
+              <div
+                key={item.id}
+                className={`flex items-start gap-3 p-3 bg-[#0d0d0d] border border-[#1a1a1a] border-l-2 ${borderColor} rounded-xl`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-200 leading-snug">{item.insight}</p>
+                </div>
+                <span className="text-[11px] text-gray-600 whitespace-nowrap flex-shrink-0 mt-0.5">
+                  {item.timestamp ? timeAgo(item.timestamp) : ''}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function IntelligencePanel({ insights, stats, loading }: { insights: Insight[]; stats: Record<string, number>; loading: boolean }) {
   const proposalCount = stats['proposal_sent'] || 0;
@@ -217,6 +302,28 @@ export default function DashboardPage() {
     loading: true,
   });
 
+  // Intelligence feed (real-time, last 24h)
+  const [feedData, setFeedData] = useState<FeedData>({
+    items: [],
+    generatedAt: '',
+    loading: true,
+  });
+
+  // AKAI Intelligence Score (pattern engine learnings)
+  const [learnings, setLearnings] = useState<{
+    weeklyScore: number;
+    topInsight: string;
+    nextAction: string;
+    patterns: Array<{ type: string; insight: string; confidence: number }>;
+    loading: boolean;
+  }>({
+    weeklyScore: 0,
+    topInsight: '',
+    nextAction: '',
+    patterns: [],
+    loading: true,
+  });
+
   // Background: ensure Firestore profile exists and check onboarding status.
   useEffect(() => {
     if (!user) return;
@@ -362,6 +469,89 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [user]);
 
+  // Fetch AKAI Intelligence learnings
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const idToken = await user.getIdToken().catch(() => '');
+        const res = await fetch(`${RAILWAY_API}/api/analytics/learnings/${user.uid}`, {
+          headers: {
+            'x-api-key': API_KEY,
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+        });
+        if (!res.ok) throw new Error('Learnings unavailable');
+        const data = await res.json();
+        if (!cancelled) {
+          setLearnings({
+            weeklyScore: data.weeklyScore ?? 0,
+            topInsight: data.topInsight ?? '',
+            nextAction: data.nextAction ?? '',
+            patterns: data.patterns ?? [],
+            loading: false,
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setLearnings(prev => ({ ...prev, loading: false }));
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Fetch intelligence feed (mount + every 60s)
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval>;
+
+    const fetchFeed = async () => {
+      try {
+        const idToken = await user.getIdToken().catch(() => '');
+        const res = await fetch(`${RAILWAY_API}/api/analytics/feed/${user.uid}`, {
+          headers: {
+            'x-api-key': API_KEY,
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+        });
+        if (!res.ok) throw new Error('Feed unavailable');
+        const data = await res.json() as { items: FeedItem[]; generatedAt: string };
+        if (!cancelled) {
+          setFeedData({ items: data.items ?? [], generatedAt: data.generatedAt ?? '', loading: false });
+        }
+      } catch {
+        if (!cancelled) {
+          setFeedData(prev => ({ ...prev, loading: false }));
+        }
+      }
+    };
+
+    fetchFeed();
+    intervalId = setInterval(fetchFeed, 60000);
+    return () => { cancelled = true; clearInterval(intervalId); };
+  }, [user]);
+
+  const refreshFeed = () => {
+    if (!user) return;
+    setFeedData(prev => ({ ...prev, loading: true }));
+    user.getIdToken().catch(() => '').then(idToken =>
+      fetch(`${RAILWAY_API}/api/analytics/feed/${user.uid}`, {
+        headers: {
+          'x-api-key': API_KEY,
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+      })
+        .then(r => r.json())
+        .then((data: { items: FeedItem[]; generatedAt: string }) => {
+          setFeedData({ items: data.items ?? [], generatedAt: data.generatedAt ?? '', loading: false });
+        })
+        .catch(() => setFeedData(prev => ({ ...prev, loading: false })))
+    );
+  };
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
@@ -459,6 +649,51 @@ export default function DashboardPage() {
                 stats={insightsData.stats}
                 loading={insightsData.loading}
               />
+            </section>
+
+            {/* ── AKAI Intelligence Score ───────────────────────────────────── */}
+            <section>
+              <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-white">🧠 AKAI Intelligence</h3>
+                  <span className="text-xs text-gray-500">Updated daily</span>
+                </div>
+                {learnings.loading ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-full border-4 border-[#1f1f1f] animate-pulse" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 w-3/4 bg-[#1f1f1f] rounded animate-pulse" />
+                        <div className="h-3 w-1/2 bg-[#1f1f1f] rounded animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Score ring */}
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-16 h-16 rounded-full border-4 border-[#D4AF37] flex items-center justify-center flex-shrink-0">
+                        <span className="text-xl font-black text-[#D4AF37]">{learnings.weeklyScore}</span>
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">{learnings.topInsight || 'AKAI is collecting data — check back tomorrow'}</p>
+                        <p className="text-gray-500 text-xs mt-0.5">→ {learnings.nextAction || 'Keep using AKAI to generate insights'}</p>
+                      </div>
+                    </div>
+                    {/* Top patterns */}
+                    {learnings.patterns.slice(0, 2).map((p, i) => (
+                      <div key={i} className="text-xs text-gray-400 py-1 border-t border-[#1a1a1a]">
+                        {p.insight}
+                      </div>
+                    ))}
+                    {learnings.patterns.length === 0 && (
+                      <div className="text-xs text-gray-600 py-1 border-t border-[#1a1a1a]">
+                        No patterns yet — keep using AKAI to unlock insights
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </section>
 
             {/* ── Quick actions ─────────────────────────────────────────────── */}
