@@ -13,8 +13,13 @@ const INDUSTRY_PREVIEWS: Record<string, string> = {
   'Real Estate': "Hi, this is Sophie from {businessName}. I noticed you've been looking at properties in your area — I wanted to reach out personally. Do you have a moment? I can match you with listings that fit exactly what you're looking for.",
   Legal: "Hi, this is Sophie calling on behalf of {businessName}. I'm following up on your enquiry — our team specialises in exactly what you need. Do you have 5 minutes? I can connect you with a solicitor today.",
   Medical: "Hi, this is Sophie from {businessName}. I'm calling to follow up on your enquiry and help you book an appointment at a time that suits you. Are you free for a quick 2-minute chat?",
+  'Medical & Health': "Hi, this is Sophie from {businessName}. I'm calling to follow up on your enquiry and help you book an appointment at a time that suits you. Are you free for a quick 2-minute chat?",
   Finance: "Hi, this is Sophie calling from {businessName}. You enquired about our financial services — I'd love to connect you with one of our advisors. Do you have a couple of minutes now?",
   Retail: "Hi, this is Sophie from {businessName}. Thanks for your interest — I'm calling to make sure you found what you were looking for and to let you know about our current offers. Got a moment?",
+  Recruitment: "Hi, this is Sophie calling from {businessName}. I'm reaching out because you enquired about our services — we help recruitment agencies fill roles up to 3x faster using AI. Do you have 2 minutes? I'd love to show you how.",
+  Hospitality: "Hi, this is Sophie calling from {businessName}. I'm following up on your enquiry — we work with a lot of hospitality businesses to boost bookings and automate review collection. Got a moment to chat?",
+  Construction: "Hi, this is Sophie from {businessName}. I'm calling because you enquired about our services — we help construction businesses respond to quote requests faster and make sure no lead falls through the cracks. Do you have 2 minutes?",
+  Technology: "Hi, this is Sophie calling from {businessName}. I'm following up on your enquiry — I'd love to understand your goals and show you how AKAI can accelerate your sales pipeline. Do you have a couple of minutes?",
   Other: "Hi, this is Sophie calling from {businessName}. I'm following up on your recent enquiry — do you have 2 minutes? I'd love to help you get started.",
 };
 
@@ -403,29 +408,29 @@ function SuccessState({ msg, sub }: { msg: string; sub: string }) {
 /* ─── Rotating Hero Banners ─── */
 const HERO_BANNERS = [
   {
-    headline: ['AK', ' Your AI', '\nBusiness Partner'],
-    gradient: 'Business Partner',
-    sub: 'Finds leads, books meetings, handles enquiries, and grows your revenue while you sleep.',
+    white: 'Stop Losing Deals',
+    gold: 'While You Sleep.',
+    sub: 'AKAI works 24/7 — calling leads, booking meetings, and closing deals while you rest.',
   },
   {
-    headline: ['While You Work,', ' Play', '\nor Sleep'],
-    gradient: 'or Sleep',
-    sub: 'AKAI runs 24/7 — calling leads, closing deals, and filling your calendar. Automatically.',
+    white: 'Your AI Team.',
+    gold: 'Zero Salaries.',
+    sub: '9 AI specialists running your sales, email, voice, web, ads, and social. From $147/mo.',
   },
   {
-    headline: ['From', ' Finding', '\nto Closing'],
-    gradient: 'to Closing',
-    sub: 'Every lead captured. Every follow-up sent. Every meeting booked. Zero effort from you.',
-  },
-  {
-    headline: ['Your AI', ' Executive', '\nTeam. $599/mo.'],
-    gradient: 'Team. $599/mo.',
-    sub: 'Sales. Recruiter. Web. Ads. Social. All nine specialists working for you around the clock.',
-  },
-  {
-    headline: ['Stop Paying', ' Agencies', '\n$13,000/mo'],
-    gradient: '$13,000/mo',
+    white: 'Stop Paying Agencies',
+    gold: '$13,000 a Month.',
     sub: 'AKAI does everything a full-stack digital agency does — at a fraction of the cost.',
+  },
+  {
+    white: 'Every Lead. Every',
+    gold: 'Follow-Up. Automated.',
+    sub: 'Sophie calls your leads within 60 seconds. Books the meeting. Logs the result. You just show up.',
+  },
+  {
+    white: 'From Finding',
+    gold: 'To Closing.',
+    sub: 'Leads captured, nurtured, and converted — automatically. This is what AKAI was built for.',
   },
 ];
 
@@ -475,26 +480,14 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
 
         {/* Rotating Headline */}
         <div
-          className="fade-up fade-up-2 transition-opacity duration-400 max-w-4xl"
+          className="fade-up fade-up-2 transition-opacity duration-400 max-w-5xl w-full"
           style={{ opacity: fading ? 0 : 1 }}
         >
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight">
-            {banner.headline.map((part, i) => {
-              const isGradient = part.trim() === banner.gradient || part === banner.gradient;
-              const lines = part.split('\n');
-              return lines.map((line, j) => (
-                <span key={`${i}-${j}`}>
-                  {j > 0 && <br />}
-                  <span className={isGradient && j === lines.length - 1 ? 'gradient-text' : i === 1 ? 'text-[#D4AF37]' : 'text-white'}>
-                    {line}
-                  </span>
-                </span>
-              ));
-            })}
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black leading-[0.92] tracking-tight mb-6 text-left sm:text-center">
+            <span className="text-white block">{banner.white}</span>
+            <span className="text-[#D4AF37] block">{banner.gold}</span>
           </h1>
-
-          {/* Sub */}
-          <p className="text-lg text-white/60 max-w-2xl mx-auto mb-4 leading-relaxed">
+          <p className="text-lg text-white/50 max-w-2xl mx-auto mb-4 leading-relaxed text-left sm:text-center">
             {banner.sub}
           </p>
         </div>
