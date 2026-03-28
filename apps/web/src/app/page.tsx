@@ -146,7 +146,7 @@ const HERO_BANNERS = [
 ];
 
 /* ─── Hero ─── */
-function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
+function HeroSection({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
   const [bannerIdx, setBannerIdx] = useState(0);
   const [fading, setFading] = useState(false);
 
@@ -885,7 +885,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
-      <Hero onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
+      <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
       <TrustBar />
       <div id="demo"><HowItWorksAnimated /></div>
       <HowAKAILearns />
