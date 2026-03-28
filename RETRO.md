@@ -409,3 +409,23 @@ No process to treat build warnings as blocking. Developers saw yellow text and m
 
 *RCA authored by: RCA Agent — MM (AKAI)*  
 *Date: 2026-03-28. Do not delete. Append future RCAs below this block.*
+
+---
+
+## RCA #6 — Hero Banners Never Rotated (2026-03-28)
+
+**What broke:** Rotating hero banners were built in `Hero.tsx` but never appeared on screen. The homepage rendered a static inline `Hero` function from `page.tsx` instead.
+
+**Root cause:** Two hero components existed simultaneously:
+1. `components/landing/Hero.tsx` — correct, animated, has `useEffect` rotation
+2. Inline `function Hero()` in `app/page.tsx` — static, no animation, shadows the import
+
+The page only imported `Hero.tsx` for `DemoModal`. The local function took precedence. All banner work was done on the invisible component.
+
+**Why CI missed it:** Playwright tests check text/links, not animation. No visual regression tests. No one did a live visual check between banner commit and today.
+
+**Prevention gates added:**
+1. **Single hero rule** — ZeroDefect gate now checks: `grep -n "^function Hero\|^const Hero" apps/web/src/app/page.tsx` must return 0 results. Hero must always come from `components/landing/Hero.tsx`.
+2. **Visual check requirement** — AGENTS.md updated: any commit touching `Hero.tsx` or hero copy requires a manual live visual check before marking done.
+
+**Status: CLOSED**

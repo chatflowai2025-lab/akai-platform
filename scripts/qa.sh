@@ -156,6 +156,16 @@ else
   echo "  ⚠️  package.json not found at repo root — skipping deprecation check"
 fi
 
+# ── Suite 5d: Duplicate Hero component check (RCA #6) ────────────────────────
+echo ""
+echo "┌─ SUITE 5d: Duplicate Hero component check"
+HERO_IN_PAGE=$(grep -n "^function Hero\|^const Hero" "$REPO_ROOT/apps/web/src/app/page.tsx" 2>/dev/null | wc -l | tr -d ' ')
+if [ "$HERO_IN_PAGE" -eq 0 ]; then
+  check "No inline Hero component in page.tsx (must use Hero.tsx)" "pass"
+else
+  check "No inline Hero component in page.tsx (must use Hero.tsx)" "fail" "Found $HERO_IN_PAGE inline Hero definition(s) — import from components/landing/Hero.tsx instead"
+fi
+
 # ── Suite 5: /onboard route ───────────────────────────────────────────────────
 echo ""
 echo "┌─ SUITE 5: Onboard route"
