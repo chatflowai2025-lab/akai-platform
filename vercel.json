@@ -1,5 +1,5 @@
 {
-  "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "cd apps/web && pnpm build",
+  "installCommand": "cd apps/web && npm install --legacy-peer-deps",
+  "buildCommand": "cd apps/web && npx next build",
   "outputDirectory": "apps/web/.next"
 }
