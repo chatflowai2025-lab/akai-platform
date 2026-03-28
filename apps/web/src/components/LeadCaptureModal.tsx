@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const INDUSTRIES = [
   'Trades',
@@ -36,16 +36,38 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
   });
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'called'>('idle');
+  const [healthStatus, setHealthStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handleClose = () => {
-    // Reset on close
     setForm({ firstName: '', businessName: '', email: '', phone: '', industry: '', website: '' });
     setAgreed(false);
     setStatus('idle');
+    setCallStatus('idle');
+    setHealthStatus('idle');
     onClose();
   };
+
+  // Auto-fire Sophie call on success
+  useEffect(() => {
+    if (status !== 'done' || !form.phone || callStatus !== 'idle') return;
+    setCallStatus('calling');
+    fetch('/api/demo-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: form.firstName,
+        phone: form.phone,
+        email: form.email,
+        businessName: form.businessName,
+        industry: form.industry,
+      }),
+    })
+      .then(() => setCallStatus('called'))
+      .catch(() => setCallStatus('called')); // non-fatal — show success regardless
+  }, [status]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,24 +116,73 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
 
         {status === 'done' ? (
           /* ── Success screen ── */
-          <div className="text-center py-6">
-            <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-5">
-              <span className="text-3xl">🎉</span>
+          <div className="py-4">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🎉</span>
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">
+                You&apos;re in{form.firstName ? `, ${form.firstName}` : ''}!
+              </h2>
+              <p className="text-gray-400 text-sm">
+                {selectedPlan ? `${selectedPlan} — 14-day free trial` : '14-day free trial starting now'}
+              </p>
             </div>
-            <h2 className="text-xl font-bold text-white mb-3">
-              You&apos;re in, {form.firstName}! 🎉
-            </h2>
-            <p className="text-white/60 text-sm leading-relaxed mb-3">
-              {selectedPlan ? `${selectedPlan} plan — 14-day free trial starting now.` : '14-day free trial starting now.'}
-            </p>
-            <p className="text-white/60 text-sm leading-relaxed mb-6">
-              Aaron will reach out personally within a few hours to get your AKAI team live. In the meantime, AK will be in touch to answer any questions.
-            </p>
+
+            {/* Sophie call status */}
+            <div className={`rounded-xl p-4 mb-3 border ${callStatus === 'called' ? 'bg-green-500/10 border-green-500/20' : 'bg-[#1a1a1a] border-[#2a2a2a]'}`}>
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{callStatus === 'called' ? '✅' : '📞'}</span>
+                <div>
+                  <p className="text-white font-semibold text-sm">
+                    {callStatus === 'calling' ? 'Sophie is calling you now…' : callStatus === 'called' ? 'Sophie is on the way!' : 'Connecting Sophie to your number…'}
+                  </p>
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    {callStatus === 'called' ? `Calling ${form.phone} — answer in the next 60 seconds` : 'Your AI sales agent calls within 60 seconds'}
+                  </p>
+                </div>
+                {callStatus === 'calling' && <div className="ml-auto w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />}
+              </div>
+            </div>
+
+            {/* Free health report */}
+            <div className="rounded-xl p-4 mb-4 border border-[#2a2a2a] bg-[#111]">
+              <div className="flex items-start gap-3">
+                <span className="text-xl mt-0.5">🩺</span>
+                <div className="flex-1">
+                  <p className="text-white font-semibold text-sm mb-1">Free Digital Health Report</p>
+                  <p className="text-gray-500 text-xs leading-relaxed mb-3">See exactly what&apos;s costing you leads — speed, SEO, mobile, and conversion gaps. Takes 60 seconds.</p>
+                  {healthStatus === 'sent' ? (
+                    <p className="text-green-400 text-xs font-semibold">✅ Report on its way to {form.email}</p>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        if (!form.website && !form.businessName) return;
+                        setHealthStatus('sending');
+                        try {
+                          await fetch('/api/health-check', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: form.firstName, email: form.email, business: form.businessName, website: form.website, phone: form.phone }),
+                          });
+                        } catch { /* non-fatal */ }
+                        setHealthStatus('sent');
+                      }}
+                      disabled={healthStatus === 'sending'}
+                      className="px-4 py-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-xs font-bold hover:bg-[#D4AF37]/20 transition disabled:opacity-50"
+                    >
+                      {healthStatus === 'sending' ? 'Generating…' : 'Get my free report →'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <button
               onClick={handleClose}
-              className="bg-[#D4AF37] text-black font-bold px-8 py-3 rounded-xl text-sm hover:opacity-90 transition"
+              className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-xl text-sm hover:opacity-90 transition"
             >
-              Close
+              Go to dashboard →
             </button>
           </div>
         ) : (
