@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { isSafeMode } from '@/lib/beta-config';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -384,13 +384,14 @@ function PipelineBoard({ leads, onStatusChange }: PipelineBoardProps) {
     { id: 'booked', label: 'Booked', color: 'border-purple-500/30 text-purple-400', dot: 'bg-purple-400' },
   ];
 
+  // All hooks must be called before any early returns (Rules of Hooks)
+  const scoredLeads = useMemo(() => (leads ?? []).map(l => ({ lead: l, score: scoreLeadAI(l) })), [leads]);
+  const displayLeads = useMemo(() => hotOnly ? scoredLeads.filter(({ score }) => score >= 7) : scoredLeads, [hotOnly, scoredLeads]);
+  const hotCount = useMemo(() => scoredLeads.filter(({ score }) => score >= 7).length, [scoredLeads]);
+
   if (!leads || leads.length === 0) {
     return <EmptyLeadsState />;
   }
-
-  const scoredLeads = leads.map(l => ({ lead: l, score: scoreLeadAI(l) }));
-  const displayLeads = hotOnly ? scoredLeads.filter(({ score }) => score >= 7) : scoredLeads;
-  const hotCount = scoredLeads.filter(({ score }) => score >= 7).length;
 
   return (
     <div>
@@ -969,18 +970,18 @@ function ProspectsSection() {
     setUpdating(null);
   };
 
-  const filtered = prospects.filter(p => {
+  const filtered = useMemo(() => prospects.filter(p => {
     const matchFilter = filter === 'all' || p.status === filter;
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
-  });
+  }), [prospects, filter, search]);
 
-  const counts = {
+  const counts = useMemo(() => ({
     total: prospects.length,
     not_contacted: prospects.filter(p => p.status === 'not_contacted').length,
     contacted: prospects.filter(p => p.status === 'contacted').length,
     qualified: prospects.filter(p => p.status === 'qualified').length,
-  };
+  }), [prospects]);
 
   return (
     <section>
