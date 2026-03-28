@@ -345,7 +345,7 @@ function Field({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
       />
     </div>
   );
@@ -360,7 +360,7 @@ function Select({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#D4AF37] transition-colors text-sm appearance-none"
+        className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37] transition-colors text-sm appearance-none"
       >
         <option value="">Select…</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -419,12 +419,12 @@ const HERO_BANNERS = [
   },
   {
     white: 'Stop Paying Agencies',
-    gold: '$13,000 a Month.',
+    gold: '$13,000 Monthly.',
     sub: 'AKAI does everything a full-stack digital agency does — at a fraction of the cost.',
   },
   {
-    white: 'Every Lead. Every',
-    gold: 'Follow-Up. Automated.',
+    white: 'Every Lead.',
+    gold: 'Followed Up. Always.',
     sub: 'Sophie calls your leads within 60 seconds. Books the meeting. Logs the result. You just show up.',
   },
   {
@@ -516,25 +516,25 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
             href={!loading && user ? '/dashboard' : undefined}
             onClick={!loading && user ? undefined : () => onOpenCapture?.()}
             size="lg"
-            className="glow-gold-sm min-w-[180px] min-h-[52px]"
+            className="glow-gold-sm min-w-[180px] min-h-[52px] w-full sm:w-auto"
           >
             Start Free Trial →
           </Button>
           <button
             onClick={() => setModal('demo')}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] bg-green-500 text-white hover:bg-green-400 shadow-lg shadow-green-500/20 w-full sm:w-auto"
           >
             🎙️ Try Live Agent Now
           </button>
           <button
             onClick={() => onOpenCapture?.()}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-purple-200 hover:bg-purple-500/10 w-full sm:w-auto"
           >
             Free Digital Health Check
           </button>
           <button
             onClick={() => onOpenChat?.()}
-            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-white/20 text-white/70 hover:border-[#D4AF37]/60 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5"
+            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 px-6 py-3.5 text-base min-h-[52px] border border-white/20 text-white/70 hover:border-[#D4AF37]/60 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 w-full sm:w-auto"
           >
             💬 Talk to AK
           </button>

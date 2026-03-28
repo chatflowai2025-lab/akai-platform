@@ -524,7 +524,7 @@ function MobileBottomNav({
   onMenuOpen: () => void;
 }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0a0a] border-t border-[#1f1f1f] flex items-center md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0a0a] border-t border-[#1f1f1f] flex items-center md:hidden pb-safe" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       <a
         href="/dashboard"
         className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 hover:text-white active:text-[#D4AF37] transition"

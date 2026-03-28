@@ -140,8 +140,8 @@ function TrustBar() {
 const HERO_BANNERS = [
   { white: 'Stop Losing Deals', gold: 'While You Sleep.' },
   { white: 'Your AI Team.', gold: 'Zero Salaries.' },
-  { white: 'Stop Paying Agencies', gold: '$13,000 a Month.' },
-  { white: 'Every Lead. Every', gold: 'Follow-Up. Automated.' },
+  { white: 'Stop Paying Agencies', gold: '$13,000 Monthly.' },
+  { white: 'Every Lead.', gold: 'Followed Up. Always.' },
   { white: 'From Finding', gold: 'To Closing.' },
 ];
 

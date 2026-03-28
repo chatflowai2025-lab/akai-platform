@@ -208,7 +208,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   value={form.firstName}
                   onChange={e => set('firstName', e.target.value)}
                   placeholder="Jane"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
@@ -222,7 +222,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   value={form.businessName}
                   onChange={e => set('businessName', e.target.value)}
                   placeholder="ACME Pty Ltd"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
@@ -236,7 +236,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   value={form.email}
                   onChange={e => set('email', e.target.value)}
                   placeholder="jane@business.com"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
@@ -250,7 +250,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   value={form.phone}
                   onChange={e => set('phone', e.target.value)}
                   placeholder="+61 400 000 000"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
@@ -261,7 +261,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   required
                   value={form.industry}
                   onChange={e => set('industry', e.target.value)}
-                  className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#D4AF37] transition-colors text-sm appearance-none"
+                  className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37] transition-colors text-sm appearance-none"
                 >
                   <option value="">Select your industry…</option>
                   {INDUSTRIES.map(i => (
@@ -279,7 +279,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   value={form.website}
                   onChange={e => set('website', e.target.value)}
                   placeholder="https://yoursite.com.au"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
