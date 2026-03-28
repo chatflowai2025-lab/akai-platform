@@ -390,9 +390,33 @@ function EmailGuardContent({
       })
       .catch(() => {});
 
+    // Load existing enquiries first, then auto-sync if inbox is connected
     fetch(`${RAILWAY}/api/email/enquiries/${user.uid}`, { headers: { 'x-api-key': API_KEY } })
       .then(r => r.json())
-      .then(d => setEnquiries(d.enquiries || []))
+      .then(d => {
+        setEnquiries(d.enquiries || []);
+        // Auto-poll on load if already connected (silent — no banner)
+        return fetch(`${RAILWAY}/api/email/gmail/status?userId=${user.uid}`, { headers: { 'x-api-key': API_KEY } })
+          .then(r => r.json())
+          .then(status => {
+            if (status.connected) {
+              // Trigger a background sync — updates enquiries silently
+              fetch(`${RAILWAY}/api/email/poll/${user.uid}`, {
+                method: 'POST',
+                headers: { 'x-api-key': API_KEY },
+              })
+                .then(r => r.json())
+                .then(() => {
+                  // Refresh enquiries after sync
+                  fetch(`${RAILWAY}/api/email/enquiries/${user.uid}`, { headers: { 'x-api-key': API_KEY } })
+                    .then(r => r.json())
+                    .then(d2 => setEnquiries(d2.enquiries || []))
+                    .catch(() => {});
+                })
+                .catch(() => {});
+            }
+          }).catch(() => {});
+      })
       .catch(() => {});
   }, [user.uid]);
 
