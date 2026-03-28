@@ -1088,7 +1088,7 @@ export default function SocialPage() {
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs text-gray-500">
+                    <p suppressHydrationWarning className="text-xs text-gray-500">
                       {post.status === 'Draft' ? 'No date set' : formatScheduledDate(post.scheduledAt)}
                     </p>
                   </div>
