@@ -25,7 +25,7 @@ function MSCalCallbackInner() {
       return;
     }
 
-    if (!code) {
+    if (!code || !state) {
       router.replace('/calendar?error=no_code');
       return;
     }
@@ -43,7 +43,6 @@ function MSCalCallbackInner() {
       attempted.current = true;
 
       try {
-        // Exchange code for tokens
         const res = await fetch(`${RAILWAY}/api/email/microsoft/callback`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
@@ -57,17 +56,14 @@ function MSCalCallbackInner() {
         const d = await res.json();
 
         if (d.success || d.email) {
-          // Mark calendar as connected
-          await fetch(`${RAILWAY}/api/email/microsoft/callback`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-            body: JSON.stringify({ userId: user.uid, markCalendar: true }),
-          }).catch(() => {});
+          // microsoftCalendarConnected is already set in the callback
           router.replace('/calendar?connected=outlook');
         } else {
+          console.error('[calendar/ms-callback] error:', d);
           router.replace('/calendar?error=' + encodeURIComponent(d.error || 'ms_calendar_failed'));
         }
-      } catch {
+      } catch (e: any) {
+        console.error('[calendar/ms-callback] fetch error:', e);
         router.replace('/calendar?error=ms_calendar_failed');
       }
     });
