@@ -190,19 +190,11 @@ export default function SettingsPage() {
 
         // Connected Accounts — inbox integrations
         const inboxConn = data.inboxConnection || {};
-        const gmailConn = data.gmailConnection || {};
+        const gmailConn = data.gmail || data.gmailConnection || {};
 
-        // Load Google Calendar from integrations sub-doc
-        let gcalConnected = false;
-        let gcalEmail: string | undefined;
-        try {
-          const gcalSnap = await getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar'));
-          if (gcalSnap.exists()) {
-            const gcal = gcalSnap.data();
-            gcalConnected = gcal.connected === true || !!gcal.accessToken;
-            gcalEmail = gcal.email || undefined;
-          }
-        } catch { /* ignore */ }
+        // Google Calendar — check root doc fields (not subcollection)
+        const gcalConnected = data.googleCalendarConnected === true || !!data.googleRefreshToken;
+        const gcalEmail = data.googleCalendarEmail || undefined;
 
         // Load social connections
         const socialMap: Record<string, ConnectedAccount> = {
@@ -228,11 +220,11 @@ export default function SettingsPage() {
 
         setConnectedAccounts({
           microsoft: {
-            connected: inboxConn.connected === true || !!inboxConn.email,
-            identifier: inboxConn.email || undefined,
+            connected: inboxConn.provider === 'microsoft' || !!inboxConn.accessTokenEnc || data.microsoftCalendarConnected === true,
+            identifier: inboxConn.email || data.microsoftCalendarEmail || undefined,
           },
           gmail: {
-            connected: gmailConn.connected === true || !!gmailConn.email,
+            connected: gmailConn.connected === true || !!gmailConn.email || !!gmailConn.accessToken,
             identifier: gmailConn.email || undefined,
           },
           googleCalendar: { connected: gcalConnected, identifier: gcalEmail },
