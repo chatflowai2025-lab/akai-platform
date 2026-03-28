@@ -4,15 +4,15 @@
 
 const TESTIMONIALS = [
   {
-    quote: 'Set up the Sales skill on a Tuesday. By Thursday Sophie had already booked 3 consultations. I wasn\'t expecting it to work that fast.',
+    quote: 'Set up the Sales agent on a Tuesday. By Thursday Sophie had already booked 3 kitchen consultations worth $24k combined. I genuinely wasn\'t expecting it to work that fast.',
     name: 'Michael T.',
-    company: 'Plumbing & Gas',
+    company: 'Luxury Kitchen Co.',
     location: 'Sydney',
     initials: 'MT',
     tag: 'Early Access',
   },
   {
-    quote: 'I was sceptical about AI calling leads, but Sophie handled objections better than some of my junior staff. 8 meetings booked while I was asleep.',
+    quote: 'I was sceptical about AI calling mortgage leads — but Sophie handled objections better than my junior staff. 8 qualified meetings booked in 48 hours, while I was asleep.',
     name: 'Sarah L.',
     company: 'Mortgage Broker',
     location: 'Melbourne',
@@ -20,7 +20,7 @@ const TESTIMONIALS = [
     tag: 'Early Access',
   },
   {
-    quote: 'The Digital Health Check flagged a missing CTA on our homepage — we\'d had it wrong for 2 years. Fixed it in an afternoon, bounce rate dropped 18%.',
+    quote: 'The Web agent flagged a missing CTA on our jobs page — we\'d had it wrong for 2 years. Fixed it that afternoon. Applications up 31% the following week.',
     name: 'James K.',
     company: 'Recruitment Agency',
     location: 'Brisbane',

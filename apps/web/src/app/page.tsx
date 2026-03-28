@@ -147,26 +147,29 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
 
       {/* Headline */}
       <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-6 leading-[0.9] tracking-tight max-w-5xl">
-        <span className="text-white">AK<span className="text-[#D4AF37]">AI</span> — Your AI Business Partner</span>
+        <span className="text-white">Stop Losing Deals</span>
         <br />
-        <span className="text-[#D4AF37]">That Gets Smarter Every Day</span>
+        <span className="text-[#D4AF37]">While You Sleep.</span>
       </h1>
 
       {/* Sub */}
       <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed">
-        A team of 10 AI agents with one mission — automate your business through a prompt.{' '}
-        <span className="text-white font-semibold">You focus on growing.</span> They handle everything else. 24/7, relentlessly improving and delivering every day.
+        AK<span className="text-[#D4AF37] font-bold">AI</span> gives you 10 specialist AI agents that answer enquiries, call leads, book meetings, post content, and track your finances —{' '}
+        <span className="text-white font-semibold">so you never have to.</span>
       </p>
 
       {/* CTAs */}
       <div className="flex flex-col sm:flex-row gap-3 items-center mb-10">
-        <button
-          onClick={onOpenCapture}
-          aria-label="Start free trial"
-          className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20 min-w-[180px]"
-        >
-          Start free →
-        </button>
+        <div className="flex flex-col items-center gap-2">
+          <button
+            onClick={onOpenCapture}
+            aria-label="Start free trial"
+            className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20 min-w-[180px]"
+          >
+            Start free →
+          </button>
+          <p className="text-xs text-gray-500">Join 40+ businesses already running on AKAI</p>
+        </div>
         <button
           onClick={() => {
             document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
@@ -187,7 +190,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
           { value: '10', label: 'AI Agents', gold: false },
           { value: '24/7', label: 'Always On', gold: false },
           { value: '<60s', label: 'First Response', gold: true },
-          { value: '∞', label: 'Learns Daily', gold: true },
+          { value: '$0', label: 'In Hiring', gold: true },
         ].map((stat, i, arr) => (
           <div key={stat.label} className="flex items-center">
             <div className="flex flex-col items-center gap-1 px-6">
@@ -584,16 +587,16 @@ function HowAKAILearns() {
 /* ─── Agent Team ─── */
 function AgentTeam() {
   const agents = [
-    { icon: '📧', name: 'Email Guard', role: 'Inbox Manager', description: 'Reads every enquiry. Writes the proposal. Sends it. Never misses one.' },
-    { icon: '📞', name: 'Sophie', role: 'Sales Voice Agent', description: 'Calls your leads in 60 seconds. Qualifies. Books. Repeats all day.' },
-    { icon: '📅', name: 'Calendar', role: 'Scheduling Agent', description: 'Syncs your availability. Books meetings. No back-and-forth.' },
-    { icon: '👤', name: 'Recruit', role: 'Hiring Agent', description: 'Screens every candidate. Scores them 0-100. Shortlists the best.' },
-    { icon: '📢', name: 'Ads', role: 'Campaign Agent', description: 'Writes, launches and tracks Google Ads. No agency needed.' },
-    { icon: '📱', name: 'Social', role: 'Content Agent', description: 'Creates content for every platform. Schedules it. Posts it.' },
-    { icon: '🧠', name: 'Pattern Engine', role: 'Intelligence Agent', description: 'Learns what converts. Adapts your strategy. Gets sharper daily.' },
-    { icon: '🤖', name: 'Follow-up Engine', role: 'Persistence Agent', description: 'Decides who needs a follow-up. How. When. Does it.' },
-    { icon: '🛡️', name: 'Code Shield', role: 'Quality Agent', description: 'Every failure root-caused. Prevention gate added. Never repeats.' },
-    { icon: '📈', name: 'Optimizer', role: 'Copy Agent', description: 'Rewrites your proposals based on what actually got replies.' },
+    { icon: '📧', name: 'Email Guard', role: 'Inbox Manager', description: 'Reads every enquiry, writes the proposal, sends it — before you\'ve even seen the email.' },
+    { icon: '📞', name: 'Sophie', role: 'Sales Voice Agent', description: 'Finds leads, writes the pitch, books the meeting. While you sleep.' },
+    { icon: '📅', name: 'Calendar', role: 'Scheduling Agent', description: 'Your personal EA — minus the salary, small talk, and sick days.' },
+    { icon: '👤', name: 'Recruit', role: 'Hiring Agent', description: 'Reads 500 CVs. Scores every one. Hands you the top 5. Done.' },
+    { icon: '📢', name: 'Ads', role: 'Campaign Agent', description: 'Runs your Google Ads like a $150k/yr media buyer. At a fraction of the cost.' },
+    { icon: '📱', name: 'Social', role: 'Content Agent', description: 'Posts to every platform, every day. Your brand never goes quiet again.' },
+    { icon: '🧠', name: 'Pattern Engine', role: 'Intelligence Agent', description: 'Spots what\'s working, doubles down on it, and updates your strategy — automatically.' },
+    { icon: '🤖', name: 'Follow-up Engine', role: 'Persistence Agent', description: 'The relentless closer. Follows up every lead until they reply or opt out.' },
+    { icon: '🛡️', name: 'Code Shield', role: 'Quality Agent', description: 'Catches every failure, finds the root cause, and makes sure it never happens again.' },
+    { icon: '📈', name: 'Optimizer', role: 'Copy Agent', description: 'Rewrites your proposals using what actually got replies. Gets better every send.' },
   ];
 
   return (
@@ -762,15 +765,27 @@ function PricingCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
 /* ─── New Footer ─── */
 function AKAIFooter() {
   return (
-    <footer className="border-t border-[#1f1f1f] py-8 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-gray-600 text-sm text-center sm:text-left">
-          © 2026 AK<span className="text-[#D4AF37]">AI</span> · <a href="https://getakai.ai" className="text-[#D4AF37] hover:underline">getakai.ai</a> · Built in Sydney 🇦🇺 · 25 years of enterprise tech, distilled into one prompt.
-        </p>
-        <div className="flex gap-6">
-          <a href="/login" className="text-gray-500 hover:text-white text-sm transition-colors">Sign in</a>
-          <a href="/she-demo" className="text-gray-500 hover:text-white text-sm transition-colors">Live demo</a>
-          <a href="/dashboard" className="text-gray-500 hover:text-white text-sm transition-colors">Dashboard</a>
+    <footer className="border-t border-[#1f1f1f] pt-12 pb-8 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Final CTA strip */}
+        <div className="text-center mb-10">
+          <p className="text-white/50 text-sm uppercase tracking-widest font-semibold mb-2">One last thing</p>
+          <p className="text-2xl sm:text-3xl font-black text-white leading-tight mb-1">
+            Your competitors are already automating.
+          </p>
+          <p className="text-2xl sm:text-3xl font-black text-[#D4AF37] leading-tight">
+            Are you?
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-gray-600 text-sm text-center sm:text-left">
+            © 2026 AK<span className="text-[#D4AF37]">AI</span> · <a href="https://getakai.ai" className="text-[#D4AF37] hover:underline">getakai.ai</a> · Built in Sydney 🇦🇺 · 25 years of enterprise tech, distilled into one prompt.
+          </p>
+          <div className="flex gap-6">
+            <a href="/login" className="text-gray-500 hover:text-white text-sm transition-colors">Sign in</a>
+            <a href="/she-demo" className="text-gray-500 hover:text-white text-sm transition-colors">Live demo</a>
+            <a href="/dashboard" className="text-gray-500 hover:text-white text-sm transition-colors">Dashboard</a>
+          </div>
         </div>
       </div>
     </footer>

@@ -144,6 +144,7 @@ function TodayColumn({ items, loading, onRefresh }: { items: FeedItem[]; loading
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="h-14 bg-[#1a1a1a] rounded-xl animate-pulse" />
           ))}
+          <p className="text-[10px] text-gray-700 text-center pt-1">Fetching activity…</p>
         </div>
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center flex-1">
@@ -289,14 +290,23 @@ function NowColumn({ pendingProposals, hotLeads, meetingCount, nextMeetingTime, 
 // ── Right column — Needs You ──────────────────────────────────────────────────
 function NeedsYouColumn({ items, loading }: { items: NeedsYouItem[]; loading: boolean }) {
   const router = useRouter();
+  const hasUrgent = !loading && items.length > 0;
 
   return (
-    <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 flex flex-col h-full">
+    <div className={`rounded-2xl p-5 flex flex-col h-full border transition-colors ${hasUrgent ? 'bg-[#140a0a] border-red-500/30' : 'bg-[#111] border-[#1f1f1f]'}`}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-black text-white">🙋 Needs you</h2>
-        {!loading && items.length > 0 && (
-          <span className="text-[11px] font-bold text-black bg-[#D4AF37] px-2 py-0.5 rounded-full">
-            {items.length}
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-black text-white">🙋 Needs you</h2>
+          {hasUrgent && (
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+            </span>
+          )}
+        </div>
+        {hasUrgent && (
+          <span className="text-[11px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
+            {items.length} urgent
           </span>
         )}
       </div>
@@ -311,7 +321,7 @@ function NeedsYouColumn({ items, loading }: { items: NeedsYouItem[]; loading: bo
         <div className="flex flex-col items-center justify-center py-10 text-center flex-1">
           <p className="text-3xl mb-2">🎉</p>
           <p className="text-gray-300 text-sm font-semibold">Nothing needs you right now</p>
-          <p className="text-gray-600 text-xs mt-1">AKAI is handling everything autonomously</p>
+          <p className="text-gray-500 text-xs mt-1">AKAI is handling everything autonomously</p>
         </div>
       ) : (
         <div className="space-y-2 flex-1">
@@ -319,16 +329,19 @@ function NeedsYouColumn({ items, loading }: { items: NeedsYouItem[]; loading: bo
             <button
               key={item.id}
               onClick={() => router.push(item.href)}
-              className="w-full flex items-center gap-3 p-3 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition text-left group"
+              className="w-full flex items-center gap-3 p-3 bg-red-500/5 border border-red-500/20 rounded-xl hover:border-red-500/40 hover:bg-red-500/10 transition text-left group"
             >
-              <span className="text-base flex-shrink-0">{item.icon}</span>
+              <span className="relative flex-shrink-0">
+                <span className="text-base">{item.icon}</span>
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              </span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-white">{item.label}</p>
                 {item.count !== undefined && item.count > 0 && (
-                  <p className="text-[10px] text-gray-500">{item.count} item{item.count !== 1 ? 's' : ''}</p>
+                  <p className="text-[10px] text-red-400/70">{item.count} action{item.count !== 1 ? 's' : ''} needed</p>
                 )}
               </div>
-              <span className="text-gray-600 group-hover:text-[#D4AF37] transition text-sm flex-shrink-0">→</span>
+              <span className="text-red-400/50 group-hover:text-red-400 transition text-sm flex-shrink-0">→</span>
             </button>
           ))}
         </div>
@@ -798,7 +811,10 @@ export default function DashboardPage() {
                     <div className="h-4 w-1/2 bg-[#1f1f1f] rounded animate-pulse" />
                   </div>
                 ) : insightsData.insights.length === 0 ? (
-                  <p className="text-gray-600 text-sm">No data yet — AKAI logs interactions as you use it</p>
+                  <div className="flex flex-col items-start gap-2">
+                    <p className="text-gray-400 text-sm">No patterns yet — AKAI learns as you use it.</p>
+                    <p className="text-gray-600 text-xs">Once you run campaigns and receive leads, AKAI will surface what&apos;s working.</p>
+                  </div>
                 ) : (
                   <ul className="space-y-2">
                     {insightsData.insights.map((ins, i) => (

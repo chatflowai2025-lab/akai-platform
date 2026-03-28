@@ -228,6 +228,7 @@ function PipelineTab() {
   const sentCount = proposals.filter(p => p.status !== 'Draft').length;
   const totalCount = proposals.length;
   const winRate = sentCount > 0 ? ((wonCount / sentCount) * 100).toFixed(1) : '0.0';
+  const isEmpty = proposals.length === 0;
 
   const addProposal = () => {
     if (!newClient.trim()) return;
@@ -290,6 +291,19 @@ function PipelineTab() {
         </button>
       </div>
 
+      {isEmpty && (
+        <div className="flex flex-col items-center justify-center py-16 text-center border-b border-[#1f1f1f] bg-[#080808]">
+          <p className="text-5xl mb-4">📄</p>
+          <p className="text-white font-black text-lg mb-2">No proposals yet</p>
+          <p className="text-gray-500 text-sm mb-6 max-w-[300px]">Create your first proposal and start winning clients. Each deal starts with a great pitch.</p>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition shadow-lg shadow-[#D4AF37]/20"
+          >
+            ✨ Create first proposal →
+          </button>
+        </div>
+      )}
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <div className="flex h-full gap-0 min-w-max">
           {PIPELINE_STATUSES.map(status => {
@@ -330,7 +344,9 @@ function PipelineTab() {
                     </div>
                   ))}
                   {cols.length === 0 && (
-                    <div className="flex items-center justify-center h-20 text-[11px] text-gray-800">Empty</div>
+                    <div className="flex flex-col items-center justify-center h-20 gap-1 border border-dashed border-[#1f1f1f] rounded-xl">
+                      <p className="text-[11px] text-gray-600">No proposals</p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1019,7 +1035,7 @@ export default function ProposalsPage() {
                 <section>
                   <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Recent Proposals</h2>
                   {loadingSaved ? (
-                    <p className="text-xs text-gray-600">Loading...</p>
+                    <p className="text-xs text-gray-500">Loading saved proposals…</p>
                   ) : (
                     <div className="space-y-1">
                       {savedProposals.map(p => (

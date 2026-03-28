@@ -9,7 +9,7 @@ const AGENTS = [
     color: 'from-yellow-500/20 to-amber-500/20',
     border: 'border-yellow-500/20',
     accent: 'text-yellow-400',
-    what: 'Sets strategy, prioritises work, allocates resources across every skill.',
+    what: 'Sets the direction, coordinates the team, and makes sure every agent is pulling toward one goal — your growth.',
     does: ['Defines weekly goals', 'Routes work to the right agents', 'Reviews results and adjusts'],
   },
   {
@@ -18,7 +18,7 @@ const AGENTS = [
     color: 'from-blue-500/20 to-cyan-500/20',
     border: 'border-blue-500/20',
     accent: 'text-blue-400',
-    what: 'Keeps operations running. Clears blockers. Makes sure nothing falls through the cracks.',
+    what: 'The one who keeps the machine running. Nothing slips, nothing waits, nothing breaks twice.',
     does: ['Monitors all active tasks', 'Escalates blockers to you', 'Manages delivery timelines'],
   },
   {
@@ -27,7 +27,7 @@ const AGENTS = [
     color: 'from-pink-500/20 to-rose-500/20',
     border: 'border-pink-500/20',
     accent: 'text-pink-400',
-    what: 'Owns your brand, outreach, and content. Generates demand while you sleep.',
+    what: 'Builds your brand, writes your outreach, and runs your campaigns — generating demand while you do literally anything else.',
     does: ['Writes outreach emails', 'Creates social content', 'Runs ad campaigns'],
   },
   {
@@ -36,7 +36,7 @@ const AGENTS = [
     color: 'from-green-500/20 to-emerald-500/20',
     border: 'border-green-500/20',
     accent: 'text-green-400',
-    what: 'Sophie AI calls your leads, qualifies them, and books meetings — 24/7.',
+    what: 'Finds leads, writes the pitch, books the meeting. While you sleep.',
     does: ['Outbound calling via Sophie', 'Lead qualification', 'Meeting booking'],
   },
   {
@@ -45,7 +45,7 @@ const AGENTS = [
     color: 'from-purple-500/20 to-violet-500/20',
     border: 'border-purple-500/20',
     accent: 'text-purple-400',
-    what: 'Sources candidates, screens CVs, and shortlists the best fits for your roles.',
+    what: 'Reads every CV so you don\'t have to. Scores them 0–100, shortlists the best, and schedules interviews automatically.',
     does: ['AI candidate screening', 'Job description writing', 'Interview scheduling'],
   },
   {
@@ -54,7 +54,7 @@ const AGENTS = [
     color: 'from-amber-500/20 to-yellow-500/20',
     border: 'border-amber-500/20',
     accent: 'text-[#D4AF37]',
-    what: 'Tracks revenue, invoices, and margins. Flags issues before they become problems.',
+    what: 'Your CFO without the corner office. Tracks every dollar, flags margin risks, and keeps the books honest.',
     does: ['Revenue tracking', 'Invoice generation', 'Margin analysis'],
   },
   {
@@ -63,7 +63,7 @@ const AGENTS = [
     color: 'from-sky-500/20 to-blue-500/20',
     border: 'border-sky-500/20',
     accent: 'text-sky-400',
-    what: 'Audits your website, writes copy, and builds new pages. No dev needed.',
+    what: 'Audits your site, rewrites the copy, fixes the leaks. No agency invoice at the end.',
     does: ['SEO & conversion audit', 'AI copywriting', 'Website builder'],
   },
   {
@@ -72,7 +72,7 @@ const AGENTS = [
     color: 'from-orange-500/20 to-red-500/20',
     border: 'border-orange-500/20',
     accent: 'text-orange-400',
-    what: 'Creates platform-perfect content for Instagram, LinkedIn, Facebook, and X.',
+    what: 'Posts to Instagram, LinkedIn, Facebook, and X — every day, on brand, without you writing a single word.',
     does: ['4-platform content generation', 'Brand voice consistency', 'Scheduling'],
   },
   {
@@ -81,7 +81,7 @@ const AGENTS = [
     color: 'from-teal-500/20 to-cyan-500/20',
     border: 'border-teal-500/20',
     accent: 'text-teal-400',
-    what: "Manages client relationships, sends updates, and makes sure everyone's happy.",
+    what: 'Keeps every client happy, informed, and coming back — without you having to chase anyone.',
     does: ['Client communications', 'Proposal generation', 'Relationship tracking'],
   },
 ];

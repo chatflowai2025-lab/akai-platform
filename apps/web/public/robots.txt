@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /settings
-Disallow: /api/
+Disallow: /api
+Disallow: /onboard
 Sitemap: https://getakai.ai/sitemap.xml

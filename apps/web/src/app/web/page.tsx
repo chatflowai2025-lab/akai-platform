@@ -926,11 +926,11 @@ function SitePreview({ generatedSite, businessName, industry, location, colorSch
           </div>
         </div>
 
-        {/* RIGHT: sidebar */}
-        <div className="w-72 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col overflow-y-auto bg-[#0a0a0a]">
+        {/* RIGHT: sidebar — Publish always pinned top, rest scrolls */}
+        <div className="w-72 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col bg-[#0a0a0a] overflow-hidden">
 
-          {/* Publish */}
-          <div className="p-4 border-b border-[#1f1f1f]">
+          {/* Publish — always visible, never scrolls away */}
+          <div className="p-4 border-b border-[#1f1f1f] flex-shrink-0">
             <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Publish</p>
             {!isPublished ? (
               <>
@@ -953,6 +953,9 @@ function SitePreview({ generatedSite, businessName, industry, location, colorSch
               </div>
             )}
           </div>
+
+          {/* Section nav + SEO + hints — scrollable */}
+          <div className="flex-1 overflow-y-auto">
 
           {/* Section nav */}
           <div className="p-4 border-b border-[#1f1f1f]">
@@ -978,7 +981,7 @@ function SitePreview({ generatedSite, businessName, industry, location, colorSch
           </div>
 
           {/* Rotating hints */}
-          <div className="p-4 flex-1">
+          <div className="p-4">
             <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Tips &amp; Hints</p>
             <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3 min-h-[80px] transition-all duration-500">
               <span className="text-lg">{SITE_PREVIEW_HINTS[hintIdx]?.icon}</span>
@@ -1001,6 +1004,7 @@ function SitePreview({ generatedSite, businessName, industry, location, colorSch
               </div>
             </div>
           </div>
+          </div>{/* end scrollable section */}
         </div>
       </div>
     </div>

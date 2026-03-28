@@ -322,42 +322,44 @@ function EmptyLeadsState() {
 
   const actions = [
     {
-      icon: '📁',
-      label: 'Import CSV',
-      description: 'Upload a spreadsheet of leads',
-      onClick: () => document.getElementById('lead-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-    },
-    {
       icon: '🛡️',
       label: 'Connect Email Guard',
       description: 'Capture leads from your inbox automatically',
       onClick: () => router.push('/email-guard'),
+      primary: false,
     },
     {
       icon: '📞',
       label: 'Trigger Sophie',
       description: 'Let Sophie AI start calling prospects',
       onClick: () => safeSend(sendMessage, 'I want to trigger Sophie AI to start calling leads'),
+      primary: false,
     },
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <p className="text-3xl mb-3">🎯</p>
-      <p className="text-white font-bold text-sm mb-1">No leads yet</p>
-      <p className="text-gray-600 text-xs mb-6 max-w-[260px]">
-        Get started by importing leads, connecting Email Guard, or letting Sophie do the hunting.
+    <div className="flex flex-col items-center justify-center py-14 text-center">
+      <p className="text-5xl mb-4">🎯</p>
+      <p className="text-white font-black text-lg mb-2">No leads yet — launch your first campaign</p>
+      <p className="text-gray-500 text-sm mb-8 max-w-[320px]">
+        Import a list, connect your inbox, or let Sophie AI hunt for prospects. Your pipeline starts here.
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl">
+      <button
+        onClick={() => document.getElementById('lead-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        className="mb-5 flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition shadow-lg shadow-[#D4AF37]/20"
+      >
+        📁 Import leads now →
+      </button>
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
         {actions.map(a => (
           <button
             key={a.label}
             onClick={a.onClick}
-            className="flex flex-col items-center gap-2 p-4 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl hover:border-[#D4AF37]/30 hover:bg-[#141414] transition-colors group"
+            className="flex-1 flex flex-col items-center gap-2 p-4 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl hover:border-[#D4AF37]/30 hover:bg-[#141414] transition-colors group"
           >
             <span className="text-2xl group-hover:scale-110 transition-transform">{a.icon}</span>
             <p className="text-sm font-bold text-white">{a.label}</p>
-            <p className="text-[11px] text-gray-600">{a.description}</p>
+            <p className="text-[11px] text-gray-500">{a.description}</p>
           </button>
         ))}
       </div>

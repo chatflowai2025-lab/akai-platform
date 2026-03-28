@@ -346,6 +346,10 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   }
 
   // ── Web module responses ──────────────────────────────────────────────────
+  if ((msg.includes('publish') && (msg.includes('site') || msg.includes('website'))) || msg.includes('publish live') || msg.includes('go live')) {
+    return `Yes — I publish your site directly to your own subdomain on getakai.ai.\n\nHere's how:\n1. Go to **Web** → **Build** tab\n2. Fill in your business details — takes 60 seconds\n3. AK generates your full site (hero, services, about, contact)\n4. Hit **🚀 Publish live** in the sidebar — it's live in under 30 seconds\n\nYour site will be at **[yourbusiness].getakai.ai** — shareable link, mobile-optimised, SEO-ready from day one.\n\nWant me to open the Build tab now?`;
+  }
+
   if (msg.startsWith('fix the "') && msg.includes('" issue on my website')) {
     const issueMatch = message.match(/fix the "(.+?)" issue on my website/i);
     const issue = issueMatch?.[1] ?? 'this issue';
