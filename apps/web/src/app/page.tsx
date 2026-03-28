@@ -149,7 +149,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
 
       {/* Headline */}
       <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-6 leading-[0.9] tracking-tight max-w-5xl">
-        <span className="text-white">AKAI — Your AI Business Partner</span>
+        <span className="text-white">AK<span className="text-[#D4AF37]">AI</span> — Your AI Business Partner</span>
         <br />
         <span className="text-[#D4AF37]">That Gets Smarter Every Day</span>
       </h1>
