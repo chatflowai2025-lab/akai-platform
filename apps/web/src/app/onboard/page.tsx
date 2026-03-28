@@ -255,10 +255,8 @@ export default function OnboardPage() {
       console.error('[ONBOARD] Railway call failed (non-fatal):', err);
     }
 
-    // Redirect to dashboard
-    setTimeout(() => {
-      router.replace('/dashboard');
-    }, 1500);
+    // Redirect to dashboard — always fires, errors above are non-fatal
+    router.replace('/dashboard');
   };
 
   const sendMessage = async () => {
@@ -394,7 +392,7 @@ export default function OnboardPage() {
         </div>
         <div className="max-w-2xl mx-auto mt-2 flex justify-end">
           <button
-            onClick={() => handleComplete({ ...state, step: 'complete' })}
+            onClick={() => handleComplete({ ...state, step: 'complete' }).catch(() => router.replace('/dashboard'))}
             disabled={completing}
             className="text-xs text-gray-600 hover:text-gray-400 transition"
           >

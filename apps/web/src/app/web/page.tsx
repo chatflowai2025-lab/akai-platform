@@ -691,6 +691,322 @@ function AuditPanel({
   );
 }
 
+// ── Site Preview (Step 4) ─────────────────────────────────────────────────────
+interface SitePreviewProps {
+  generatedSite: GeneratedSite;
+  businessName: string;
+  industry: string;
+  location: string;
+  colorScheme: ColorScheme;
+  contactEmail: string;
+  contactPhone: string;
+  services: string[];
+  user: ReturnType<typeof useAuth>['user'];
+  onStartOver: () => void;
+}
+
+const SITE_PREVIEW_HINTS = [
+  { icon: '💡', tip: 'Did you know? Websites with clear CTAs convert 3x better than those without.' },
+  { icon: '🔍', tip: "Did you know? 75% of users judge a business's credibility by their website design." },
+  { icon: '📱', tip: 'Did you know? Your site auto-adapts for mobile — no extra work needed.' },
+  { icon: '⚡', tip: 'Did you know? AK can update your site copy anytime — just ask in chat.' },
+  { icon: '🎯', tip: 'Did you know? Sites with local keywords rank 2x higher in Google for local searches.' },
+  { icon: '🚀', tip: 'Tip: Once published, your site is live at your subdomain in under 30 seconds.' },
+  { icon: '🤖', tip: 'Tip: AK can add new services, change your headline, or swap colours — just tell it what you want.' },
+];
+
+function SitePreview({ generatedSite, businessName, industry, location, colorScheme, contactEmail, contactPhone, services, user, onStartOver }: SitePreviewProps) {
+  const siteServices = generatedSite.services.length > 0
+    ? generatedSite.services
+    : services.filter(Boolean).map(s => ({ title: s, description: '' }));
+
+  type PaletteKey = 'bg' | 'text' | 'accent' | 'nav' | 'card' | 'border' | 'sub';
+  const palettes: Record<ColorScheme, Record<PaletteKey, string>> = {
+    'Modern Dark':    { bg: '#0a0a0a', text: '#ffffff', accent: '#D4AF37', nav: '#111111', card: '#1a1a1a', border: '#2a2a2a', sub: '#9ca3af' },
+    'Clean Light':    { bg: '#ffffff', text: '#111111', accent: '#2563eb', nav: '#f8fafc', card: '#f1f5f9', border: '#e2e8f0', sub: '#6b7280' },
+    'Bold & Bright':  { bg: '#0f172a', text: '#f8fafc', accent: '#38bdf8', nav: '#1e293b', card: '#1e293b', border: '#334155', sub: '#94a3b8' },
+    'Natural/Earthy': { bg: '#faf7f2', text: '#1c1917', accent: '#b45309', nav: '#f5f0e8', card: '#ede9df', border: '#d6cfc4', sub: '#78716c' },
+  };
+  const p = palettes[colorScheme] ?? palettes['Modern Dark'];
+
+  const [hintIdx, setHintIdx] = useState(0);
+  const [activeSection, setActiveSection] = useState('hero');
+  const [isPublished, setIsPublished] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const t = setInterval(() => setHintIdx(i => (i + 1) % SITE_PREVIEW_HINTS.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const el = previewRef.current?.querySelector(`#preview-${id}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setActiveSection(id);
+  };
+
+  const aboutParas = generatedSite.about
+    ? generatedSite.about.split('\n\n').filter(Boolean)
+    : [`${businessName} is a trusted provider of ${industry} based in ${location}.`, 'We work closely with every client to understand their goals and exceed expectations.'];
+
+  const handlePublish = async () => {
+    if (!user || !generatedSite) return;
+    setPublishing(true);
+    setPublishError(null);
+    try {
+      let idToken: string | undefined;
+      try {
+        const { getAuth } = await import('firebase/auth');
+        const { getFirebaseApp } = await import('@/lib/firebase');
+        const app = getFirebaseApp();
+        if (app) {
+          const fbAuth = getAuth(app);
+          if (fbAuth.currentUser) idToken = await fbAuth.currentUser.getIdToken();
+        }
+      } catch { /* non-fatal */ }
+      const res = await fetch('/api/web/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subdomain: generatedSite.subdomain, userId: user.uid, site: { ...generatedSite, businessName, colorScheme }, idToken }),
+      });
+      if (!res.ok) throw new Error('Publish failed');
+      setIsPublished(true);
+    } catch {
+      setPublishError('Failed to publish. Please try again.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-[#1f1f1f] flex-shrink-0">
+        <div>
+          <h2 className="text-white font-bold text-base">✨ Your website is ready</h2>
+          <p className="text-gray-500 text-xs mt-0.5">Scroll to preview every section · publish when you&apos;re happy</p>
+        </div>
+        <button onClick={onStartOver} className="px-3 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-lg text-xs hover:text-white transition">
+          Start over
+        </button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* LEFT: full website preview */}
+        <div ref={previewRef} className="flex-1 overflow-y-auto" style={{ background: '#0d0d0d' }}>
+          {/* Browser chrome */}
+          <div className="sticky top-0 z-20 flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-[#2a2a2a]">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500/60" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+              <div className="w-3 h-3 rounded-full bg-green-500/60" />
+            </div>
+            <div className="flex-1 bg-[#111] border border-[#2a2a2a] rounded-md px-3 py-1 text-xs text-gray-500 text-center truncate">
+              🔒 {generatedSite.subdomain}.getakai.ai
+            </div>
+          </div>
+
+          {/* Rendered website */}
+          <div style={{ background: p.bg, color: p.text, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+
+            {/* Sticky nav */}
+            <nav className="sticky top-[40px] z-10" style={{ background: p.nav, borderBottom: `1px solid ${p.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 32px' }}>
+              <span style={{ color: p.accent, fontWeight: 900, fontSize: 20 }}>{businessName}</span>
+              <div style={{ display: 'flex', gap: 24 }}>
+                {['Services', 'About', 'Contact'].map(s => (
+                  <button key={s} onClick={() => scrollToSection(s.toLowerCase())}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: activeSection === s.toLowerCase() ? p.accent : p.sub, fontWeight: 500, fontSize: 14 }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => scrollToSection('contact')}
+                style={{ background: p.accent, color: p.bg, padding: '10px 22px', borderRadius: 10, fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer' }}>
+                Get in Touch
+              </button>
+            </nav>
+
+            {/* Hero */}
+            <div id="preview-hero" style={{ padding: '96px 32px', textAlign: 'center' }}>
+              <div style={{ display: 'inline-block', padding: '4px 14px', borderRadius: 999, background: `${p.accent}18`, border: `1px solid ${p.accent}30`, color: p.accent, fontSize: 12, fontWeight: 600, marginBottom: 24 }}>
+                {industry}{location ? ` · ${location}` : ''}
+              </div>
+              <h1 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 900, lineHeight: 1.05, color: p.text, marginBottom: 20 }}>
+                {generatedSite.headline}
+              </h1>
+              <p style={{ fontSize: 18, color: p.sub, maxWidth: 560, margin: '0 auto 36px', lineHeight: 1.6 }}>
+                {generatedSite.subheadline}
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => scrollToSection('contact')}
+                  style={{ background: p.accent, color: p.bg, padding: '14px 32px', borderRadius: 12, fontWeight: 800, fontSize: 16, border: 'none', cursor: 'pointer' }}>
+                  {generatedSite.cta} →
+                </button>
+                <button onClick={() => scrollToSection('services')}
+                  style={{ background: 'transparent', color: p.text, padding: '14px 32px', borderRadius: 12, fontWeight: 600, fontSize: 16, border: `1px solid ${p.border}`, cursor: 'pointer' }}>
+                  See our services
+                </button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, marginTop: 56, flexWrap: 'wrap' }}>
+                {['Trusted locally', 'Fast response', 'Results guaranteed'].map(t => (
+                  <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: p.sub }}>
+                    <span style={{ color: p.accent }}>✓</span> {t}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Services */}
+            <div id="preview-services" style={{ background: p.card, padding: '72px 32px', borderTop: `1px solid ${p.border}` }}>
+              <div style={{ textAlign: 'center', marginBottom: 48 }}>
+                <p style={{ color: p.accent, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>What we do</p>
+                <h2 style={{ fontSize: 36, fontWeight: 900, color: p.text, margin: 0 }}>Our Services</h2>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, maxWidth: 900, margin: '0 auto' }}>
+                {siteServices.slice(0, 3).map((svc, i) => (
+                  <div key={i} style={{ background: p.bg, borderRadius: 16, padding: 28, border: `1px solid ${p.border}` }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: `${p.accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 16 }}>
+                      {['⚡', '🎯', '✅'][i]}
+                    </div>
+                    <h3 style={{ fontWeight: 800, fontSize: 17, color: p.text, marginBottom: 8 }}>{svc.title}</h3>
+                    <p style={{ color: p.sub, fontSize: 14, lineHeight: 1.6 }}>{svc.description || `Professional ${svc.title.toLowerCase()} tailored to your needs.`}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* About */}
+            <div id="preview-about" style={{ padding: '72px 32px' }}>
+              <div style={{ maxWidth: 840, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
+                <div>
+                  <p style={{ color: p.accent, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>About us</p>
+                  <h2 style={{ fontSize: 30, fontWeight: 900, color: p.text, marginBottom: 20, lineHeight: 1.2 }}>Built on trust, driven by results</h2>
+                  {aboutParas.map((para, i) => (
+                    <p key={i} style={{ color: p.sub, fontSize: 15, lineHeight: 1.7, marginBottom: 14 }}>{para}</p>
+                  ))}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  {[{ n: '10+', l: 'Years experience' }, { n: '500+', l: 'Happy clients' }, { n: '98%', l: 'Satisfaction rate' }, { n: '24/7', l: 'Support' }].map(s => (
+                    <div key={s.l} style={{ background: p.card, border: `1px solid ${p.border}`, borderRadius: 12, padding: 20, textAlign: 'center' }}>
+                      <div style={{ fontSize: 28, fontWeight: 900, color: p.accent }}>{s.n}</div>
+                      <div style={{ fontSize: 12, color: p.sub, marginTop: 4 }}>{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CTA banner */}
+            <div style={{ background: p.accent, padding: '56px 32px', textAlign: 'center' }}>
+              <h2 style={{ fontSize: 32, fontWeight: 900, color: p.bg, marginBottom: 12 }}>Ready to get started?</h2>
+              <p style={{ color: `${p.bg}aa`, fontSize: 16, marginBottom: 28 }}>Join hundreds of businesses growing with {businessName}.</p>
+              <button onClick={() => scrollToSection('contact')}
+                style={{ background: p.bg, color: p.accent, padding: '14px 36px', borderRadius: 12, fontWeight: 800, fontSize: 16, border: 'none', cursor: 'pointer' }}>
+                {generatedSite.cta} →
+              </button>
+            </div>
+
+            {/* Contact / Footer */}
+            <div id="preview-contact" style={{ background: p.nav, padding: '56px 32px', borderTop: `1px solid ${p.border}` }}>
+              <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
+                <h2 style={{ fontSize: 28, fontWeight: 900, color: p.text, marginBottom: 8 }}>Get in touch</h2>
+                <p style={{ color: p.sub, fontSize: 15, marginBottom: 28 }}>We&apos;d love to hear from you. Reach out and we&apos;ll respond quickly.</p>
+                <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', fontSize: 14, color: p.sub }}>
+                  {contactEmail && <span>📧 {contactEmail}</span>}
+                  {contactPhone && <span>📞 {contactPhone}</span>}
+                  {location && <span>📍 {location}</span>}
+                </div>
+                <div style={{ marginTop: 40, paddingTop: 24, borderTop: `1px solid ${p.border}`, color: p.sub, fontSize: 12 }}>
+                  © {new Date().getFullYear()} {businessName} · Built with AKAI
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: sidebar */}
+        <div className="w-72 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col overflow-y-auto bg-[#0a0a0a]">
+
+          {/* Publish */}
+          <div className="p-4 border-b border-[#1f1f1f]">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Publish</p>
+            {!isPublished ? (
+              <>
+                <button onClick={handlePublish} disabled={publishing}
+                  className="w-full py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 disabled:opacity-60 transition">
+                  {publishing ? '⏳ Publishing…' : '🚀 Publish live'}
+                </button>
+                <p className="text-xs text-gray-600 text-center mt-1">{generatedSite.subdomain}.getakai.ai</p>
+                {publishError && <p className="text-red-400 text-xs text-center mt-2">{publishError}</p>}
+              </>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-green-500/10 border border-green-500/20 rounded-xl">
+                <span className="text-green-400">✅</span>
+                <div>
+                  <p className="text-green-400 font-semibold text-xs">Live!</p>
+                  <a href={`https://${generatedSite.subdomain}.getakai.ai`} target="_blank" rel="noreferrer" className="text-green-400/70 text-xs hover:text-green-400 underline">
+                    {generatedSite.subdomain}.getakai.ai
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section nav */}
+          <div className="p-4 border-b border-[#1f1f1f]">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Jump to section</p>
+            <div className="space-y-1">
+              {[{ id: 'hero', label: '🏠 Hero' }, { id: 'services', label: '⚡ Services' }, { id: 'about', label: '👥 About' }, { id: 'contact', label: '📧 Contact' }].map(s => (
+                <button key={s.id} onClick={() => scrollToSection(s.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${activeSection === s.id ? 'bg-[#D4AF37]/10 text-[#D4AF37] font-semibold' : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'}`}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SEO preview */}
+          <div className="p-4 border-b border-[#1f1f1f]">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">SEO Preview</p>
+            <div className="bg-[#0d0d0d] rounded-xl p-3 border border-[#1f1f1f]">
+              <p className="text-blue-400 text-xs font-medium truncate">{generatedSite.subdomain}.getakai.ai</p>
+              <p className="text-white text-xs font-semibold mt-1 leading-snug line-clamp-2">{generatedSite.headline}</p>
+              <p className="text-green-600 text-[10px] mt-0.5 line-clamp-3 leading-relaxed">{generatedSite.metaDescription}</p>
+            </div>
+          </div>
+
+          {/* Rotating hints */}
+          <div className="p-4 flex-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Tips &amp; Hints</p>
+            <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3 min-h-[80px] transition-all duration-500">
+              <span className="text-lg">{SITE_PREVIEW_HINTS[hintIdx]?.icon}</span>
+              <p className="text-gray-300 text-xs leading-relaxed mt-1">{SITE_PREVIEW_HINTS[hintIdx]?.tip}</p>
+            </div>
+            <div className="flex gap-1 justify-center mt-2 mb-4">
+              {SITE_PREVIEW_HINTS.map((_, i) => (
+                <button key={i} onClick={() => setHintIdx(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === hintIdx ? 'bg-[#D4AF37] w-4' : 'bg-[#2a2a2a] w-1.5'}`} />
+              ))}
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 p-2.5 bg-[#111] border border-[#1f1f1f] rounded-xl">
+                <span className="text-sm flex-shrink-0 mt-0.5">🎨</span>
+                <p className="text-gray-500 text-xs leading-relaxed">Not happy with colours? Tell AK in chat — it can regenerate with any palette.</p>
+              </div>
+              <div className="flex items-start gap-2 p-2.5 bg-[#111] border border-[#1f1f1f] rounded-xl">
+                <span className="text-sm flex-shrink-0 mt-0.5">✏️</span>
+                <p className="text-gray-500 text-xs leading-relaxed">Want to change the headline? Hit Start over — takes 20 seconds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Build Tab ─────────────────────────────────────────────────────────────────
 function BuildTab() {
   const { user } = useAuth();
@@ -708,9 +1024,6 @@ function BuildTab() {
   const [progressStep, setProgressStep] = useState(0);
   const [generatedSite, setGeneratedSite] = useState<GeneratedSite | null>(null);
   const [buildError, setBuildError] = useState<string | null>(null);
-  const [isPublished, setIsPublished] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [publishError, setPublishError] = useState<string | null>(null);
 
   const updateService = (idx: number, val: string) => {
     setServices(prev => prev.map((s, i) => i === idx ? val : s));
@@ -921,123 +1234,19 @@ function BuildTab() {
 
   // ── Step 4 ──────────────────────────────────────────────────────────────────
   if (step === 4 && generatedSite) {
-    const siteServices = generatedSite.services.length > 0
-      ? generatedSite.services
-      : services.filter(Boolean).map(s => ({ title: s, description: '' }));
-
     return (
-      <div className="flex flex-col h-full overflow-y-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-white font-bold text-xl">✨ Your website is ready</h2>
-            <p className="text-gray-400 text-sm mt-0.5">Preview below — publish when you&apos;re happy</p>
-          </div>
-          <button onClick={() => { setStep(1); setGeneratedSite(null); setIsPublished(false); }}
-            className="px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-sm hover:text-white transition">
-            Start over
-          </button>
-        </div>
-
-        <div className="rounded-2xl border border-[#2a2a2a] overflow-hidden mb-6 max-w-2xl">
-          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] px-8 py-10 border-b border-[#2a2a2a]">
-            <div className="inline-block px-2.5 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-xs font-medium mb-4">{businessName}</div>
-            <h3 className="text-white font-black text-2xl leading-tight mb-2">{generatedSite.headline}</h3>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-lg mb-6">{generatedSite.subheadline}</p>
-            <button className="px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold">{generatedSite.cta}</button>
-          </div>
-          <div className="px-8 py-6 border-b border-[#2a2a2a] bg-[#0d0d0d]">
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">Services</p>
-            <div className="grid grid-cols-3 gap-4">
-              {siteServices.slice(0, 3).map((svc, i) => (
-                <div key={i} className="bg-[#111] rounded-xl p-4 border border-[#1f1f1f]">
-                  <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center text-sm mb-3">{['⚡', '🎯', '✅'][i]}</div>
-                  <p className="text-white text-sm font-semibold mb-1">{svc.title}</p>
-                  {svc.description && <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{svc.description}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="px-8 py-5 bg-[#111]">
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Contact</p>
-            <div className="flex gap-6 text-sm text-gray-400">
-              {contactEmail && <span>📧 {contactEmail}</span>}
-              {contactPhone && <span>📞 {contactPhone}</span>}
-              {location && <span>📍 {location}</span>}
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-2xl space-y-3">
-          {!isPublished ? (
-            <>
-              <button
-                onClick={async () => {
-                  if (!user || !generatedSite) return;
-                  setPublishing(true);
-                  setPublishError(null);
-                  try {
-                    // Get Firebase ID token so the server can write to Firestore
-                    // when Firebase Admin SDK service account creds aren't in env
-                    let idToken: string | undefined;
-                    try {
-                      const { getAuth } = await import('firebase/auth');
-                      const { getFirebaseApp } = await import('@/lib/firebase');
-                      const app = getFirebaseApp();
-                      if (app) {
-                        const fbAuth = getAuth(app);
-                        if (fbAuth.currentUser) {
-                          idToken = await fbAuth.currentUser.getIdToken();
-                        }
-                      }
-                    } catch {
-                      // non-fatal — server will try Admin SDK first
-                    }
-                    const res = await fetch('/api/web/publish', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        subdomain: generatedSite.subdomain,
-                        userId: user.uid,
-                        site: { ...generatedSite, businessName, colorScheme },
-                        idToken,
-                      }),
-                    });
-                    if (!res.ok) throw new Error('Publish failed');
-                    setIsPublished(true);
-                  } catch {
-                    setPublishError('Failed to publish. Please try again.');
-                  } finally {
-                    setPublishing(false);
-                  }
-                }}
-                disabled={publishing}
-                className="w-full py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 disabled:opacity-60 transition"
-              >
-                {publishing ? '⏳ Publishing…' : `🚀 Publish to ${generatedSite.subdomain}.getakai.ai`}
-              </button>
-              {publishError && (
-                <p className="text-red-400 text-xs text-center">{publishError}</p>
-              )}
-            </>
-          ) : (
-            <div className="flex items-center gap-3 px-5 py-3 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <span className="text-green-400 text-lg">✅</span>
-              <div>
-                <p className="text-green-400 font-semibold text-sm">Your site is live!</p>
-                <p className="text-green-400/70 text-xs">
-                  <a href={`https://${generatedSite.subdomain}.getakai.ai`} target="_blank" rel="noreferrer" className="hover:text-green-400 underline">
-                    {generatedSite.subdomain}.getakai.ai
-                  </a>
-                </p>
-              </div>
-            </div>
-          )}
-          <div className="p-4 bg-[#0d0d0d] border border-[#1f1f1f] rounded-xl">
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">SEO Meta Description</p>
-            <p className="text-xs text-gray-400 leading-relaxed">{generatedSite.metaDescription}</p>
-          </div>
-        </div>
-      </div>
+      <SitePreview
+        generatedSite={generatedSite}
+        businessName={businessName}
+        industry={industry}
+        location={location}
+        colorScheme={colorScheme}
+        contactEmail={contactEmail}
+        contactPhone={contactPhone}
+        services={services}
+        user={user}
+        onStartOver={() => { setStep(1); setGeneratedSite(null); }}
+      />
     );
   }
 
