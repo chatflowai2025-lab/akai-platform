@@ -763,11 +763,31 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           <p className="text-xs text-gray-500 mt-0.5">Schedule, manage, and stay on top of everything</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Connected badge */}
+          {/* Connected badge + disconnect */}
           {calConnected && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-green-400 font-semibold capitalize">{calProvider} connected</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-xl">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-xs text-green-400 font-semibold capitalize">{calProvider} connected</span>
+              </div>
+              <button
+                onClick={async () => {
+                  if (!confirm('Disconnect calendar?')) return;
+                  const endpoint = calProvider === 'outlook'
+                    ? `https://api-server-production-2a27.up.railway.app/api/email/microsoft/disconnect`
+                    : `https://api-server-production-2a27.up.railway.app/api/calendar/disconnect`;
+                  await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': 'aiclozr_api_key_2026_prod' },
+                    body: JSON.stringify({ userId: user.uid }),
+                  }).catch(() => {});
+                  setCalConnected(false);
+                  setCalProvider(null);
+                }}
+                className="text-xs text-gray-600 hover:text-red-400 transition px-2 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30"
+              >
+                Disconnect
+              </button>
             </div>
           )}
           {/* Booking link copy button */}
