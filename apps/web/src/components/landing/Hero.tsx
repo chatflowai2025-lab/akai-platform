@@ -103,10 +103,10 @@ export function DemoModal({ onClose }: { onClose: () => void }) {
 
             {step === 1 && (
               <div className="flex flex-col gap-4 mt-4">
-                <Field label="Full name *" value={form.name} onChange={v => set('name', v)} placeholder="Jane Smith" />
+                <Field label="Full name *" value={form.name} onChange={v => set('name', v)} placeholder="Jane Smith" autoComplete="name" />
                 <Field label="Email *" value={form.email} onChange={v => set('email', v)} placeholder="jane@business.com" type="email" />
                 <Field label="Phone number *" value={form.phone} onChange={v => set('phone', v)} placeholder="+61 400 000 000" type="tel" />
-                <Field label="Website URL" value={form.website} onChange={v => set('website', v)} placeholder="https://yoursite.com.au" />
+                <Field label="Website URL" value={form.website} onChange={v => set('website', v)} placeholder="https://yoursite.com.au" type="url" />
                 <NavBtn
                   label="Next →"
                   disabled={!form.name || !form.phone || !form.email}
@@ -235,7 +235,7 @@ function HealthCheckModal({ onClose }: { onClose: () => void }) {
 
             {step === 1 && (
               <div className="flex flex-col gap-4 mt-4">
-                <Field label="Full name *" value={form.name} onChange={v => set('name', v)} placeholder="Jane Smith" />
+                <Field label="Full name *" value={form.name} onChange={v => set('name', v)} placeholder="Jane Smith" autoComplete="name" />
                 <Field label="Email *" value={form.email} onChange={v => set('email', v)} placeholder="jane@business.com" type="email" />
                 <Field label="Website URL *" value={form.website} onChange={v => set('website', v)} placeholder="https://yoursite.com.au" />
                 <Field label="Phone" value={form.phone} onChange={v => set('phone', v)} placeholder="+61 400 000 000" type="tel" />
@@ -335,8 +335,10 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 }
 
 function Field({
-  label, value, onChange, placeholder, type = 'text',
-}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
+  label, value, onChange, placeholder, type = 'text', autoComplete,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; autoComplete?: string }) {
+  // Derive sensible autoComplete default from type if not explicitly provided
+  const ac = autoComplete ?? (type === 'email' ? 'email' : type === 'tel' ? 'tel' : type === 'url' ? 'url' : 'on');
   return (
     <div>
       <label className="text-xs text-white/50 mb-1 block">{label}</label>
@@ -345,6 +347,7 @@ function Field({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete={ac}
         className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
       />
     </div>
