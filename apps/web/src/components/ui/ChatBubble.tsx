@@ -22,7 +22,7 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
           className={cn(
             'px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap',
             isAssistant
-              ? 'bg-[#111] border border-[#1f1f1f] text-white rounded-tl-sm'
+              ? 'bg-white text-gray-900 rounded-tl-sm shadow-sm'
               : 'bg-[#D4AF37] text-black font-medium rounded-tr-sm'
           )}
         >

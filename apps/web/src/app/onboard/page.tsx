@@ -342,8 +342,8 @@ export default function OnboardPage() {
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       {/* Header */}
       <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f]">
-        <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-sm">
-          A
+        <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">
+          AK
         </div>
         <span className="font-semibold text-white">AKAI Setup</span>
         <span className="ml-auto flex items-center gap-3">
