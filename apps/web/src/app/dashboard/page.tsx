@@ -434,7 +434,9 @@ export default function DashboardPage() {
           !!data?.onboarding?.businessName ||
           !!data?.campaignConfig?.businessName ||
           !!data?.gmail?.connected ||
-          !!data?.googleCalendarConnected;
+          !!data?.googleCalendarConnected ||
+          !!data?.inboxConnection?.provider || // MS Outlook connected = onboarded
+          !!data?.microsoftCalendarConnected;
         if (!onboardingComplete) {
           router.replace('/onboard');
         }
