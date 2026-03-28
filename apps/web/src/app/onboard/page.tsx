@@ -347,6 +347,12 @@ export default function OnboardPage() {
         <span className="ml-auto flex items-center gap-3">
           <span className="text-xs text-gray-500 hidden sm:block">{user.email}</span>
           <button
+            onClick={() => router.replace('/dashboard')}
+            className="text-xs text-[#D4AF37]/70 hover:text-[#D4AF37] transition font-medium"
+          >
+            Skip setup →
+          </button>
+          <button
             onClick={logout}
             className="text-xs text-white/30 hover:text-white/60 transition"
           >
@@ -392,7 +398,7 @@ export default function OnboardPage() {
         </div>
         <div className="max-w-2xl mx-auto mt-2 flex justify-end">
           <button
-            onClick={() => handleComplete({ ...state, step: 'complete' }).catch(() => router.replace('/dashboard'))}
+            onClick={() => { handleComplete({ ...state, step: 'complete' }).catch(() => router.replace('/dashboard')); }}
             disabled={completing}
             className="text-xs text-gray-600 hover:text-gray-400 transition"
           >
