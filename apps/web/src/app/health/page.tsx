@@ -684,6 +684,7 @@ function WebAuditInline({
       <div className="flex gap-3">
         <input
           type="url"
+          autoComplete="url"
           value={website}
           onChange={e => setWebsite(e.target.value)}
           placeholder="https://yoursite.com.au"

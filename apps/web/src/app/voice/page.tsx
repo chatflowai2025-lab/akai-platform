@@ -809,6 +809,7 @@ function SetupWizard({
           {config.useOwnNumber && (
             <input
               type="tel"
+              autoComplete="tel"
               value={config.phoneNumber}
               onClick={e => e.stopPropagation()}
               onChange={e => setConfig({ ...config, phoneNumber: e.target.value })}
