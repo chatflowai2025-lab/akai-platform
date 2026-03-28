@@ -143,6 +143,7 @@ const HERO_BANNERS = [
   { white: 'Stop Paying Agencies', gold: '$13,000 Monthly.' },
   { white: 'Every Lead.', gold: 'Followed Up. Always.' },
   { white: 'From Finding', gold: 'To Closing.' },
+  { white: 'While You Work,', gold: 'Play or Sleep.' },
 ];
 
 /* ─── Hero ─── */
