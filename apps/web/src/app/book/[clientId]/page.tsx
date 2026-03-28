@@ -162,6 +162,7 @@ function ChatColumn({ clientId, bizName }: { clientId: string; bizName: string }
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
+            aria-label="Send message"
             className="px-4 py-2.5 bg-[#D4AF37] text-black font-bold rounded-xl text-sm hover:opacity-90 transition disabled:opacity-40"
           >
             →
@@ -392,6 +393,7 @@ function BookingColumn({ clientId, bizName }: { clientId: string; bizName: strin
                 <input
                   type="text"
                   required
+                  autoComplete="name"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="Full name"
@@ -402,6 +404,7 @@ function BookingColumn({ clientId, bizName }: { clientId: string; bizName: strin
                 <label className="text-xs text-gray-500 block mb-1">Phone <span className="text-gray-700">(opt)</span></label>
                 <input
                   type="tel"
+                  autoComplete="tel"
                   value={form.phone}
                   onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                   placeholder="+61 400 000 000"
@@ -415,6 +418,7 @@ function BookingColumn({ clientId, bizName }: { clientId: string; bizName: strin
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 placeholder="you@example.com"

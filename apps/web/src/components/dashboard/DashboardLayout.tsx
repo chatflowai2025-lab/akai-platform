@@ -388,7 +388,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
             <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
               placeholder={user?.email === 'mrakersten@gmail.com' ? 'Ask AK or feedback: ...' : 'Ask AK anything...'}
               className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition min-w-0" />
-            <button onClick={send} disabled={loading || !input.trim()}
+            <button onClick={send} disabled={loading || !input.trim()} aria-label="Send message"
               className="px-3 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex-shrink-0">→</button>
           </div>
         </div>
