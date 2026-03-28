@@ -16,6 +16,7 @@ const SUGGESTED_PROMPTS = [
   "Run a health check on my site",
   "Show my leads",
   "Connect my email",
+  "How does Sophie work?",
 ];
 
 interface ChatState {

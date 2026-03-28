@@ -201,6 +201,11 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   }
 
   // ── How to set up Sophie / Voice module ──────────────────────────────────
+  if (msg.includes('how does sophie work') || msg.includes('what is sophie') || msg.includes('who is sophie') ||
+      (msg.includes('sophie') && msg.includes('how') && msg.includes('work'))) {
+    return "Sophie is your AI sales agent — she makes outbound phone calls, qualifies leads, and books meetings while you sleep.\n\nHere's how it works:\n1. **Upload leads** — a CSV of names and numbers, or let AK research them for you\n2. **Set the script** — opening line, qualifying question, call to action (I can write it)\n3. **Set call hours** — default Mon–Fri 9am–5pm in your timezone\n4. **Go live** — Sophie starts calling and books qualified leads straight into your calendar\n\nShe runs 24/7, handles objections, and only escalates hot leads to you. Want to set her up?";
+  }
+
   if (msg.includes('how do i set up sophie') || msg.includes('set up sophie') || msg.includes('sophie setup') ||
       msg.includes('how to set up sophie') || msg.includes('configure sophie')) {
     return "Sophie setup is in the **Voice module** — here's the flow:\n\n1. **Script** — opening line, qualifying question, call to action (I can write it for you)\n2. **Call hours** — default Mon–Fri 9am–5pm, adjustable by timezone\n3. **Your number** — Sophie calls from a number assigned to your account\n4. **Test call** — Sophie calls you first so you can hear exactly what your leads will hear\n5. **Go live** — upload leads or point her at a target market\n\nWant me to write Sophie's opening script for your business?";

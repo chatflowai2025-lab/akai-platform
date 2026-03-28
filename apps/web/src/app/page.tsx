@@ -13,7 +13,7 @@ interface Msg { role: 'user' | 'assistant'; content: string; }
 
 const INITIAL: Msg = {
   role: 'assistant',
-  content: "Hey! I'm AK — your AI business partner. 👋\n\nTell me about your business and I'll show you exactly how AKAI can help — from finding leads to closing deals, all on autopilot.",
+  content: "Hey! I'm AK. What kind of business do you run?",
 };
 
 function HomepageChat({ defaultOpen = false, onOpenChange }: { defaultOpen?: boolean; onOpenChange?: (open: boolean) => void }) {

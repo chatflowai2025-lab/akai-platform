@@ -26,10 +26,11 @@ const INITIAL: ChatMessage = {
 };
 
 const SUGGESTED_PROMPTS = [
-  '📊 How are my leads performing?',
-  "✉️ Check my inbox for new enquiries",
-  "📅 What's on my calendar today?",
-  '🔍 Run a web audit on my site',
+  '❓ What should I do first?',
+  '🔍 Run a health check on my site',
+  '📊 Show my leads',
+  '✉️ Connect my email',
+  '🤖 How does Sophie work?',
 ];
 
 const CHAT_HISTORY_KEY = 'akai_chat_history';
@@ -318,7 +319,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     });
   }, [fetchMemory]);
 
-  const isOnlyInitialMessage = messages.length === 1 && messages[0]?.id === '1';
+  const isOnlyInitialMessage = messages.length === 1 && (messages[0]?.id === '1' || messages[0]?.id === 'welcome-1');
 
   return (
       <aside className="w-80 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col bg-[#080808] h-full overflow-hidden">

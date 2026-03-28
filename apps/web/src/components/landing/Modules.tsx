@@ -51,6 +51,34 @@ const MODULES: Module[] = [
     badge: 'Multi-platform',
     href: '/social',
   },
+  {
+    emoji: '🎙️',
+    name: 'Voice',
+    description: 'AI voice agent handles inbound calls',
+    badge: 'Natural conversation',
+    href: '/voice',
+  },
+  {
+    emoji: '🌐',
+    name: 'Web',
+    description: 'Audits your site and fixes what costs you leads',
+    badge: 'Conversion optimised',
+    href: '/web',
+  },
+  {
+    emoji: '📄',
+    name: 'Proposals',
+    description: 'Generates tailored proposals in seconds',
+    badge: 'Auto-personalised',
+    href: '/proposals',
+  },
+  {
+    emoji: '💊',
+    name: 'Health',
+    description: 'Monitors business vitals and flags issues early',
+    badge: 'Daily report',
+    href: '/health',
+  },
 ];
 
 function ModuleCard({ mod }: { mod: Module }) {
@@ -100,14 +128,14 @@ export default function Modules() {
         {/* Header */}
         <div className="text-center mb-14">
           <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">
-            Six AI modules · One platform
+            10 AI agents · One platform
           </p>
           <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
             Every business function.{' '}
             <span className="text-[#D4AF37]">Fully automated.</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
-            Each module runs independently or together — and every one learns from the others.
+            Each agent runs independently or together — and every one learns from the others.
           </p>
         </div>
 

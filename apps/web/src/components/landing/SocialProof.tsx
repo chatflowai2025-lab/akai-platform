@@ -85,7 +85,7 @@ export default function SocialProof() {
         {/* Stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/[0.06]">
           <div className="bg-[#0a0a0a] px-6 py-5 text-center">
-            <p className="text-3xl font-black text-[#D4AF37]">9</p>
+            <p className="text-3xl font-black text-[#D4AF37]">10</p>
             <p className="text-xs text-white/40 mt-1.5 leading-snug">AI agents working 24/7</p>
           </div>
           <div className="bg-[#0a0a0a] px-6 py-5 text-center">
