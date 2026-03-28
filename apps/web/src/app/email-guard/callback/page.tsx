@@ -17,12 +17,19 @@ function CallbackInner() {
     if (attempted.current) return;
 
     const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+
+    if (error) {
+      router.replace('/email-guard?error=' + encodeURIComponent(error));
+      return;
+    }
+
     if (!code) {
       router.replace('/email-guard?error=no_code');
       return;
     }
 
-    // Wait for Firebase auth to resolve (up to 5s)
     const auth = getFirebaseAuth();
     if (!auth) {
       router.replace('/login');
@@ -30,37 +37,64 @@ function CallbackInner() {
     }
 
     const timeout = setTimeout(() => {
-      // Auth timed out — redirect to login
       router.replace('/login');
     }, 5000);
 
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (!user) return; // Keep waiting
-      
+      if (!user) return;
+
       clearTimeout(timeout);
       unsub();
 
       if (attempted.current) return;
       attempted.current = true;
 
-      fetch(`${RAILWAY}/api/email/gmail/callback`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-        body: JSON.stringify({ 
-          code, 
-          userId: user.uid, 
-          redirectUri: 'https://getakai.ai/email-guard/callback' 
-        }),
-      })
-        .then(r => r.json())
-        .then(d => {
-          if (d.success || d.email) {
-            router.replace('/email-guard?connected=gmail&email=' + encodeURIComponent(d.email || 'connected'));
-          } else {
-            router.replace('/email-guard?error=' + encodeURIComponent(d.error || 'connection_failed'));
-          }
+      // Determine if this is a Microsoft callback (has state with our HMAC signature)
+      // or a Gmail callback (no state / different state format)
+      const isMicrosoft = state && state.includes('.');
+
+      if (isMicrosoft) {
+        // Microsoft OAuth callback
+        fetch(`${RAILWAY}/api/email/microsoft/callback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+          body: JSON.stringify({
+            code,
+            state,
+            userId: user.uid,
+            redirectUri: 'https://getakai.ai/email-guard/callback',
+          }),
         })
-        .catch(() => router.replace('/email-guard?error=connection_failed'));
+          .then(r => r.json())
+          .then(d => {
+            if (d.success || d.email) {
+              router.replace('/email-guard?connected=microsoft&email=' + encodeURIComponent(d.email || 'connected'));
+            } else {
+              router.replace('/email-guard?error=' + encodeURIComponent(d.detail || d.error || 'ms_connection_failed'));
+            }
+          })
+          .catch(() => router.replace('/email-guard?error=ms_connection_failed'));
+      } else {
+        // Gmail OAuth callback
+        fetch(`${RAILWAY}/api/email/gmail/callback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+          body: JSON.stringify({
+            code,
+            userId: user.uid,
+            redirectUri: 'https://getakai.ai/email-guard/callback',
+          }),
+        })
+          .then(r => r.json())
+          .then(d => {
+            if (d.success || d.email) {
+              router.replace('/email-guard?connected=gmail&email=' + encodeURIComponent(d.email || 'connected'));
+            } else {
+              router.replace('/email-guard?error=' + encodeURIComponent(d.error || 'gmail_connection_failed'));
+            }
+          })
+          .catch(() => router.replace('/email-guard?error=gmail_connection_failed'));
+      }
     });
 
     return () => {
@@ -72,12 +106,12 @@ function CallbackInner() {
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] flex flex-col items-center justify-center gap-4">
       <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-      <p className="text-white/60 text-sm">Connecting your Gmail…</p>
+      <p className="text-white/60 text-sm">Connecting your inbox…</p>
     </div>
   );
 }
 
-export default function GmailCallbackPage() {
+export default function EmailCallbackPage() {
   return (
     <Suspense fallback={
       <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center">

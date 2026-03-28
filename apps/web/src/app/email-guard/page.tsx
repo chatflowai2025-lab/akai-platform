@@ -315,6 +315,14 @@ function EmailGuardContent({
       triggerFirstPoll();
       return;
     }
+    if (initialConnectedParam === 'microsoft') {
+      setMsConnected(true);
+      setMsEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
+      router.replace('/email-guard');
+      safeSend(sendMessage, `My Microsoft inbox is now connected. What can you do with it and what should I do first?`);
+      triggerFirstPoll();
+      return;
+    }
     if (initialErrorParam) {
       setConnectError('Connection failed — please try again.');
       router.replace('/email-guard');
