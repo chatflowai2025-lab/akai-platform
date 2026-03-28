@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -231,11 +231,11 @@ function CalendarGrid({ year, month, events, selectedDate, onSelectDate, onAddEv
   }
   while (cells.length % 7 !== 0) cells.push(null);
 
-  const eventsByDate = events.reduce<Record<string, CalEvent[]>>((acc, e) => {
+  const eventsByDate = useMemo(() => events.reduce<Record<string, CalEvent[]>>((acc, e) => {
     if (!acc[e.date]) acc[e.date] = [];
     acc[e.date]!.push(e);
     return acc;
-  }, {});
+  }, {}), [events]);
 
   const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -350,7 +350,7 @@ function WeekView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (dat
 function DayView({ events, onAddEvent }: { events: CalEvent[]; onAddEvent: (date: string) => void }) {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0] ?? '';
-  const dayEvents = events.filter(e => e.date === todayStr);
+  const dayEvents = useMemo(() => events.filter(e => e.date === todayStr), [events, todayStr]);
 
   return (
     <div className="flex-1 overflow-auto p-6">
