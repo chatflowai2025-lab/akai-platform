@@ -567,6 +567,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
+    // Safety timeout — if APIs hang >10s, stop loading spinner
+    const timeout = setTimeout(() => {
+      if (!cancelled) setCommandLoading(false);
+    }, 10000);
     (async () => {
       setCommandLoading(true);
       try {
@@ -625,10 +629,11 @@ export default function DashboardPage() {
       } catch {
         // Non-fatal — leave defaults
       } finally {
+        clearTimeout(timeout);
         if (!cancelled) setCommandLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, [user]);
 
   const refreshFeed = () => {
