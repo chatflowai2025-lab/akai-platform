@@ -600,8 +600,10 @@ function CalendarContent({ user }: { user: { uid: string } }) {
             setCalProvider('google');
             return;
           }
-          // Check Microsoft calendar connected
-          if (d?.microsoftCalendarConnected || d?.inboxConnection?.provider === 'microsoft') {
+          // Check Microsoft calendar connected (check all possible indicators)
+          if (d?.microsoftCalendarConnected === true || 
+              d?.inboxConnection?.provider === 'microsoft' ||
+              d?.microsoftCalendarEmail) {
             setCalConnected(true);
             setCalProvider('outlook');
             return;
