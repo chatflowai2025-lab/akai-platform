@@ -161,7 +161,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
     <div className="fixed bottom-6 right-6 z-50 bg-[#1a1a1a] border border-[#D4AF37]/30 text-white text-sm px-4 py-3 rounded-xl shadow-xl flex items-center gap-3">
       <span>✅</span>
       <span>{message}</span>
-      <button onClick={onClose} className="text-gray-500 hover:text-white ml-2">✕</button>
+      <button onClick={onClose} aria-label="Dismiss" className="text-gray-500 hover:text-white ml-2">✕</button>
     </div>
   );
 }

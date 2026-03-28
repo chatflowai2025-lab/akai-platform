@@ -54,7 +54,7 @@ export default function Sidebar() {
           <button
             className="md:hidden text-gray-400 hover:text-white p-1"
             onClick={() => setMobileOpen(false)}
-          >✕</button>
+          aria-label="Close menu">✕</button>
         </Link>
       </div>
 

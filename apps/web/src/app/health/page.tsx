@@ -29,11 +29,11 @@ interface DiagnosticResult {
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 const MOCK_ACTIVITY: ActivityItem[] = [
-  { icon: '✉️', text: 'Email proposal sent — john.smith@gmail.com', time: '2 min ago' },
-  { icon: '📞', text: 'Sophie call triggered — +61 412 xxx xxx', time: '15 min ago' },
-  { icon: '🔍', text: 'Web audit completed — apheritageinterior.com.au', time: '1h ago' },
-  { icon: '📧', text: 'Gmail connected — chatflowai2025@gmail.com', time: '3h ago' },
-  { icon: '🚀', text: 'Campaign submitted — AP Heritage Kitchens', time: 'yesterday' },
+  { icon: '✉️', text: 'Email proposal sent to a new enquiry', time: '2 min ago' },
+  { icon: '📞', text: 'Sophie outbound call triggered', time: '15 min ago' },
+  { icon: '🔍', text: 'Web audit completed', time: '1h ago' },
+  { icon: '📧', text: 'Gmail inbox connected', time: '3h ago' },
+  { icon: '🚀', text: 'Outbound campaign submitted', time: 'yesterday' },
 ];
 
 // ── Sub-components ───────────────────────────────────────────────────────────
