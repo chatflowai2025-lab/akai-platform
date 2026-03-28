@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { isSafeMode } from '@/lib/beta-config';
+import { getFirebaseDb, getFirebaseAuth } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
 function safeSend(sendMessage: (t: string) => void, text: string) {
@@ -266,6 +268,7 @@ function EmailGuardContent({
   const [gmailHasSendScope, setGmailHasSendScope] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [ctaAction, setCtaAction] = useState<string>('book_time');
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [polling, setPolling] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -347,8 +350,28 @@ function EmailGuardContent({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Save ctaAction to Firestore whenever it changes (skip initial mount)
+  const ctaActionRef = useCallback(async (action: string) => {
+    const db = getFirebaseDb();
+    if (!db) return;
+    await setDoc(doc(db, 'users', user.uid), {
+      emailSettings: { ctaAction: action },
+    }, { merge: true });
+  }, [user.uid]);
+
   // Check connection status + load enquiries on mount
   useEffect(() => {
+    // Load ctaAction from Firestore
+    const db = getFirebaseDb();
+    if (db) {
+      getDoc(doc(db, 'users', user.uid)).then(snap => {
+        const data = snap.data();
+        if (data?.emailSettings?.ctaAction) {
+          setCtaAction(data.emailSettings.ctaAction);
+        }
+      }).catch(() => {});
+    }
+
     fetch(`${RAILWAY}/api/email/microsoft/status?userId=${user.uid}`, { headers: { 'x-api-key': API_KEY } })
       .then(r => r.json())
       .then(d => { if (d.connected) { setMsConnected(true); setMsEmail(d.email || null); } })
@@ -588,6 +611,39 @@ function EmailGuardContent({
           )}
           <p className="text-xs text-gray-600 px-1">Connect Gmail to read enquiries and send proposals — you control what gets sent.</p>
         </div>
+
+        {/* ── CTA Action Selector (shown when connected) ──────────────── */}
+        {isConnected && (
+          <section>
+            <h2 className="text-sm font-bold text-white mb-1">When a lead replies, what happens?</h2>
+            <p className="text-xs text-gray-500 mb-4">Choose the action included in your proposal email.</p>
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                { id: 'akai_chat',     emoji: '💬', label: 'AKAI Chat',       desc: 'AI qualifies & nurtures them instantly' },
+                { id: 'book_time',     emoji: '📅', label: 'Book a time',      desc: 'Show my calendar — they pick a slot' },
+                { id: 'sophie_call',   emoji: '📞', label: 'Sophie calls them', desc: 'Instant AI voice outreach' },
+                { id: 'connect_human', emoji: '🙋', label: 'Connect me',       desc: 'Route straight to you or your team' },
+              ] as const).map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    setCtaAction(opt.id);
+                    ctaActionRef(opt.id);
+                  }}
+                  className={`rounded-xl p-4 cursor-pointer transition text-left ${
+                    ctaAction === opt.id
+                      ? 'border border-[#D4AF37] bg-[#D4AF37]/5'
+                      : 'bg-[#111] border border-[#1f1f1f]'
+                  }`}
+                >
+                  <div className="text-xl mb-1">{opt.emoji}</div>
+                  <p className="text-sm font-semibold text-white">{opt.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── Pre-connect preview (shown only when not connected, not connecting) ── */}
         {!isConnected && !connecting && (
