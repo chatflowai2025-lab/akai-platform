@@ -322,7 +322,7 @@ function DealRoomContent({ enquiryId, user }: { enquiryId: string; user: { uid: 
                       <div className="flex-1 min-w-0 pt-1">
                         <div className="flex items-baseline justify-between gap-2">
                           <p className="text-sm font-semibold text-white">{item.title}</p>
-                          <span className="text-[11px] text-gray-600 flex-shrink-0">{item.time}</span>
+                          <span suppressHydrationWarning className="text-[11px] text-gray-600 flex-shrink-0">{item.time}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.description}</p>
                       </div>
