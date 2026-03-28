@@ -16,7 +16,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">1. Agreement</h2>
-            <p>By accessing or using the AKAI platform (&quot;Service&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). AKAI is operated by AI Clozr (ABN 50 179 250 215), Sydney, New South Wales, Australia (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;). If you are using AKAI on behalf of a business, you represent that you have authority to bind that business to these Terms.</p>
+            <p>By accessing or using the AKAI platform (&quot;Service&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). AKAI is operated by AKAI (ABN 50 179 250 215), Sydney, New South Wales, Australia (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;). If you are using AKAI on behalf of a business, you represent that you have authority to bind that business to these Terms.</p>
           </section>
 
           <section>
@@ -157,7 +157,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">10. Limitation of Liability</h2>
-            <p>To the maximum extent permitted by law, AKAI and AI Clozr shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, revenue, data, or business opportunities, arising from your use of the Service.</p>
+            <p>To the maximum extent permitted by law, AKAI and AKAI shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, revenue, data, or business opportunities, arising from your use of the Service.</p>
             <p className="mt-2">In particular, we are not liable for:</p>
             <ul className="list-disc list-inside space-y-2 mt-2">
               <li>Decisions made by or actions taken based on AI-generated content, recommendations, or autonomous actions taken by the platform</li>
@@ -178,7 +178,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">12. Indemnification</h2>
-            <p>You agree to indemnify and hold harmless AKAI and AI Clozr from any claims, damages, losses, or costs (including legal fees) arising from: your use of the Service, your violation of these Terms, your violation of any third party&apos;s rights (including your leads&apos; privacy rights), or your breach of any applicable law including spam, privacy, or consumer protection legislation.</p>
+            <p>You agree to indemnify and hold harmless AKAI and AKAI from any claims, damages, losses, or costs (including legal fees) arising from: your use of the Service, your violation of these Terms, your violation of any third party&apos;s rights (including your leads&apos; privacy rights), or your breach of any applicable law including spam, privacy, or consumer protection legislation.</p>
           </section>
 
           <section>
@@ -199,7 +199,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">16. Contact</h2>
-            <p>Questions about these Terms? Contact us at <a href="mailto:hello@getakai.ai" className="text-[#D4AF37] hover:underline">hello@getakai.ai</a> or write to AI Clozr (ABN 50 179 250 215), Sydney NSW Australia.</p>
+            <p>Questions about these Terms? Contact us at <a href="mailto:hello@getakai.ai" className="text-[#D4AF37] hover:underline">hello@getakai.ai</a> or write to AKAI (ABN 50 179 250 215), Sydney NSW Australia.</p>
           </section>
 
         </div>

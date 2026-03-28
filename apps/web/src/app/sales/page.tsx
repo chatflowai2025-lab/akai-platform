@@ -1409,7 +1409,7 @@ export default function SalesPage() {
             )}
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Leads this month" value={stats.totalLeadsThisMonth} icon="🎯" sublabel="from AI Clozr" />
+            <StatCard label="Leads this month" value={stats.totalLeadsThisMonth} icon="🎯" sublabel="from AKAI" />
             <StatCard label="Active campaigns" value={stats.activeCampaigns} icon="🚀" sublabel="running now" />
             <StatCard label="Calls this week" value={stats.callsMadeThisWeek} icon="📞" sublabel="by Sophie AI" />
             <StatCard label="Meetings booked" value={stats.meetingsBooked} icon="📅" sublabel="total pipeline" />

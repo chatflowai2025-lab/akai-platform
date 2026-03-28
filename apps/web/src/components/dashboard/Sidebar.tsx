@@ -20,6 +20,7 @@ const MODULES = [
   { id: 'ads', icon: '📣', label: 'Ads', status: 'live', href: '/ads', external: false },
   { id: 'social', icon: '📱', label: 'Social', status: 'live', href: '/social', external: false },
   { id: 'health', icon: '🩺', label: 'Health', status: 'live', href: '/health', external: false },
+  { id: 'code-shield', icon: '🛡️', label: 'Code Shield', status: 'live', href: '/dashboard/code-shield', external: false },
 ];
 
 export default function Sidebar() {

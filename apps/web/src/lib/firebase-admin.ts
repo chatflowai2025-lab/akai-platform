@@ -45,12 +45,23 @@ function getAdminApp(): App | null {
   return null;
 }
 
+/**
+ * Returns the Admin Firestore instance pointing at the named 'akai' database.
+ * This matches the client-side getFirebaseDb() which uses initializeFirestore(app, {}, 'akai').
+ * Falls back to default database if named database is unavailable.
+ */
 export function getAdminFirestore(): Firestore | null {
   const app = getAdminApp();
   if (!app) return null;
   try {
-    return getFirestore(app);
+    // Use the named 'akai' database — must match client-side firebase.ts
+    return getFirestore(app, 'akai');
   } catch {
-    return null;
+    try {
+      // Fallback to default database if named database call fails
+      return getFirestore(app);
+    } catch {
+      return null;
+    }
   }
 }

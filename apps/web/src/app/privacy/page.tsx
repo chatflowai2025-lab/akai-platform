@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">1. Who We Are</h2>
-            <p>AKAI is an AI-powered business automation platform operated by <strong className="text-white">AI Clozr (ABN 50 179 250 215)</strong>, based in Sydney, New South Wales, Australia.</p>
+            <p>AKAI is an AI-powered business automation platform operated by <strong className="text-white">AKAI (ABN 50 179 250 215)</strong>, based in Sydney, New South Wales, Australia.</p>
             <p className="mt-2">We are bound by the <em>Privacy Act 1988</em> (Cth) and the Australian Privacy Principles (APPs) contained in that Act. This Privacy Policy explains how we collect, use, store, and disclose personal information in accordance with those obligations.</p>
             <p className="mt-2">Contact: <a href="mailto:hello@getakai.ai" className="text-[#D4AF37] hover:underline">hello@getakai.ai</a></p>
           </section>
@@ -136,7 +136,7 @@ export default function PrivacyPage() {
               <li>Honouring any access, correction, or deletion requests made by your leads regarding their personal information</li>
               <li>Promptly informing us of any opt-out requests that require us to cease processing a lead&apos;s data</li>
             </ul>
-            <p className="mt-3">AI Clozr acts as a <strong className="text-white">data processor</strong> for lead data — we process it on your instructions. We do not use your leads&apos; personal information for any purpose other than providing the Service to you.</p>
+            <p className="mt-3">AKAI acts as a <strong className="text-white">data processor</strong> for lead data — we process it on your instructions. We do not use your leads&apos; personal information for any purpose other than providing the Service to you.</p>
             <p className="mt-2">Leads who wish to have their information removed from our systems should contact the business (AKAI account holder) that collected their enquiry. Businesses may also contact us at <a href="mailto:hello@getakai.ai" className="text-[#D4AF37] hover:underline">hello@getakai.ai</a> to request deletion of specific lead records.</p>
           </section>
 
@@ -189,7 +189,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold text-white mb-3">14. Contact & Complaints</h2>
             <p>For privacy enquiries, requests, or complaints, contact our Privacy Officer:</p>
             <p className="mt-2">
-              <strong className="text-white">AI Clozr (ABN 50 179 250 215)</strong><br />
+              <strong className="text-white">AKAI (ABN 50 179 250 215)</strong><br />
               Sydney, New South Wales, Australia<br />
               <a href="mailto:hello@getakai.ai" className="text-[#D4AF37] hover:underline">hello@getakai.ai</a>
             </p>
