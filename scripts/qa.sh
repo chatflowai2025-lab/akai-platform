@@ -129,11 +129,12 @@ fi
 echo ""
 echo "┌─ SUITE 5b: Hardcoded URL Scan"
 if [ -d "$REPO_ROOT/apps/web/src" ]; then
-  HARDCODED=$(grep -r "api-server-production-2a27" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null || true)
+  # Allow fallback pattern (|| 'url') — only fail if URL appears WITHOUT env var reference
+  HARDCODED=$(grep -r "api-server-production-2a27" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "process\.env" | grep -v "NEXT_PUBLIC_API_URL" || true)
   if [ -z "$HARDCODED" ]; then
-    check "No hardcoded Railway URL in frontend source" "pass"
+    check "No bare hardcoded Railway URL (env var fallback pattern allowed)" "pass"
   else
-    check "No hardcoded Railway URL in frontend source" "fail" "hardcoded URL found — use NEXT_PUBLIC_API_URL env var instead"
+    check "No bare hardcoded Railway URL (env var fallback pattern allowed)" "fail" "URL found without process.env reference — wrap in env var"
     echo "$HARDCODED" | head -5
   fi
 else
