@@ -35,6 +35,7 @@ async function notifyEmail(params: {
       },
       body: JSON.stringify({
         from: 'AKAI <onboarding@resend.dev>',
+        reply_to: 'chatflowai2025@gmail.com',
         to: [LEAD_NOTIFY_EMAIL, OWNER_NOTIFY_EMAIL],
         subject: `🔥 New Trial Request — ${name || email}`,
         html: `

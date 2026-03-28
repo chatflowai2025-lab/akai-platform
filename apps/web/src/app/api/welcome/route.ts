@@ -17,6 +17,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     },
     body: JSON.stringify({
       from: 'Aaron at AKAI <onboarding@resend.dev>',
+      reply_to: 'AK at AKAI <chatflowai2025@gmail.com>',
       to,
       subject,
       html,
@@ -119,15 +120,15 @@ function buildWelcomeEmail(name: string, email: string): string {
         <p style="margin:0 0 10px;font-size:13px;color:#78350f;line-height:1.6;">
           As an early tester, what you find and report directly changes what gets built next. Two ways to give feedback:
         </p>
-        <p style="margin:0 0 6px;font-size:13px;color:#78350f;"><strong>1. Reply to this email</strong> — Aaron reads every reply personally.</p>
-        <p style="margin:0;font-size:13px;color:#78350f;"><strong>2. Tell AK in the dashboard</strong> — type your feedback in the chat, AK logs and routes it instantly.</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#78350f;"><strong>1. Reply to this email</strong> — AK picks it up and responds. Anything needing Aaron gets escalated to him directly.</p>
+        <p style="margin:0;font-size:13px;color:#78350f;"><strong>2. Tell AK in the dashboard</strong> — type your feedback in the chat, AK responds instantly and logs it for review.</p>
       </div>
 
       <!-- Report issues -->
       <div style="background:#f8f8f8;border-radius:6px;padding:16px 20px;margin:0 0 32px;">
         <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#111;">Found something that's not right?</p>
         <p style="margin:0;font-size:13px;color:#555;line-height:1.6;">
-          Reply to this email with what happened and what you expected. Screenshots or descriptions both work. Aaron will look at it personally and you'll hear back within hours.
+          Reply to this email with what happened and what you expected. AK picks up all replies and responds — anything serious gets escalated to Aaron directly. You'll hear back fast.
         </p>
       </div>
 
@@ -149,7 +150,7 @@ function buildWelcomeEmail(name: string, email: string): string {
         Founder, AKAI
       </p>
       <p style="font-size:12px;color:#999;margin:0;">
-        <a href="https://getakai.ai" style="color:#999;text-decoration:none;">getakai.ai</a> · Reply to this email anytime
+        <a href="https://getakai.ai" style="color:#999;text-decoration:none;">getakai.ai</a> · Reply anytime — AK responds 24/7
       </p>
     </div>
 

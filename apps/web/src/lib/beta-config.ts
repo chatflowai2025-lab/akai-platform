@@ -7,7 +7,7 @@ export const BETA_CONTACT_EMAIL = process.env.NEXT_PUBLIC_BETA_CONTACT_EMAIL ?? 
 export const BETA_WHITELIST: Record<string, { name: string; safeMode: boolean }> = {
   'mrakersten@gmail.com': { name: 'Aaron', safeMode: true },
   'pagliariccimarco@gmail.com': { name: 'Marco', safeMode: false },
-  'info@apheritageinterior.com.au': { name: 'Anna', safeMode: false },
+  'info@apheritageinterior.com.au': { name: 'AP Heritage', safeMode: false },
   'danielle.avissar@gmail.com': { name: 'Danielle', safeMode: false },
   'henrik.mortensen@live.com.au': { name: 'Henrik', safeMode: true },
   'jilljjqb@gmail.com': { name: 'Jill', safeMode: true },
