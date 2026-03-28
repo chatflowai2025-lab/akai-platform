@@ -16,6 +16,18 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          // Allow Firebase OAuth popups to communicate back
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'unsafe-none' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
