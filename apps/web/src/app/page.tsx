@@ -447,7 +447,7 @@ function AKAIFooter() {
     <footer className="border-t border-[#1f1f1f] py-8 px-6">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-gray-600 text-sm text-center sm:text-left">
-          © 2026 AKAI · <a href="https://getakai.ai" className="text-[#D4AF37] hover:underline">getakai.ai</a> · Built in Sydney 🇦🇺 · AI that works while you don&apos;t
+          © 2026 AK<span className="text-[#D4AF37]">AI</span> · <a href="https://getakai.ai" className="text-[#D4AF37] hover:underline">getakai.ai</a> · Built in Sydney 🇦🇺 · 25 years of enterprise tech, distilled into one prompt.
         </p>
         <div className="flex gap-6">
           <a href="/login" className="text-gray-500 hover:text-white text-sm transition-colors">Sign in</a>
