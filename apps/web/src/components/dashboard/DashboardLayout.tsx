@@ -413,7 +413,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
                     onClick={() => { sendRaw(turn.userMessage); setShowMemory(false); }}
                     className="w-full text-left px-3 py-2 hover:bg-[#1a1a1a] transition group"
                   >
-                    <div className="text-[10px] text-gray-600 mb-0.5">{new Date(turn.timestamp).toLocaleString('en-AU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                    <div suppressHydrationWarning className="text-[10px] text-gray-600 mb-0.5">{new Date(turn.timestamp).toLocaleString('en-AU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                     <div className="text-xs text-gray-300 truncate group-hover:text-white">You: {turn.userMessage?.slice(0, 80)}</div>
                     <div className="text-xs text-gray-600 truncate mt-0.5">AK: {turn.akResponse?.slice(0, 80)}</div>
                   </button>
