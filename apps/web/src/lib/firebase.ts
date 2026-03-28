@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -37,7 +37,14 @@ export function getFirebaseAuth(): Auth | null {
  */
 export function getFirebaseDb(): Firestore | null {
   const app = getFirebaseApp();
-  return app ? getFirestore(app) : null;
+  if (!app) return null;
+  try {
+    // Use the named 'akai' database where all data lives
+    return initializeFirestore(app, {}, 'akai');
+  } catch {
+    // Already initialized — get existing instance
+    return getFirestore(app, 'akai');
+  }
 }
 
 // Legacy named exports for backwards compat.
