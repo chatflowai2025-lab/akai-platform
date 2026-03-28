@@ -1,7 +1,7 @@
 // AKAI Beta Access Control
 // safeMode = full platform experience, no live calls or external emails sent
 
-export const BETA_MODE = true;
+export const BETA_MODE = false;
 export const BETA_CONTACT_EMAIL = process.env.NEXT_PUBLIC_BETA_CONTACT_EMAIL ?? 'hello@getakai.ai';
 
 export const BETA_WHITELIST: Record<string, { name: string; safeMode: boolean }> = {
