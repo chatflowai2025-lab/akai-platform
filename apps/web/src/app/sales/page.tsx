@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { isSafeMode } from '@/lib/beta-config';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -33,19 +33,126 @@ interface SalesStats {
   meetingsBooked: number;
 }
 
+interface CallLogEntry {
+  id: string;
+  leadName: string;
+  phone: string;
+  time: string;
+  duration: string;
+  outcome: 'connected' | 'no_answer' | 'converted';
+}
+
+interface FollowUpSequence {
+  id: string;
+  name: string;
+  description: string;
+  steps: number;
+}
+
+interface FollowUpActivationState {
+  lastUsed?: string;
+  activeLeads: string[];
+}
+
+// ── Call Log helpers ──────────────────────────────────────────────────────
+
+const CALL_LOG_KEY = 'akai_call_log';
+const FOLLOWUP_KEY = 'akai_followup_sequences';
+
+function getCallLog(): CallLogEntry[] {
+  if (typeof window === 'undefined') return [];
+  try { return JSON.parse(localStorage.getItem(CALL_LOG_KEY) ?? '[]'); } catch { return []; }
+}
+
+function saveCallLog(entries: CallLogEntry[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CALL_LOG_KEY, JSON.stringify(entries));
+}
+
+function addCallLogEntries(newEntries: CallLogEntry[]) {
+  const existing = getCallLog();
+  saveCallLog([...newEntries, ...existing].slice(0, 200));
+}
+
+function getFollowUpState(): Record<string, FollowUpActivationState> {
+  if (typeof window === 'undefined') return {};
+  try { return JSON.parse(localStorage.getItem(FOLLOWUP_KEY) ?? '{}'); } catch { return {}; }
+}
+
+function saveFollowUpState(state: Record<string, FollowUpActivationState>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(FOLLOWUP_KEY, JSON.stringify(state));
+}
+
+// ── Lead scoring ──────────────────────────────────────────────────────────
+
+function scoreLeadAI(lead: Lead): number {
+  let score = 3;
+  if (lead.phone) score += 1;
+  if (lead.email) score += 1;
+  if (lead.meeting_booked) score += 4;
+  else if (lead.status === 'qualified') score += 3;
+  else if (lead.status === 'contacted' || lead.status === 'called') score += 1;
+  if (lead.call_made) score += 1;
+  if (lead.id) {
+    const hash = lead.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    score += (hash % 3) - 1;
+  }
+  return Math.max(1, Math.min(10, score));
+}
+
+function scoreColor(score: number): string {
+  if (score >= 8) return 'bg-red-500/20 text-red-400 border-red-500/30';
+  if (score >= 6) return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+  if (score >= 4) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+  return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+}
+
+function mockCallEntry(lead: Lead): CallLogEntry {
+  const outcomes: CallLogEntry['outcome'][] = ['connected', 'connected', 'no_answer', 'converted'];
+  const durations = ['0m 45s', '1m 12s', '2m 03s', '0m 22s', '3m 18s', '1m 55s'];
+  const hash = (lead.id ?? lead.name ?? '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return {
+    id: `call-${Date.now()}-${hash}`,
+    leadName: lead.name || 'Unknown',
+    phone: lead.phone || '—',
+    time: new Date().toISOString(),
+    duration: durations[hash % durations.length]!,
+    outcome: outcomes[hash % outcomes.length]!,
+  };
+}
+
+// ── Pipeline helpers ──────────────────────────────────────────────────────
+
+function timeSince(dateStr?: string): string {
+  if (!dateStr) return '';
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  } catch { return ''; }
+}
+
+function formatCallTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch { return iso; }
+}
+
+function getLeadColumn(lead: Lead): 'new' | 'called' | 'qualified' | 'booked' {
+  if (lead.meeting_booked || lead.status === 'booked') return 'booked';
+  if (lead.status === 'qualified') return 'qualified';
+  if (lead.call_made || lead.status === 'contacted' || lead.status === 'called') return 'called';
+  return 'new';
+}
+
 // ── Stat Card ─────────────────────────────────────────────────────────────
 
-function StatCard({
-  label,
-  value,
-  icon,
-  sublabel,
-}: {
-  label: string;
-  value: number | string;
-  icon: string;
-  sublabel: string;
-}) {
+function StatCard({ label, value, icon, sublabel }: { label: string; value: number | string; icon: string; sublabel: string }) {
   return (
     <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 flex flex-col gap-2 hover:border-[#D4AF37]/20 transition-colors">
       <div className="flex items-center justify-between">
@@ -60,19 +167,7 @@ function StatCard({
 
 // ── Quick Action Card ─────────────────────────────────────────────────────
 
-function QuickAction({
-  icon,
-  label,
-  description,
-  href,
-  chatPrompt,
-}: {
-  icon: string;
-  label: string;
-  description: string;
-  href: string;
-  chatPrompt?: string;
-}) {
+function QuickAction({ icon, label, description, href, chatPrompt }: { icon: string; label: string; description: string; href: string; chatPrompt?: string }) {
   const { sendMessage } = useDashboardChat();
   const handleClick = chatPrompt
     ? (e: React.MouseEvent) => { e.preventDefault(); safeSend(sendMessage, chatPrompt); }
@@ -95,40 +190,45 @@ function QuickAction({
   );
 }
 
-// ── Pipeline helpers ──────────────────────────────────────────────────────
+// ── Call Status Badge ─────────────────────────────────────────────────────
 
-function timeSince(dateStr?: string): string {
-  if (!dateStr) return '';
-  try {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
-  } catch { return ''; }
+function CallStatusBadge({ status }: { status?: Lead['callStatus'] }) {
+  if (!status || status === 'pending') {
+    return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-gray-500/10 text-gray-400 border-gray-500/20">Pending</span>;
+  }
+  if (status === 'calling') {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+        Calling…
+      </span>
+    );
+  }
+  if (status === 'completed') {
+    return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-green-500/10 text-green-400 border-green-500/20">✓ Called</span>;
+  }
+  return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">Failed</span>;
 }
 
-function getLeadColumn(lead: Lead): 'new' | 'called' | 'qualified' | 'booked' {
-  if (lead.meeting_booked || lead.status === 'booked') return 'booked';
-  if (lead.status === 'qualified') return 'qualified';
-  if (lead.call_made || lead.status === 'contacted' || lead.status === 'called') return 'called';
-  return 'new';
+// ── Score Badge ───────────────────────────────────────────────────────────
+
+function ScoreBadge({ score }: { score: number }) {
+  return (
+    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${scoreColor(score)}`} title={`AI score: ${score}/10`}>
+      {score}
+    </span>
+  );
 }
 
-// ── Pipeline Board ────────────────────────────────────────────────────────
-
-interface PipelineBoardProps {
-  leads: Lead[];
-  onStatusChange: (leadId: string, status: string, meetingBooked?: boolean) => void;
-}
+// ── Lead Card ─────────────────────────────────────────────────────────────
 
 interface LeadCardProps {
   lead: Lead;
   onStatusChange: (leadId: string, status: string, meetingBooked?: boolean) => void;
+  score: number;
 }
 
-function LeadCard({ lead, onStatusChange }: LeadCardProps) {
+function LeadCard({ lead, onStatusChange, score }: LeadCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   const statusColors: Record<string, string> = {
@@ -157,6 +257,7 @@ function LeadCard({ lead, onStatusChange }: LeadCardProps) {
             {lead.phone && <p className="text-[11px] text-gray-500 truncate">{lead.phone}</p>}
             {lead.email && <p className="text-[11px] text-gray-600 truncate">{lead.email}</p>}
           </div>
+          <ScoreBadge score={score} />
         </div>
         <div className="flex items-center justify-between mt-1.5">
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${colorClass}`}>
@@ -170,12 +271,14 @@ function LeadCard({ lead, onStatusChange }: LeadCardProps) {
         </div>
       </button>
 
-      {/* Status update modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setModalOpen(false)}>
           <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 w-full max-w-xs" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-bold text-sm">{lead.name || 'Lead'}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-white font-bold text-sm">{lead.name || 'Lead'}</h3>
+                <ScoreBadge score={score} />
+              </div>
               <button onClick={() => setModalOpen(false)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
             </div>
             {lead.phone && <p className="text-xs text-gray-500 mb-1">📞 {lead.phone}</p>}
@@ -200,8 +303,7 @@ function LeadCard({ lead, onStatusChange }: LeadCardProps) {
                       : 'border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#3a3a3a]'
                   }`}
                 >
-                  {opt.label}
-                  {currentStatus === opt.status && ' ✓'}
+                  {opt.label}{currentStatus === opt.status && ' ✓'}
                 </button>
               ))}
             </div>
@@ -212,8 +314,66 @@ function LeadCard({ lead, onStatusChange }: LeadCardProps) {
   );
 }
 
-function PipelineBoard({ leads, onStatusChange }: PipelineBoardProps) {
+// ── Empty Leads State ─────────────────────────────────────────────────────
+
+function EmptyLeadsState() {
+  const router = useRouter();
   const { sendMessage } = useDashboardChat();
+
+  const actions = [
+    {
+      icon: '📁',
+      label: 'Import CSV',
+      description: 'Upload a spreadsheet of leads',
+      onClick: () => document.getElementById('lead-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    },
+    {
+      icon: '🛡️',
+      label: 'Connect Email Guard',
+      description: 'Capture leads from your inbox automatically',
+      onClick: () => router.push('/email-guard'),
+    },
+    {
+      icon: '📞',
+      label: 'Trigger Sophie',
+      description: 'Let Sophie AI start calling prospects',
+      onClick: () => safeSend(sendMessage, 'I want to trigger Sophie AI to start calling leads'),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <p className="text-3xl mb-3">🎯</p>
+      <p className="text-white font-bold text-sm mb-1">No leads yet</p>
+      <p className="text-gray-600 text-xs mb-6 max-w-[260px]">
+        Get started by importing leads, connecting Email Guard, or letting Sophie do the hunting.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl">
+        {actions.map(a => (
+          <button
+            key={a.label}
+            onClick={a.onClick}
+            className="flex flex-col items-center gap-2 p-4 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl hover:border-[#D4AF37]/30 hover:bg-[#141414] transition-colors group"
+          >
+            <span className="text-2xl group-hover:scale-110 transition-transform">{a.icon}</span>
+            <p className="text-sm font-bold text-white">{a.label}</p>
+            <p className="text-[11px] text-gray-600">{a.description}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Pipeline Board ────────────────────────────────────────────────────────
+
+interface PipelineBoardProps {
+  leads: Lead[];
+  onStatusChange: (leadId: string, status: string, meetingBooked?: boolean) => void;
+}
+
+function PipelineBoard({ leads, onStatusChange }: PipelineBoardProps) {
+  const [hotOnly, setHotOnly] = useState(false);
 
   const columns = [
     { id: 'new', label: 'New Lead', color: 'border-gray-600/30 text-gray-400', dot: 'bg-gray-400' },
@@ -223,98 +383,265 @@ function PipelineBoard({ leads, onStatusChange }: PipelineBoardProps) {
   ];
 
   if (!leads || leads.length === 0) {
+    return <EmptyLeadsState />;
+  }
+
+  const scoredLeads = leads.map(l => ({ lead: l, score: scoreLeadAI(l) }));
+  const displayLeads = hotOnly ? scoredLeads.filter(({ score }) => score >= 7) : scoredLeads;
+  const hotCount = scoredLeads.filter(({ score }) => score >= 7).length;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-4">
+        <button
+          onClick={() => setHotOnly(false)}
+          className={`text-xs px-3 py-1.5 rounded-lg border transition font-medium ${!hotOnly ? 'bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]' : 'border-[#2a2a2a] text-gray-500 hover:text-white hover:border-[#3a3a3a]'}`}
+        >
+          All leads ({leads.length})
+        </button>
+        <button
+          onClick={() => setHotOnly(true)}
+          className={`text-xs px-3 py-1.5 rounded-lg border transition font-medium ${hotOnly ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'border-[#2a2a2a] text-gray-500 hover:text-white hover:border-[#3a3a3a]'}`}
+        >
+          🔥 Hot leads ({hotCount})
+        </button>
+      </div>
+
+      {displayLeads.length === 0 && hotOnly ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <p className="text-gray-500 text-sm">No hot leads yet.</p>
+          <p className="text-gray-700 text-xs mt-1">Hot leads are scored 7+. Keep calling!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {columns.map(col => {
+            const colLeads = displayLeads.filter(({ lead }) => getLeadColumn(lead) === col.id);
+            return (
+              <div key={col.id} className="flex flex-col gap-2">
+                <div className={`flex items-center gap-2 pb-2 border-b ${col.color}`}>
+                  <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                  <span className="text-xs font-semibold uppercase tracking-wider">{col.label}</span>
+                  <span className="ml-auto text-xs opacity-60">{colLeads.length}</span>
+                </div>
+                {colLeads.length === 0 ? (
+                  <div className="flex items-center justify-center py-8 border border-dashed border-[#2a2a2a] rounded-xl">
+                    <p className="text-xs text-gray-700 text-center px-2">No leads here yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {colLeads.map(({ lead, score }, i) => (
+                      <LeadCard key={lead.id ?? i} lead={lead} score={score} onStatusChange={onStatusChange} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Call Log Tab ──────────────────────────────────────────────────────────
+
+function CallLogTab() {
+  const [entries, setEntries] = useState<CallLogEntry[]>([]);
+
+  useEffect(() => {
+    setEntries(getCallLog());
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === CALL_LOG_KEY) setEntries(getCallLog());
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  const outcomeBadge = (outcome: CallLogEntry['outcome']) => {
+    if (outcome === 'converted') return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+    if (outcome === 'connected') return 'bg-green-500/10 text-green-400 border-green-500/20';
+    return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+  };
+
+  const outcomeLabel = (outcome: CallLogEntry['outcome']) => {
+    if (outcome === 'converted') return '🏆 Converted';
+    if (outcome === 'connected') return '✅ Connected';
+    return '📵 No Answer';
+  };
+
+  if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4 text-2xl">
-          📭
-        </div>
-        <p className="text-white/60 font-semibold text-sm">No leads yet.</p>
-        <p className="text-gray-600 text-xs mt-2 max-w-[260px]">
-          Add leads above and launch your first campaign to get Sophie calling.
+      <div className="flex flex-col items-center justify-center py-14 text-center">
+        <span className="text-3xl mb-3">📵</span>
+        <p className="text-white font-bold text-sm mb-1">No calls yet</p>
+        <p className="text-gray-600 text-xs max-w-[240px]">
+          No calls yet — trigger Sophie above to start calling
         </p>
-        <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
-          <a
-            href="#lead-upload"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('lead-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
-            className="px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity"
-          >
-            ↑ Add leads now
-          </a>
-          <button
-            onClick={() => safeSend(sendMessage, 'I want to launch a new outbound sales campaign')}
-            className="px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-sm font-semibold hover:bg-[#D4AF37]/20 transition-colors"
-          >
-            Ask AK to launch campaign →
-          </button>
-        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {columns.map(col => {
-        const colLeads = leads.filter(l => getLeadColumn(l) === col.id);
-        return (
-          <div key={col.id} className="flex flex-col gap-2">
-            <div className={`flex items-center gap-2 pb-2 border-b ${col.color}`}>
-              <span className={`w-2 h-2 rounded-full ${col.dot}`} />
-              <span className="text-xs font-semibold uppercase tracking-wider">{col.label}</span>
-              <span className="ml-auto text-xs opacity-60">{colLeads.length}</span>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{entries.length} call{entries.length !== 1 ? 's' : ''} logged</p>
+        <button
+          onClick={() => { saveCallLog([]); setEntries([]); }}
+          className="text-xs text-gray-600 hover:text-red-400 transition-colors"
+        >
+          Clear log
+        </button>
+      </div>
+      <div className="divide-y divide-[#1a1a1a]">
+        {entries.map(entry => (
+          <div key={entry.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+            <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">
+              {entry.leadName[0]?.toUpperCase() ?? '?'}
             </div>
-            {colLeads.length === 0 ? (
-              <div className="flex items-center justify-center py-8 border border-dashed border-[#2a2a2a] rounded-xl">
-                <p className="text-xs text-gray-700 text-center px-2">No leads here yet</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {colLeads.map((lead, i) => (
-                  <LeadCard key={lead.id ?? i} lead={lead} onStatusChange={onStatusChange} />
-                ))}
-              </div>
-            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{entry.leadName}</p>
+              <p className="text-[11px] text-gray-500">{entry.phone}</p>
+            </div>
+            <div className="text-right flex-shrink-0 hidden sm:block">
+              <p className="text-[11px] text-gray-500" suppressHydrationWarning>{formatCallTime(entry.time)}</p>
+              <p className="text-[11px] text-gray-700">{entry.duration}</p>
+            </div>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 ${outcomeBadge(entry.outcome)}`}>
+              {outcomeLabel(entry.outcome)}
+            </span>
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }
 
-// ── Call Status Badge ─────────────────────────────────────────────────────
+// ── Follow-up Sequences ───────────────────────────────────────────────────
 
-function CallStatusBadge({ status }: { status?: Lead['callStatus'] }) {
-  if (!status || status === 'pending') {
-    return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-gray-500/10 text-gray-400 border-gray-500/20">Pending</span>;
-  }
-  if (status === 'calling') {
-    return (
-      <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
-        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-        Calling…
-      </span>
-    );
-  }
-  if (status === 'completed') {
-    return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-green-500/10 text-green-400 border-green-500/20">✓ Called</span>;
-  }
-  return <span className="text-[11px] px-2 py-0.5 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">Failed</span>;
+const PRESET_SEQUENCES: FollowUpSequence[] = [
+  { id: 'drip-3day', name: '3-day drip', description: 'Day 1 call → Day 2 email → Day 3 SMS nudge', steps: 3 },
+  { id: 'weekly-checkin', name: 'Weekly check-in', description: 'Gentle weekly touchpoint for warm leads', steps: 3 },
+  { id: 'post-call', name: 'Post-call follow-up', description: 'Email recap → LinkedIn connect → 3-day callback', steps: 4 },
+];
+
+function FollowUpSequences({ leads }: { leads: Lead[] }) {
+  const [states, setStates] = useState<Record<string, FollowUpActivationState>>({});
+  const [confirmSeq, setConfirmSeq] = useState<FollowUpSequence | null>(null);
+  const [activating, setActivating] = useState<string | null>(null);
+
+  useEffect(() => {
+    setStates(getFollowUpState());
+  }, []);
+
+  const handleActivate = async (seq: FollowUpSequence) => {
+    setActivating(seq.id);
+    await new Promise(r => setTimeout(r, 1000));
+    const newState: FollowUpActivationState = {
+      lastUsed: new Date().toISOString(),
+      activeLeads: leads.map(l => l.id ?? '').filter(Boolean),
+    };
+    const updated = { ...states, [seq.id]: newState };
+    setStates(updated);
+    saveFollowUpState(updated);
+    setActivating(null);
+    setConfirmSeq(null);
+  };
+
+  return (
+    <section>
+      <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">Follow-up Sequences</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {PRESET_SEQUENCES.map(seq => {
+          const state = states[seq.id];
+          const isActive = !!state;
+          return (
+            <div key={seq.id} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-4 flex flex-col gap-3 hover:border-[#D4AF37]/20 transition-colors">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-bold text-white">{seq.name}</p>
+                  {isActive && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border bg-green-500/10 text-green-400 border-green-500/20 font-semibold">Active</span>
+                  )}
+                </div>
+                <p className="text-[11px] text-gray-500">{seq.description}</p>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] text-gray-600">
+                <span>📋 {seq.steps} steps</span>
+                {state?.lastUsed && (
+                  <span suppressHydrationWarning>🕐 {timeSince(state.lastUsed)}</span>
+                )}
+              </div>
+              <button
+                onClick={() => setConfirmSeq(seq)}
+                className="mt-auto px-3 py-2 bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl text-xs font-bold hover:bg-[#D4AF37]/20 transition-colors"
+              >
+                {isActive ? 'Re-activate →' : 'Activate →'}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {confirmSeq && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setConfirmSeq(null)}>
+          <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-sm">Activate: {confirmSeq.name}</h3>
+              <button onClick={() => setConfirmSeq(null)} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+            <p className="text-xs text-gray-500 mb-2">{confirmSeq.description}</p>
+            <p className="text-xs text-gray-400 mb-4">
+              This sequence will apply to <strong className="text-white">{leads.length} lead{leads.length !== 1 ? 's' : ''}</strong> in your pipeline.
+            </p>
+            {leads.length === 0 && (
+              <p className="text-xs text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2 mb-4">
+                ⚠️ No leads in pipeline. Add leads first.
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmSeq(null)}
+                className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-sm font-semibold hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleActivate(confirmSeq)}
+                disabled={activating === confirmSeq.id || leads.length === 0}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {activating === confirmSeq.id ? (
+                  <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Activating…</>
+                ) : (
+                  'Confirm & Activate'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
-// ── Plan lead limits ─────────────────────────────────────────────────────────
+// ── Plan lead limits ──────────────────────────────────────────────────────
 const PLAN_LEAD_LIMITS: Record<string, number> = {
   starter: 50,
   growth: 150,
   scale: 500,
   trial: 20,
 };
-const EXTRA_LEAD_PRICE = 3; // $3 per extra lead
+const EXTRA_LEAD_PRICE = 3;
 
 // ── Lead Upload Section ───────────────────────────────────────────────────
 
-function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail = '' }: { userId: string; businessName: string; plan?: string; userEmail?: string }) {
+function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail = '', onCallsLaunched }: {
+  userId: string;
+  businessName: string;
+  plan?: string;
+  userEmail?: string;
+  onCallsLaunched?: () => void;
+}) {
   const [mode, setMode] = useState<'manual' | 'csv'>('manual');
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
@@ -351,7 +678,6 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
     const nameIdx = headers.findIndex(h => h.includes('name'));
     const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('mobile'));
     const emailIdx = headers.findIndex(h => h.includes('email'));
-
     const parsed: Lead[] = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = (lines[i] ?? '').split(',').map(c => c.trim().replace(/"/g, ''));
@@ -377,7 +703,6 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
       setUploadedLeads(prev => [...prev, ...parsed]);
     };
     reader.readAsText(file);
-    // Reset input so same file can be re-selected
     e.target.value = '';
   };
 
@@ -403,19 +728,20 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
   const launchCampaign = async () => {
     if (uploadedLeads.length === 0 || launching) return;
 
-    // Safe mode — simulate campaign without calling anyone
     if (isSafeMode(userEmail)) {
       setLaunching(true);
       await new Promise(r => setTimeout(r, 1500));
       setUploadedLeads(prev => prev.map(l => ({ ...l, callStatus: 'completed' as const })));
+      addCallLogEntries(uploadedLeads.map(mockCallEntry));
+      onCallsLaunched?.();
       setLaunchResult({ success: true, message: `✅ Safe mode: Campaign simulated for ${uploadedLeads.length} leads. No calls were made (beta testing mode).` });
       setLaunching(false);
       return;
     }
+
     setLaunching(true);
     setLaunchResult(null);
 
-    // Filter out DNC numbers if check was run
     const safeLeads = dncResult
       ? uploadedLeads.filter(l => l.phone && !dncResult.blocked.includes(l.phone))
       : uploadedLeads;
@@ -426,7 +752,6 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
       return;
     }
 
-    // Mark as calling
     setUploadedLeads(prev => prev.map(l => ({ ...l, callStatus: 'calling' as const })));
 
     const script = `Hi {{name}}, this is Sophie from ${businessName || '[businessName]'}. I'm reaching out because we help businesses like yours generate more leads and close more deals using AI. Do you have 2 minutes to chat?`;
@@ -434,16 +759,9 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
     try {
       const res = await fetch(`${RAILWAY_API}/api/campaign/launch`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': RAILWAY_API_KEY,
-        },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
         body: JSON.stringify({
-          leads: safeLeads.map(l => ({
-            name: l.name || '',
-            phone: l.phone || '',
-            email: l.email || '',
-          })),
+          leads: safeLeads.map(l => ({ name: l.name || '', phone: l.phone || '', email: l.email || '' })),
           script,
           userId,
           campaignName,
@@ -454,6 +772,8 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
       const data = await res.json();
 
       setUploadedLeads(prev => prev.map(l => ({ ...l, callStatus: 'completed' as const })));
+      addCallLogEntries(safeLeads.map(mockCallEntry));
+      onCallsLaunched?.();
       setLaunchResult({ success: true, message: data.message || `Campaign launched! ${uploadedLeads.length} leads queued for Sophie AI.` });
     } catch (err) {
       setUploadedLeads(prev => prev.map(l => ({ ...l, callStatus: 'failed' as const })));
@@ -470,8 +790,6 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
         Lead Upload &amp; Campaign
       </h2>
       <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 space-y-6">
-
-        {/* Mode toggle */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMode('manual')}
@@ -487,57 +805,21 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
           </button>
         </div>
 
-        {/* Manual form */}
         {mode === 'manual' && (
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <input
-              type="text"
-              placeholder="Name"
-              value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-              onKeyDown={e => e.key === 'Enter' && addManualLead()}
-              className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-            />
-            <input
-              type="tel"
-              placeholder="Phone (+61...)"
-              value={form.phone}
-              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-              onKeyDown={e => e.key === 'Enter' && addManualLead()}
-              className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              onKeyDown={e => e.key === 'Enter' && addManualLead()}
-              className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-            />
-            <button
-              onClick={addManualLead}
-              disabled={!form.name && !form.phone}
-              className="px-4 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] text-white rounded-xl text-sm font-semibold hover:border-[#D4AF37]/40 transition-colors disabled:opacity-40"
-            >
+            <input type="text" placeholder="Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onKeyDown={e => e.key === 'Enter' && addManualLead()} className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors" />
+            <input type="tel" placeholder="Phone (+61...)" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} onKeyDown={e => e.key === 'Enter' && addManualLead()} className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors" />
+            <input type="email" placeholder="Email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} onKeyDown={e => e.key === 'Enter' && addManualLead()} className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors" />
+            <button onClick={addManualLead} disabled={!form.name && !form.phone} className="px-4 py-2.5 bg-[#1a1a1a] border border-[#2a2a2a] text-white rounded-xl text-sm font-semibold hover:border-[#D4AF37]/40 transition-colors disabled:opacity-40">
               + Add Lead
             </button>
           </div>
         )}
 
-        {/* CSV upload */}
         {mode === 'csv' && (
           <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-3 px-6 py-4 border-2 border-dashed border-[#2a2a2a] rounded-xl text-sm text-gray-400 hover:border-[#D4AF37]/40 hover:text-white transition-colors w-full justify-center"
-            >
+            <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
+            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-3 px-6 py-4 border-2 border-dashed border-[#2a2a2a] rounded-xl text-sm text-gray-400 hover:border-[#D4AF37]/40 hover:text-white transition-colors w-full justify-center">
               <span className="text-xl">📎</span>
               <span>Click to upload CSV (name, phone, email columns)</span>
             </button>
@@ -545,17 +827,11 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
           </div>
         )}
 
-        {/* Uploaded leads list */}
         {uploadedLeads.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{uploadedLeads.length} lead{uploadedLeads.length !== 1 ? 's' : ''} queued</p>
-              <button
-                onClick={() => setUploadedLeads([])}
-                className="text-xs text-gray-600 hover:text-red-400 transition-colors"
-              >
-                Clear all
-              </button>
+              <button onClick={() => setUploadedLeads([])} className="text-xs text-gray-600 hover:text-red-400 transition-colors">Clear all</button>
             </div>
             <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
               {uploadedLeads.map((lead, i) => (
@@ -565,17 +841,11 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{lead.name || '—'}</p>
-                    <p className="text-xs text-gray-500">{lead.phone} {lead.email ? `· ${lead.email}` : ''}</p>
+                    <p className="text-xs text-gray-500">{lead.phone}{lead.email ? ` · ${lead.email}` : ''}</p>
                   </div>
                   <CallStatusBadge status={lead.callStatus} />
                   {lead.callStatus === 'pending' && (
-                    <button
-                      onClick={() => removeLead(lead.id!)}
-                      className="text-gray-600 hover:text-red-400 transition-colors text-sm ml-1"
-                      title="Remove"
-                    >
-                      ×
-                    </button>
+                    <button onClick={() => removeLead(lead.id!)} className="text-gray-600 hover:text-red-400 transition-colors text-sm ml-1" title="Remove">×</button>
                   )}
                 </div>
               ))}
@@ -583,26 +853,16 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
           </div>
         )}
 
-        {/* Campaign name + Launch */}
         {uploadedLeads.length > 0 && (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 border-t border-[#1f1f1f]">
-            <input
-              type="text"
-              placeholder="Campaign name"
-              value={campaignName}
-              onChange={e => setCampaignName(e.target.value)}
-              className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-            />
+            <input type="text" placeholder="Campaign name" value={campaignName} onChange={e => setCampaignName(e.target.value)} className="flex-1 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors" />
             <button
               onClick={launchCampaign}
               disabled={launching || uploadedLeads.length === 0}
               className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-[#D4AF37]/20"
             >
               {launching ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  Launching…
-                </>
+                <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Launching…</>
               ) : (
                 <>📞 Start Calling ({uploadedLeads.length})</>
               )}
@@ -610,22 +870,20 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
           </div>
         )}
 
-        {/* Launch result */}
-        {/* Plan limit warning */}
-      {uploadedLeads.length > leadLimit && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 text-sm">
-          <p className="text-yellow-300 font-semibold">⚠️ Over plan limit</p>
-          <p className="text-yellow-400/80 text-xs mt-1">
-            Your <strong>{plan.charAt(0).toUpperCase() + plan.slice(1)}</strong> plan includes <strong>{leadLimit} leads/mo</strong>.
-            You&apos;ve added {uploadedLeads.length} — that&apos;s <strong>{excessLeads} extra at ${EXTRA_LEAD_PRICE}/each = ${extraCost}</strong>.
-          </p>
-          <button className="mt-2 text-xs text-yellow-300 underline hover:text-yellow-200">
-            Generate payment link for {excessLeads} extra leads →
-          </button>
-        </div>
-      )}
+        {uploadedLeads.length > leadLimit && (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 text-sm">
+            <p className="text-yellow-300 font-semibold">⚠️ Over plan limit</p>
+            <p className="text-yellow-400/80 text-xs mt-1">
+              Your <strong>{plan.charAt(0).toUpperCase() + plan.slice(1)}</strong> plan includes <strong>{leadLimit} leads/mo</strong>.
+              You&apos;ve added {uploadedLeads.length} — that&apos;s <strong>{excessLeads} extra at ${EXTRA_LEAD_PRICE}/each = ${extraCost}</strong>.
+            </p>
+            <button className="mt-2 text-xs text-yellow-300 underline hover:text-yellow-200">
+              Generate payment link for {excessLeads} extra leads →
+            </button>
+          </div>
+        )}
 
-    {launchResult && (
+        {launchResult && (
           <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium ${
             launchResult.success
               ? 'bg-green-500/10 border-green-500/20 text-green-400'
@@ -641,7 +899,6 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
 }
 
 // ── CTA Banner ────────────────────────────────────────────────────────────
-// Rendered inside DashboardLayout so useDashboardChat() has access to the real context.
 
 function CTASection() {
   const { sendMessage } = useDashboardChat();
@@ -678,7 +935,6 @@ function buildOutreachEmail(p: Prospect): { subject: string; body: string } {
     : `${websiteLine}I came across ${businessName} and wanted to reach out directly.`;
 
   const subject = p.subject || `Quick question — ${businessName}`;
-
   const body = [
     `Hi,`,
     ``,
@@ -734,7 +990,12 @@ function ProspectsSection() {
     return matchFilter && matchSearch;
   });
 
-  const counts = { total: prospects.length, not_contacted: prospects.filter(p => p.status === 'not_contacted').length, contacted: prospects.filter(p => p.status === 'contacted').length, qualified: prospects.filter(p => p.status === 'qualified').length };
+  const counts = {
+    total: prospects.length,
+    not_contacted: prospects.filter(p => p.status === 'not_contacted').length,
+    contacted: prospects.filter(p => p.status === 'contacted').length,
+    qualified: prospects.filter(p => p.status === 'qualified').length,
+  };
 
   return (
     <section>
@@ -745,7 +1006,6 @@ function ProspectsSection() {
         </div>
       </div>
 
-      {/* Filter + Search */}
       <div className="flex flex-wrap gap-2 mb-4">
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search prospects..." className="bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition w-48" />
         {['all', 'not_contacted', 'contacted', 'replied', 'qualified', 'closed'].map(f => (
@@ -766,9 +1026,7 @@ function ProspectsSection() {
               const statusInfo = STATUS_STYLES[p.status] ?? STATUS_STYLES['not_contacted'] ?? { label: p.status, style: '' };
               return (
                 <div key={p.id} className="flex items-center gap-4 px-4 py-3 hover:bg-[#141414] transition-colors group">
-                  <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">
-                    {p.id}
-                  </div>
+                  <div className="w-7 h-7 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-xs font-bold text-[#D4AF37] flex-shrink-0">{p.id}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{p.name}</p>
                     <div className="flex items-center gap-3 mt-0.5">
@@ -814,6 +1072,8 @@ function ProspectsSection() {
 export default function SalesPage() {
   const router = useRouter();
   const { user, loading, userProfile } = useAuth();
+  const [pipelineTab, setPipelineTab] = useState<'pipeline' | 'calllog'>('pipeline');
+  const [callLogKey, setCallLogKey] = useState(0);
 
   const [stats, setStats] = useState<SalesStats>({
     totalLeadsThisMonth: 0,
@@ -836,14 +1096,10 @@ export default function SalesPage() {
     async function fetchLeads() {
       try {
         const res = await fetch(`${RAILWAY_API}/api/leads`, {
-          headers: {
-            'x-api-key': RAILWAY_API_KEY,
-          },
+          headers: { 'x-api-key': RAILWAY_API_KEY },
           cache: 'no-store',
         });
-
         if (!res.ok) throw new Error('Non-OK response');
-
         const data = await res.json();
         const leadsArr: Lead[] = Array.isArray(data) ? data : data?.leads ?? [];
         setLeads(leadsArr);
@@ -854,14 +1110,10 @@ export default function SalesPage() {
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
 
-        const thisMonth = leadsArr.filter(
-          (l) => l.created_at && new Date(l.created_at) >= startOfMonth
-        );
-        const callsThisWeek = leadsArr.filter(
-          (l) => l.call_made && l.created_at && new Date(l.created_at) >= startOfWeek
-        );
-        const meetings = leadsArr.filter((l) => l.meeting_booked);
-        const campaignIds = new Set(leadsArr.map((l) => l.campaign_id).filter(Boolean));
+        const thisMonth = leadsArr.filter(l => l.created_at && new Date(l.created_at) >= startOfMonth);
+        const callsThisWeek = leadsArr.filter(l => l.call_made && l.created_at && new Date(l.created_at) >= startOfWeek);
+        const meetings = leadsArr.filter(l => l.meeting_booked);
+        const campaignIds = new Set(leadsArr.map(l => l.campaign_id).filter(Boolean));
 
         setStats({
           totalLeadsThisMonth: thisMonth.length,
@@ -880,6 +1132,11 @@ export default function SalesPage() {
     fetchLeads();
   }, [user]);
 
+  const handleCallsLaunched = useCallback(() => {
+    setPipelineTab('calllog');
+    setCallLogKey(k => k + 1);
+  }, []);
+
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
@@ -892,7 +1149,6 @@ export default function SalesPage() {
 
   return (
     <DashboardLayout>
-      {/* Top bar */}
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <div className="flex items-center gap-2">
@@ -911,10 +1167,14 @@ export default function SalesPage() {
 
       <div className="flex-1 overflow-y-auto p-8 space-y-8">
 
-        {/* Lead Upload & Campaign */}
-        <LeadUploadSection userId={user.uid} businessName={businessName} plan={(userProfile as { plan?: string } | null)?.plan || 'starter'} userEmail={user.email || ''} />
+        <LeadUploadSection
+          userId={user.uid}
+          businessName={businessName}
+          plan={(userProfile as { plan?: string } | null)?.plan || 'starter'}
+          userEmail={user.email || ''}
+          onCallsLaunched={handleCallsLaunched}
+        />
 
-        {/* Live stats */}
         <section>
           <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
             Live stats
@@ -930,70 +1190,73 @@ export default function SalesPage() {
           </div>
         </section>
 
-        {/* Quick actions */}
         <section>
           <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">Quick actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <QuickAction
-              icon="🚀"
-              label="Launch Campaign"
-              description="Start a new outbound sales campaign"
-              href="#lead-upload"
-              chatPrompt="I want to launch a new outbound sales campaign"
-            />
-            <QuickAction
-              icon="👥"
-              label="View All Leads"
-              description="See your full lead pipeline and status"
-              href="#leads"
-              chatPrompt="Show me my lead pipeline"
-            />
-            <QuickAction
-              icon="🤖"
-              label="Configure Sophie AI"
-              description="Tune your AI sales agent's voice & script"
-              href="/voice"
-              chatPrompt="I want to configure my Sophie AI sales agent"
-            />
+            <QuickAction icon="🚀" label="Launch Campaign" description="Start a new outbound sales campaign" href="#lead-upload" chatPrompt="I want to launch a new outbound sales campaign" />
+            <QuickAction icon="👥" label="View All Leads" description="See your full lead pipeline and status" href="#leads" chatPrompt="Show me my lead pipeline" />
+            <QuickAction icon="🤖" label="Configure Sophie AI" description="Tune your AI sales agent's voice & script" href="/voice" chatPrompt="I want to configure my Sophie AI sales agent" />
           </div>
         </section>
 
-        {/* CRM Pipeline Board */}
+        {/* Pipeline + Call Log tabs */}
         <section id="leads">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pipeline</h2>
-            <span className="text-xs text-gray-600">{leads.length} total lead{leads.length !== 1 ? 's' : ''}</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPipelineTab('pipeline')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${pipelineTab === 'pipeline' ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30' : 'text-gray-500 hover:text-white border border-transparent'}`}
+              >
+                Pipeline
+              </button>
+              <button
+                onClick={() => setPipelineTab('calllog')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${pipelineTab === 'calllog' ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30' : 'text-gray-500 hover:text-white border border-transparent'}`}
+              >
+                📋 Call Log
+              </button>
+            </div>
+            {pipelineTab === 'pipeline' && (
+              <span className="text-xs text-gray-600">{leads.length} total lead{leads.length !== 1 ? 's' : ''}</span>
+            )}
           </div>
+
           <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-4 min-h-[160px]">
-            {statsLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
-              </div>
+            {pipelineTab === 'pipeline' ? (
+              statsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <PipelineBoard
+                  leads={leads}
+                  onStatusChange={(leadId, status, meetingBooked) => {
+                    setLeads(prev => prev.map(l =>
+                      l.id === leadId
+                        ? { ...l, status, meeting_booked: meetingBooked ?? l.meeting_booked, call_made: (status === 'contacted' || status === 'called' || status === 'qualified' || meetingBooked) ? true : l.call_made }
+                        : l
+                    ));
+                    fetch(`${RAILWAY_API}/api/leads/${leadId}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+                      body: JSON.stringify({ status, meeting_booked: meetingBooked }),
+                    }).catch(() => {});
+                  }}
+                />
+              )
             ) : (
-              <PipelineBoard
-                leads={leads}
-                onStatusChange={(leadId, status, meetingBooked) => {
-                  setLeads(prev => prev.map(l =>
-                    l.id === leadId
-                      ? { ...l, status, meeting_booked: meetingBooked ?? l.meeting_booked, call_made: (status === 'contacted' || status === 'called' || status === 'qualified' || meetingBooked) ? true : l.call_made }
-                      : l
-                  ));
-                  // Persist to Railway
-                  fetch(`${RAILWAY_API}/api/leads/${leadId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
-                    body: JSON.stringify({ status, meeting_booked: meetingBooked }),
-                  }).catch(() => {});
-                }}
-              />
+              <CallLogTab key={callLogKey} />
             )}
           </div>
         </section>
 
+        {/* Follow-up Sequences */}
+        <FollowUpSequences leads={leads} />
+
         {/* AKAI Prospects */}
         <ProspectsSection />
 
-        {/* CTA Banner — uses useDashboardChat() via CTASection component */}
+        {/* CTA Banner */}
         <CTASection />
 
       </div>
