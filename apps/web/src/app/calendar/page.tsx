@@ -534,7 +534,7 @@ function BookingsView({ userId }: { userId: string }) {
               <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-semibold">
                 ✓ Confirmed
               </span>
-              <p className="text-xs text-gray-600 mt-1">
+              <p suppressHydrationWarning className="text-xs text-gray-600 mt-1">
                 {apt.slot ? new Date(apt.slot).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Time TBC'}
               </p>
             </div>

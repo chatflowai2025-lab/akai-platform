@@ -454,7 +454,7 @@ export default function HealthPage() {
                       {gate.status === 'critical' ? '🚨 critical' : '👁️ monitoring'} · {gate.count}×
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mb-1">
+                  <p suppressHydrationWarning className="text-xs text-gray-500 mb-1">
                     Last: {gate.lastOccurrence ? new Date(gate.lastOccurrence).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'unknown'}
                   </p>
                   <p className="text-xs text-[#D4AF37]/80 mt-2">→ {gate.prevention}</p>
@@ -484,7 +484,7 @@ export default function HealthPage() {
                     }`}>{f.status}</span>
                   </div>
                   {f.rootCause && <p className="text-xs text-gray-500">{f.rootCause}</p>}
-                  <p className="text-xs text-gray-700 mt-0.5">
+                  <p suppressHydrationWarning className="text-xs text-gray-700 mt-0.5">
                     {f.timestamp ? new Date(f.timestamp).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
                     {f.isRepeat && <span className="ml-2 text-red-400">⚠ repeat</span>}
                   </p>

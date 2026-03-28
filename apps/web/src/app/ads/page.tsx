@@ -201,7 +201,7 @@ function CampaignsList() {
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-xs text-gray-600">
+              <p suppressHydrationWarning className="text-xs text-gray-600">
                 {new Date(c.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
