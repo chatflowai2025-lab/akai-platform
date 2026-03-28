@@ -805,7 +805,7 @@ function IntelligenceSection() {
 /* ─── Pricing CTA ─── */
 function PricingCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
   return (
-    <section className="py-24 px-6">
+    <section className="py-24 px-6 relative overflow-hidden">
       <div className="max-w-2xl mx-auto text-center">
         <div className="absolute left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#D4AF37]/[0.04] rounded-full blur-[80px] pointer-events-none" />
         <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-4">
@@ -884,7 +884,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
       <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
       <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
       <TrustBar />
