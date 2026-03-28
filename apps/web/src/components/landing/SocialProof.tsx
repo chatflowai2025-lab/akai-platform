@@ -38,12 +38,19 @@ export default function SocialProof() {
       <div className="max-w-5xl mx-auto space-y-16">
 
         {/* Trust banner */}
-        <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-white/40 font-medium">
-          <span>✅ Trusted by businesses across Sydney</span>
-          <span className="hidden sm:inline text-white/10">·</span>
-          <span>⚡ 24/7 AI operations</span>
-          <span className="hidden sm:inline text-white/10">·</span>
-          <span>🚀 Zero setup required</span>
+        <div className="text-center">
+          <p className="text-xs text-white/20 uppercase tracking-widest font-semibold mb-4">Trusted by Australian businesses across every industry</p>
+          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 text-sm text-white/40 font-medium">
+            <span>🏗️ Trades & Construction</span>
+            <span className="hidden sm:inline text-white/10">·</span>
+            <span>🏠 Real Estate</span>
+            <span className="hidden sm:inline text-white/10">·</span>
+            <span>💰 Finance & Mortgage</span>
+            <span className="hidden sm:inline text-white/10">·</span>
+            <span>🎯 Recruitment</span>
+            <span className="hidden sm:inline text-white/10">·</span>
+            <span>🛥️ Luxury & Lifestyle</span>
+          </div>
         </div>
 
         {/* Stats bar */}

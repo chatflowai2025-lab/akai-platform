@@ -95,8 +95,8 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: () => void 
         {/* Header */}
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-black mb-5 leading-tight">
-            Simple pricing.{' '}
-            <span className="gradient-text">Serious ROI.</span>
+            Your ops team.{' '}
+            <span className="gradient-text">At 1% of the cost.</span>
           </h2>
           <p className="text-white/40 text-lg">
             14-day free trial · Cancel anytime · No setup fees
