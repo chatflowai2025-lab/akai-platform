@@ -280,7 +280,7 @@ function EmptyFeed() {
 // ── Main dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, userProfile, loading, logout } = useAuth();
 
   const [stats, setStats] = useState<StatsSummary>({
     leads: 0,
@@ -639,6 +639,38 @@ export default function DashboardPage() {
                 />
               </div>
             </section>
+
+            {/* Client setup guide — shown until all steps complete */}
+            {!userProfile?.onboardingComplete && (
+              <div className="bg-[#111] border border-[#D4AF37]/30 rounded-2xl p-5 mb-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <span className="text-2xl">🚀</span>
+                  <div>
+                    <p className="text-white font-black text-sm">Let&apos;s get you set up</p>
+                    <p className="text-gray-500 text-xs mt-0.5">Complete these steps to activate your AKAI team</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { step: 'Connect your inbox', desc: 'Gmail or Outlook — AKAI reads enquiries and sends proposals', link: '/email-guard', done: false },
+                    { step: 'Connect your calendar', desc: 'Google or Outlook Calendar — leads can book directly', link: '/calendar', done: false },
+                    { step: 'Set up your brand', desc: 'Business name, logo, tone of voice', link: '/settings', done: false },
+                    { step: 'Send your first proposal', desc: 'Check your inbox for any pending enquiries', link: '/email-guard', done: false },
+                  ].map((item, i) => (
+                    <a key={i} href={item.link} className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#1a1a1a] transition group">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${item.done ? 'border-green-400 bg-green-400' : 'border-[#D4AF37]/40 group-hover:border-[#D4AF37]'}`}>
+                        {item.done && <span className="text-black text-xs font-bold">✓</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${item.done ? 'text-gray-500 line-through' : 'text-white'}`}>{item.step}</p>
+                        <p className="text-xs text-gray-600">{item.desc}</p>
+                      </div>
+                      <span className="text-gray-600 group-hover:text-[#D4AF37] transition text-sm">→</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ── Intelligence panel ───────────────────────────────────────── */}
             <section>

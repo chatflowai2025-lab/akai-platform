@@ -2,7 +2,7 @@
 
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -20,6 +20,8 @@ type Tab = 'signin' | 'signup';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWelcome = searchParams?.get('welcome') === 'true';
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search);
@@ -204,6 +206,13 @@ export default function LoginPage() {
       <a href="/" className="flex items-center mb-8">
         <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
       </a>
+
+      {isWelcome && (
+        <div className="w-full max-w-md mb-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl px-5 py-4 text-center">
+          <p className="text-[#D4AF37] font-bold text-sm mb-1">Welcome to AKAI 👋</p>
+          <p className="text-gray-400 text-xs">Sign in below to access your AI business team</p>
+        </div>
+      )}
 
       <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8">
         <div className="flex mb-8 bg-[#0a0a0a] rounded-xl p-1">
