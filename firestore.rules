@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── users ───────────────────────────────────────────────────────────────
+    // Only the authenticated user can read or write their own document.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ─── trialLeads ──────────────────────────────────────────────────────────
+    // Anyone (authenticated or not) can submit a trial lead. No reads.
+    match /trialLeads/{docId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // ─── signups ─────────────────────────────────────────────────────────────
+    // Written server-side (admin SDK) only. No client reads or writes.
+    match /signups/{docId} {
+      allow read, write: if false;
+    }
+
+    // ─── conversations ───────────────────────────────────────────────────────
+    // Written and read by backend admin SDK only. Block all client access.
+    match /conversations/{userId} {
+      allow read, write: if false;
+
+      match /{date}/{messageId} {
+        allow read, write: if false;
+      }
+    }
+
+    // ─── publishedSites ──────────────────────────────────────────────────────
+    // Public read (needed for serving the widget/site by subdomain).
+    // No client writes — managed via backend admin SDK only.
+    match /publishedSites/{subdomain} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ─── security_events ─────────────────────────────────────────────────────
+    // Written by backend admin SDK only. Block all client access.
+    match /security_events/{docId} {
+      allow read, write: if false;
+    }
+
+    // ─── Catch-all: deny everything else ─────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
