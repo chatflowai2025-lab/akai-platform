@@ -2,59 +2,74 @@ const PLANS = [
   {
     name: 'Starter',
     price: '$147',
+    annual: '$1,470/yr',
+    annualNote: 'Save 2 months',
     period: '/mo',
     description: 'One AI agent, fully operational.',
+    roiBadge: '13× ROI',
     features: [
       '1 AKAI agent of your choice',
       'Social is the most popular starter',
       'AI automation included',
       'Full dashboard access',
-      'Replaces a part-time VA (~$1,500/mo)',
+      '60 voice mins · 5k emails · 1k AI tasks/mo',
+      'Replaces a part-time VA (~$2,000/mo)',
     ],
-    cta: 'Start free trial →',
+    cta: 'Start 14-day free trial →',
     highlight: false,
     badge: null,
   },
   {
     name: 'Growth',
     price: '$497',
+    annual: '$4,970/yr',
+    annualNote: 'Save 2 months',
     period: '/mo',
-    description: 'Three agents, full automation stack.',
+    description: 'Three agents. Sales rep + marketer + VA — replaced.',
+    roiBadge: '27× ROI',
     features: [
       '3 AKAI agents of your choice',
       'Sales + Email Guard + Social recommended',
       'Team seats (up to 5)',
       'Advanced analytics',
       'Onboarding call included',
-      'Replaces marketing + sales + VA (~$8,500/mo)',
+      '300 voice mins · 25k emails · 5k AI tasks/mo',
+      'Replaces sales rep + marketing + VA (~$13,500/mo)',
     ],
-    cta: 'Start free trial →',
+    cta: 'Start 14-day free trial →',
     highlight: true,
     badge: 'Most Popular',
   },
   {
     name: 'Scale',
     price: '$1,497',
+    annual: '$14,970/yr',
+    annualNote: 'Save 2 months',
     period: '/mo',
-    description: 'All 10 agents. Unlimited everything.',
+    description: 'All 10 agents. Your entire ops team — automated.',
+    roiBadge: '20× ROI',
     features: [
       'All 10 AKAI agents',
       'Sales, Voice, Web, Email Guard, Calendar',
       'Proposals, Ads, Recruit, Social & Health',
       'Unlimited team seats',
       'Dedicated account manager',
+      '1,200 voice mins · unlimited emails · unlimited AI tasks',
       'White-label option + SLA guarantee',
-      'Replaces your entire ops team (~$25k+/mo)',
+      'Replaces your entire ops team (~$30,000/mo)',
     ],
-    cta: 'Start free trial →',
+    cta: 'Start 14-day free trial →',
     highlight: false,
     badge: null,
   },
   {
     name: 'Enterprise',
     price: 'Custom',
+    annual: '',
+    annualNote: '',
     period: '',
     description: 'Dedicated environment. Custom integrations. Full white-label.',
+    roiBadge: null,
     features: [
       'Dedicated cloud environment',
       'Custom API integrations',
@@ -84,7 +99,10 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: () => void 
             <span className="gradient-text">Serious ROI.</span>
           </h2>
           <p className="text-white/40 text-lg">
-            7-day free trial · Cancel anytime · No setup fees
+            14-day free trial · Cancel anytime · No setup fees
+          </p>
+          <p className="text-white/30 text-sm mt-2">
+            Annual plans available — pay yearly, save 2 months
           </p>
         </div>
 
@@ -114,17 +132,36 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: () => void 
               )}
 
               <div className="relative mt-4 flex flex-col flex-1">
-                {/* Plan name */}
-                <div className="text-xs text-white/40 uppercase tracking-widest mb-3">{plan.name}</div>
+                {/* Plan name + ROI badge */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-xs text-white/40 uppercase tracking-widest">{plan.name}</div>
+                  {plan.roiBadge && (
+                    <div className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                      plan.highlight ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'bg-white/[0.06] text-white/50'
+                    }`}>
+                      {plan.roiBadge}
+                    </div>
+                  )}
+                </div>
 
                 {/* Price */}
-                <div className="flex items-baseline gap-1 mb-2">
+                <div className="flex items-baseline gap-1 mb-1">
                   <span className="text-xs text-white/30 font-semibold mr-0.5">from</span>
                   <span className={`text-5xl font-black tracking-tight ${plan.highlight ? 'gradient-text' : 'text-white'}`}>
                     {plan.price}
                   </span>
                   <span className="text-white/30 text-sm">{plan.period}</span>
                 </div>
+
+                {/* Annual option */}
+                {plan.annual && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-white/30 text-xs">{plan.annual}</span>
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                      plan.highlight ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'bg-white/[0.04] text-white/30'
+                    }`}>{plan.annualNote}</span>
+                  </div>
+                )}
 
                 <p className="text-white/40 text-sm mb-7 leading-relaxed">{plan.description}</p>
 
