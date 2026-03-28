@@ -16,7 +16,7 @@ const jsonLd = {
     '10 AI agents that run your business — sales, email, calendar, social, web, ads, recruiting and more.',
   offers: {
     '@type': 'Offer',
-    price: '147',
+    price: '299',
     priceCurrency: 'USD',
   },
   url: SITE_URL,

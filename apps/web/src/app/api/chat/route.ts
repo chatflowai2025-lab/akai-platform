@@ -258,7 +258,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   }
 
   if (msg.includes('add another list') || msg.includes('more contacts') || msg.includes('more leads')) {
-    return "Your current plan includes **50 contacts/month**. Adding another list of 50 targeted leads is **+$149/mo** — includes lead research, enrichment, and DNC filtering.\n\nWant me to add it before we launch?";
+    return "Your current plan includes **50 contacts/month**. Adding another list of 50 targeted leads is **+$150** (50 × $3/lead) — includes lead research, enrichment, and DNC filtering.\n\nWant me to add it before we launch?";
   }
 
   // ── Voice / Sophie module responses ─────────────────────────────────────
