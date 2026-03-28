@@ -91,19 +91,20 @@ function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
   const handleNotify = async () => {
     if (!handle.trim()) return;
     setState(s => ({ ...s, loading: true, error: '' }));
+    const cleanHandle = handle.trim().replace(/^@/, '');
+    // Best-effort save — never show an error for a waitlist signup
     try {
       const db = getFirebaseDb();
-      if (!db) throw new Error('Database unavailable');
-      const cleanHandle = handle.trim().replace(/^@/, '');
-      await setDoc(
-        doc(db, 'users', uid),
-        { socialWaitlist: { x: { handle: cleanHandle, notifiedAt: serverTimestamp() } } },
-        { merge: true }
-      );
-      setState({ submitted: true, loading: false, error: '' });
-    } catch {
-      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
-    }
+      if (db) {
+        await setDoc(
+          doc(db, 'users', uid),
+          { socialWaitlist: { x: { handle: cleanHandle, notifiedAt: serverTimestamp() } } },
+          { merge: true }
+        );
+      }
+    } catch { /* non-fatal */ }
+    // Always succeed from user's perspective
+    setState({ submitted: true, loading: false, error: '' });
   };
 
   return (
@@ -177,19 +178,12 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
   const handleNotify = async () => {
     if (!handle.trim()) return;
     setState(s => ({ ...s, loading: true, error: '' }));
+    const cleanHandle = handle.trim().replace(/^@/, '');
     try {
       const db = getFirebaseDb();
-      if (!db) throw new Error('Database unavailable');
-      const cleanHandle = handle.trim().replace(/^@/, '');
-      await setDoc(
-        doc(db, 'users', uid),
-        { socialWaitlist: { instagram: { handle: cleanHandle, notifiedAt: serverTimestamp() } } },
-        { merge: true }
-      );
-      setState({ submitted: true, loading: false, error: '' });
-    } catch {
-      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
-    }
+      if (db) await setDoc(doc(db, 'users', uid), { socialWaitlist: { instagram: { handle: cleanHandle, notifiedAt: serverTimestamp() } } }, { merge: true });
+    } catch { /* non-fatal */ }
+    setState({ submitted: true, loading: false, error: '' });
   };
 
   return (
@@ -265,16 +259,9 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
     setState(s => ({ ...s, loading: true, error: '' }));
     try {
       const db = getFirebaseDb();
-      if (!db) throw new Error('Database unavailable');
-      await setDoc(
-        doc(db, 'users', uid),
-        { socialWaitlist: { linkedin: { handle: handle.trim(), notifiedAt: serverTimestamp() } } },
-        { merge: true }
-      );
-      setState({ submitted: true, loading: false, error: '' });
-    } catch {
-      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
-    }
+      if (db) await setDoc(doc(db, 'users', uid), { socialWaitlist: { linkedin: { handle: handle.trim(), notifiedAt: serverTimestamp() } } }, { merge: true });
+    } catch { /* non-fatal */ }
+    setState({ submitted: true, loading: false, error: '' });
   };
 
   return (
@@ -345,16 +332,9 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
     setState(s => ({ ...s, loading: true, error: '' }));
     try {
       const db = getFirebaseDb();
-      if (!db) throw new Error('Database unavailable');
-      await setDoc(
-        doc(db, 'users', uid),
-        { socialWaitlist: { facebook: { handle: handle.trim(), notifiedAt: serverTimestamp() } } },
-        { merge: true }
-      );
-      setState({ submitted: true, loading: false, error: '' });
-    } catch {
-      setState(s => ({ ...s, loading: false, error: 'Failed to save. Please try again.' }));
-    }
+      if (db) await setDoc(doc(db, 'users', uid), { socialWaitlist: { facebook: { handle: handle.trim(), notifiedAt: serverTimestamp() } } }, { merge: true });
+    } catch { /* non-fatal */ }
+    setState({ submitted: true, loading: false, error: '' });
   };
 
   return (
