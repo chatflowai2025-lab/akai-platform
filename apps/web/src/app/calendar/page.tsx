@@ -10,7 +10,7 @@ import { collection, doc, setDoc, getDocs, serverTimestamp } from 'firebase/fire
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type EventType = 'Call' | 'Meeting' | 'Task' | 'Reminder';
-type CalendarView = 'month' | 'week' | 'day';
+type CalendarView = 'month' | 'week' | 'day' | 'bookings';
 
 interface CalEvent {
   id: string;
@@ -549,6 +549,59 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
   );
 }
 
+// ─── Bookings View ────────────────────────────────────────────────────────────
+
+function BookingsView({ userId }: { userId: string }) {
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`https://api-server-production-2a27.up.railway.app/api/calendar/appointments/${userId}`, {
+      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
+    })
+      .then(r => r.json())
+      .then(d => { setAppointments(d.appointments || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [userId]);
+
+  if (loading) return <div className="flex-1 flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" /></div>;
+
+  if (appointments.length === 0) return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8">
+      <div className="w-12 h-12 rounded-2xl bg-[#111] border border-[#1f1f1f] flex items-center justify-center text-2xl">📭</div>
+      <p className="text-white font-semibold text-sm">No bookings yet</p>
+      <p className="text-gray-500 text-xs">When leads book via your email CTA, they appear here</p>
+    </div>
+  );
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6 space-y-3">
+      <h3 className="text-sm font-bold text-white mb-4">📋 Booked appointments</h3>
+      {appointments.map((apt: any) => (
+        <div key={apt.id} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-white font-semibold text-sm">{apt.name}</p>
+              <p className="text-gray-400 text-xs mt-0.5">{apt.email}</p>
+              {apt.phone && <p className="text-gray-500 text-xs">{apt.phone}</p>}
+            </div>
+            <div className="text-right flex-shrink-0">
+              <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-semibold">
+                ✓ Confirmed
+              </span>
+              <p className="text-xs text-gray-600 mt-1">
+                {apt.slot ? new Date(apt.slot).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Time TBC'}
+              </p>
+            </div>
+          </div>
+          {apt.message && <p className="text-xs text-gray-500 mt-2 italic">&ldquo;{apt.message}&rdquo;</p>}
+          {apt.googleEventId && <p className="text-xs text-[#D4AF37] mt-1">📅 Added to Google Calendar</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main Calendar Page ───────────────────────────────────────────────────────
 
 declare global {
@@ -566,6 +619,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   const [modalDate, setModalDate] = useState<string | undefined>(undefined);
   const [calConnected, setCalConnected] = useState(false);
   const [calProvider, setCalProvider] = useState<string | null>(null);
+  const [copyToast, setCopyToast] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -710,6 +764,20 @@ function CalendarContent({ user }: { user: { uid: string } }) {
               <span className="text-xs text-green-400 font-semibold capitalize">{calProvider} connected</span>
             </div>
           )}
+          {/* Booking link copy button */}
+          <button
+            onClick={() => {
+              const url = `https://getakai.ai/book/${user.uid}?biz=${encodeURIComponent('Your Business')}`;
+              navigator.clipboard.writeText(url).then(() => {
+                setCopyToast(true);
+                setTimeout(() => setCopyToast(false), 2000);
+              });
+            }}
+            className="text-xs px-3 py-1.5 rounded-lg border border-[#1f1f1f] text-gray-400 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 transition"
+            title="Copy your booking page link"
+          >
+            {copyToast ? '✅ Copied!' : '🔗 Copy booking link'}
+          </button>
           {/* Add event */}
           <button
             onClick={() => openAddModal()}
@@ -727,6 +795,12 @@ function CalendarContent({ user }: { user: { uid: string } }) {
                 {v}
               </button>
             ))}
+            <button onClick={() => setView('bookings')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                view === 'bookings' ? 'bg-[#D4AF37] text-black' : 'text-gray-400 hover:text-white'
+              }`}>
+              📋
+            </button>
           </div>
         </div>
       </header>
@@ -762,6 +836,9 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           )}
           {view === 'day' && (
             <DayView events={events} onAddEvent={date => openAddModal(date)} />
+          )}
+          {view === 'bookings' && (
+            <BookingsView userId={user.uid} />
           )}
         </div>
 
