@@ -19,6 +19,11 @@ const INITIAL: Msg = {
 function HomepageChat({ defaultOpen = false, onOpenChange }: { defaultOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [open, setOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<Msg[]>([INITIAL]);
+
+  // Sync open state when parent triggers it
+  useEffect(() => {
+    if (defaultOpen) setOpen(true);
+  }, [defaultOpen]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
