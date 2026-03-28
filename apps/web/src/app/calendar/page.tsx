@@ -438,7 +438,7 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
     setConnectError(null);
     try {
       const r = await fetch(
-        `https://api-server-production-2a27.up.railway.app/api/email/microsoft/auth-url?userId=${userId}`,
+        `https://api-server-production-2a27.up.railway.app/api/calendar/ms-auth-url?userId=${userId}`,
         { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
       );
       if (!r.ok) throw new Error(`Server error ${r.status}`);
@@ -578,6 +578,11 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     if (params.get('connected') === 'google') {
       setCalConnected(true);
       setCalProvider('google');
+      history.pushState({}, '', window.location.pathname);
+    }
+    if (params.get('connected') === 'outlook') {
+      setCalConnected(true);
+      setCalProvider('outlook');
       history.pushState({}, '', window.location.pathname);
     }
   }, []);
