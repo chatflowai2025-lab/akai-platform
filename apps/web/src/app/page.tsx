@@ -157,7 +157,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
       {/* Sub */}
       <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed">
         A team of 10 AI agents with one mission — automate your business through a prompt.{' '}
-        <span className="text-white font-semibold">You focus on growing.</span> They handle everything else. 24/7, relentlessly improving.
+        <span className="text-white font-semibold">You focus on growing.</span> They handle everything else. 24/7, relentlessly improving and delivering every day.
       </p>
 
       {/* CTAs */}
