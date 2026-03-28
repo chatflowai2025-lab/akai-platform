@@ -323,6 +323,8 @@ function EmailGuardContent({
     // MS OAuth callback — exchange code for token
     if (initialCode) {
       setConnecting(true);
+      // Clear URL params immediately to prevent re-processing on remount
+      router.replace('/email-guard');
       fetch(`${RAILWAY}/api/email/microsoft/callback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
@@ -338,14 +340,14 @@ function EmailGuardContent({
           if (d.success || d.email) {
             setMsConnected(true);
             setMsEmail(d.email || null);
-            router.replace('/email-guard');
             safeSend(sendMessage, `My Microsoft inbox is now connected. What can you do with it and what should I do first?`);
             triggerFirstPoll();
           } else {
-            setConnectError(d.error || 'Connection failed.');
+            console.error('[MS OAuth] callback error:', d);
+            setConnectError(`Microsoft connection failed: ${d.detail || d.error || 'Unknown error'}`);
           }
         })
-        .catch(() => setConnectError('Connection failed.'))
+        .catch((e) => { console.error('[MS OAuth] fetch error:', e); setConnectError('Connection failed — check console for details.'); })
         .finally(() => setConnecting(false));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
