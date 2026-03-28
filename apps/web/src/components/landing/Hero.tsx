@@ -58,7 +58,7 @@ function YouTubeModal({ onClose }: { onClose: () => void }) {
 }
 
 /* ─── Demo Call Modal ─── */
-function DemoModal({ onClose }: { onClose: () => void }) {
+export function DemoModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [form, setForm] = useState({

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Navbar from '@/components/landing/Navbar';
 import Modules from '@/components/landing/Modules';
 import Pricing from '@/components/landing/Pricing';
+import { DemoModal } from '@/components/landing/Hero';
 import LeadCaptureModal from '@/components/LeadCaptureModal';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
@@ -129,7 +130,7 @@ function TrustBar() {
 }
 
 /* ─── Hero ─── */
-function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
+function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 overflow-hidden">
       {/* Background glow */}
@@ -194,7 +195,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
             <p className="text-gray-500 text-xs mt-0.5">See your business blind spots in 60s</p>
           </div>
         </a>
-        <button onClick={onOpenCapture} className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-green-500/40 hover:bg-green-500/5 rounded-2xl px-5 py-4 transition-all group text-left">
+        <button onClick={onOpenDemo} className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-green-500/40 hover:bg-green-500/5 rounded-2xl px-5 py-4 transition-all group text-left">
           <span className="text-2xl">🎙️</span>
           <div>
             <p className="text-white font-semibold text-sm group-hover:text-green-300 transition">Try Live AI Agent</p>
@@ -822,6 +823,7 @@ function AKAIFooter() {
 export default function Home() {
   const [captureOpen, setCaptureOpen] = useState(false);
   const [capturePlan, setCapturePlan] = useState<string | undefined>(undefined);
+  const [demoOpen, setDemoOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   const openCapture = (plan?: string) => {
@@ -839,7 +841,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
-      <Hero onOpenCapture={() => openCapture()} />
+      <Hero onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
       <TrustBar />
       <div id="demo"><HowItWorksAnimated /></div>
       <HowAKAILearns />
@@ -851,6 +853,7 @@ export default function Home() {
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
       <LeadCaptureModal isOpen={captureOpen} onClose={() => { setCaptureOpen(false); setCapturePlan(undefined); }} selectedPlan={capturePlan} />
+      {demoOpen && <DemoModal onClose={() => setDemoOpen(false)} />}
     </main>
   );
 }
