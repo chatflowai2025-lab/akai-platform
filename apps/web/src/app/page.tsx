@@ -200,6 +200,321 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
   );
 }
 
+/* ─── How It Works Animated ─── */
+function HowItWorksAnimated() {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const steps = [
+    {
+      label: 'Lead emails in',
+      icon: '📧',
+      time: '0–15s',
+      headline: 'A new lead just landed',
+      description: 'John found you on Google. He\'s interested. AKAI sees it immediately.',
+      badge: { emoji: '✨', text: 'New lead detected' },
+      ui: (
+        <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4 text-left space-y-2">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#1f1f1f]">
+            <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-xs">JS</div>
+            <div>
+              <p className="text-white text-xs font-semibold">john.smith@gmail.com</p>
+              <p className="text-gray-500 text-[10px]">to: info@yourbusiness.com · just now</p>
+            </div>
+            <span className="ml-auto text-[10px] bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">New</span>
+          </div>
+          <p className="text-white text-xs font-bold">Subject: Kitchen renovation enquiry</p>
+          <p className="text-gray-400 text-xs leading-relaxed">Hi, I&apos;m interested in a custom kitchen for our new home. Budget around $8–12k. We&apos;re looking to start ASAP — ideally within 2 months. Can you send through some options?</p>
+        </div>
+      ),
+    },
+    {
+      label: 'AKAI scores & responds',
+      icon: '🧠',
+      time: '15–30s',
+      headline: 'AKAI reads, scores, and acts',
+      description: 'In under 30 seconds, AKAI analyses intent, scores the lead, and starts drafting.',
+      badge: { emoji: '🔥', text: 'High-intent lead' },
+      ui: (
+        <div className="space-y-3">
+          <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[#D4AF37] text-sm">🔥</span>
+              <span className="text-white text-xs font-bold">Lead Score: 8/10</span>
+              <span className="ml-auto text-[10px] text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-2 py-0.5 rounded-full">High priority</span>
+            </div>
+            <div className="space-y-1.5">
+              {['✅ Budget mentioned ($8–12k)', '✅ Specific project (kitchen reno)', '✅ Urgent timeline (2 months)'].map(t => (
+                <div key={t} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-300">{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-xl px-4 py-3 flex items-center gap-3">
+            <div className="flex gap-1">{[0,150,300].map(d => <span key={d} className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: `${d}ms` }} />)}</div>
+            <span className="text-gray-400 text-xs">Generating personalised proposal...</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: 'Proposal sent',
+      icon: '✉️',
+      time: '30–45s',
+      headline: 'Proposal out the door — in 23 seconds',
+      description: 'A tailored, professional proposal — written and sent before you even knew the lead existed.',
+      badge: { emoji: '✉️', text: 'Proposal sent in 23 seconds' },
+      ui: (
+        <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4 text-left space-y-2">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#1f1f1f]">
+            <div className="w-7 h-7 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-xs text-[#D4AF37] font-bold">AK</div>
+            <div>
+              <p className="text-white text-xs font-semibold">AKAI (on your behalf)</p>
+              <p className="text-gray-500 text-[10px]">to: john.smith@gmail.com · 23s after enquiry</p>
+            </div>
+            <span className="ml-auto text-[10px] bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full">Sent ✓</span>
+          </div>
+          <p className="text-white text-xs font-bold">Re: Kitchen renovation enquiry</p>
+          <p className="text-gray-400 text-xs leading-relaxed">Dear John, Thank you for reaching out about your kitchen renovation. Based on your brief, I&apos;ve put together three options in the $8–12k range with timelines that fit your 2-month window. I&apos;d love to walk you through them on a quick call — here&apos;s my booking link...</p>
+        </div>
+      ),
+    },
+    {
+      label: 'Meeting booked',
+      icon: '📅',
+      time: '45–60s',
+      headline: 'John booked. Thursday 10am.',
+      description: 'No back-and-forth. John clicked the link, picked a time, it\'s in the calendar.',
+      badge: { emoji: '📅', text: 'Meeting confirmed' },
+      ui: (
+        <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500 text-xs uppercase tracking-wider">This week</span>
+            <span className="text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">Confirmed</span>
+          </div>
+          <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl p-3 flex items-center gap-3">
+            <div className="text-center min-w-[40px]">
+              <p className="text-[#D4AF37] text-lg font-black">THU</p>
+              <p className="text-white text-xs font-bold">10:00</p>
+            </div>
+            <div className="w-px h-8 bg-[#D4AF37]/30" />
+            <div>
+              <p className="text-white text-xs font-bold">Kitchen Consultation — John Smith</p>
+              <p className="text-gray-500 text-[10px]">30 min · Google Meet · Booked via AKAI</p>
+            </div>
+          </div>
+          <p className="text-gray-500 text-[10px]">John confirmed via your booking link · No manual scheduling needed</p>
+        </div>
+      ),
+    },
+    {
+      label: 'Follow-up sent',
+      icon: '🔄',
+      time: '60–75s',
+      headline: 'No reply? AKAI follows up — automatically',
+      description: 'After 48 hours with no response, AKAI sends a warm follow-up. And logs the pattern.',
+      badge: { emoji: '🧠', text: 'Pattern logged' },
+      ui: (
+        <div className="space-y-3">
+          <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-yellow-400 text-sm">⏰</span>
+              <span className="text-white text-xs font-bold">48h follow-up triggered</span>
+            </div>
+            <p className="text-gray-400 text-xs leading-relaxed">&ldquo;Hi John, just wanted to make sure you received my proposal. Happy to hop on a quick call if you have questions — here&apos;s the link again...&rdquo;</p>
+          </div>
+          <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[#D4AF37] text-sm">🧠</span>
+              <span className="text-[#D4AF37] text-xs font-bold">Intelligence update</span>
+            </div>
+            <p className="text-gray-400 text-xs">Pattern logged: Tuesday enquiries convert <span className="text-white font-semibold">2× better</span> — strategy updated automatically</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: 'You close the deal',
+      icon: '🏆',
+      time: '75–90s',
+      headline: 'You close. $8,400. AKAI did the work.',
+      description: 'You showed up to one call. Everything else was handled — automatically, professionally, relentlessly.',
+      badge: { emoji: '💰', text: '$8,400 kitchen sale' },
+      ui: (
+        <div className="space-y-3">
+          <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl p-4 text-center">
+            <p className="text-[#D4AF37] text-3xl font-black mb-1">$8,400</p>
+            <p className="text-white text-xs font-bold">Kitchen renovation — John Smith</p>
+            <p className="text-gray-500 text-[10px] mt-1">Deal closed · Revenue logged</p>
+          </div>
+          <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-xl p-4">
+            <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">AKAI handled:</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {['4 emails written', '1 call attempted', '2 follow-ups sent', '1 meeting booked'].map(t => (
+                <div key={t} className="flex items-center gap-1.5">
+                  <span className="text-[#D4AF37] text-xs">✓</span>
+                  <span className="text-gray-300 text-[10px]">{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const start = () => { setStep(0); setPlaying(true); setDone(false); };
+  const restart = () => { setStep(0); setPlaying(true); setDone(false); };
+
+  useEffect(() => {
+    if (!playing) return;
+    if (step >= steps.length - 1) {
+      setPlaying(false);
+      setDone(true);
+      return;
+    }
+    const t = setTimeout(() => setStep(s => s + 1), 2500);
+    return () => clearTimeout(t);
+  }, [playing, step, steps.length]);
+
+  const current = steps[step] ?? steps[0]!;
+  const progress = ((step + 1) / steps.length) * 100;
+
+  return (
+    <section className="relative py-24 px-6">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent" />
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">See it live</p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+            Lead in. Deal closed. <span className="text-[#D4AF37]">90 seconds.</span>
+          </h2>
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+            Watch AKAI turn a cold enquiry into a booked meeting and a closed sale — without you lifting a finger.
+          </p>
+        </div>
+
+        {/* Main demo card */}
+        <div
+          className="rounded-3xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)',
+            border: '1px solid #2a2a2a',
+            boxShadow: '0 0 80px rgba(212,175,55,0.06)',
+          }}
+        >
+          {/* Top bar */}
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-[#1f1f1f] bg-[#0a0a0a]">
+            <div className="flex gap-1.5">{['bg-red-500/60','bg-yellow-500/60','bg-green-500/60'].map(c => <div key={c} className={`w-2.5 h-2.5 rounded-full ${c}`} />)}</div>
+            <span className="text-gray-600 text-xs mx-auto">AKAI · Live demo</span>
+            {playing && <span className="text-[10px] text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full animate-pulse">● Live</span>}
+          </div>
+
+          {/* Step tabs */}
+          <div className="flex overflow-x-auto border-b border-[#1f1f1f] bg-[#0a0a0a] px-2 py-1 gap-1">
+            {steps.map((s, i) => (
+              <button
+                key={s.label}
+                onClick={() => { setStep(i); setPlaying(false); setDone(i === steps.length - 1); }}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${
+                  i === step
+                    ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20'
+                    : i < step
+                    ? 'text-gray-400 hover:text-white'
+                    : 'text-gray-600 hover:text-gray-400'
+                }`}
+              >
+                <span>{s.icon}</span>
+                <span className="hidden sm:inline">{s.label}</span>
+                <span className="sm:hidden">{i + 1}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Content area */}
+          <div className="p-6 md:p-8">
+            {!playing && !done && step === 0 ? (
+              /* Pre-play state */
+              <div className="flex flex-col items-center justify-center py-12 text-center gap-6">
+                <div className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-4xl">
+                  ▶
+                </div>
+                <div>
+                  <p className="text-white font-black text-xl mb-2">Watch the 90-second demo</p>
+                  <p className="text-gray-500 text-sm max-w-sm">See how AKAI handles a real lead from first email to closed deal — automatically.</p>
+                </div>
+                <button
+                  onClick={start}
+                  className="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-3 text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20"
+                >
+                  ▶ Watch the 90-second demo
+                </button>
+              </div>
+            ) : (
+              /* Playing / navigating */
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                {/* Left: context */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">{current.icon}</span>
+                    <div>
+                      <span className="text-[10px] text-[#D4AF37] font-semibold uppercase tracking-wider">{current.time}</span>
+                      <p className="text-gray-500 text-xs">{current.label}</p>
+                    </div>
+                  </div>
+                  <h3 className="text-white font-black text-2xl md:text-3xl leading-tight">{current.headline}</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">{current.description}</p>
+                  <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-full px-4 py-2">
+                    <span className="text-sm">{current.badge.emoji}</span>
+                    <span className="text-[#D4AF37] text-sm font-semibold">{current.badge.text}</span>
+                  </div>
+                  {done && (
+                    <button
+                      onClick={restart}
+                      className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mt-2"
+                    >
+                      ↺ Restart demo
+                    </button>
+                  )}
+                </div>
+
+                {/* Right: UI mockup */}
+                <div className="animate-fade-in">{current.ui}</div>
+              </div>
+            )}
+
+            {/* Progress bar */}
+            {(playing || done || step > 0) && (
+              <div className="mt-8 space-y-2">
+                <div className="flex justify-between text-[10px] text-gray-600">
+                  <span>Step {step + 1} of {steps.length}</span>
+                  <span>{current.time}</span>
+                </div>
+                <div className="h-1 bg-[#1f1f1f] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#D4AF37] rounded-full transition-all duration-700 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between">
+                  {steps.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i <= step ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── How AKAI Learns ─── */
 function HowAKAILearns() {
   const steps = [
@@ -469,6 +784,7 @@ export default function Home() {
       <Navbar onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />
       <Hero onOpenCapture={() => setCaptureOpen(true)} />
       <TrustBar />
+      <HowItWorksAnimated />
       <HowAKAILearns />
       <AgentTeam />
       <Modules />
