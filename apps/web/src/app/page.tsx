@@ -110,10 +110,10 @@ function HomepageChat({ defaultOpen = false, onOpenChange }: { defaultOpen?: boo
 /* ─── Trust Bar ─── */
 function TrustBar() {
   const items = [
-    'Trusted by Sydney businesses',
-    '24/7 autonomous operations',
-    'Gets smarter with every interaction',
-    'Zero setup required',
+    '10 AI agents working for you',
+    'Relentless pursuit of excellence',
+    'Automate your business through a prompt',
+    'You focus on growth — we handle the rest',
   ];
   return (
     <div className="w-full bg-[#0d0d0d] border-y border-[#1f1f1f] py-3 overflow-hidden">
@@ -156,8 +156,8 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
 
       {/* Sub */}
       <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed">
-        Finds leads, books meetings, handles enquiries, runs your ads, screens candidates —
-        and <span className="text-white font-semibold">learns from every interaction</span> to do it better tomorrow.
+        A team of 10 AI agents with one mission — automate your business through a prompt.{' '}
+        <span className="text-white font-semibold">You focus on growing.</span> They handle everything else. 24/7, relentlessly improving.
       </p>
 
       {/* CTAs */}
@@ -233,7 +233,7 @@ function HowAKAILearns() {
             The AI that actually <span className="text-[#D4AF37]">gets better</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
-            Most software stays the same. AKAI compounds. Every interaction makes the next one sharper.
+            AKAI is built on one principle: relentless, continuous improvement. Every interaction is an input. Every result is a lesson. The mission never stops.
           </p>
         </div>
 
@@ -257,6 +257,61 @@ function HowAKAILearns() {
               <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Agent Team ─── */
+function AgentTeam() {
+  const agents = [
+    { icon: '📧', name: 'Email Guard', role: 'Inbox Manager', description: 'Reads every enquiry. Writes the proposal. Sends it. Never misses one.' },
+    { icon: '📞', name: 'Sophie', role: 'Sales Voice Agent', description: 'Calls your leads in 60 seconds. Qualifies. Books. Repeats all day.' },
+    { icon: '📅', name: 'Calendar', role: 'Scheduling Agent', description: 'Syncs your availability. Books meetings. No back-and-forth.' },
+    { icon: '👤', name: 'Recruit', role: 'Hiring Agent', description: 'Screens every candidate. Scores them 0-100. Shortlists the best.' },
+    { icon: '📢', name: 'Ads', role: 'Campaign Agent', description: 'Writes, launches and tracks Google Ads. No agency needed.' },
+    { icon: '📱', name: 'Social', role: 'Content Agent', description: 'Creates content for every platform. Schedules it. Posts it.' },
+    { icon: '🧠', name: 'Pattern Engine', role: 'Intelligence Agent', description: 'Learns what converts. Adapts your strategy. Gets sharper daily.' },
+    { icon: '🤖', name: 'Follow-up Engine', role: 'Persistence Agent', description: 'Decides who needs a follow-up. How. When. Does it.' },
+    { icon: '🛡️', name: 'Code Shield', role: 'Quality Agent', description: 'Every failure root-caused. Prevention gate added. Never repeats.' },
+    { icon: '📈', name: 'Optimizer', role: 'Copy Agent', description: 'Rewrites your proposals based on what actually got replies.' },
+  ];
+
+  return (
+    <section className="py-24 px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">Your team</p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+            10 AI agents. <span className="text-[#D4AF37]">One goal.</span>
+          </h2>
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+            Relentless pursuit of excellence. Continuously improving. Making your business more profitable —
+            all through a single prompt.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+          {agents.map(agent => (
+            <div
+              key={agent.name}
+              className="group bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 hover:border-[#D4AF37]/40 hover:bg-[#111] transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="text-3xl mb-3">{agent.icon}</div>
+              <p className="text-white font-black text-sm mb-0.5">{agent.name}</p>
+              <p className="text-[#D4AF37] text-[10px] font-semibold uppercase tracking-wider mb-2">{agent.role}</p>
+              <p className="text-gray-500 text-xs leading-relaxed">{agent.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 text-center">
+          <p className="text-gray-600 text-sm">
+            All agents run <span className="text-white">24/7</span> ·{' '}
+            Learn from every interaction ·{' '}
+            Report to <span className="text-[#D4AF37]">you</span>
+          </p>
         </div>
       </div>
     </section>
@@ -415,6 +470,7 @@ export default function Home() {
       <Hero onOpenCapture={() => setCaptureOpen(true)} />
       <TrustBar />
       <HowAKAILearns />
+      <AgentTeam />
       <Modules />
       <IntelligenceSection />
       <PricingCTA onOpenCapture={() => setCaptureOpen(true)} />
