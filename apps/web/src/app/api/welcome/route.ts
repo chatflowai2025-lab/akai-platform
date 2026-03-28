@@ -5,6 +5,24 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 async function sendEmail(to: string, subject: string, html: string) {
+  // Try Railway SMTP relay first (proven working, uses Gmail SMTP)
+  try {
+    const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
+    const res = await fetch(`${railwayUrl}/api/send-welcome`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || '' },
+      body: JSON.stringify({ to, subject, html }),
+    });
+    if (res.ok) {
+      console.log(`[welcome] Sent via Railway SMTP to ${to}`);
+      return;
+    }
+    console.warn('[welcome] Railway SMTP failed, falling back to Resend:', await res.text());
+  } catch (e) {
+    console.warn('[welcome] Railway SMTP error, falling back to Resend:', e);
+  }
+
+  // Fallback: Resend
   if (!RESEND_API_KEY) {
     console.log(`[welcome] Mock mode — would send to ${to}`);
     return;
@@ -191,19 +209,21 @@ export async function POST(req: NextRequest) {
       console.warn('[welcome] Firestore admin not available:', err);
     }
 
+    // Check + mark welcomeEmailSent in Firestore (non-fatal if Firestore unavailable)
     if (db) {
-      const ref = db.collection('users').doc(uid);
-      const snap = await ref.get();
-
-      if (snap.exists && snap.data()?.welcomeEmailSent === true) {
-        return NextResponse.json({ ok: true, skipped: true });
+      try {
+        const ref = db.collection('users').doc(uid);
+        const snap = await ref.get();
+        if (snap.exists && snap.data()?.welcomeEmailSent === true) {
+          return NextResponse.json({ ok: true, skipped: true });
+        }
+        await ref.set({ welcomeEmailSent: true }, { merge: true });
+      } catch (fsErr) {
+        console.warn('[welcome] Firestore check failed (continuing anyway):', fsErr);
       }
-
-      // Mark as sent before sending — prevents race conditions
-      await ref.set({ welcomeEmailSent: true }, { merge: true });
     }
 
-    // Send the email
+    // Send the email — always attempt even if Firestore failed
     try {
       await sendEmail(
         email,
@@ -212,7 +232,7 @@ export async function POST(req: NextRequest) {
       );
       console.log(`[welcome] Email sent to ${email}`);
     } catch (emailErr) {
-      console.error('[welcome] Email send failed (non-fatal):', emailErr);
+      console.error('[welcome] Email send failed:', emailErr);
       // Still return success — don't block the user's dashboard load
     }
 
