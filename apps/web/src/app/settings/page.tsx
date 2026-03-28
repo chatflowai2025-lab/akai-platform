@@ -7,6 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb, getFirebaseAuth, getFirebaseStorage } from '@/lib/firebase';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import {
+  isGmailConnected, gmailEmail,
+  isMicrosoftConnected, microsoftEmail,
+  isGoogleCalendarConnected, googleCalendarEmail,
+} from '@/lib/firestore-schema';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -188,14 +193,7 @@ export default function SettingsPage() {
         if (data.avatarColor) setAvatarColor(data.avatarColor);
         if (data.avatarPhotoUrl) setAvatarPhotoUrl(data.avatarPhotoUrl);
 
-        // Connected Accounts — inbox integrations
-        const inboxConn = data.inboxConnection || {};
-        const gmailConn = data.gmail || data.gmailConnection || {};
-
-        // Google Calendar — check root doc fields (not subcollection)
-        const gcalConnected = data.googleCalendarConnected === true || !!data.googleRefreshToken;
-        const gcalEmail = data.googleCalendarEmail || undefined;
-
+        // Connected Accounts — use canonical schema helpers (never guess paths)
         // Load social connections
         const socialMap: Record<string, ConnectedAccount> = {
           instagram: { connected: false },
@@ -220,14 +218,17 @@ export default function SettingsPage() {
 
         setConnectedAccounts({
           microsoft: {
-            connected: inboxConn.provider === 'microsoft' || !!inboxConn.accessTokenEnc || data.microsoftCalendarConnected === true,
-            identifier: inboxConn.email || data.microsoftCalendarEmail || undefined,
+            connected: isMicrosoftConnected(data),
+            identifier: microsoftEmail(data) || undefined,
           },
           gmail: {
-            connected: gmailConn.connected === true || !!gmailConn.email || !!gmailConn.accessToken,
-            identifier: gmailConn.email || undefined,
+            connected: isGmailConnected(data),
+            identifier: gmailEmail(data) || undefined,
           },
-          googleCalendar: { connected: gcalConnected, identifier: gcalEmail },
+          googleCalendar: {
+            connected: isGoogleCalendarConnected(data),
+            identifier: googleCalendarEmail(data) || undefined,
+          },
           instagram: socialMap['instagram'] ?? { connected: false },
           linkedin: socialMap['linkedin'] ?? { connected: false },
           facebook: socialMap['facebook'] ?? { connected: false },

@@ -10,6 +10,7 @@ import Sidebar from './Sidebar';
 import { isSafeMode } from '@/lib/beta-config';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import type { ChatMessage } from '@/lib/shared-types';
+import { buildUserContext } from '@/lib/firestore-schema';
 
 // ── Chat context ──────────────────────────────────────────────────────────────
 interface ChatContextValue { sendMessage: (text: string) => void; }
@@ -118,32 +119,11 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     const db = getFirebaseDb();
     if (!db) return;
     getDoc(doc(db, 'users', user.uid)).then(snap => {
-      const d = snap.data();
-      // Gmail: stored under data.gmail.* (not data.gmailConnection)
-      const gmailConnected = d?.gmail?.connected === true || !!d?.gmail?.accessToken;
-      // Microsoft: stored under data.inboxConnection.* — has token but may not have connected:true flag
-      const msConnected = d?.inboxConnection?.provider === 'microsoft'
-        || !!d?.inboxConnection?.accessTokenEnc
-        || d?.microsoftCalendarConnected === true;
-      // Google Calendar: root doc fields
-      const gcalConnected = d?.googleCalendarConnected === true || !!d?.googleRefreshToken;
-      const sophieConfigured = d?.voiceConfig?.configured === true || d?.campaignConfig?.businessName;
+      const d = snap.data() || {};
+      // Use canonical schema helpers — never guess field paths here
       setUserContext({
         ...(d?.campaignConfig || {}),
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || d?.displayName || '',
-        businessName: d?.businessName || d?.campaignConfig?.businessName || d?.onboarding?.businessName || '',
-        industry: d?.onboarding?.industry || d?.campaignConfig?.industry || '',
-        location: d?.onboarding?.location || '',
-        gmailConnected: gmailConnected ? 'true' : 'false',
-        gmailEmail: d?.gmail?.email || '',
-        microsoftConnected: msConnected ? 'true' : 'false',
-        microsoftEmail: d?.inboxConnection?.email || d?.microsoftCalendarEmail || '',
-        googleCalendarConnected: gcalConnected ? 'true' : 'false',
-        googleCalendarEmail: d?.googleCalendarEmail || '',
-        sophieConfigured: sophieConfigured ? 'true' : 'false',
-        plan: d?.plan || d?.planTier || 'trial',
+        ...buildUserContext(d, user),
       });
     }).catch(() => {});
   }, [user]);
