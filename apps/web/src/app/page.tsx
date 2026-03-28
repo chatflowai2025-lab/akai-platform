@@ -186,7 +186,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
       {/* Stats bar */}
       <div className="w-full max-w-3xl bg-[#111] border border-[#1f1f1f] rounded-2xl px-6 py-5 flex flex-wrap justify-center gap-y-4">
         {[
-          { value: '6', label: 'AI Modules', gold: false },
+          { value: '10', label: 'AI Agents', gold: false },
           { value: '24/7', label: 'Always On', gold: false },
           { value: '<60s', label: 'First Response', gold: true },
           { value: '∞', label: 'Learns Daily', gold: true },
