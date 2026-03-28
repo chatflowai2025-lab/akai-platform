@@ -562,8 +562,15 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalDate, setModalDate] = useState<string | undefined>(undefined);
-  const [calConnected, setCalConnected] = useState(false);
-  const [calProvider, setCalProvider] = useState<string | null>(null);
+  // Initialise from localStorage so badge persists across navigation
+  const [calConnected, setCalConnected] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(`cal_connected_${user.uid}`) === 'true';
+  });
+  const [calProvider, setCalProvider] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(`cal_provider_${user.uid}`) || null;
+  });
   const [copyToast, setCopyToast] = useState(false);
 
   useEffect(() => {
@@ -622,6 +629,18 @@ function CalendarContent({ user }: { user: { uid: string } }) {
       }).catch(() => {});
     });
   }, [user.uid]);
+
+  // Persist connection state to localStorage so it survives navigation
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (calConnected && calProvider) {
+      localStorage.setItem(`cal_connected_${user.uid}`, 'true');
+      localStorage.setItem(`cal_provider_${user.uid}`, calProvider);
+    } else if (!calConnected) {
+      localStorage.removeItem(`cal_connected_${user.uid}`);
+      localStorage.removeItem(`cal_provider_${user.uid}`);
+    }
+  }, [calConnected, calProvider, user.uid]);
 
   useEffect(() => {
     if (!calConnected || calProvider !== 'google') return;
