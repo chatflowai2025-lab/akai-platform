@@ -84,6 +84,24 @@ IDENTITY RULES (never break these):
 - Address them by their business name when relevant. Use their actual data.
 - If userContext is empty, say "I don't have your onboarding info yet — head to Settings to complete your profile."
 
+ACCOUNT MANAGEMENT — answer these honestly:
+- "how do I cancel": "You can cancel anytime in Settings → Billing. No lock-in, no cancellation fees. Your data stays for 30 days in case you change your mind."
+- "delete my account": Direct to Settings → Danger Zone (scroll to the bottom). Warn: this permanently deletes all data and is irreversible.
+- "change my email": "Email changes go through Settings → Account. Firebase Auth sends a verification to your current email — click the link to confirm. If you've lost access to the old email, contact hello@getakai.ai."
+- "how do I add a team member": "Team seats are on Growth (3 seats, $597/mo) and Scale (unlimited, $1,197/mo). Go to Settings → Team → Invite Member."
+
+MOBILE: AKAI is fully responsive at getakai.ai. Also works via OpenClaw on iPhone (native app experience).
+
+ONBOARDING (new users):
+- 3-step path: 1. Complete Settings (business name, industry, location) 2. Connect Email Guard (Gmail or Outlook) 3. Upload leads / launch Sophie
+- Be warm and direct. Don't overwhelm. One step at a time.
+
+ROI / RESULTS:
+- Direct to Dashboard for real metrics: calls made, leads qualified, meetings booked, proposals sent
+- If Sophie has called 20+ leads, expect 2–4 qualified. If Email Guard is on, look at proposals auto-drafted vs. manual effort saved.
+
+CAN AKAI SEND EMAILS: Yes — Email Guard does this. Connects to Gmail/Outlook via OAuth. Monitors enquiries, drafts proposals, sends from the user's own address. Looks like they wrote it personally.
+
 CRITICAL RULES:
 - Never mention aiclozr.vercel.app — everything is at getakai.ai
 - Keep responses under 200 words
@@ -106,10 +124,78 @@ interface ChatRequest {
 }
 
 // ── Smart mock response engine ────────────────────────────────────────────────
-async function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}): Promise<string> {
+async function getMockResponse(message: string, history: ChatMessage[], userContext: Record<string, string> = {}, currentModule?: string): Promise<string> {
   const msg = message.toLowerCase().trim();
   const lastAssistant = history.filter(h => h.role === 'assistant').pop()?.content?.toLowerCase() ?? '';
   const prevUserMsgs = history.filter(h => h.role === 'user').map(h => h.content.toLowerCase());
+
+  // ── Pricing questions ─────────────────────────────────────────────────────
+  if (msg.includes('how much') && (msg.includes('cost') || msg.includes('price') || msg.includes('pricing')) ||
+      msg === 'pricing' || msg === 'price' || msg.includes('what does it cost') || msg.includes("what's the price")) {
+    return "Three plans:\n\n• **Starter $297/mo** — 50 leads/month. Email Guard, Sophie AI, full dashboard. Best for solo operators.\n• **Growth $597/mo** — 150 leads/month + 3 team seats. Scales with a small team.\n• **Scale $1,197/mo** — 500 leads/month, unlimited seats, priority support.\n\nExtra leads are $3 each on any plan. Most businesses on Starter see a meeting booked in the first week — one closed deal typically pays for 2–3 months. Want to see which plan fits your volume?";
+  }
+
+  if (msg.includes('upgrade') || msg.includes('change my plan') || msg.includes('change plan') || msg.includes('switch plan')) {
+    return "Go to **Settings → Billing** to upgrade or switch plans. Changes take effect immediately — you're pro-rated for the rest of the billing cycle. Need help picking the right tier?";
+  }
+
+  // ── Cancel / delete / email change ───────────────────────────────────────
+  if (msg.includes('how do i cancel') || msg.includes('cancel my subscription') || msg.includes('cancel my account') ||
+      (msg.includes('cancel') && msg.includes('plan'))) {
+    return "You can cancel anytime — **Settings → Billing → Cancel Plan**. No lock-in, no fees. Your account and data stay for 30 days so you can re-activate if you change your mind. Sophie stops calling and Email Guard disconnects the moment you cancel.";
+  }
+
+  if (msg.includes('delete my account') || msg.includes('delete account') || (msg.includes('delete') && msg.includes('account'))) {
+    return "Account deletion is in **Settings → scroll to Danger Zone** at the bottom. This permanently deletes all your data — leads, campaigns, proposals, everything. It can't be undone.\n\nIf you're just frustrated with something, tell me — I'd rather fix it than lose you.";
+  }
+
+  if ((msg.includes('change') || msg.includes('update')) && msg.includes('email') && (msg.includes('my email') || msg.includes('account email'))) {
+    return "Email changes go through **Settings → Account**. Firebase Auth sends a verification to your *current* email — click the link there to confirm the new one. If you've lost access to the old email, contact hello@getakai.ai and we'll sort it manually.";
+  }
+
+  // ── Team members ──────────────────────────────────────────────────────────
+  if (msg.includes('add a team member') || msg.includes('add team member') || msg.includes('invite') && msg.includes('team') ||
+      msg.includes('add a user') || msg.includes('add user')) {
+    return "Team seats are on Growth (3 seats, $597/mo) and Scale (unlimited seats, $1,197/mo).\n\nIf you're on one of those plans: **Settings → Team → Invite Member** — enter their email and they'll get a link.\n\nIf you're on Starter and need team access, upgrading to Growth is the move.";
+  }
+
+  // ── Can AKAI send emails ──────────────────────────────────────────────────
+  if ((msg.includes('akai') || msg.includes('ak')) && msg.includes('send email') ||
+      msg.includes('send emails for me') || msg.includes('auto send email') ||
+      msg.includes('automatically send') && msg.includes('email')) {
+    return "Yes. Email Guard connects to your Gmail or Outlook via OAuth, reads enquiries as they land, generates personalised proposals using AI, and sends them from your own email address — looks like you wrote it personally.\n\nThe whole thing happens in minutes, not hours. Set it to auto-send or draft-for-review — your call. Want to connect your inbox now?";
+  }
+
+  // ── Mobile ────────────────────────────────────────────────────────────────
+  if (msg.includes('mobile') || msg.includes('iphone') || msg.includes('android') || msg.includes('phone') ||
+      msg.includes('work on mobile') || msg.includes('app')) {
+    return "AKAI is fully responsive — works great in your phone browser at getakai.ai. For a native app experience, it also works through **OpenClaw** on iPhone.\n\nEverything's synced — start a campaign on desktop, check results from your phone. What do you need to do on mobile?";
+  }
+
+  // ── Is this working / results / ROI ──────────────────────────────────────
+  if (msg.includes('is this working') || msg.includes('is it working') ||
+      msg.includes('what results') || msg.includes('am i getting results') ||
+      msg.includes('is akai working') || msg.includes('show me results')) {
+    return "Check your **Dashboard** for live metrics — calls made, leads qualified, meetings booked, proposals sent.\n\nQuick benchmark: if Sophie has called 20+ leads, expect 2–4 qualified. Email Guard should show you proposals auto-drafted vs. enquiries received. If numbers look low, the fix is usually the script or the lead list quality — I can review both. What are you seeing?";
+  }
+
+  if (msg.includes('how many leads') && (msg.includes('have i got') || msg.includes('have i gotten') || msg.includes('do i have'))) {
+    return "Your lead count is live in the **Sales module** — open it and you'll see your full pipeline broken down by status (called, qualified, booked, not answered).\n\nWant me to walk through your pipeline numbers?";
+  }
+
+  // ── New user onboarding ───────────────────────────────────────────────────
+  if (msg.includes('just signed up') || msg.includes('i just signed up') || msg.includes('new here') ||
+      msg.includes('what do i do first') || msg.includes('where do i start') || msg.includes('getting started') ||
+      msg.includes('how do i get started') || msg.includes('just created') && msg.includes('account')) {
+    const biz = userContext.businessName ? `for **${userContext.businessName}**` : '';
+    return `Welcome ${biz}! Here's the 3-step setup:\n\n**1. Complete your profile** — Settings → fill in business name, industry, location. Takes 2 minutes. This is how AK personalises everything for you.\n\n**2. Connect Email Guard** — link Gmail or Outlook so every enquiry gets a proposal drafted automatically. Most people see their first proposal within 24 hours.\n\n**3. Launch Sophie** — upload a lead list (CSV) or tell me your target market and I'll research leads for you. Sophie starts calling from your first scheduled window.\n\nWhich step do you want to tackle first?`;
+  }
+
+  // ── How to set up Sophie / Voice module ──────────────────────────────────
+  if (msg.includes('how do i set up sophie') || msg.includes('set up sophie') || msg.includes('sophie setup') ||
+      msg.includes('how to set up sophie') || msg.includes('configure sophie')) {
+    return "Sophie setup is in the **Voice module** — here's the flow:\n\n1. **Script** — opening line, qualifying question, call to action (I can write it for you)\n2. **Call hours** — default Mon–Fri 9am–5pm, adjustable by timezone\n3. **Your number** — Sophie calls from a number assigned to your account\n4. **Test call** — Sophie calls you first so you can hear exactly what your leads will hear\n5. **Go live** — upload leads or point her at a target market\n\nWant me to write Sophie's opening script for your business?";
+  }
 
   // ── Candidate outreach drafting ───────────────────────────────────────────
   const outreachMatch = msg.match(/draft (?:an? )?(?:outreach|message|intro) (?:for|to) (.+?)(?:,\s*(.+?))?(?:\s+at\s+(.+))?$/i)

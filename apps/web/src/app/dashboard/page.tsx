@@ -473,7 +473,10 @@ export default function DashboardPage() {
           'Content-Type': 'application/json',
           ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         };
-        const res = await fetch(`${RAILWAY_API}/api/stats/summary?userId=${user.uid}`, { headers });
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 10000);
+        const res = await fetch(`${RAILWAY_API}/api/stats/summary?userId=${user.uid}`, { headers, signal: ctrl.signal });
+        clearTimeout(timeoutId);
         if (!res.ok) throw new Error('Stats unavailable');
         const data = await res.json();
         if (!cancelled) {
@@ -500,9 +503,13 @@ export default function DashboardPage() {
     (async () => {
       try {
         const idToken = await user.getIdToken().catch(() => '');
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 10000);
         const res = await fetch(`${RAILWAY_API}/api/analytics/insights/${user.uid}`, {
           headers: { 'x-api-key': API_KEY, ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
+          signal: ctrl.signal,
         });
+        clearTimeout(timeoutId);
         if (!res.ok) throw new Error('Insights unavailable');
         const data = await res.json() as { insights: Insight[]; stats: Record<string, number>; period: string };
         if (!cancelled) setInsightsData({ ...data, loading: false });
@@ -520,9 +527,13 @@ export default function DashboardPage() {
     (async () => {
       try {
         const idToken = await user.getIdToken().catch(() => '');
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 10000);
         const res = await fetch(`${RAILWAY_API}/api/analytics/learnings/${user.uid}`, {
           headers: { 'x-api-key': API_KEY, ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
+          signal: ctrl.signal,
         });
+        clearTimeout(timeoutId);
         if (!res.ok) throw new Error('Learnings unavailable');
         const data = await res.json();
         if (!cancelled) {
@@ -548,9 +559,13 @@ export default function DashboardPage() {
     const fetchFeed = async () => {
       try {
         const idToken = await user.getIdToken().catch(() => '');
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 10000);
         const res = await fetch(`${RAILWAY_API}/api/analytics/feed/${user.uid}`, {
           headers: { 'x-api-key': API_KEY, ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
+          signal: ctrl.signal,
         });
+        clearTimeout(timeoutId);
         if (!res.ok) throw new Error('Feed unavailable');
         const data = await res.json() as { items: FeedItem[]; generatedAt: string };
         if (!cancelled) setFeedData({ items: data.items ?? [], generatedAt: data.generatedAt ?? '', loading: false });
@@ -581,7 +596,10 @@ export default function DashboardPage() {
         };
 
         // Enquiries — proposals + hot leads + follow-ups
-        const enquiriesRes = await fetch(`${RAILWAY_API}/api/email/enquiries/${user.uid}`, { headers });
+        const enquiriesCtrl = new AbortController();
+        const enquiriesTimeout = setTimeout(() => enquiriesCtrl.abort(), 10000);
+        const enquiriesRes = await fetch(`${RAILWAY_API}/api/email/enquiries/${user.uid}`, { headers, signal: enquiriesCtrl.signal });
+        clearTimeout(enquiriesTimeout);
         if (enquiriesRes.ok) {
           const d = await enquiriesRes.json();
           if (!cancelled) {
@@ -603,7 +621,10 @@ export default function DashboardPage() {
         }
 
         // Calendar appointments
-        const calRes = await fetch(`${RAILWAY_API}/api/calendar/appointments/${user.uid}`, { headers });
+        const calCtrl = new AbortController();
+        const calTimeout = setTimeout(() => calCtrl.abort(), 10000);
+        const calRes = await fetch(`${RAILWAY_API}/api/calendar/appointments/${user.uid}`, { headers, signal: calCtrl.signal });
+        clearTimeout(calTimeout);
         if (calRes.ok) {
           const d = await calRes.json();
           if (!cancelled) {

@@ -429,7 +429,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
         </div>
 
         {/* Headline */}
-        <h1 className="fade-up fade-up-2 text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight max-w-4xl">
+        <h1 className="fade-up fade-up-2 text-4xl sm:text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight max-w-4xl">
           <span className="text-white">AK</span><span className="text-[#D4AF37]"> Your AI</span>
           <br />
           <span className="gradient-text">Business Partner</span>
@@ -446,7 +446,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
         </p>
 
         {/* CTA row */}
-        <div className="fade-up fade-up-4 flex flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-3xl">
+        <div className="fade-up fade-up-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-3xl">
           <Button
             href={!loading && user ? '/dashboard' : undefined}
             onClick={!loading && user ? undefined : () => onOpenCapture?.()}
@@ -477,7 +477,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
 
         {/* Social proof stats bar */}
         <div className="fade-up fade-up-4 w-full max-w-3xl">
-          <div className="glass rounded-2xl px-8 py-5 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.06]">
+          <div className="glass rounded-2xl px-4 sm:px-8 py-5 grid grid-cols-2 md:grid-cols-4 gap-y-4 md:gap-y-0 divide-x-0 md:divide-x divide-white/[0.06]">
             <div className="flex flex-col items-center gap-1 px-4">
               <span className="text-3xl font-black text-white tracking-tight">9</span>
               <span className="text-xs text-white/40 uppercase tracking-wider">AI Specialists</span>

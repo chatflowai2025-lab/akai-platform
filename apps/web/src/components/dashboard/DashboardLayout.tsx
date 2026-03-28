@@ -7,6 +7,7 @@ import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { isSafeMode } from '@/lib/beta-config';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import type { ChatMessage } from '@/lib/shared-types';
@@ -586,7 +587,9 @@ function DashboardLayoutInner({
               <span className="text-yellow-400 text-xs font-semibold">🧪 Beta / Safe Mode — Full experience. No live calls or emails will be sent.</span>
             </div>
           )}
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </div>
         {!noChat && (
           <div className="hidden md:flex">

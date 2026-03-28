@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -136,8 +137,7 @@ export default function Sidebar() {
         <div className="pt-2 mt-1 border-t border-[#1a1a1a]">
           <div className="px-3 py-2 mb-1 flex items-center gap-2">
             {avatarPhotoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarPhotoUrl} alt="Avatar" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+              <Image src={avatarPhotoUrl} alt="Avatar" width={28} height={28} className="rounded-full object-cover flex-shrink-0" />
             ) : (
               <div
                 className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black text-black"

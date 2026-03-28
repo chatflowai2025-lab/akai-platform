@@ -184,6 +184,31 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
         </button>
       </div>
 
+      {/* Action tiles */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-center w-full max-w-2xl mb-10">
+        <a href="/health" className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-purple-500/40 hover:bg-purple-500/5 rounded-2xl px-5 py-4 transition-all group text-left">
+          <span className="text-2xl">🩺</span>
+          <div>
+            <p className="text-white font-semibold text-sm group-hover:text-purple-300 transition">Free Digital Health Check</p>
+            <p className="text-gray-500 text-xs mt-0.5">See your business blind spots in 60s</p>
+          </div>
+        </a>
+        <button onClick={onOpenCapture} className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-green-500/40 hover:bg-green-500/5 rounded-2xl px-5 py-4 transition-all group text-left">
+          <span className="text-2xl">🎙️</span>
+          <div>
+            <p className="text-white font-semibold text-sm group-hover:text-green-300 transition">Try Live AI Agent</p>
+            <p className="text-gray-500 text-xs mt-0.5">Sophie calls you in under 60 seconds</p>
+          </div>
+        </button>
+        <a href="/dashboard" className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 rounded-2xl px-5 py-4 transition-all group text-left">
+          <span className="text-2xl">⚡</span>
+          <div>
+            <p className="text-white font-semibold text-sm group-hover:text-[#D4AF37] transition">Launch Your AI Team</p>
+            <p className="text-gray-500 text-xs mt-0.5">10 agents live in under 5 minutes</p>
+          </div>
+        </a>
+      </div>
+
       {/* Stats bar */}
       <div className="w-full max-w-3xl bg-[#111] border border-[#1f1f1f] rounded-2xl px-6 py-5 flex flex-wrap justify-center gap-y-4">
         {[

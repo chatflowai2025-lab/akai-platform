@@ -793,9 +793,9 @@ function SitePreview({ generatedSite, businessName, industry, location, colorSch
         </button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* LEFT: full website preview */}
-        <div ref={previewRef} className="flex-1 overflow-y-auto" style={{ background: '#0d0d0d' }}>
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        {/* TOP/LEFT: full website preview */}
+        <div ref={previewRef} className="flex-1 overflow-y-auto min-h-0" style={{ background: '#0d0d0d' }}>
           {/* Browser chrome */}
           <div className="sticky top-0 z-20 flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-[#2a2a2a]">
             <div className="flex gap-1.5">
@@ -926,8 +926,8 @@ function SitePreview({ generatedSite, businessName, industry, location, colorSch
           </div>
         </div>
 
-        {/* RIGHT: sidebar — Publish always pinned top, rest scrolls */}
-        <div className="w-72 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col bg-[#0a0a0a] overflow-hidden">
+        {/* BOTTOM/RIGHT: sidebar — Publish always pinned top, rest scrolls */}
+        <div className="w-full lg:w-72 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-[#1f1f1f] flex flex-col bg-[#0a0a0a] overflow-hidden max-h-64 lg:max-h-none">
 
           {/* Publish — always visible, never scrolls away */}
           <div className="p-4 border-b border-[#1f1f1f] flex-shrink-0">
