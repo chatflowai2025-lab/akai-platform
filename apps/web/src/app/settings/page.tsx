@@ -287,6 +287,7 @@ export default function SettingsPage() {
 
       // Fire-and-forget: also update voiceConfig subcollection so Sophie has latest context.
       // This is intentionally NOT awaited — a failure here must NOT block the main save UX.
+      // eslint-disable-next-line -- Raw subcollection path intentional: 'users/{uid}/voiceConfig/config' is the canonical voiceConfig subcollection path (FIRESTORE_SCHEMA.md). No schema helper exists for subcollection doc refs.
       setDoc(doc(db, 'users', user.uid, 'voiceConfig', 'config'), {
         businessName: bizForm.businessName,
         industry: bizForm.industry,

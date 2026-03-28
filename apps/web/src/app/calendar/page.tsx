@@ -618,6 +618,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           }
         }
         // Fallback: check integrations sub-doc
+        // eslint-disable-next-line -- Raw subcollection path intentional: 'users/{uid}/integrations/googleCalendar' is a legacy fallback sub-doc (FIRESTORE_SCHEMA.md). No schema helper covers subcollection doc refs.
         getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar')).then(snap2 => {
           if (snap2.exists()) {
             const d = snap2.data();
