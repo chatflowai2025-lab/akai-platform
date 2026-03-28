@@ -182,7 +182,7 @@ ${opts.industry ? `<p style="margin:0;color:#D4AF37;font-size:12px;letter-spacin
 <tr><td style="padding:0 40px;"><div style="border-top:1px solid #eee;height:1px;font-size:0;line-height:0;">&nbsp;</div></td></tr>
 <tr><td style="background:#f5f5f5;padding:24px 40px;text-align:center;border-radius:0 0 10px 10px;">
 <p style="margin:0 0 10px;color:#666;font-size:13px;font-family:Arial,sans-serif;">AKAI &nbsp;&middot;&nbsp; <a href="https://getakai.ai" style="color:#888;text-decoration:none;">getakai.ai</a></p>
-<p style="margin:0;font-size:11px;color:#aaa;font-family:Arial,sans-serif;">You received this proposal from AKAI. <a href="#" style="color:#aaa;text-decoration:underline;">Unsubscribe</a></p>
+<p style="margin:0;font-size:11px;color:#aaa;font-family:Arial,sans-serif;">You received this proposal from AKAI. <a href="mailto:support@getakai.ai?subject=Unsubscribe" style="color:#aaa;text-decoration:underline;">Unsubscribe</a></p>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }
