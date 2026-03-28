@@ -91,6 +91,8 @@ export default function SettingsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [notifSaved, setNotifSaved] = useState(false);
   const [notifError, setNotifError] = useState<string | null>(null);
+  const [telegramTesting, setTelegramTesting] = useState(false);
+  const [telegramTestResult, setTelegramTestResult] = useState<string | null>(null);
   const [resettingOnboarding, setResettingOnboarding] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -335,6 +337,33 @@ export default function SettingsPage() {
       setNotifError(`Save failed: ${msg}. Please try again.`);
     } finally {
       setNotifSaving(false);
+    }
+  };
+
+  const testTelegramNotification = async () => {
+    if (!user || telegramTesting) return;
+    setTelegramTesting(true);
+    setTelegramTestResult(null);
+    try {
+      const auth = getFirebaseAuth();
+      if (!auth?.currentUser) throw new Error('Not authenticated');
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/telegram/test', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setTelegramTestResult('✅ Test sent! Check your Telegram.');
+      } else {
+        setTelegramTestResult(`❌ ${data.error || 'Not connected yet — click Connect Telegram first.'}`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setTelegramTestResult(`❌ Error: ${msg}`);
+    } finally {
+      setTelegramTesting(false);
+      setTimeout(() => setTelegramTestResult(null), 5000);
     }
   };
 
@@ -807,36 +836,60 @@ export default function SettingsPage() {
             </div>
           </div>
 
-            {/* Telegram card */}
+            {/* Telegram Notifications — per-client deep link connect */}
             <div className={`rounded-xl border transition-colors ${
-              notifPrefs.telegram ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'
+              notifPrefs.telegramChatId ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'
             }`}>
-              <button
-                onClick={() => setNotifPrefs(p => ({ ...p, telegram: !p.telegram }))}
-                className="w-full flex items-start gap-4 px-4 py-4 text-left hover:opacity-90 transition"
-              >
+              <div className="flex items-start gap-4 px-4 py-4">
                 <span className="text-2xl mt-0.5">✈️</span>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-white">Telegram</p>
-                  <p className="text-xs text-gray-500 mt-0.5">We&apos;ll message you on Telegram</p>
+                  <p className="text-sm font-semibold text-white">Telegram Notifications</p>
+                  {notifPrefs.telegramChatId ? (
+                    <p className="text-xs text-green-400 mt-0.5">✅ Connected — receiving briefings on Telegram</p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-0.5">Get lead alerts, meeting bookings, and daily briefings in Telegram</p>
+                  )}
                 </div>
-                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${
-                  notifPrefs.telegram ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'
-                }`}>
-                  {notifPrefs.telegram && <span className="text-black text-[10px] font-black">✓</span>}
-                </div>
-              </button>
-              {notifPrefs.telegram && (
-                <div className="px-4 pb-4">
-                  <input
-                    type="text"
-                    value={notifPrefs.telegramChatId}
-                    onChange={e => setNotifPrefs(p => ({ ...p, telegramChatId: e.target.value }))}
-                    placeholder="Your Telegram username or chat ID"
-                    className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
-                  />
-                  <p className="text-xs text-gray-600 mt-1.5">Start a chat with @AKAI_Notify_Bot first, then enter your username</p>
-                </div>
+              </div>
+              <div className="px-4 pb-4 flex flex-wrap gap-2">
+                {!notifPrefs.telegramChatId ? (
+                  <a
+                    href={user?.uid ? `https://t.me/mmwinningbot?start=${user.uid}` : 'https://t.me/mmwinningbot'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#229ED9] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition"
+                  >
+                    Connect Telegram →
+                  </a>
+                ) : (
+                  <>
+                    <button
+                      onClick={testTelegramNotification}
+                      disabled={telegramTesting}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-white rounded-xl text-sm font-medium hover:border-[#D4AF37]/30 transition disabled:opacity-50"
+                    >
+                      {telegramTesting ? (
+                        <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Testing…</>
+                      ) : '📨 Test notification'}
+                    </button>
+                    <a
+                      href={user?.uid ? `https://t.me/mmwinningbot?start=${user.uid}` : 'https://t.me/mmwinningbot'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-xs hover:border-[#3a3a3a] transition"
+                    >
+                      Reconnect
+                    </a>
+                  </>
+                )}
+              </div>
+              {telegramTestResult && (
+                <p className="px-4 pb-3 text-xs text-gray-300">{telegramTestResult}</p>
+              )}
+              {!notifPrefs.telegramChatId && (
+                <p className="px-4 pb-3 text-xs text-gray-600">
+                  Click &ldquo;Connect Telegram&rdquo; → opens Telegram → bot links your account automatically
+                </p>
               )}
             </div>
 
