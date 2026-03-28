@@ -415,7 +415,7 @@ const HERO_BANNERS = [
   {
     white: 'Your AI Team.',
     gold: 'Zero Salaries.',
-    sub: '9 AI specialists running your sales, email, voice, web, ads, and social. From $147/mo.',
+    sub: '10 AI specialists running your sales, email, voice, web, ads, and social. From $147/mo.',
   },
   {
     white: 'Stop Paying Agencies',
@@ -544,8 +544,8 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
         <div className="fade-up fade-up-4 w-full max-w-3xl">
           <div className="glass rounded-2xl px-4 sm:px-8 py-5 grid grid-cols-2 md:grid-cols-4 gap-y-4 md:gap-y-0 divide-x-0 md:divide-x divide-white/[0.06]">
             <div className="flex flex-col items-center gap-1 px-4">
-              <span className="text-3xl font-black text-white tracking-tight">9</span>
-              <span className="text-xs text-white/40 uppercase tracking-wider">AI Specialists</span>
+              <span className="text-3xl font-black text-white tracking-tight">10</span>
+              <span className="text-xs text-white/40 uppercase tracking-wider">AI Agents</span>
             </div>
             <div className="flex flex-col items-center gap-1 px-4">
               <span className="text-3xl font-black text-white tracking-tight">24/7</span>
