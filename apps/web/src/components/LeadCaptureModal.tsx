@@ -50,9 +50,9 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
     onClose();
   };
 
-  // Auto-fire Sophie call on success
+  // Auto-fire Sophie call on success — runs once when status flips to 'done'
   useEffect(() => {
-    if (status !== 'done' || !form.phone || callStatus !== 'idle') return;
+    if (status !== 'done' || !form.phone) return;
     setCallStatus('calling');
     fetch('/api/demo-call', {
       method: 'POST',
@@ -66,8 +66,9 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
       }),
     })
       .then(() => setCallStatus('called'))
-      .catch(() => setCallStatus('called')); // non-fatal — show success regardless
-  }, [status]);
+      .catch(() => setCallStatus('called'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]); // intentional: only fire once when status changes to 'done'
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
