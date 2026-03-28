@@ -267,3 +267,145 @@ NEVER SHIP IF:
 
 *Retrospective authored by: Platform Agent / CTO / Creative Director — MM (AKAI)*  
 *This document is permanent. Do not delete. Update it when the gate evolves.*
+
+---
+
+# RCA — Root Cause Analysis Report
+**Date:** 2026-03-28  
+**Authored by:** RCA Agent — MM (AKAI)  
+**Trigger:** Post-incident analysis of 5 known failure classes shipped to production
+
+---
+
+## RCA #1 — Email Delivery Failures (Resend → Gmail SMTP)
+
+**What happened:**  
+Welcome emails and health check emails were silently dropped. Users never received onboarding emails. No error surfaced in logs or monitoring — the system appeared to work fine.
+
+**Root cause (real, not surface):**  
+Resend requires a verified sending domain. `aiclozr.com` was never registered or verified in the Resend dashboard. Resend's API returns HTTP 200 even for unverified domains — it accepts the request but silently drops the email. The code had no delivery confirmation check.
+
+**Why CI/QA didn't catch it:**  
+No integration test for email delivery existed. The QA gate only checked HTTP responses from the web app. There was no end-to-end email send test, no mailbox assertion, and no Resend domain-verification check in the deploy pipeline.
+
+**What now catches it:**  
+- Pre-deploy check: `scripts/qa.sh` should be extended with an email smoke test (send to a test mailbox and confirm receipt, or call Resend's domain verification API endpoint before deploy)
+- Gmail SMTP is now the sending method (no domain verification required for authenticated accounts)
+- Documentation: NEVER use Resend with an unverified domain — add domain verification as step 1 of any Resend setup
+
+**Prevention gate:**  
+Document + process gate. No code gate yet for automated delivery verification.
+
+**Status: CLOSED** (switched to Gmail SMTP) | Automated gate: OPEN (email smoke test not yet in qa.sh)
+
+---
+
+## RCA #2 — Railway API URL Hardcoded in Frontend
+
+**What happened:**  
+The Railway API server URL (`api-server-production-2a27.up.railway.app`) was hardcoded directly in frontend TypeScript/TSX components instead of read from environment variables. This exposed internal infrastructure details in the compiled JS bundle — visible to anyone who inspects the source.
+
+**Root cause (real, not surface):**  
+Developer convenience over discipline. During rapid development, URLs were pasted directly into `fetch()` calls without a second thought. No lint rule or code review checklist item flagged it.
+
+**Why CI/QA didn't catch it:**  
+No grep/static analysis for hardcoded infrastructure URLs in the CI pipeline. The QA gate only checked the deployed HTML, not the source code. Security audit did not cover frontend bundle content.
+
+**What now catches it:**  
+- `scripts/qa.sh` now includes: `grep -r "api-server-production-2a27" apps/web/src/ --include="*.ts" --include="*.tsx"` — fails if any match found
+- All API URLs must use `process.env.NEXT_PUBLIC_API_URL` (set in Vercel env vars)
+
+**Prevention gate:** CLOSED — grep check added to qa.sh in this commit
+
+**Status: CLOSED**
+
+---
+
+## RCA #3 — Next.js CVE (14.2.3 Auth Bypass)
+
+**What happened:**  
+A known middleware auth bypass vulnerability (CVE in Next.js 14.2.3) was shipped to production. Any request could bypass middleware-enforced authentication under specific conditions.
+
+**Root cause (real, not surface):**  
+No automated CVE/dependency audit in the CI pipeline. `pnpm audit` was never run as part of the deploy or merge gate. The vulnerability existed in `next@14.2.3` and would have been flagged immediately by any standard audit.
+
+**Why CI/QA didn't catch it:**  
+The QA gate (`scripts/qa.sh`) tests live HTTP responses — it has no visibility into dependency vulnerability databases. No pre-push hook or CI step ran `pnpm audit`. No process existed to check for security advisories on dependency upgrades.
+
+**What now catches it:**  
+- `pnpm audit --audit-level=high` added to `scripts/qa.sh` — fails the gate on any high or critical CVE
+- This runs against the local `node_modules` and `pnpm-lock.yaml` before any deploy
+
+**Prevention gate:** CLOSED — CVE audit added to qa.sh in this commit
+
+**Status: CLOSED**
+
+---
+
+## RCA #4 — Firebase Admin Crash (Welcome Email Route)
+
+**What happened:**  
+The welcome email API route crashed entirely when the Firestore Admin SDK threw an error. The crash was unhandled — the entire route returned a 500, silently failing all subsequent logic (email send, user state update).
+
+**Root cause (real, not surface):**  
+No defensive error handling around Firebase Admin SDK calls. The assumption was "Firestore is reliable, it won't throw." In reality, Admin SDK calls can throw for many reasons: network issues, permission errors, malformed document paths, cold-start initialisation races. A single unguarded `await db.collection(...).get()` can take down an entire route.
+
+**Why CI/QA didn't catch it:**  
+No integration test triggered the welcome email route in a test environment. The QA gate only tested the frontend. No error boundary existed in the API route to isolate Admin SDK failures from the rest of the route logic.
+
+**What now catches it:**  
+- **Coding standard (mandatory):** All Firebase Admin SDK calls MUST be wrapped in `try/catch`. Pattern:
+  ```typescript
+  // ✅ REQUIRED for all Admin SDK calls
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    // use doc
+  } catch (err) {
+    console.error('[Firebase Admin] Firestore read failed:', err);
+    // degrade gracefully — do NOT re-throw unless caller handles it
+  }
+  ```
+- Comment standard: Any Admin SDK call without a `try/catch` is a blocking PR review comment
+- Future: add ESLint rule or custom plugin to flag unguarded async calls to known SDK methods
+
+**Prevention gate:** OPEN (coding standard documented, no automated lint rule yet)
+
+**Status: CLOSED** (bug fixed) | Automated gate: OPEN (lint rule pending)
+
+---
+
+## RCA #5 — themeColor Deprecation (8 Pages)
+
+**What happened:**  
+Next.js 14 deprecated the `themeColor` field in the `metadata` export. 8 pages used it, generating build warnings on every `pnpm build`. Warnings were ignored/unnoticed and shipped to production without resolution.
+
+**Root cause (real, not surface):**  
+No process to treat build warnings as blocking. Developers saw yellow text and moved on. There was no Next.js upgrade checklist, no deprecation monitoring, and the QA gate only tested the deployed site — not the build output.
+
+**Why CI/QA didn't catch it:**  
+`scripts/qa.sh` runs against the live deployed URL. It never inspects build output. No CI step captured `pnpm build` stderr and checked for deprecation warnings. "It builds" was treated as sufficient.
+
+**What now catches it:**  
+- `scripts/qa.sh` now includes: `pnpm build 2>&1 | grep -i "deprecated"` — fails the gate if any deprecation warnings appear in build output
+- Rule: build warnings are build failures. Zero-warning policy on `pnpm build`.
+
+**Prevention gate:** CLOSED — deprecation check added to qa.sh in this commit
+
+**Status: CLOSED**
+
+---
+
+## RCA Summary Table
+
+| # | Failure | Real Root Cause | Gate Added | Status |
+|---|---------|-----------------|------------|--------|
+| 1 | Email silent failures | Resend drops unverified domain silently; no delivery test | Process gate (switched to Gmail SMTP) | CLOSED / auto gate OPEN |
+| 2 | Hardcoded Railway URL | No grep/lint for infrastructure URLs in source | `grep` check in qa.sh | CLOSED |
+| 3 | Next.js CVE shipped | No CVE audit in pipeline | `pnpm audit --audit-level=high` in qa.sh | CLOSED |
+| 4 | Firebase Admin crash | Unguarded Admin SDK calls; no try/catch standard | Coding standard documented | CLOSED / lint rule OPEN |
+| 5 | themeColor deprecation | Build warnings not treated as failures | `pnpm build \| grep deprecated` in qa.sh | CLOSED |
+
+---
+
+*RCA authored by: RCA Agent — MM (AKAI)*  
+*Date: 2026-03-28. Do not delete. Append future RCAs below this block.*

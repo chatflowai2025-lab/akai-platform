@@ -108,6 +108,54 @@ echo "┌─ SUITE 4: Security"
 check "HSTS header present" "$(echo "$HEADERS" | grep -qi 'strict-transport-security' && echo pass || echo fail)"
 check "No secret keys in HTML" "$(echo "$HTML" | grep -qE 'sk_live_|whsec_|re_[A-Za-z0-9]{20}' && echo fail || echo pass)"
 
+# ── Suite 5a: Security — CVE Audit (RCA #3) ──────────────────────────────────
+echo ""
+echo "┌─ SUITE 5a: CVE Audit"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if [ -f "$REPO_ROOT/pnpm-lock.yaml" ]; then
+  CVE_OUTPUT=$(cd "$REPO_ROOT" && pnpm audit --audit-level=high 2>&1 || true)
+  CVE_HIGH=$(echo "$CVE_OUTPUT" | grep -cE '[0-9]+ high|[0-9]+ critical' || true)
+  # pnpm audit exits non-zero if vulnerabilities found — check exit code
+  if (cd "$REPO_ROOT" && pnpm audit --audit-level=high > /dev/null 2>&1); then
+    check "No high/critical CVEs (pnpm audit)" "pass"
+  else
+    check "No high/critical CVEs (pnpm audit)" "fail" "run: pnpm audit --audit-level=high"
+  fi
+else
+  echo "  ⚠️  pnpm-lock.yaml not found — skipping CVE audit (run from repo root or pass correct BASE_URL)"
+fi
+
+# ── Suite 5b: Hardcoded Railway URL scan (RCA #2) ─────────────────────────────
+echo ""
+echo "┌─ SUITE 5b: Hardcoded URL Scan"
+if [ -d "$REPO_ROOT/apps/web/src" ]; then
+  HARDCODED=$(grep -r "api-server-production-2a27" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null || true)
+  if [ -z "$HARDCODED" ]; then
+    check "No hardcoded Railway URL in frontend source" "pass"
+  else
+    check "No hardcoded Railway URL in frontend source" "fail" "hardcoded URL found — use NEXT_PUBLIC_API_URL env var instead"
+    echo "$HARDCODED" | head -5
+  fi
+else
+  echo "  ⚠️  apps/web/src not found — skipping hardcoded URL scan"
+fi
+
+# ── Suite 5c: Build deprecation warnings (RCA #5) ────────────────────────────
+echo ""
+echo "┌─ SUITE 5c: Build Deprecation Check"
+if [ -f "$REPO_ROOT/package.json" ]; then
+  BUILD_WARNINGS=$(cd "$REPO_ROOT" && pnpm build 2>&1 | grep -i "deprecated" || true)
+  if [ -z "$BUILD_WARNINGS" ]; then
+    check "No deprecation warnings in pnpm build" "pass"
+  else
+    WARN_COUNT=$(echo "$BUILD_WARNINGS" | wc -l | tr -d ' ')
+    check "No deprecation warnings in pnpm build" "fail" "$WARN_COUNT deprecation warning(s) found — fix before deploy"
+    echo "$BUILD_WARNINGS" | head -10
+  fi
+else
+  echo "  ⚠️  package.json not found at repo root — skipping deprecation check"
+fi
+
 # ── Suite 5: /onboard route ───────────────────────────────────────────────────
 echo ""
 echo "┌─ SUITE 5: Onboard route"
