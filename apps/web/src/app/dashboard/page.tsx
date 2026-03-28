@@ -450,9 +450,13 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
-  // ── Welcome email ──────────────────────────────────────────────────────────
+  // ── Welcome email — fires once per browser session, Firestore guards server-side ──
   useEffect(() => {
     if (!user) return;
+    // Client-side session guard — never fires twice in the same tab session
+    const sessionKey = `akai_welcome_sent_${user.uid}`;
+    if (sessionStorage.getItem(sessionKey)) return;
+    sessionStorage.setItem(sessionKey, '1');
     fetch('/api/welcome', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -985,16 +985,10 @@ function SetupWizard({
             />
           </div>
 
-          <button
-            onClick={fireTestCall}
-            disabled={!testPhone}
-            className="flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-40"
-          >
-            📞 Call me now
-          </button>
-          {isSafeMode(userEmail) && (
-            <p className="text-xs text-yellow-500/60">Safe mode active — test call will be simulated</p>
-          )}
+          <div className="flex items-center gap-3 px-4 py-3 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl">
+            <span className="text-yellow-500 text-sm">⏳</span>
+            <p className="text-xs text-gray-500 leading-relaxed">Test calls are temporarily disabled while we finalise your account setup. Aaron will reach out directly to run your first call together.</p>
+          </div>
         </div>
       )}
 
