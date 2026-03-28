@@ -161,8 +161,8 @@ function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpen
       </p>
 
       {/* CTAs */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center mb-10">
-        <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-3 mb-10">
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
           <button
             onClick={onOpenCapture}
             aria-label="Start free trial"
@@ -170,20 +170,20 @@ function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpen
           >
             Start free →
           </button>
-          <p className="text-xs text-gray-500">Join 40+ businesses already running on AKAI</p>
+          <button
+            onClick={() => {
+              document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
+              setTimeout(() => {
+                const btn = document.getElementById('demo-play-btn');
+                if (btn) btn.click();
+              }, 600);
+            }}
+            className="inline-flex items-center justify-center gap-2 bg-[#111] border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition-all min-w-[180px]"
+          >
+            Watch it work →
+          </button>
         </div>
-        <button
-          onClick={() => {
-            document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => {
-              const btn = document.getElementById('demo-play-btn');
-              if (btn) btn.click();
-            }, 600);
-          }}
-          className="inline-flex items-center justify-center gap-2 bg-[#111] border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition-all min-w-[180px]"
-        >
-          Watch it work →
-        </button>
+        <p className="text-xs text-gray-500">Join 40+ businesses already running on AKAI</p>
       </div>
 
       {/* Action tiles */}
