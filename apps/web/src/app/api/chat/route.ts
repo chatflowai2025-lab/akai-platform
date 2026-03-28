@@ -3,9 +3,11 @@ import Anthropic from '@anthropic-ai/sdk';
 import { checkRequestScope, type UserPlan } from '@/lib/safety-gates';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 
-const SYSTEM_PROMPT = `You are AK, the AI brain inside AKAI — a fully autonomous AI business operating system that runs businesses 24/7.
+const SYSTEM_PROMPT = `You are AK — the AI co-founder inside AKAI. You're not a chatbot. You're the sharpest operator in the room, and you run businesses 24/7.
 
-PERSONALITY: Direct, warm, confident. Like a brilliant COO who gets things done. No filler phrases. Just results.
+PERSONALITY: Direct, sharp, opinionated. Like a founder who has seen everything and cuts straight to what matters. No filler. No "great question!" — just insight, action, and results. Think: brilliant co-founder who actually gives a damn about this business succeeding. Push back when needed. Celebrate wins. Call out what's not working.
+
+PROACTIVITY: Never just answer the question — suggest the next move. If someone says "I connected my Gmail", respond with what to do next. If they ask about leads, tell them what action would get more. Always end with a clear next step or question.
 
 PLATFORM STATUS: AKAI has 9 modules, ALL LIVE and operational:
 1. Sales — Sophie AI makes outbound calls, qualifies leads, books meetings
@@ -102,13 +104,20 @@ ROI / RESULTS:
 
 CAN AKAI SEND EMAILS: Yes — Email Guard does this. Connects to Gmail/Outlook via OAuth. Monitors enquiries, drafts proposals, sends from the user's own address. Looks like they wrote it personally.
 
+BUSINESS CONTEXT (from user's account — use this to personalise):
+- Business name: {businessName}
+- Industry: {industry}
+- Location: {location}
+- Plan: {plan}
+
 CRITICAL RULES:
 - Never mention aiclozr.vercel.app — everything is at getakai.ai
 - Keep responses under 200 words
 - Ask ONE question at a time
 - Be the smartest person in the room but never show off
 - When you save something, confirm it clearly: "✅ Done — [what was saved]"
-- If Claude API is available, use it for all responses. The mock fallback is only for emergencies.`;
+- If Claude API is available, use it for all responses. The mock fallback is only for emergencies.
+- Always suggest a concrete next step at the end of your response`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -692,11 +701,60 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ── Helper: send Telegram notification to Aaron ──────────────────────────
+    const tgNotify = (text: string) => {
+      const TG_TOKEN = '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
+      const AARON_CHAT = '8320254721';
+      fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: AARON_CHAT, text, parse_mode: 'Markdown' }),
+      }).catch(() => {});
+    };
+
     // ── Intent shortcuts — resolve before hitting Anthropic ──────────────────
     const intentMsg = message.toLowerCase().trim();
+
+    // Health check / website audit
+    if (intentMsg.includes('run health check') || intentMsg.includes('audit my website') || intentMsg.includes('health check')) {
+      return NextResponse.json({ message: "I'm running a health check on your website now. Check your email in 15 minutes for the full report. 🔍" });
+    }
+
+    // Connect email / Gmail
+    if (intentMsg.includes('connect email') || intentMsg.includes('how do i connect gmail') || intentMsg.includes('connect my gmail') || intentMsg.includes('set up gmail')) {
+      return NextResponse.json({ message: "Head to **Email Guard** → [https://getakai.ai/email-guard](https://getakai.ai/email-guard) and click **Connect Gmail**. Takes 30 seconds." });
+    }
+
+    // Connect calendar
+    if (intentMsg.includes('connect calendar') || intentMsg.includes('how do i connect google calendar') || intentMsg.includes('connect my calendar') || intentMsg.includes('set up calendar')) {
+      return NextResponse.json({ message: "Go to **Calendar** → [https://getakai.ai/calendar](https://getakai.ai/calendar) and click **Connect Google Calendar**." });
+    }
+
+    // Call leads / Sophie campaign
+    if (intentMsg.includes('call a lead') || intentMsg.includes('call my leads') || intentMsg.includes('start calling')) {
+      return NextResponse.json({ message: "Sophie is ready to call your leads. Go to **Sales** → [https://getakai.ai/sales](https://getakai.ai/sales) and hit **'Start Campaign'**. 📞" });
+    }
+
+    // Upgrade
+    if (intentMsg === 'upgrade' || intentMsg.includes('upgrade my plan') || intentMsg.includes('change plan') && !intentMsg.includes('how')) {
+      return NextResponse.json({ message: "To upgrade your plan, go to **Settings** → [https://getakai.ai/settings](https://getakai.ai/settings) or reply here with the plan you want and I'll sort it." });
+    }
+
+    // Cancel subscription — escalate to Aaron
+    if (intentMsg === 'cancel' || intentMsg.includes('cancel subscription') || intentMsg.includes('cancel my subscription') || intentMsg.includes('cancel my plan')) {
+      const userEmail = userContext.email || userContext.gmailEmail || 'unknown';
+      tgNotify(`🚨 *Cancellation Alert*\n\nUser ${userId} (${userEmail}) wants to cancel their subscription.\n\nTime: ${new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' })} AEST`);
+      return NextResponse.json({ message: "I've flagged this to Aaron who will reach out personally within the hour. He'll make sure everything is sorted for you. 🙏" });
+    }
+
+    // Help / what can AKAI do
+    if (intentMsg === 'help' || intentMsg === 'what can you do' || intentMsg.includes('what can akai do') || intentMsg.includes('what do you do') || intentMsg.includes('show me what you can do')) {
+      return NextResponse.json({ message: "Here's what AKAI does — 9 modules, all live:\n\n📞 **Sales** — Sophie AI calls your leads, qualifies them, books meetings\n✉️ **Email Guard** — Monitors inbox, auto-drafts proposals from every enquiry\n🌐 **Web** — Website audit + AI content, SEO fixes in seconds\n📣 **Ads** — Google & Meta campaigns built with AI copy, ready to launch\n🗣️ **Voice** — Configure Sophie's script, voice, call hours\n🎯 **Recruit** — Source candidates, write JDs, screen applicants with AI\n📱 **Social** — Month of content across Instagram, LinkedIn, Facebook\n📄 **Proposals** — Professional client proposals generated in seconds\n📅 **Calendar** — Google/Outlook sync, meetings auto-booked by Sophie\n\nWhat do you want to tackle first?" });
+    }
+
     if (userId !== 'anonymous') {
-      // "show my leads"
-      if (intentMsg.includes('show my leads') || intentMsg.includes('my leads') || intentMsg === 'leads') {
+      // "show my leads" / "how many leads"
+      if (intentMsg.includes('show my leads') || intentMsg.includes('how many leads') || intentMsg.includes('my leads') || intentMsg === 'leads') {
         let leadsCount: number | null = null;
         try {
           const db = getAdminFirestore();
@@ -801,10 +859,16 @@ SALES CONVERSATION RULES:
         ? '\n\nUSER ACCOUNT CONTEXT (already known, use this to personalise responses):\n' +
           Object.entries(userContext).map(([k,v]) => v ? `- ${k}: ${v}` : '').filter(Boolean).join('\n')
         : '';
+      // Inject business context into system prompt placeholders
+      const populatedSystemPrompt = SYSTEM_PROMPT
+        .replace('{businessName}', userContext.businessName || userContext.onboardingBusinessName || 'Not set')
+        .replace('{industry}', userContext.industry || userContext.onboardingIndustry || 'Not set')
+        .replace('{location}', userContext.location || userContext.onboardingLocation || 'Not set')
+        .replace('{plan}', userContext.plan || userContext.planTier || 'Trial');
       const response = await client.messages.create({
         model: 'claude-haiku-4-5',
         max_tokens: 400,
-        system: SYSTEM_PROMPT + contextBlock + moduleContext + conversationMemory,
+        system: populatedSystemPrompt + contextBlock + moduleContext + conversationMemory,
         messages,
       });
       const content0 = response.content[0];

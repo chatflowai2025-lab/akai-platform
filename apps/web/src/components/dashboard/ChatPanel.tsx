@@ -11,6 +11,13 @@ const INITIAL: ChatMessage = {
   timestamp: new Date().toISOString(),
 };
 
+const SUGGESTED_PROMPTS = [
+  "What should I do first?",
+  "Run a health check on my site",
+  "Show my leads",
+  "Connect my email",
+];
+
 interface ChatState {
   step: string;
   data: Record<string, string>;
@@ -151,6 +158,21 @@ export default function ChatPanel() {
             )}
           </div>
         ))}
+        {/* Suggested prompt chips — show after welcome message when chat is idle */}
+        {messages.length === 1 && !loading && (
+          <div className="flex flex-col gap-2 mt-2">
+            {SUGGESTED_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                onClick={() => sendButton(prompt)}
+                disabled={loading}
+                className="text-left text-xs px-3 py-2 rounded-lg border border-[#1f1f1f] text-gray-400 hover:border-[#D4AF37]/40 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition disabled:opacity-40"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
         {loading && (
           <div className="text-xs text-gray-500 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
