@@ -496,6 +496,66 @@ export default function SHEDemoPage() {
         </div>
       </section>
 
+      {/* What just happened? — AKAI Intelligence Explainer */}
+      <section className="bg-[#0a0a0a] border-t border-[#1f1f1f] py-14 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div
+            className="rounded-2xl p-8 md:p-10"
+            style={{
+              background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)',
+              border: '1px solid #D4AF37',
+              boxShadow: '0 0 40px rgba(212,175,55,0.06)',
+            }}
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] animate-pulse" />
+              <h3 className="text-white font-black text-2xl">What just happened?</h3>
+            </div>
+            <div className="space-y-4">
+              {[
+                {
+                  icon: '📞',
+                  text: 'Sophie just called that lead using AKAI\'s autonomous call engine',
+                  sub: 'Call initiated within 60 seconds of enquiry — no human needed',
+                },
+                {
+                  icon: '🧠',
+                  text: 'The call was logged and analyzed for pattern learning',
+                  sub: 'Duration, tone, outcome, and timing all fed into the intelligence layer',
+                },
+                {
+                  icon: '🤖',
+                  text: 'If no reply in 48h, AKAI will schedule a follow-up automatically',
+                  sub: 'No reminder needed — the system decides when, how, and what to say next',
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex gap-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-4 items-start"
+                >
+                  <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                  <div>
+                    <p className="text-white font-semibold text-sm mb-0.5">{item.text}</p>
+                    <p className="text-gray-500 text-xs">{item.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <p className="text-gray-500 text-sm mb-4">This is what AKAI does for every business, every day.</p>
+              <a
+                href="https://getakai.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-3 text-sm hover:opacity-90 transition-all"
+              >
+                Build yours at getakai.ai →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* AKAI Footer Strip */}
       <footer
         className="py-4 text-center"
