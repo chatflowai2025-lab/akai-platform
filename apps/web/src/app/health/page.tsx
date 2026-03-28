@@ -354,7 +354,7 @@ export default function HealthPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -446,7 +446,7 @@ export default function HealthPage() {
           <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl divide-y divide-[#1f1f1f]">
             {activityLoading ? (
               <div className="p-8 flex justify-center">
-                <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : activity.length === 0 ? (
               <div className="p-8 text-center text-gray-600 text-sm">No activity yet.</div>
@@ -522,7 +522,7 @@ export default function HealthPage() {
           <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl divide-y divide-[#1f1f1f]">
             {failuresLoading ? (
               <div className="p-6 flex justify-center">
-                <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : recentFailures.length === 0 ? (
               <div className="p-6 text-center text-gray-600 text-sm">No failures in the last 7 days.</div>
@@ -703,7 +703,7 @@ function WebAuditInline({
 
       {fetching && (
         <div className="flex flex-col items-center gap-3 py-8">
-          <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          <div role="status" aria-label="Loading" className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           <p className="text-white/50 text-sm">Analysing your digital presence...</p>
         </div>
       )}

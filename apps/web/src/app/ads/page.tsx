@@ -596,7 +596,7 @@ function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () 
 
         {loading && (
           <div className="flex items-center gap-3 text-gray-400 text-sm py-4 mt-4">
-            <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
             AI is building your campaign — this takes about 10 seconds…
           </div>
         )}
@@ -671,7 +671,7 @@ function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () 
               >
                 {launching ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                     Launching…
                   </>
                 ) : (
@@ -893,7 +893,7 @@ function MetaCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () =>
 
         {loading && (
           <div className="flex items-center gap-3 text-gray-400 text-sm py-4 mt-4">
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             AI is building your Meta campaign — this takes about 10 seconds…
           </div>
         )}
@@ -966,7 +966,7 @@ function MetaCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () =>
               >
                 {launching ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Launching…
                   </>
                 ) : (
@@ -1003,7 +1003,7 @@ export default function AdsPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

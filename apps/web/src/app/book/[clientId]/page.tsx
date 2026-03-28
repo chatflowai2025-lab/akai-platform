@@ -328,7 +328,7 @@ function BookingColumn({ clientId, bizName }: { clientId: string; bizName: strin
         {/* 7-day slot grid */}
         {!slotsLoaded ? (
           <div className="flex justify-center py-6">
-            <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -526,7 +526,7 @@ export default function BookingPage({ params }: { params: { clientId: string } }
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

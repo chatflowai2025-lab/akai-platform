@@ -142,7 +142,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                     {callStatus === 'called' ? `Calling ${form.phone} — answer in the next 60 seconds` : 'Your AI sales agent calls within 60 seconds'}
                   </p>
                 </div>
-                {callStatus === 'calling' && <div className="ml-auto w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />}
+                {callStatus === 'calling' && <div role="status" aria-label="Loading" className="ml-auto w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />}
               </div>
             </div>
 

@@ -383,7 +383,7 @@ function PipelineTab() {
             <div className="flex gap-2 mt-4">
               <button onClick={generateWithAI} disabled={generating || !newClient.trim()}
                 className="flex-1 py-2 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/10 disabled:opacity-40 transition flex items-center justify-center gap-1.5">
-                {generating ? <><span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> Generating...</> : '✨ Generate with AI'}
+                {generating ? <><span role="status" aria-label="Loading" className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> Generating...</> : '✨ Generate with AI'}
               </button>
               <button onClick={addProposal} disabled={!newClient.trim()}
                 className="flex-1 py-2 bg-[#D4AF37] text-black rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-40 transition">
@@ -879,7 +879,7 @@ export default function ProposalsPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -927,7 +927,7 @@ export default function ProposalsPage() {
                   className="w-full mb-3 py-2 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/10 transition flex items-center justify-center gap-1.5"
                 >
                   {loadingProspects ? (
-                    <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                    <span role="status" aria-label="Loading" className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
                   ) : '👤'} Pick from prospects
                 </button>
 
@@ -1017,7 +1017,7 @@ export default function ProposalsPage() {
                 >
                   {generating ? (
                     <>
-                      <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      <span role="status" aria-label="Loading" className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
                       Generating...
                     </>
                   ) : 'Generate Proposal →'}
@@ -1109,7 +1109,7 @@ export default function ProposalsPage() {
             <div className="overflow-y-auto flex-1 space-y-1">
               {loadingProspects ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                  <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : prospects.length === 0 ? (
                 <p className="text-xs text-gray-500 text-center py-8">No prospects found</p>

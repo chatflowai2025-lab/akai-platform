@@ -585,7 +585,7 @@ function AuditPanel({
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {loading && (
           <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-sm mx-auto text-center">
-            <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
             <div>
               <p className="text-sm text-white font-semibold">Analysing your site…</p>
               <p className="text-xs text-gray-500 mt-1">Hang tight — detailed results coming up.</p>
@@ -1220,7 +1220,7 @@ function BuildTab() {
         <div className="relative">
           <div className="w-20 h-20 rounded-2xl bg-[#1a1a1a] border border-[#D4AF37]/20 flex items-center justify-center text-4xl">🏗️</div>
           <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0a0a0a] border-2 border-[#D4AF37] flex items-center justify-center">
-            <div className="w-3 h-3 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-3 h-3 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
         <div className="text-center">
@@ -1391,7 +1391,7 @@ function CompareTab() {
         </div>
         {r.loading ? (
           <div className="flex items-center gap-2 py-4">
-            <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
             <span className="text-xs text-gray-500">Auditing…</span>
           </div>
         ) : r.error ? (
@@ -1459,7 +1459,7 @@ function CompareTab() {
           className="w-full py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-40 transition mb-6 flex items-center justify-center gap-2"
         >
           {running ? (
-            <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> Comparing…</>
+            <><span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> Comparing…</>
           ) : '⚡ Compare Now'}
         </button>
 
@@ -1560,7 +1560,7 @@ export default function WebPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

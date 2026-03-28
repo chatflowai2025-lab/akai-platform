@@ -158,7 +158,7 @@ function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
                 disabled={!handle.trim() || state.loading}
                 className="w-full py-3 rounded-xl bg-white text-black text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
-                {state.loading && <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
+                {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
                 Notify me
               </button>
             </div>
@@ -237,7 +237,7 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
                 disabled={!handle.trim() || state.loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
-                {state.loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 Notify me
               </button>
             </div>
@@ -310,7 +310,7 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
                 disabled={!handle.trim() || state.loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-400 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
-                {state.loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 Notify me
               </button>
             </div>
@@ -383,7 +383,7 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
                 disabled={!handle.trim() || state.loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
-                {state.loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 Notify me
               </button>
             </div>
@@ -576,7 +576,7 @@ export default function SocialPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -811,7 +811,7 @@ export default function SocialPage() {
                 >
                   {generating ? (
                     <>
-                      <div className="w-3.5 h-3.5 border-2 border-black/40 border-t-black rounded-full animate-spin" />
+                      <div role="status" aria-label="Loading" className="w-3.5 h-3.5 border-2 border-black/40 border-t-black rounded-full animate-spin" />
                       Generating...
                     </>
                   ) : '✨ Generate Posts'}

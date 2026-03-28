@@ -198,7 +198,7 @@ function RulesEngine({ userId }: { userId: string }) {
       <div className="bg-[#111] border border-[#1f1f1f] rounded-xl overflow-hidden">
         {loadingRules ? (
           <div className="flex items-center justify-center py-8">
-            <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="divide-y divide-[#1a1a1a]">
@@ -589,7 +589,7 @@ function EmailGuardContent({
       {/* First-poll banner */}
       {firstPollBanner === 'checking' && (
         <div className="flex items-center gap-3 px-8 py-3 bg-[#D4AF37]/10 border-b border-[#D4AF37]/20">
-          <div className="w-3.5 h-3.5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <div role="status" aria-label="Loading" className="w-3.5 h-3.5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />
           <p className="text-sm text-[#D4AF37] font-medium">Checking your inbox for the first time…</p>
         </div>
       )}
@@ -668,7 +668,7 @@ function EmailGuardContent({
 
           {connecting && (
             <div className="flex items-center gap-2 text-xs text-gray-500 px-1">
-              <div className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+              <div role="status" aria-label="Loading" className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
               Connecting…
             </div>
           )}
@@ -1088,7 +1088,7 @@ function EmailGuardPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -1098,7 +1098,7 @@ function EmailGuardPage() {
       <Suspense
         fallback={
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         }
       >

@@ -613,7 +613,7 @@ function FollowUpSequences({ leads }: { leads: Lead[] }) {
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {activating === confirmSeq.id ? (
-                  <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Activating…</>
+                  <><span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Activating…</>
                 ) : (
                   'Confirm & Activate'
                 )}
@@ -864,7 +864,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
               className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-[#D4AF37]/20"
             >
               {launching ? (
-                <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Launching…</>
+                <><span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Launching…</>
               ) : (
                 <>📞 Start Calling ({uploadedLeads.length})</>
               )}
@@ -1019,7 +1019,7 @@ function ProspectsSection() {
 
       <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-12"><div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" /></div>
+          <div className="flex items-center justify-center py-12"><div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" /></div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-600 text-sm">No prospects match your filter.</div>
         ) : (
@@ -1185,7 +1185,7 @@ function OutboundProspectsTab({ userId }: { userId: string }) {
 
       {loading ? (
         <div className="flex items-center justify-center py-14">
-          <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+          <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : prospects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-14 text-center">
@@ -1229,7 +1229,7 @@ function OutboundProspectsTab({ userId }: { userId: string }) {
                           disabled={isContacting}
                           className="flex items-center gap-1 text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition-colors disabled:opacity-50 font-semibold"
                         >
-                          {isContacting ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : 'Contact →'}
+                          {isContacting ? <span role="status" aria-label="Loading" className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : 'Contact →'}
                         </button>
                       ) : null}
                     </div>
@@ -1299,7 +1299,7 @@ function OutboundProspectsTab({ userId }: { userId: string }) {
                 disabled={adding || !form.businessName}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {adding ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Add & Enrich'}
+                {adding ? <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Add & Enrich'}
               </button>
             </div>
           </div>
@@ -1382,7 +1382,7 @@ export default function SalesPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -1421,7 +1421,7 @@ export default function SalesPage() {
           <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
             Live stats
             {statsLoading && (
-              <span className="ml-2 inline-block w-3 h-3 border border-gray-600 border-t-transparent rounded-full animate-spin align-middle" />
+              <span role="status" aria-label="Loading" className="ml-2 inline-block w-3 h-3 border border-gray-600 border-t-transparent rounded-full animate-spin align-middle" />
             )}
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1473,7 +1473,7 @@ export default function SalesPage() {
             {pipelineTab === 'pipeline' ? (
               statsLoading ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                  <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 <PipelineBoard

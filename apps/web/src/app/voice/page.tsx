@@ -406,7 +406,7 @@ Be specific to their industry and location. Australian English. Conversational, 
           <p className="text-gray-500 mt-1 text-sm">We&apos;ve written options based on your business — just pick the ones that fit.</p>
         </div>
         <button onClick={generateSuggestions} disabled={generating} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg text-xs font-semibold hover:bg-[#D4AF37]/20 transition disabled:opacity-40">
-          {generating ? <span className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : '✨'} {generating ? 'AK is writing your script…' : 'Get AK\'s suggestions'}
+          {generating ? <span role="status" aria-label="Loading" className="w-3 h-3 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" /> : '✨'} {generating ? 'AK is writing your script…' : 'Get AK\'s suggestions'}
         </button>
       </div>
 
@@ -994,7 +994,7 @@ function SetupWizard({
 
       {testCallState === 'calling' && (
         <div className="flex items-center gap-3 px-5 py-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
-          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
           <div>
             {isSafeMode(userEmail)
               ? <p className="text-sm font-semibold text-blue-300">✅ Test call simulated (Safe Mode)</p>
@@ -1165,7 +1165,7 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule, userId }:
             </a>
           )}
         </div>
-        {statusLoading && <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />}
+        {statusLoading && <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />}
       </div>
 
       {/* Campaign stats */}
@@ -1188,7 +1188,7 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule, userId }:
         </div>
         {statusLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : recentCalls.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
@@ -1319,7 +1319,7 @@ function VoicePageInner() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -1357,7 +1357,7 @@ function VoicePageInner() {
       <div className="flex-1 overflow-y-auto p-8">
         {configLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+            <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
         <div className="flex gap-6 h-full">

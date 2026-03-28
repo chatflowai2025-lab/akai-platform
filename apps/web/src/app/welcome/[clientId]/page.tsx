@@ -17,7 +17,7 @@ export default function WelcomePage() {
       <div className="text-center">
         <p className="text-3xl font-black text-white mb-2">AK<span className="text-[#D4AF37]">AI</span></p>
         <p className="text-gray-500 text-sm">Loading your workspace...</p>
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mt-4" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mt-4" />
       </div>
     </div>
   );

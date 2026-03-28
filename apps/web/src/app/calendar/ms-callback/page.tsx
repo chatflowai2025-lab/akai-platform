@@ -73,7 +73,7 @@ function MSCalCallbackInner() {
 
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] flex flex-col items-center justify-center gap-4">
-      <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      <div role="status" aria-label="Loading" className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       <p className="text-white/60 text-sm">Connecting Outlook Calendar…</p>
     </div>
   );
@@ -83,7 +83,7 @@ export default function MSCalCallbackPage() {
   return (
     <Suspense fallback={
       <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <MSCalCallbackInner />

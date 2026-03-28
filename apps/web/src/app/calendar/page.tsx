@@ -509,7 +509,7 @@ function BookingsView({ userId }: { userId: string }) {
       .catch(() => setLoading(false));
   }, [userId]);
 
-  if (loading) return <div className="flex-1 flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex-1 flex items-center justify-center"><div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" /></div>;
 
   if (appointments.length === 0) return (
     <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8">
@@ -925,7 +925,7 @@ function CalendarPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

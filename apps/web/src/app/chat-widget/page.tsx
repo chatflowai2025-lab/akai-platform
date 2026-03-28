@@ -140,7 +140,7 @@ function ChatWidget() {
   if (!configLoaded) {
     return (
       <div className="flex items-center justify-center h-full bg-white">
-        <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: brandColor, borderTopColor: 'transparent' }} />
+        <div role="status" aria-label="Loading" className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: brandColor, borderTopColor: 'transparent' }} />
       </div>
     );
   }
@@ -267,7 +267,7 @@ export default function ChatWidgetPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-screen bg-white">
-        <div className="w-5 h-5 rounded-full border-2 border-[#0a1628] border-t-transparent animate-spin" />
+        <div role="status" aria-label="Loading" className="w-5 h-5 rounded-full border-2 border-[#0a1628] border-t-transparent animate-spin" />
       </div>
     }>
       <ChatWidget />
