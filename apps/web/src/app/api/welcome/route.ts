@@ -218,6 +218,19 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ ok: true, skipped: true });
         }
         await ref.set({ welcomeEmailSent: true }, { merge: true });
+
+        // Track signup in dedicated collection for analytics
+        try {
+          await db.collection('signups').add({
+            uid,
+            email,
+            name: name || null,
+            signedUpAt: new Date().toISOString(),
+            createdAt: new Date(),
+          });
+        } catch (signupErr) {
+          console.warn('[welcome] Failed to write signup record (non-fatal):', signupErr);
+        }
       } catch (fsErr) {
         console.warn('[welcome] Firestore check failed (continuing anyway):', fsErr);
       }
