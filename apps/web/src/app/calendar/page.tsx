@@ -650,6 +650,12 @@ function CalendarContent({ user }: { user: { uid: string } }) {
             setCalProvider('google');
             return;
           }
+          // Check Microsoft calendar connected
+          if (d?.microsoftCalendarConnected || d?.inboxConnection?.provider === 'microsoft') {
+            setCalConnected(true);
+            setCalProvider('outlook');
+            return;
+          }
         }
         // Fallback: check integrations sub-doc
         getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar')).then(snap2 => {
