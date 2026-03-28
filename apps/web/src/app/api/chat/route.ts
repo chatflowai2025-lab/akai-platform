@@ -9,7 +9,7 @@ PERSONALITY: Direct, sharp, opinionated. Like a founder who has seen everything 
 
 PROACTIVITY: Never just answer the question — suggest the next move. If someone says "I connected my Gmail", respond with what to do next. If they ask about leads, tell them what action would get more. Always end with a clear next step or question.
 
-PLATFORM STATUS: AKAI has 9 modules, ALL LIVE and operational:
+PLATFORM STATUS: AKAI has 10 modules, ALL LIVE and operational:
 1. Sales — Sophie AI makes outbound calls, qualifies leads, books meetings
 2. Voice — Configure Sophie's voice, script, call hours, and campaign settings
 3. Web — Website audit for speed, SEO, conversions + AI content generation
@@ -494,7 +494,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 
   // ── Error / health check ────────────────────────────────────────────────
   if (msg.includes('what errors') || msg.includes('any errors') || msg.includes('any issues') || msg.includes('something broken') || msg.includes('is everything ok') || msg.includes('system status')) {
-    return "Everything looks good — 9 modules live, last health check passed. ✅\n\nIf you're seeing a specific issue, describe it and I'll fix it right now.";
+    return "Everything looks good — 10 modules live, last health check passed. ✅\n\nIf you're seeing a specific issue, describe it and I'll fix it right now.";
   }
 
   // ── Web audit intent ─────────────────────────────────────────────────────
@@ -766,7 +766,7 @@ export async function POST(req: NextRequest) {
 
     // Help / what can AKAI do
     if (intentMsg === 'help' || intentMsg === 'what can you do' || intentMsg.includes('what can akai do') || intentMsg.includes('what do you do') || intentMsg.includes('show me what you can do')) {
-      return NextResponse.json({ message: "Here's what AKAI does — 9 modules, all live:\n\n📞 **Sales** — Sophie AI calls your leads, qualifies them, books meetings\n✉️ **Email Guard** — Monitors inbox, auto-drafts proposals from every enquiry\n🌐 **Web** — Website audit + AI content, SEO fixes in seconds\n📣 **Ads** — Google & Meta campaigns built with AI copy, ready to launch\n🗣️ **Voice** — Configure Sophie's script, voice, call hours\n🎯 **Recruit** — Source candidates, write JDs, screen applicants with AI\n📱 **Social** — Month of content across Instagram, LinkedIn, Facebook\n📄 **Proposals** — Professional client proposals generated in seconds\n📅 **Calendar** — Google/Outlook sync, meetings auto-booked by Sophie\n\nWhat do you want to tackle first?" });
+      return NextResponse.json({ message: "Here's what AKAI does — 10 modules, all live:\n\n📞 **Sales** — Sophie AI calls your leads, qualifies them, books meetings\n✉️ **Email Guard** — Monitors inbox, auto-drafts proposals from every enquiry\n🌐 **Web** — Website audit + AI content, SEO fixes in seconds\n📣 **Ads** — Google & Meta campaigns built with AI copy, ready to launch\n🗣️ **Voice** — Configure Sophie's script, voice, call hours\n🎯 **Recruit** — Source candidates, write JDs, screen applicants with AI\n📱 **Social** — Month of content across Instagram, LinkedIn, Facebook\n📄 **Proposals** — Professional client proposals generated in seconds\n📅 **Calendar** — Google/Outlook sync, meetings auto-booked by Sophie\n\nWhat do you want to tackle first?" });
     }
 
     if (userId !== 'anonymous') {
@@ -801,7 +801,7 @@ export async function POST(req: NextRequest) {
         } catch { /* non-fatal */ }
         const planName = plan || 'Trial';
         const planDetails: Record<string, string> = {
-          trial: 'You\'re on the **Trial** plan — all 9 modules active, exploring for free.',
+          trial: 'You\'re on the **Trial** plan — all 10 modules active, exploring for free.',
           starter: 'You\'re on **Starter ($297/mo)** — 50 leads/month, all core modules (Email Guard, Sophie, Dashboard).',
           growth: 'You\'re on **Growth ($597/mo)** — 150 leads/month, 3 team seats, everything in Starter plus priority support.',
           scale: 'You\'re on **Scale ($1,197/mo)** — 500 leads/month, unlimited seats, full AKAI OS, white-glove onboarding.',

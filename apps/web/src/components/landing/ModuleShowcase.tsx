@@ -49,7 +49,7 @@ export default function ModuleShowcase() {
             <span className="text-[#D4AF37]">All in one place.</span>
           </h2>
           <p className="text-white/40 text-base max-w-xl mx-auto">
-            Six AI-powered modules working together to find, convert, and retain your customers.
+            10 AI-powered modules working together to find, convert, and retain your customers.
           </p>
         </div>
 
