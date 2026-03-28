@@ -180,11 +180,21 @@ export default function LoginPage() {
       provider.setCustomParameters({ prompt: 'select_account', tenant: msTenant });
       provider.addScope('email');
       provider.addScope('profile');
-      // Use redirect — more reliable than popup (no popup blocker issues)
-      await signInWithRedirect(auth, provider);
-      // onAuthStateChanged + getRedirectResult handle the rest
+      // Use popup — avoids redirect loop issues with Next.js app router
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user?.email || '';
+      if (!userEmail) {
+        await auth.signOut();
+        setError('Could not retrieve email from Microsoft. Please try again.');
+        setLoading(false);
+        return;
+      }
+      // onAuthStateChanged handles redirect to dashboard
     } catch (err: unknown) {
-      setError(cleanError(err instanceof Error ? err.message : 'Microsoft sign-in failed.'));
+      const msg = err instanceof Error ? err.message : 'Microsoft sign-in failed.';
+      if (!msg.includes('popup-closed') && !msg.includes('cancelled')) {
+        setError(cleanError(msg));
+      }
       setLoading(false);
     }
   };
