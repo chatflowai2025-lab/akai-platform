@@ -647,6 +647,37 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   }, [calConnected, calProvider, user.uid]);
 
   useEffect(() => {
+    if (!calConnected || calProvider !== 'outlook') return;
+
+    // Fetch Outlook calendar events via Railway API
+    fetch(`https://api-server-production-2a27.up.railway.app/api/calendar/outlook-events?userId=${user.uid}&days=30`, {
+      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data?.events?.length) return;
+        const outlookEvents: CalEvent[] = data.events.map((e: any) => ({
+          id: e.id || `outlook-${Math.random()}`,
+          title: e.subject || '(No title)',
+          date: (e.start?.dateTime || e.start?.date || '').slice(0, 10),
+          time: e.start?.dateTime ? new Date(e.start.dateTime).toTimeString().slice(0, 5) : '00:00',
+          duration: e.end?.dateTime && e.start?.dateTime
+            ? Math.round((new Date(e.end.dateTime).getTime() - new Date(e.start.dateTime).getTime()) / 60000)
+            : 60,
+          type: 'Meeting' as EventType,
+          notes: e.body?.content?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) || e.bodyPreview || '',
+          inviteViaAk: false,
+          color: 'blue',
+        })).filter((e: CalEvent) => e.date);
+        setEvents(prev => {
+          const ids = new Set(prev.map(e => e.id));
+          return [...prev, ...outlookEvents.filter((e: CalEvent) => !ids.has(e.id))];
+        });
+      })
+      .catch(() => {});
+  }, [calConnected, calProvider, user.uid]);
+
+  useEffect(() => {
     reloadCalConfig();
     const db = getFirebaseDb();
     if (!db) return;
