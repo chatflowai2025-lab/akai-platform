@@ -1,7 +1,7 @@
 const PLANS = [
   {
     name: 'Starter',
-    price: '$147',
+    price: '$299',
     annual: '$1,470/yr',
     annualNote: 'Save 2 months',
     period: '/mo',
@@ -21,7 +21,7 @@ const PLANS = [
   },
   {
     name: 'Growth',
-    price: '$497',
+    price: '$599',
     annual: '$4,970/yr',
     annualNote: 'Save 2 months',
     period: '/mo',
@@ -42,7 +42,7 @@ const PLANS = [
   },
   {
     name: 'Scale',
-    price: '$1,497',
+    price: '$1,200',
     annual: '$14,970/yr',
     annualNote: 'Save 2 months',
     period: '/mo',

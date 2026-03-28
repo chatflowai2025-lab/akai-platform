@@ -39,9 +39,9 @@ const VOICE_OPTIONS = [
 
 const PLAN_LABELS: Record<string, { label: string; color: string }> = {
   trial: { label: 'Free Trial', color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' },
-  starter: { label: 'Starter — $297/mo', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-  growth: { label: 'Growth — $597/mo', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-  scale: { label: 'Scale — $1,197/mo', color: 'text-[#D4AF37] bg-[#D4AF37]/10 border-[#D4AF37]/20' },
+  starter: { label: 'Starter — $299/mo', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+  growth: { label: 'Growth — $599/mo', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+  scale: { label: 'Scale — $1,200/mo', color: 'text-[#D4AF37] bg-[#D4AF37]/10 border-[#D4AF37]/20' },
 };
 
 interface NotifPrefs {
@@ -692,9 +692,9 @@ export default function SettingsPage() {
           </div>
           <div className="grid grid-cols-3 gap-3 pt-1">
             {[
-              { tier: 'starter', label: 'Starter', price: '$297/mo' },
-              { tier: 'growth', label: 'Growth', price: '$597/mo' },
-              { tier: 'scale', label: 'Scale', price: '$1,197/mo' },
+              { tier: 'starter', label: 'Starter', price: '$299/mo' },
+              { tier: 'growth', label: 'Growth', price: '$599/mo' },
+              { tier: 'scale', label: 'Scale', price: '$1,200/mo' },
             ].map(p => (
               <div key={p.tier} className={`rounded-xl border p-3 text-center ${planTier === p.tier ? 'border-[#D4AF37]/40 bg-[#D4AF37]/5' : 'border-[#2a2a2a] bg-[#0a0a0a]'}`}>
                 <p className="text-xs font-bold text-white">{p.label}</p>

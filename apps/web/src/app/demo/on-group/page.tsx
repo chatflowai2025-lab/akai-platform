@@ -345,9 +345,9 @@ export default function ONGroupDemoPage() {
           </p>
           <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto mb-8">
             {[
-              { name: 'Starter', price: '$147', period: '/mo', desc: '1 module' },
-              { name: 'Growth', price: '$497', period: '/mo', desc: '3 modules', highlight: true },
-              { name: 'Scale', price: '$1,497', period: '/mo', desc: 'Full suite' },
+              { name: 'Starter', price: '$299', period: '/mo', desc: '1 module' },
+              { name: 'Growth', price: '$599', period: '/mo', desc: '3 modules', highlight: true },
+              { name: 'Scale', price: '$1,200', period: '/mo', desc: 'Full suite' },
             ].map(p => (
               <div key={p.name} className={`rounded-xl p-4 border ${p.highlight ? 'border-[#D4AF37]' : 'border-[#2a2a2a]'}`}>
                 <p className="text-xs text-gray-500 mb-1">{p.name}</p>

@@ -65,9 +65,9 @@ When user describes how they want emails handled, extract the rule and save it:
 - "hold until 9am" → action: hold, holdUntil: 9am
 
 PRICING & LEAD LIMITS:
-- Starter $297/mo = 50 leads/month included
-- Growth $597/mo = 150 leads/month included
-- Scale $1,197/mo = 500 leads/month included
+- Starter $299/mo = 50 leads/month included
+- Growth $599/mo = 150 leads/month included
+- Scale $1,200/mo = 500 leads/month included
 - Extra leads (any plan): $3/lead — generate a Stripe payment link on request
 - When user uploads leads, check against their plan limit
 - If they exceed limit: "You've uploaded [N] leads. Your [Plan] plan includes [X]/mo. That's [excess] extra leads at $3 each = $[total]. Want to proceed? I'll send a payment link."
@@ -90,7 +90,7 @@ ACCOUNT MANAGEMENT — answer these honestly:
 - "how do I cancel": "You can cancel anytime in Settings → Billing. No lock-in, no cancellation fees. Your data stays for 30 days in case you change your mind."
 - "delete my account": Direct to Settings → Danger Zone (scroll to the bottom). Warn: this permanently deletes all data and is irreversible.
 - "change my email": "Email changes go through Settings → Account. Firebase Auth sends a verification to your current email — click the link to confirm. If you've lost access to the old email, contact hello@getakai.ai."
-- "how do I add a team member": "Team seats are on Growth (3 seats, $597/mo) and Scale (unlimited, $1,197/mo). Go to Settings → Team → Invite Member."
+- "how do I add a team member": "Team seats are on Growth (3 seats, $599/mo) and Scale (unlimited, $1,200/mo). Go to Settings → Team → Invite Member."
 
 MOBILE: AKAI is fully responsive at getakai.ai. Also works via OpenClaw on iPhone (native app experience).
 
@@ -141,7 +141,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   // ── Pricing questions ─────────────────────────────────────────────────────
   if (msg.includes('how much') && (msg.includes('cost') || msg.includes('price') || msg.includes('pricing')) ||
       msg === 'pricing' || msg === 'price' || msg.includes('what does it cost') || msg.includes("what's the price")) {
-    return "Three plans:\n\n• **Starter $297/mo** — 50 leads/month. Email Guard, Sophie AI, full dashboard. Best for solo operators.\n• **Growth $597/mo** — 150 leads/month + 3 team seats. Scales with a small team.\n• **Scale $1,197/mo** — 500 leads/month, unlimited seats, priority support.\n\nExtra leads are $3 each on any plan. Most businesses on Starter see a meeting booked in the first week — one closed deal typically pays for 2–3 months. Want to see which plan fits your volume?";
+    return "Three plans:\n\n• **Starter $299/mo** — 50 leads/month. Email Guard, Sophie AI, full dashboard. Best for solo operators.\n• **Growth $599/mo** — 150 leads/month + 3 team seats. Scales with a small team.\n• **Scale $1,200/mo** — 500 leads/month, unlimited seats, priority support.\n\nExtra leads are $3 each on any plan. Most businesses on Starter see a meeting booked in the first week — one closed deal typically pays for 2–3 months. Want to see which plan fits your volume?";
   }
 
   if (msg.includes('upgrade') || msg.includes('change my plan') || msg.includes('change plan') || msg.includes('switch plan')) {
@@ -165,7 +165,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   // ── Team members ──────────────────────────────────────────────────────────
   if (msg.includes('add a team member') || msg.includes('add team member') || msg.includes('invite') && msg.includes('team') ||
       msg.includes('add a user') || msg.includes('add user')) {
-    return "Team seats are on Growth (3 seats, $597/mo) and Scale (unlimited seats, $1,197/mo).\n\nIf you're on one of those plans: **Settings → Team → Invite Member** — enter their email and they'll get a link.\n\nIf you're on Starter and need team access, upgrading to Growth is the move.";
+    return "Team seats are on Growth (3 seats, $599/mo) and Scale (unlimited seats, $1,200/mo).\n\nIf you're on one of those plans: **Settings → Team → Invite Member** — enter their email and they'll get a link.\n\nIf you're on Starter and need team access, upgrading to Growth is the move.";
   }
 
   // ── Can AKAI send emails ──────────────────────────────────────────────────
@@ -802,9 +802,9 @@ export async function POST(req: NextRequest) {
         const planName = plan || 'Trial';
         const planDetails: Record<string, string> = {
           trial: 'You\'re on the **Trial** plan — all 10 modules active, exploring for free.',
-          starter: 'You\'re on **Starter ($297/mo)** — 50 leads/month, all core modules (Email Guard, Sophie, Dashboard).',
-          growth: 'You\'re on **Growth ($597/mo)** — 150 leads/month, 3 team seats, everything in Starter plus priority support.',
-          scale: 'You\'re on **Scale ($1,197/mo)** — 500 leads/month, unlimited seats, full AKAI OS, white-glove onboarding.',
+          starter: 'You\'re on **Starter ($299/mo)** — 50 leads/month, all core modules (Email Guard, Sophie, Dashboard).',
+          growth: 'You\'re on **Growth ($599/mo)** — 150 leads/month, 3 team seats, everything in Starter plus priority support.',
+          scale: 'You\'re on **Scale ($1,200/mo)** — 500 leads/month, unlimited seats, full AKAI OS, white-glove onboarding.',
         };
         const detail = planDetails[planName.toLowerCase()] || `You\'re on the **${planName}** plan.`;
         return NextResponse.json({ message: `${detail}\n\nWant to upgrade or see what's included in each tier? Go to **Settings → Billing**.` });
@@ -826,7 +826,7 @@ SALES CONVERSATION RULES:
 4. Always personalise. Use their industry, their pain, their language back at them.
 5. After 2-3 exchanges, move toward the close: "The best way to see this is to just try it — 14 days free, no card needed. You can be set up in 10 minutes. Want me to walk you through it?"
 6. Close with a direct link: "Sign up here: getakai.ai/login — takes 2 minutes. I'll be there on the other side to help you get going."
-7. If they ask pricing: "Starts at $297/mo for 50 leads/month. But honestly — try it free first. If AKAI doesn't save you 5 hours in your first week, cancel. No one has yet."
+7. If they ask pricing: "Starts at $299/mo for 50 leads/month. But honestly — try it free first. If AKAI doesn't save you 5 hours in your first week, cancel. No one has yet."
 8. NEVER be pushy. Be genuinely curious about their business. The sale comes from understanding, not pitching.
 9. Keep responses SHORT — 2-4 sentences max. This is a chat, not an essay.
 10. If they're ready to sign up: send them directly to getakai.ai/login`,
