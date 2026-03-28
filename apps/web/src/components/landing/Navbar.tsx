@@ -26,7 +26,8 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center">
+          <a href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center"><span className="text-black font-black text-sm leading-none">AK</span></div>
             <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
           </a>
 
@@ -50,7 +51,7 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
                 >
                   💬 Talk to AK
                 </button>
-                <Button onClick={() => onOpenCapture?.()} size="sm">
+                <Button href="/login" size="sm">
                   Get Started →
                 </Button>
               </>
@@ -61,7 +62,7 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
               </Button>
             )}
             {loading && (
-              <Button onClick={() => onOpenCapture?.()} size="sm">
+              <Button href="/login" size="sm">
                 Get Started →
               </Button>
             )}

@@ -1318,8 +1318,9 @@ function VoicePageInner() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center flex-col gap-3">
         <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+        <span className="text-gray-500 text-sm">Loading Sophie — AI Sales Agent...</span>
       </div>
     );
   }

@@ -80,6 +80,29 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // ── Test mock support: if __MOCK_USER__ is set, use it as the auth state ──
+    if (typeof window !== 'undefined') {
+      const mockUser = (window as unknown as Record<string, unknown>).__MOCK_USER__;
+      const mockFirestore = (window as unknown as Record<string, unknown>).__MOCK_FIRESTORE__;
+      if (mockUser && typeof mockUser === 'object') {
+        const u = mockUser as { uid: string; email: string; displayName?: string };
+        const firestoreData = (mockFirestore && typeof mockFirestore === 'object') ? mockFirestore as Record<string, unknown> : {};
+        const profile: UserProfile = {
+          uid: u.uid,
+          email: u.email,
+          displayName: u.displayName ?? null,
+          businessName: (firestoreData['businessName'] as string | undefined) ?? ((firestoreData['onboarding'] as Record<string, unknown> | undefined)?.['businessName'] as string | undefined) ?? null,
+          createdAt: null,
+          lastLoginAt: null,
+          onboardingComplete: !!(firestoreData['onboarding']),
+        };
+        setUser(mockUser as unknown as User);
+        setUserProfile(profile);
+        setLoading(false);
+        return;
+      }
+    }
+
     const auth = getFirebaseAuth();
     if (!auth) {
       // Auth not available yet (SSR) — retry after hydration
