@@ -27,64 +27,9 @@ interface CalEvent {
 
 // ─── Mock events (relative to today) ─────────────────────────────────────────
 
+// No mock events — each user sees only their own events from their connected calendar
 function getMockEvents(): CalEvent[] {
-  const today = new Date();
-  const addDays = (d: Date, n: number) => {
-    const r = new Date(d);
-    r.setDate(r.getDate() + n);
-    return r.toISOString().split('T')[0] ?? '';
-  };
-
-  const daysUntilTue = (2 - today.getDay() + 7) % 7 || 7;
-  const daysUntilFri = (5 - today.getDay() + 7) % 7 || 7;
-  const daysUntilMon = (1 - today.getDay() + 7) % 7 || 7;
-
-  return [
-    {
-      id: 'mock-1',
-      title: 'Sophie AI calls',
-      date: today.toISOString().split('T')[0] ?? '',
-      time: '09:00',
-      duration: 480,
-      type: 'Call',
-      notes: 'Recurring daily — 9am to 5pm outbound calling',
-      inviteViaAk: false,
-      color: 'blue',
-    },
-    {
-      id: 'mock-2',
-      title: 'Marco — AP Heritage',
-      date: addDays(today, daysUntilTue),
-      time: '10:00',
-      duration: 60,
-      type: 'Meeting',
-      notes: 'AP Heritage campaign review with Marco',
-      inviteViaAk: false,
-      color: 'gold',
-    },
-    {
-      id: 'mock-3',
-      title: 'Will — SHE review',
-      date: addDays(today, daysUntilFri),
-      time: '14:00',
-      duration: 45,
-      type: 'Meeting',
-      notes: 'SHE campaign performance review with Will',
-      inviteViaAk: false,
-      color: 'green',
-    },
-    {
-      id: 'mock-4',
-      title: 'AKAI team sync',
-      date: addDays(today, daysUntilMon),
-      time: '09:00',
-      duration: 30,
-      type: 'Meeting',
-      notes: 'Weekly team alignment — all skills',
-      inviteViaAk: false,
-      color: 'purple',
-    },
-  ];
+  return [];
 }
 
 const EVENT_COLORS: Record<string, { pill: string; dot: string }> = {
