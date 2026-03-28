@@ -16,6 +16,108 @@ import { getFirebaseDb } from '@/lib/firebase';
 
 type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'calendar' | 'complete';
 
+// Step order for progress bar (excluding 'complete')
+const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'goal', 'location', 'contact', 'notifications'];
+const STEP_LABELS = ['Industry', 'Business', 'Goal', 'Location', 'Contact', 'Notify'];
+
+function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
+  const currentIndex = STEP_ORDER.indexOf(currentStep);
+  const effectiveIndex = currentIndex === -1 ? STEP_ORDER.length : currentIndex;
+
+  return (
+    <div className="w-full max-w-2xl mx-auto px-4 py-4">
+      <div className="flex items-center">
+        {STEP_ORDER.map((step, i) => {
+          const isComplete = i < effectiveIndex;
+          const isCurrent = i === effectiveIndex;
+          return (
+            <div key={step} className="flex items-center flex-1">
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  isComplete
+                    ? 'bg-[#D4AF37] text-black'
+                    : isCurrent
+                      ? 'bg-[#D4AF37]/20 border-2 border-[#D4AF37] text-[#D4AF37]'
+                      : 'bg-[#1a1a1a] border border-[#2a2a2a] text-gray-600'
+                }`}>
+                  {isComplete ? '✓' : i + 1}
+                </div>
+                <span className={`text-[9px] mt-1 font-medium hidden sm:block ${
+                  isCurrent ? 'text-[#D4AF37]' : isComplete ? 'text-gray-400' : 'text-gray-600'
+                }`}>{STEP_LABELS[i]}</span>
+              </div>
+              {i < STEP_ORDER.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-1 transition-all ${i < effectiveIndex ? 'bg-[#D4AF37]' : 'bg-[#2a2a2a]'}`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Completion screen shown after setup finishes
+function CompletionScreen() {
+  const router = useRouter();
+
+  const cards = [
+    {
+      icon: '✉️',
+      title: 'Connect your inbox',
+      desc: 'Let AKAI monitor and respond to enquiries',
+      href: '/email-guard',
+    },
+    {
+      icon: '📞',
+      title: 'Trigger your first call',
+      desc: 'Sophie is ready — send your first AI call now',
+      href: '/voice',
+    },
+    {
+      icon: '🔍',
+      title: 'Run a web audit',
+      desc: "See exactly what's missing from your site",
+      href: '/web',
+    },
+  ];
+
+  return (
+    <div className="flex-1 flex items-center justify-center p-6">
+      <div className="w-full max-w-xl text-center">
+        <div className="text-6xl mb-4">🎉</div>
+        <h1 className="text-3xl font-bold text-white mb-2">AKAI is ready!</h1>
+        <p className="text-gray-400 text-base mb-8">
+          Your AI executive team is online. Here&apos;s where to start:
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {cards.map(card => (
+            <button
+              key={card.href}
+              onClick={() => router.push(card.href)}
+              className="flex flex-col items-center gap-3 p-5 bg-[#111] border border-[#2a2a2a] rounded-2xl hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition group cursor-pointer"
+            >
+              <span className="text-3xl">{card.icon}</span>
+              <div>
+                <p className="text-white font-semibold text-sm group-hover:text-[#D4AF37] transition">{card.title}</p>
+                <p className="text-gray-500 text-xs mt-0.5 leading-snug">{card.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => router.replace('/dashboard')}
+          className="px-8 py-3 bg-[#D4AF37] text-black font-bold rounded-xl hover:opacity-90 transition text-sm"
+        >
+          Go to Dashboard →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 interface OnboardData {
   industry?: string;
   businessName?: string;
@@ -223,6 +325,19 @@ export default function OnboardPage() {
     );
   }
 
+  // Show completion screen when done
+  if (state.step === 'complete' && !completing) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+        <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f]">
+          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-sm">A</div>
+          <span className="font-semibold text-white">AKAI Setup</span>
+        </header>
+        <CompletionScreen />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       {/* Header */}
@@ -241,6 +356,11 @@ export default function OnboardPage() {
           </button>
         </span>
       </header>
+
+      {/* Progress bar */}
+      <div className="border-b border-[#1f1f1f] flex-shrink-0">
+        <ProgressBar currentStep={state.step} />
+      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 max-w-2xl mx-auto w-full">
@@ -274,7 +394,7 @@ export default function OnboardPage() {
         </div>
         <div className="max-w-2xl mx-auto mt-2 flex justify-end">
           <button
-            onClick={() => handleComplete({ step: 'complete', data: {} })}
+            onClick={() => handleComplete({ ...state, step: 'complete' })}
             disabled={completing}
             className="text-xs text-gray-600 hover:text-gray-400 transition"
           >

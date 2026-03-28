@@ -22,6 +22,31 @@ const INITIAL: ChatMessage = {
   timestamp: '2026-01-01T00:00:00.000Z', // static to avoid SSR/client hydration mismatch
 };
 
+const SUGGESTED_PROMPTS = [
+  '📊 How are my leads performing?',
+  "✉️ Check my inbox for new enquiries",
+  "📅 What's on my calendar today?",
+  '🔍 Run a web audit on my site',
+];
+
+const CHAT_HISTORY_KEY = 'akai_chat_history';
+
+function getLocalChatHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch { return []; }
+}
+
+function addLocalChatHistory(msg: string): string[] {
+  try {
+    const prev = getLocalChatHistory();
+    const updated = [msg, ...prev.filter(m => m !== msg)].slice(0, 5);
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(updated));
+    return updated;
+  } catch { return []; }
+}
+
 interface ChatState { step: string; data: Record<string, string>; }
 
 // ── Chat panel ────────────────────────────────────────────────────────────────
@@ -33,11 +58,17 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const [uploading, setUploading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>({ step: 'idle', data: {} });
   const [userContext, setUserContext] = useState<Record<string, string>>({});
+  const [recentHistory, setRecentHistory] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
+
+  // Load local chat history (client-side only)
+  useEffect(() => {
+    setRecentHistory(getLocalChatHistory());
+  }, []);
 
   // Handle messages injected from page buttons (e.g. quick-action buttons)
   useEffect(() => {
@@ -189,6 +220,8 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
 
     const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
     setMessages(p => [...p, userMsg]);
+    // Track in local history
+    setRecentHistory(addLocalChatHistory(text));
     setLoading(true);
 
     try {
@@ -231,6 +264,21 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
 
   const send = () => { const t = input.trim(); setInput(''); sendRaw(t); };
 
+  const saveFeedback = useCallback(async (messageId: string, content: string, rating: 'up' | 'down') => {
+    if (!user) return;
+    try {
+      const db = getFirebaseDb();
+      if (!db) return;
+      await setDoc(
+        doc(db, 'users', user.uid),
+        { chatFeedback: { [messageId]: { rating, message: content, timestamp: new Date().toISOString() } } },
+        { merge: true }
+      );
+    } catch { /* non-fatal */ }
+  }, [user]);
+
+  const isOnlyInitialMessage = messages.length === 1 && messages[0]?.id === '1';
+
   return (
       <aside className="w-80 flex-shrink-0 border-l border-[#1f1f1f] flex flex-col bg-[#080808] h-full overflow-hidden">
         {/* Header */}
@@ -253,6 +301,20 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
                     : 'bg-[#1a1a1a] text-white/90 rounded-bl-sm border border-[#2a2a2a]'
                 }`}>{m.content}</div>
               </div>
+              {m.role === 'assistant' && m.id !== '1' && (
+                <div className="flex gap-1 mt-1 ml-1">
+                  <button
+                    onClick={() => saveFeedback(m.id, m.content, 'up')}
+                    className="text-xs px-1.5 py-0.5 rounded hover:bg-[#1a1a1a] text-gray-600 hover:text-green-400 transition"
+                    title="Good response"
+                  >👍</button>
+                  <button
+                    onClick={() => saveFeedback(m.id, m.content, 'down')}
+                    className="text-xs px-1.5 py-0.5 rounded hover:bg-[#1a1a1a] text-gray-600 hover:text-red-400 transition"
+                    title="Bad response"
+                  >👎</button>
+                </div>
+              )}
               {m.buttons && m.buttons.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
                   {m.buttons.map(btn => (
@@ -268,12 +330,49 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
           {loading && (
             <div className="flex justify-start">
               <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl rounded-bl-sm px-3 py-2">
-                <div className="flex gap-1 items-center">
-                  {[0, 150, 300].map(d => <span key={d} className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1 items-center">
+                    {[0, 150, 300].map(d => <span key={d} className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                  </div>
+                  <span className="text-xs text-gray-500">AK is thinking...</span>
                 </div>
               </div>
             </div>
           )}
+
+          {/* Suggested prompts — only shown when chat is fresh */}
+          {isOnlyInitialMessage && !loading && (
+            <div className="space-y-2 mt-2">
+              <p className="text-[10px] text-gray-600 uppercase tracking-wider font-medium">Try asking</p>
+              <div className="flex flex-col gap-1.5">
+                {SUGGESTED_PROMPTS.map(prompt => (
+                  <button
+                    key={prompt}
+                    onClick={() => sendRaw(prompt)}
+                    className="text-left text-xs px-3 py-2 rounded-xl border border-[#2a2a2a] bg-[#111] text-gray-300 hover:border-[#D4AF37]/40 hover:text-white hover:bg-[#1a1a1a] transition"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+
+              {recentHistory.length > 0 && (
+                <div className="mt-3 space-y-1.5">
+                  <p className="text-[10px] text-gray-600 uppercase tracking-wider font-medium">Recent</p>
+                  {recentHistory.map(msg => (
+                    <button
+                      key={msg}
+                      onClick={() => sendRaw(msg)}
+                      className="w-full text-left text-xs px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-[#111] transition truncate"
+                    >
+                      ↩ {msg}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div ref={bottomRef} />
         </div>
 
