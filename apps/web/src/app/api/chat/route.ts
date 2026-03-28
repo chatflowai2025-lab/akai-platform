@@ -665,7 +665,11 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
 
 export async function POST(req: NextRequest) {
   try {
-    const body: ChatRequest = await req.json();
+    let body: ChatRequest;
+    try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+    if (!body?.message || typeof body.message !== 'string') {
+      return NextResponse.json({ error: 'message is required' }, { status: 400 });
+    }
     const { message, history = [], userContext = {} } = body;
     // Lock currentModule — homepage visitors can only use homepage_sales context.
     // Authenticated users get their module from userContext.uid presence.
