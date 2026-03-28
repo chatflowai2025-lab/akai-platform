@@ -13,6 +13,7 @@ export const BETA_WHITELIST: Record<string, { name: string; safeMode: boolean }>
   'jilljjqb@gmail.com': { name: 'Jill', safeMode: true },
   'chatflowai2025@gmail.com': { name: 'Aaron', safeMode: false },
   'getakainow@outlook.com': { name: 'Aaron', safeMode: false },
+  'getakaiai@outlook.com': { name: 'Aaron', safeMode: false },
 };
 
 export function isWhitelisted(email: string): boolean {

@@ -506,8 +506,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    let intervalId: ReturnType<typeof setInterval>;
-
     const fetchFeed = async () => {
       try {
         const idToken = await user.getIdToken().catch(() => '');
@@ -530,7 +528,7 @@ export default function DashboardPage() {
     };
 
     fetchFeed();
-    intervalId = setInterval(fetchFeed, 60000);
+    const intervalId = setInterval(fetchFeed, 60000);
     return () => { cancelled = true; clearInterval(intervalId); };
   }, [user]);
 
