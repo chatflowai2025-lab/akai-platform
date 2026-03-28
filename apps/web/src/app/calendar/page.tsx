@@ -562,6 +562,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalDate, setModalDate] = useState<string | undefined>(undefined);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
   // Initialise from localStorage so badge persists across navigation
   const [calConnected, setCalConnected] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -724,6 +725,18 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     const newEvent: CalEvent = { ...eventData, id, createdAt: new Date().toISOString() };
     setEvents(prev => [...prev, newEvent]);
 
+    // Navigate to the event's month/year so it's immediately visible
+    const evDate = new Date(eventData.date);
+    if (!isNaN(evDate.getTime())) {
+      setCurrentYear(evDate.getFullYear());
+      setCurrentMonth(evDate.getMonth());
+      setSelectedDate(eventData.date);
+    }
+
+    // Show success toast
+    setSaveToast(`✅ "${eventData.title}" saved`);
+    setTimeout(() => setSaveToast(null), 3000);
+
     if (db) {
       try {
         await setDoc(doc(db, 'users', user.uid, 'events', id), {
@@ -731,7 +744,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           createdAt: serverTimestamp(),
         });
       } catch {
-        // non-fatal
+        // non-fatal — event already in local state
       }
     }
   };
@@ -887,6 +900,13 @@ function CalendarContent({ user }: { user: { uid: string } }) {
           onClose={() => setShowAddModal(false)}
           onSave={handleAddEvent}
         />
+      )}
+
+      {/* Save success toast */}
+      {saveToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-[#1a1a1a] border border-green-500/40 text-green-300 text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl animate-fade-in">
+          {saveToast}
+        </div>
       )}
     </div>
   );
