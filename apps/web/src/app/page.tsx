@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
 import Navbar from '@/components/landing/Navbar';
-import Footer from '@/components/landing/Footer';
 import Modules from '@/components/landing/Modules';
 import LeadCaptureModal from '@/components/LeadCaptureModal';
 

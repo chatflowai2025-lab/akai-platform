@@ -249,7 +249,7 @@ export default function OnboardPage() {
           selectedPlan: 'trial',
         }),
       });
-      const data = await res.json();
+      await res.json().catch(() => {});
 
     } catch (err) {
       console.error('[ONBOARD] Railway call failed (non-fatal):', err);
@@ -398,8 +398,7 @@ export default function OnboardPage() {
         </div>
         <div className="max-w-2xl mx-auto mt-2 flex justify-end">
           <button
-            onClick={() => { handleComplete({ ...state, step: 'complete' }).catch(() => router.replace('/dashboard')); }}
-            disabled={completing}
+            onClick={() => router.replace('/dashboard')}
             className="text-xs text-gray-600 hover:text-gray-400 transition"
           >
             Skip for now →

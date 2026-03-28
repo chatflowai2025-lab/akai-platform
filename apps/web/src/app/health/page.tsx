@@ -183,9 +183,10 @@ export default function HealthPage() {
         const snap = await getDoc(doc(db, 'users', user.uid));
         const d = snap.exists() ? snap.data() : {};
 
-        const gmailConnected = !!d?.gmail?.connected;
-        const calendarConnected = !!d?.googleCalendarConnected;
-        const inboxConnected = !!d?.inboxConnection?.connected;
+        const { isGmailConnected, isMicrosoftConnected, isGoogleCalendarConnected } = await import('@/lib/firestore-schema');
+        const gmailConnected = isGmailConnected(d);
+        const calendarConnected = isGoogleCalendarConnected(d);
+        const inboxConnected = isMicrosoftConnected(d);
         const emailActive = gmailConnected || inboxConnected;
 
         setModules([
@@ -331,11 +332,12 @@ export default function HealthPage() {
       if (!db) throw new Error('no db');
       const snap = await getDoc(doc(db, 'users', user.uid));
       const d = snap.exists() ? snap.data() : {};
-      const gmailOk = !!d?.gmail?.connected;
+      const { isGmailConnected, isGoogleCalendarConnected } = await import('@/lib/firestore-schema');
+      const gmailOk = isGmailConnected(d);
       results.push({ label: 'Gmail', ok: gmailOk, detail: gmailOk ? 'Connected' : 'Not connected — go to Email Guard' });
 
       // 3. Calendar status
-      const calOk = !!d?.googleCalendarConnected;
+      const calOk = isGoogleCalendarConnected(d);
       results.push({ label: 'Google Calendar', ok: calOk, detail: calOk ? 'Connected' : 'Not connected — go to Calendar' });
     } catch {
       results.push({ label: 'Gmail', ok: false, detail: 'Could not check Firestore' });

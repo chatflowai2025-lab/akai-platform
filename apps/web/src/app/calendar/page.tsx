@@ -412,7 +412,7 @@ function DayDetailPanel({
 
 // ─── Connect Calendar Banner ──────────────────────────────────────────────────
 
-function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConnected: (provider: string) => void }) {
+function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (provider: string) => void }) {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
 
@@ -427,7 +427,7 @@ function ConnectCalendarBanner({ userId, onConnected }: { userId: string; onConn
       if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { url } = await r.json();
       window.location.href = url;
-    } catch (e: any) {
+    } catch {
       setConnectError('Could not reach the Google Calendar service. Try again in a moment.');
       setConnecting(null);
     }

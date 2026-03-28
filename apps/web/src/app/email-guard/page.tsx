@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { isSafeMode } from '@/lib/beta-config';
-import { getFirebaseDb, getFirebaseAuth } from '@/lib/firebase';
+import { getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // ── Safe sendMessage wrapper — prevents crash if chat context not ready ────

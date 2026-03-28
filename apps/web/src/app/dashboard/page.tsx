@@ -7,16 +7,6 @@ import TrialBadge from '@/components/dashboard/TrialBadge';
 import { useAuth } from '@/hooks/useAuth';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function timeAgo(timestamp: string): string {
-  const diff = Date.now() - new Date(timestamp).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
 function formatTime(timestamp: string): string {
   try {
     return new Date(timestamp).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
