@@ -1278,13 +1278,15 @@ function VoicePageInner() {
       try {
         const db = getFirebaseDb();
         if (!db) { setConfigLoading(false); return; }
-        const ref = doc(db, 'users', user!.uid, 'voiceConfig', 'config');
+        const ref = doc(db, 'users', user!.uid);
         const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Firestore timeout')), 1500)
+          setTimeout(() => reject(new Error('Firestore timeout')), 3000)
         );
         const snap = await Promise.race([getDoc(ref), timeout]);
         if (snap.exists()) {
-          setConfig({ ...DEFAULT_CONFIG, ...(snap.data() as VoiceConfig) });
+          const d = snap.data();
+          const saved = d?.voiceConfig;
+          if (saved) setConfig({ ...DEFAULT_CONFIG, ...saved });
         }
       } catch (err) {
         console.error('[voice] Failed to load config, using defaults', err);
@@ -1303,8 +1305,8 @@ function VoicePageInner() {
     try {
       const db = getFirebaseDb();
       if (!db) return;
-      const ref = doc(db, 'users', user.uid, 'voiceConfig', 'config');
-      await setDoc(ref, newConfig);
+      const ref = doc(db, 'users', user.uid);
+      await setDoc(ref, { voiceConfig: newConfig }, { merge: true });
     } catch (err) {
       console.error('[voice] Failed to save config', err);
       setConfigSaveError('Settings saved locally but failed to sync. Changes may not persist.');
