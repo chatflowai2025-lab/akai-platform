@@ -144,7 +144,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         <span>Now live</span>
         <span className="w-px h-3 bg-[#2a2a2a]" />
-        <span className="text-gray-500">AI business automation · Sydney</span>
+        <span className="text-gray-500">AI business automation from Sydney to New York</span>
       </div>
 
       {/* Headline */}
