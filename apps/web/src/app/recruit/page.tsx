@@ -34,6 +34,25 @@ interface ScreeningResult {
   summary: string;
 }
 
+type PipelineStage = 'applied' | 'screening' | 'shortlisted' | 'rejected';
+
+interface PipelineCandidate {
+  id: string;
+  name: string;
+  role: string;
+  score: number;
+  summary: string;
+  stage: PipelineStage;
+  addedAt: string;
+}
+
+const PIPELINE_MOCK: PipelineCandidate[] = [
+  { id: 'p1', name: 'Sarah Chen', role: 'Senior Software Engineer', score: 88, summary: 'Strong TypeScript & React. 7 yrs exp at Atlassian. Immediate availability.', stage: 'applied', addedAt: '2026-03-25' },
+  { id: 'p2', name: 'James Patel', role: 'Engineering Manager', score: 76, summary: '9 yrs exp, led 15-person teams at REA Group. Excellent leadership signals.', stage: 'screening', addedAt: '2026-03-26' },
+  { id: 'p3', name: 'Emma Williams', role: 'Full Stack Developer', score: 82, summary: 'React + Node.js, shipped 3 production apps at Afterpay. 2-week notice.', stage: 'shortlisted', addedAt: '2026-03-24' },
+  { id: 'p4', name: 'Noah Martinez', role: 'Backend Engineer', score: 35, summary: 'Limited relevant stack experience. Available immediately but gaps are significant.', stage: 'rejected', addedAt: '2026-03-23' },
+];
+
 // ── Candidate data generators ─────────────────────────────────────────────────
 const CANDIDATE_POOL = [
   { firstName: 'Sarah', lastName: 'Chen', role: 'Senior Software Engineer', company: 'Atlassian', location: 'Sydney, NSW', yearsExp: 7 },
@@ -114,6 +133,231 @@ function generateScreeningResult(jobTitle: string): ScreeningResult {
   };
 }
 
+// ── Pipeline Tab ──────────────────────────────────────────────────────────────
+function PipelineTab() {
+  const [candidates, setCandidates] = useState<PipelineCandidate[]>(() => {
+    if (typeof window === 'undefined') return PIPELINE_MOCK;
+    try {
+      const saved = localStorage.getItem('akai_recruit_pipeline');
+      return saved ? (JSON.parse(saved) as PipelineCandidate[]) : PIPELINE_MOCK;
+    } catch {
+      return PIPELINE_MOCK;
+    }
+  });
+
+  const persist = (updated: PipelineCandidate[]) => {
+    setCandidates(updated);
+    try { localStorage.setItem('akai_recruit_pipeline', JSON.stringify(updated)); } catch { /* non-fatal */ }
+  };
+
+  const moveCandidate = (id: string, stage: PipelineStage) => {
+    persist(candidates.map(c => c.id === id ? { ...c, stage } : c));
+  };
+
+  const removeCandidate = (id: string) => {
+    persist(candidates.filter(c => c.id !== id));
+  };
+
+  const stages: { key: PipelineStage; label: string; emoji: string; color: string }[] = [
+    { key: 'applied', label: 'Applied', emoji: '📥', color: 'border-blue-500/30 text-blue-400' },
+    { key: 'screening', label: 'Screening', emoji: '📞', color: 'border-yellow-500/30 text-yellow-400' },
+    { key: 'shortlisted', label: 'Shortlisted', emoji: '✅', color: 'border-green-500/30 text-green-400' },
+    { key: 'rejected', label: 'Rejected', emoji: '❌', color: 'border-red-500/30 text-red-400' },
+  ];
+
+  const scoreBadge = (score: number) => {
+    if (score > 70) return 'bg-green-500/10 border border-green-500/30 text-green-400';
+    if (score >= 40) return 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400';
+    return 'bg-red-500/10 border border-red-500/30 text-red-400';
+  };
+
+  const stageOptions = stages.map(s => s.key).filter(k => k !== 'rejected');
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {stages.map(stage => {
+          const stageCandidates = candidates.filter(c => c.stage === stage.key);
+          return (
+            <div key={stage.key} className={`bg-[#111] border rounded-xl p-4 ${stage.color.split(' ')[0]}`}>
+              <div className={`flex items-center gap-2 mb-4 ${stage.color.split(' ')[1]}`}>
+                <span>{stage.emoji}</span>
+                <span className="text-sm font-bold">{stage.label}</span>
+                <span className="ml-auto text-xs bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-full px-2 py-0.5">{stageCandidates.length}</span>
+              </div>
+              <div className="space-y-3">
+                {stageCandidates.length === 0 && (
+                  <p className="text-xs text-gray-600 text-center py-4">No candidates</p>
+                )}
+                {stageCandidates.map(c => (
+                  <div key={c.id} className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-3 hover:border-[#3a3a3a] transition">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-sm font-semibold text-white leading-tight">{c.name}</p>
+                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${scoreBadge(c.score)}`}>{c.score}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">{c.role}</p>
+                    <p className="text-xs text-gray-400 leading-relaxed mb-3 line-clamp-2">{c.summary}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {stageOptions.filter(k => k !== c.stage).map(k => {
+                        const s = stages.find(x => x.key === k)!;
+                        return (
+                          <button key={k} onClick={() => moveCandidate(c.id, k)}
+                            className="text-[10px] px-2 py-0.5 rounded-full border border-[#2a2a2a] text-gray-500 hover:text-white hover:border-[#D4AF37]/30 transition">
+                            → {s.label}
+                          </button>
+                        );
+                      })}
+                      {c.stage !== 'rejected' && (
+                        <button onClick={() => moveCandidate(c.id, 'rejected')}
+                          className="text-[10px] px-2 py-0.5 rounded-full border border-[#2a2a2a] text-red-500/60 hover:text-red-400 hover:border-red-500/30 transition">
+                          ❌ Reject
+                        </button>
+                      )}
+                      <button onClick={() => removeCandidate(c.id)}
+                        className="text-[10px] px-2 py-0.5 rounded-full border border-[#2a2a2a] text-gray-600 hover:text-red-400 hover:border-red-500/20 transition ml-auto">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Job Post Generator Tab ────────────────────────────────────────────────────
+function JobPostGeneratorTab() {
+  const [roleTitle, setRoleTitle] = useState('');
+  const [department, setDepartment] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [salaryRange, setSalaryRange] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [result, setResult] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const generateMock = () => {
+    return `# ${roleTitle || 'Role'}
+📍 ${department || 'Department'} · ${salaryRange || 'Competitive salary'}
+
+## About the Role
+
+We're looking for an exceptional **${roleTitle}** to join our ${department || 'team'}. This is a unique opportunity to make a real impact at a fast-growing company where your work will be seen and felt every day.
+
+## What You'll Do
+
+- Own core responsibilities for the ${roleTitle} function end-to-end
+- Collaborate closely with cross-functional stakeholders
+- Drive measurable outcomes and contribute to team OKRs
+- Build scalable processes and improve team efficiency
+- Mentor and contribute to a high-performance culture
+
+## What We're Looking For
+
+${requirements ? requirements.split('\n').filter(l => l.trim()).map(l => `- ${l.trim()}`).join('\n') : `- Proven experience in a ${roleTitle || 'similar'} role\n- Strong communication and problem-solving skills\n- Results-driven with high ownership mentality\n- Team player who can also work independently`}
+
+## What We Offer
+
+- 💰 Salary: **${salaryRange || 'Competitive, based on experience'}**
+- 🚀 High-impact role with real ownership
+- 🌱 Learning & development budget
+- 🏡 Flexible working arrangements
+- 🤝 Collaborative, no-BS culture
+
+## How to Apply
+
+Send your resume and a brief cover note to our team. We review every application personally and respond within 5 business days.
+
+*${department ? `${department} · ` : ''}${roleTitle} · ${salaryRange || 'Competitive salary'}*`;
+  };
+
+  const handleGenerate = async () => {
+    if (!roleTitle.trim()) return;
+    setGenerating(true);
+    setResult('');
+    try {
+      const res = await fetch('/api/recruit/generate-job-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roleTitle, department, requirements, salaryRange }),
+      });
+      if (!res.ok) throw new Error('not-found');
+      const data = await res.json();
+      setResult(data.jobPost || data.content || generateMock());
+    } catch {
+      setResult(generateMock());
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(result);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* non-fatal */ }
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
+        <h2 className="text-sm font-bold text-white mb-1">Generate Job Post</h2>
+        <p className="text-xs text-gray-500 mb-5">Fill in the basics — AI writes a compelling job description you can copy and post anywhere.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Role title *</label>
+            <input value={roleTitle} onChange={e => setRoleTitle(e.target.value)}
+              placeholder="e.g. Senior Product Manager"
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Department</label>
+            <input value={department} onChange={e => setDepartment(e.target.value)}
+              placeholder="e.g. Engineering, Marketing"
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Salary range</label>
+            <input value={salaryRange} onChange={e => setSalaryRange(e.target.value)}
+              placeholder="e.g. $90k–$120k AUD"
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Key requirements</label>
+            <textarea value={requirements} onChange={e => setRequirements(e.target.value)}
+              placeholder="One per line: 5+ years React, Strong TypeScript, AWS experience..."
+              rows={3}
+              className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition resize-none" />
+          </div>
+        </div>
+        <button onClick={handleGenerate} disabled={!roleTitle.trim() || generating}
+          className="px-5 py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition flex items-center gap-2">
+          {generating ? (
+            <><span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />Generating...</>
+          ) : 'Generate →'}
+        </button>
+      </div>
+
+      {result && (
+        <div className="bg-[#111] border border-[#1f1f1f] rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-white">Generated Job Post</h3>
+            <button onClick={handleCopy}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition ${copied ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-[#2a2a2a] text-gray-400 hover:border-[#D4AF37]/30 hover:text-[#D4AF37]'}`}>
+              {copied ? '✅ Copied!' : '📋 Copy'}
+            </button>
+          </div>
+          <pre className="whitespace-pre-wrap text-sm text-gray-300 leading-relaxed font-sans bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-4 overflow-x-auto">{result}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Find Candidates Tab ───────────────────────────────────────────────────────
 function FindCandidatesTab() {
   const [jobTitle, setJobTitle] = useState('');
@@ -126,10 +370,12 @@ function FindCandidatesTab() {
   const [contactedIds, setContactedIds] = useState<Set<string>>(new Set());
 
   // AI Screen modal
+  const [screeningCandidate, setScreeningCandidate] = useState<Candidate | null>(null);
   const [screeningJobTitle, setScreeningJobTitle] = useState('');
   const [screening, setScreening] = useState(false);
   const [screeningResult, setScreeningResult] = useState<ScreeningResult | null>(null);
   const [showScreenModal, setShowScreenModal] = useState(false);
+  const [movedToPipeline, setMovedToPipeline] = useState(false);
 
   const handleSearch = useCallback(async () => {
     if (!jobTitle.trim()) return;
@@ -149,10 +395,12 @@ function FindCandidatesTab() {
   };
 
   const handleAIScreen = async (candidate: Candidate) => {
+    setScreeningCandidate(candidate);
     setScreeningJobTitle(candidate.name);
     setScreening(true);
     setShowScreenModal(true);
     setScreeningResult(null);
+    setMovedToPipeline(false);
     try {
       const res = await fetch('/api/recruit/screen', {
         method: 'POST',
@@ -184,6 +432,32 @@ function FindCandidatesTab() {
     } finally {
       setScreening(false);
     }
+  };
+
+  const handleMoveToPipeline = () => {
+    if (!screeningResult || !screeningCandidate) return;
+    const newEntry: PipelineCandidate = {
+      id: `pipeline-${Date.now()}`,
+      name: screeningResult.candidateName,
+      role: screeningCandidate.currentRole,
+      score: screeningResult.score,
+      summary: screeningResult.summary,
+      stage: screeningResult.recommendation === 'Interview' ? 'shortlisted' : 'screening',
+      addedAt: new Date().toISOString().split('T')[0] ?? new Date().toDateString(),
+    };
+    try {
+      const saved = localStorage.getItem('akai_recruit_pipeline');
+      const existing: PipelineCandidate[] = saved ? JSON.parse(saved) : PIPELINE_MOCK;
+      const updated = [newEntry, ...existing.filter(c => c.name !== newEntry.name)];
+      localStorage.setItem('akai_recruit_pipeline', JSON.stringify(updated));
+    } catch { /* non-fatal */ }
+    setMovedToPipeline(true);
+  };
+
+  const screenScoreBadge = (score: number) => {
+    if (score > 70) return 'bg-green-500/10 border border-green-500/30 text-green-400';
+    if (score >= 40) return 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400';
+    return 'bg-red-500/10 border border-red-500/30 text-red-400';
   };
 
   const recommendationColor = (rec: ScreeningResult['recommendation']) => {
@@ -371,36 +645,49 @@ function FindCandidatesTab() {
                     <p className="text-sm font-semibold text-white">{screeningResult.candidateName}</p>
                     <p className="text-xs text-gray-500">Sample candidate</p>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-black text-[#D4AF37]">{screeningResult.score}%</div>
+                  <div className="text-right flex flex-col items-end gap-1.5">
+                    <span className={`text-lg font-black px-3 py-1 rounded-full ${screenScoreBadge(screeningResult.score)}`}>
+                      {screeningResult.score}/100
+                    </span>
                     <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${recommendationColor(screeningResult.recommendation)}`}>
                       {screeningResult.recommendation}
                     </span>
                   </div>
                 </div>
-                <div>
-                  <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-2">✅ Strengths</p>
-                  <ul className="space-y-1">
-                    {screeningResult.strengths.map((s, i) => (
-                      <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                        <span className="text-green-400 mt-0.5">•</span>{s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-xs text-orange-400 font-semibold uppercase tracking-wider mb-2">⚠️ Gaps</p>
-                  <ul className="space-y-1">
-                    {screeningResult.gaps.map((g, i) => (
-                      <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                        <span className="text-orange-400 mt-0.5">•</span>{g}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {screeningResult.strengths.length > 0 && (
+                  <div>
+                    <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-2">✅ Key Highlights</p>
+                    <ul className="space-y-1">
+                      {screeningResult.strengths.map((s, i) => (
+                        <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
+                          <span className="text-green-400 mt-0.5 flex-shrink-0">•</span><span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {screeningResult.gaps.length > 0 && (
+                  <div>
+                    <p className="text-xs text-orange-400 font-semibold uppercase tracking-wider mb-2">⚠️ Gaps to Note</p>
+                    <ul className="space-y-1">
+                      {screeningResult.gaps.map((g, i) => (
+                        <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
+                          <span className="text-orange-400 mt-0.5 flex-shrink-0">•</span><span>{g}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3">
                   <p className="text-xs text-gray-300 leading-relaxed">{screeningResult.summary}</p>
                 </div>
+                <button
+                  onClick={handleMoveToPipeline}
+                  disabled={movedToPipeline}
+                  className={`w-full py-2.5 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2 ${movedToPipeline ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-[#1a1a1a] border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10'}`}
+                >
+                  {movedToPipeline ? '✅ Added to Pipeline' : 'Move to Pipeline →'}
+                </button>
                 <button onClick={() => setShowScreenModal(false)} className="w-full py-2.5 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:bg-[#c4a030] transition">
                   Got it
                 </button>

@@ -6,6 +6,76 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TrialBadge from '@/components/dashboard/TrialBadge';
 import { useAuth } from '@/hooks/useAuth';
 
+// ── Intelligence panel types ──────────────────────────────────────────────────
+interface Insight {
+  type: string;
+  text: string;
+}
+
+interface InsightsData {
+  insights: Insight[];
+  stats: Record<string, number>;
+  period: string;
+  loading: boolean;
+}
+
+const INSIGHT_EMOJI: Record<string, string> = {
+  conversion: '📄',
+  calls: '📞',
+  bookings: '📅',
+  email: '✉️',
+};
+
+function IntelligencePanel({ insights, stats, loading }: { insights: Insight[]; stats: Record<string, number>; loading: boolean }) {
+  const proposalCount = stats['proposal_sent'] || 0;
+  const callCount = stats['sophie_call_triggered'] || 0;
+  const bookingCount = stats['meeting_booked'] || 0;
+  const repliedCount = stats['proposals_replied'] || 0;
+  const replyRate = proposalCount > 0 ? Math.round((repliedCount / proposalCount) * 100) : 0;
+
+  return (
+    <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 border-l-2 border-l-[#D4AF37]/60">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-black text-white">🧠 What AKAI learned this week</h2>
+        <span className="text-[11px] text-gray-600 bg-[#1a1a1a] px-2 py-0.5 rounded-full">Last 7 days</span>
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          <div className="h-4 w-3/4 bg-[#1f1f1f] rounded animate-pulse" />
+          <div className="h-4 w-1/2 bg-[#1f1f1f] rounded animate-pulse" />
+        </div>
+      ) : insights.length === 0 ? (
+        <p className="text-gray-600 text-sm">No data yet — AKAI logs interactions as you use it</p>
+      ) : (
+        <ul className="space-y-2 mb-5">
+          {insights.map((ins, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+              <span>{INSIGHT_EMOJI[ins.type] || '•'}</span>
+              <span>{ins.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Mini stats grid */}
+      <div className="grid grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#1f1f1f]">
+        {[
+          { label: 'Proposals', value: proposalCount },
+          { label: 'Calls', value: callCount },
+          { label: 'Bookings', value: bookingCount },
+          { label: 'Reply rate', value: proposalCount > 0 ? `${replyRate}%` : '—' },
+        ].map(({ label, value }) => (
+          <div key={label} className="text-center">
+            <p className="text-lg font-black text-white">{value}</p>
+            <p className="text-[11px] text-gray-600">{label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = 'aiclozr_api_key_2026_prod';
 
@@ -139,6 +209,14 @@ export default function DashboardPage() {
   // Business name from Firestore
   const [businessName, setBusinessName] = useState<string | null>(null);
 
+  // Intelligence insights
+  const [insightsData, setInsightsData] = useState<InsightsData>({
+    insights: [],
+    stats: {},
+    period: '7d',
+    loading: true,
+  });
+
   // Background: ensure Firestore profile exists and check onboarding status.
   useEffect(() => {
     if (!user) return;
@@ -257,6 +335,33 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [user]);
 
+  // Fetch intelligence insights
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const idToken = await user.getIdToken().catch(() => '');
+        const res = await fetch(`${RAILWAY_API}/api/analytics/insights/${user.uid}`, {
+          headers: {
+            'x-api-key': API_KEY,
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+        });
+        if (!res.ok) throw new Error('Insights unavailable');
+        const data = await res.json() as { insights: Insight[]; stats: Record<string, number>; period: string };
+        if (!cancelled) {
+          setInsightsData({ ...data, loading: false });
+        }
+      } catch {
+        if (!cancelled) {
+          setInsightsData(prev => ({ ...prev, loading: false }));
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
@@ -345,6 +450,15 @@ export default function DashboardPage() {
                   loading={stats.loading}
                 />
               </div>
+            </section>
+
+            {/* ── Intelligence panel ───────────────────────────────────────── */}
+            <section>
+              <IntelligencePanel
+                insights={insightsData.insights}
+                stats={insightsData.stats}
+                loading={insightsData.loading}
+              />
             </section>
 
             {/* ── Quick actions ─────────────────────────────────────────────── */}
