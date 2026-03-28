@@ -164,6 +164,7 @@ function Hero({ onOpenCapture }: { onOpenCapture: () => void }) {
       <div className="flex flex-col sm:flex-row gap-3 items-center mb-16">
         <button
           onClick={onOpenCapture}
+          aria-label="Start free trial"
           className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20 min-w-[180px]"
         >
           Start free →
@@ -372,6 +373,7 @@ function PricingCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
         </p>
         <button
           onClick={onOpenCapture}
+          aria-label="Create your free account"
           className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-10 py-4 text-lg hover:opacity-90 active:scale-95 transition-all shadow-2xl shadow-[#D4AF37]/20"
         >
           Create your free account →

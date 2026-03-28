@@ -845,7 +845,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
                   </div>
                   <CallStatusBadge status={lead.callStatus} />
                   {lead.callStatus === 'pending' && (
-                    <button onClick={() => removeLead(lead.id!)} className="text-gray-600 hover:text-red-400 transition-colors text-sm ml-1" title="Remove">×</button>
+                    <button onClick={() => removeLead(lead.id!)} aria-label="Remove lead" className="text-gray-600 hover:text-red-400 transition-colors text-sm ml-1" title="Remove">×</button>
                   )}
                 </div>
               ))}
