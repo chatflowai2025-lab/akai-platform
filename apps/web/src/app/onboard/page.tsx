@@ -78,6 +78,17 @@ interface OnboardState {
   data: OnboardData;
 }
 
+// Hints shown below the input for each onboarding step
+const STEP_HINTS: Partial<Record<OnboardStep, string>> = {
+  industry: "We use this to personalise your lead scripts and Sophie's call style",
+  business_name: "This is how Sophie will introduce herself on calls",
+  goal: "This helps AK focus on what matters most to grow your business",
+  location: "We target leads in your area first",
+  contact: "We'll send you lead alerts and important updates here",
+  notifications: "Choose how you want to hear from AKAI — we'll never spam you",
+  calendar: "Connect once and Sophie will book meetings automatically",
+};
+
 const INITIAL_MESSAGE: ChatMessage = {
   id: '1',
   role: 'assistant',
@@ -333,6 +344,15 @@ export default function OnboardPage() {
             Send →
           </Button>
         </div>
+        {/* Step hint */}
+        {STEP_HINTS[state.step] && (
+          <div className="max-w-2xl mx-auto mt-2">
+            <p className="text-xs text-[#D4AF37]/60 flex items-center gap-1.5">
+              <span>💡</span>
+              <span>{STEP_HINTS[state.step]}</span>
+            </p>
+          </div>
+        )}
         <div className="max-w-2xl mx-auto mt-2 flex justify-end">
           <button
             onClick={() => router.replace('/dashboard')}

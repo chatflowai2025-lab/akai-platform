@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import TrialBadge from '@/components/dashboard/TrialBadge';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -350,6 +351,87 @@ function NeedsYouColumn({ items, loading }: { items: NeedsYouItem[]; loading: bo
   );
 }
 
+// ── Setup Checklist (post-onboarding) ────────────────────────────────────────
+function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void }) {
+  const router = useRouter();
+  const { sendMessage } = useDashboardChat();
+  const [dismissing, setDismissing] = useState(false);
+
+  const handleDismiss = async () => {
+    setDismissing(true);
+    try {
+      const { getFirebaseDb } = await import('@/lib/firebase');
+      const { doc, setDoc } = await import('firebase/firestore');
+      const db = getFirebaseDb();
+      if (db) {
+        await setDoc(doc(db, 'users', uid), { setupChecklistDismissed: true }, { merge: true });
+      }
+    } catch { /* non-fatal */ } finally {
+      onDismiss();
+      setDismissing(false);
+    }
+  };
+
+  const items = [
+    {
+      icon: '✉️',
+      label: 'Connect your email',
+      hint: 'So Sophie can send and receive on your behalf',
+      action: () => router.push('/email-guard'),
+    },
+    {
+      icon: '📅',
+      label: 'Connect your calendar',
+      hint: 'Let Sophie book meetings automatically',
+      action: () => router.push('/calendar'),
+    },
+    {
+      icon: '💬',
+      label: 'Talk to AK — tell it what you need',
+      hint: 'Get personalised advice for your business',
+      action: () => sendMessage('Hi AK, what should I set up first?'),
+    },
+  ];
+
+  return (
+    <section className="bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/30 rounded-2xl p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h2 className="text-sm font-black text-white flex items-center gap-2">
+            <span>🚀</span> Get started — 3 quick wins
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">Complete these to unlock the full power of AKAI</p>
+        </div>
+        <button
+          onClick={handleDismiss}
+          disabled={dismissing}
+          className="text-xs text-gray-600 hover:text-gray-400 transition px-2 py-1 rounded border border-[#2a2a2a] hover:border-[#3a3a3a] disabled:opacity-40 flex-shrink-0"
+        >
+          {dismissing ? '...' : 'Dismiss'}
+        </button>
+      </div>
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <button
+            key={i}
+            onClick={item.action}
+            className="w-full flex items-center gap-3 p-3 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition text-left group"
+          >
+            <div className="w-8 h-8 rounded-full border-2 border-[#2a2a2a] group-hover:border-[#D4AF37]/40 flex items-center justify-center flex-shrink-0 text-base transition">
+              {item.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white">{item.label}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{item.hint}</p>
+            </div>
+            <span className="text-gray-600 group-hover:text-[#D4AF37] transition text-sm flex-shrink-0">→</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ── Main dashboard ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
@@ -365,6 +447,7 @@ export default function DashboardPage() {
   });
 
   const [businessName, setBusinessName] = useState<string | null>(null);
+  const [showChecklist, setShowChecklist] = useState(false);
 
   const [insightsData, setInsightsData] = useState<InsightsData>({
     insights: [],
@@ -442,6 +525,12 @@ export default function DashboardPage() {
           !!data?.microsoftCalendarConnected;
         if (!onboardingComplete) {
           router.replace('/onboard');
+          return;
+        }
+
+        // Show setup checklist if onboarded but not dismissed
+        if (data?.onboardingComplete === true && !data?.setupChecklistDismissed) {
+          setShowChecklist(true);
         }
       } catch {
         // Non-fatal
@@ -760,6 +849,11 @@ export default function DashboardPage() {
               </div>
             </div>
           </section>
+
+          {/* ── Setup checklist (post-onboarding) ───────────────────────── */}
+          {showChecklist && user && (
+            <SetupChecklist uid={user.uid} onDismiss={() => setShowChecklist(false)} />
+          )}
 
           {/* ── Quick actions ────────────────────────────────────────────── */}
           <section>

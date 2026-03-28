@@ -99,19 +99,45 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     setDoc(chatRef, { messages: sanitized, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
   }, [messages, user]);
 
-  // Load chat history from Firestore on mount
+  // Load chat history from Firestore on mount; inject welcome message on first login
   useEffect(() => {
     if (!user) return;
     const db = getFirebaseDb();
     if (!db) return;
     const chatRef = doc(db, 'users', user.uid, 'chat', 'history');
-    getDoc(chatRef).then(snap => {
+    getDoc(chatRef).then(async snap => {
       if (snap.exists()) {
         const saved = snap.data()?.messages;
         if (Array.isArray(saved) && saved.length > 0) {
           setMessages(saved);
+          return;
         }
       }
+      // No prior chat history — check if onboarding is complete and inject welcome message
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data() || {};
+        const isOnboarded =
+          userData?.onboardingComplete === true ||
+          !!userData?.businessName ||
+          !!userData?.onboarding?.businessName;
+        if (isOnboarded) {
+          const firstName =
+            userData?.onboarding?.businessName ||
+            userData?.businessName ||
+            user.displayName ||
+            user.email?.split('@')[0] ||
+            'there';
+          const welcomeMsg: ChatMessage = {
+            id: 'welcome-1',
+            role: 'assistant',
+            content: `Hey ${firstName}! I'm AK — your AI business partner. I've set up your account based on what you told me. What would you like to tackle first — leads, email, or something else?`,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages([welcomeMsg]);
+        }
+      } catch { /* non-fatal */ }
     }).catch(() => {});
   }, [user]);
 
