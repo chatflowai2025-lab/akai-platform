@@ -242,7 +242,7 @@ export default function SettingsPage() {
     })();
     // Load referral data
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/analytics/referral/${user.uid}`, {
-      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' },
+      headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
     })
       .then(r => r.json())
       .then((data: ReferralData) => setReferral(data))

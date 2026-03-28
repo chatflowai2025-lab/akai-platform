@@ -50,7 +50,7 @@ async function syncUserProfile(user: User): Promise<UserProfile> {
       if (refCode) {
         fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/analytics/referral/track', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': 'aiclozr_api_key_2026_prod' },
+          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
           body: JSON.stringify({ referralCode: refCode, newUserId: user.uid, newUserEmail: user.email }),
         }).catch(() => {});
         localStorage.removeItem('akai_ref_code');

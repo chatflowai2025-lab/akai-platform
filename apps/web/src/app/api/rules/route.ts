@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const API_KEY = 'aiclozr_api_key_2026_prod';
+const API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 interface Rule {
   name: string;

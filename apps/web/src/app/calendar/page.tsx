@@ -448,7 +448,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     try {
       const r = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/oauth-url?userId=${userId}`,
-        { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
+        { headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' } }
       );
       if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { url } = await r.json();
@@ -465,7 +465,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     try {
       const r = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/ms-auth-url?userId=${userId}`,
-        { headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' } }
+        { headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' } }
       );
       if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { authUrl } = await r.json() as { authUrl: string };
@@ -528,7 +528,7 @@ function BookingsView({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/appointments/${userId}`, {
-      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
+      headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' }
     })
       .then(r => r.json())
       .then(d => { setAppointments(d.appointments || []); setLoading(false); })
@@ -673,7 +673,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     if (!calConnected || calProvider !== 'google') return;
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/list?userId=${user.uid}&days=30`, {
-      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
+      headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' }
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
@@ -704,7 +704,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
 
     // Fetch Outlook calendar events via Railway API
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/outlook-events?userId=${user.uid}&days=30`, {
-      headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' }
+      headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' }
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
@@ -819,7 +819,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
                     : `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/disconnect`;
                   await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-api-key': 'aiclozr_api_key_2026_prod' },
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
                     body: JSON.stringify({ userId: user.uid }),
                   }).catch(() => {});
                   setCalConnected(false);

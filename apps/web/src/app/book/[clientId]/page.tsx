@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const RAILWAY = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const API_KEY = 'aiclozr_api_key_2026_prod';
+const API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 const FALLBACK_TIMES = [
   { label: '9:00 am', value: '09:00' },

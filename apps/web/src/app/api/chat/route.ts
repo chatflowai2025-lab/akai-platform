@@ -523,7 +523,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
     // Attempt Railway fetch
     try {
       const leadsRes = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/leads', {
-        headers: { 'x-api-key': 'aiclozr_api_key_2026_prod' },
+        headers: { 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
         signal: AbortSignal.timeout(4000),
       });
       if (leadsRes.ok) {

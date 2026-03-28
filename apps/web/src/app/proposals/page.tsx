@@ -832,7 +832,7 @@ export default function ProposalsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'aiclozr_api_key_2026_prod',
+          'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod',
         },
         body: JSON.stringify({
           to: contactEmail || '',
