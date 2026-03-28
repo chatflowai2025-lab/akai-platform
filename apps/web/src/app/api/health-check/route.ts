@@ -6,6 +6,19 @@ const RAILWAY_API = 'https://api-server-production-2a27.up.railway.app';
 const RAILWAY_API_KEY = 'aiclozr_api_key_2026_prod';
 
 async function sendEmail(to: string, subject: string, html: string, resendKey: string) {
+  // Primary: Railway SMTP relay (Gmail — proven deliverable)
+  try {
+    const res = await fetch(`${RAILWAY_API}/api/send-welcome`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+      body: JSON.stringify({ to, subject, html }),
+    });
+    if (res.ok) return;
+    console.warn('[health-check] Railway SMTP failed:', await res.text());
+  } catch (e) {
+    console.warn('[health-check] Railway SMTP error:', e);
+  }
+  // Fallback: Resend
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
