@@ -1,10 +1,7 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
-// TODO: App Check — requires Aaron to register reCAPTCHA v3 site key first.
-// Setup guide: /home/ubuntu/.openclaw/workspace/memory/firebase-app-check-setup.md
-// Once NEXT_PUBLIC_RECAPTCHA_SITE_KEY is in Vercel env vars, uncomment the block in getFirebaseApp().
-// import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -26,23 +23,16 @@ export function getFirebaseApp(): FirebaseApp | null {
   if (getApps().length) return getApp();
   const app = initializeApp(firebaseConfig);
 
-  // --- App Check (defence-in-depth, requires manual reCAPTCHA setup) ---
-  // Enable debug token in development so App Check doesn't block local dev.
-  // In production, NEXT_PUBLIC_RECAPTCHA_SITE_KEY must be set in Vercel.
-  // See: /home/ubuntu/.openclaw/workspace/memory/firebase-app-check-setup.md
-  //
-  // To activate, uncomment the block below AFTER completing the setup guide:
-  //
-  // if (process.env.NODE_ENV === 'development') {
-  //   (self as unknown as Record<string, unknown>).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-  // }
-  // if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-  //   const { initializeAppCheck, ReCaptchaV3Provider } = require('firebase/app-check');
-  //   initializeAppCheck(app, {
-  //     provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
-  //     isTokenAutoRefreshEnabled: true,
-  //   });
-  // }
+  // --- App Check (reCAPTCHA v3) ---
+  if (process.env.NODE_ENV === 'development') {
+    (self as unknown as Record<string, unknown>).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+  if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true,
+    });
+  }
   // --- End App Check ---
 
   return app;
