@@ -1952,11 +1952,34 @@ function ScreenApplicantsTab() {
   );
 }
 
+// ── Stats Bar ─────────────────────────────────────────────────────────────────
+function StatsBar() {
+  const stats = [
+    { label: 'Roles open', value: '3', icon: '📋' },
+    { label: 'Candidates this week', value: '12', icon: '👥' },
+    { label: 'Avg screen score', value: '74', icon: '🎯' },
+    { label: 'Shortlisted', value: '5', icon: '✅' },
+  ];
+  return (
+    <div className="flex items-center gap-0 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6 py-2 overflow-x-auto">
+      {stats.map((s, i) => (
+        <div key={s.label} className={`flex items-center gap-2 px-5 py-1.5 ${i < stats.length - 1 ? 'border-r border-[#1f1f1f]' : ''}`}>
+          <span className="text-base">{s.icon}</span>
+          <div>
+            <p className="text-base font-black text-white leading-none">{s.value}</p>
+            <p className="text-[10px] text-gray-500 leading-tight whitespace-nowrap">{s.label}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function RecruitPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'find' | 'post' | 'screen'>('find');
+  const [activeTab, setActiveTab] = useState<'find' | 'post' | 'screen' | 'pipeline' | 'generate'>('find');
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -1982,17 +2005,22 @@ export default function RecruitPage() {
           <span className="text-xs px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-medium">Live</span>
         </header>
 
+        {/* Stats bar */}
+        <StatsBar />
+
         {/* Tabs */}
-        <div className="flex border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6">
+        <div className="flex border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6 overflow-x-auto">
           {[
             { key: 'find', label: '🔍 Find Candidates' },
             { key: 'screen', label: '🤖 Screen Applicants' },
+            { key: 'pipeline', label: '📊 Pipeline' },
+            { key: 'generate', label: '✍️ Generate Job Post' },
             { key: 'post', label: '📋 Post a Job' },
           ].map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key as 'find' | 'post' | 'screen')}
-              className={`px-4 py-3 text-sm font-semibold border-b-2 transition mr-2 ${
+              onClick={() => setActiveTab(tab.key as typeof activeTab)}
+              className={`px-4 py-3 text-sm font-semibold border-b-2 transition mr-2 whitespace-nowrap ${
                 activeTab === tab.key
                   ? 'border-[#D4AF37] text-[#D4AF37]'
                   : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -2005,7 +2033,11 @@ export default function RecruitPage() {
 
         {/* Tab content */}
         <div className="flex-1 overflow-hidden flex flex-col">
-          {activeTab === 'find' ? <FindCandidatesTab /> : activeTab === 'screen' ? <ScreenApplicantsTab /> : <PostJobTab />}
+          {activeTab === 'find' && <FindCandidatesTab />}
+          {activeTab === 'screen' && <ScreenApplicantsTab />}
+          {activeTab === 'pipeline' && <PipelineTab />}
+          {activeTab === 'generate' && <JobPostGeneratorTab />}
+          {activeTab === 'post' && <PostJobTab />}
         </div>
       </div>
     </DashboardLayout>
