@@ -9,7 +9,13 @@
 // Aaron (mrakersten@gmail.com) is a permanent Trailblazer and receives
 // everything other Trailblazers receive.
 export const TRAILBLAZER_MEMBERS: string[] = [
-  'mrakersten@gmail.com', // Aaron Kersten — founder, always included
+  'mrakersten@gmail.com',          // Aaron Kersten — founder
+  'danielle.avissar@gmail.com',    // Danielle Avissar — Trailblazer
+  'pagliariccimarco@gmail.com',    // Marco — AP Heritage
+  'henrik.mortensen@live.com.au',  // Henrik — Lily Mortensen project
+  'jilljjqb@gmail.com',            // Jill — Trailblazer
+  'chatflowai2025@gmail.com',      // Aaron (ops account)
+  'getakainow@outlook.com',        // Aaron (test account)
 ];
 
 /**

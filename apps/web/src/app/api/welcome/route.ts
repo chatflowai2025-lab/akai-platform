@@ -102,11 +102,32 @@ function buildWelcomeEmail(name: string, email: string): string {
         </p>
       </div>
 
+      <!-- Brain / evolution section -->
+      <div style="background:#0a0a0a;border-radius:8px;padding:24px;margin:0 0 24px;">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#D4AF37;text-transform:uppercase;letter-spacing:1px;">🧠 How AKAI gets smarter</p>
+        <p style="margin:0 0 12px;font-size:13px;color:#aaa;line-height:1.7;">
+          AKAI has a central brain that learns from every interaction — every email replied to, every lead called, every meeting booked. The more you use it, the more it understands your business, your customers, and what actually converts.
+        </p>
+        <p style="margin:0;font-size:13px;color:#aaa;line-height:1.7;">
+          Over time it spots patterns you'd never see manually — which leads respond, what time of day works best, which message angles convert. It adapts automatically. You just keep working.
+        </p>
+      </div>
+
+      <!-- Trailblazer feedback section -->
+      <div style="background:#fffbeb;border-left:4px solid #D4AF37;border-radius:4px;padding:16px 20px;margin:0 0 24px;">
+        <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#92400e;">You're a Trailblazer — your feedback shapes the platform</p>
+        <p style="margin:0 0 10px;font-size:13px;color:#78350f;line-height:1.6;">
+          As an early tester, what you find and report directly changes what gets built next. Two ways to give feedback:
+        </p>
+        <p style="margin:0 0 6px;font-size:13px;color:#78350f;"><strong>1. Reply to this email</strong> — Aaron reads every reply personally.</p>
+        <p style="margin:0;font-size:13px;color:#78350f;"><strong>2. Tell AK in the dashboard</strong> — type your feedback in the chat, AK logs and routes it instantly.</p>
+      </div>
+
       <!-- Report issues -->
       <div style="background:#f8f8f8;border-radius:6px;padding:16px 20px;margin:0 0 32px;">
         <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#111;">Found something that's not right?</p>
         <p style="margin:0;font-size:13px;color:#555;line-height:1.6;">
-          Reply directly to this email and Aaron will look at it personally. We're improving the platform every day and your feedback goes straight to the top.
+          Reply to this email with what happened and what you expected. Screenshots or descriptions both work. Aaron will look at it personally and you'll hear back within hours.
         </p>
       </div>
 
