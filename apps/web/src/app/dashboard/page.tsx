@@ -651,6 +651,15 @@ export default function DashboardPage() {
               />
             </section>
 
+            {/* ── Intelligence Feed ─────────────────────────────────────────── */}
+            <section>
+              <IntelligenceFeed
+                items={feedData.items}
+                loading={feedData.loading}
+                onRefresh={refreshFeed}
+              />
+            </section>
+
             {/* ── AKAI Intelligence Score ───────────────────────────────────── */}
             <section>
               <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
