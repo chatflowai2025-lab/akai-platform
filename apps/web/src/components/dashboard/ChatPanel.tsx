@@ -189,11 +189,13 @@ export default function ChatPanel() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Ask AK anything..."
+            aria-label="Message AK"
             className="flex-1 bg-[#111] border border-[#1f1f1f] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
           />
           <button
             onClick={send}
             disabled={loading || !input.trim()}
+            aria-label="Send message"
             className="px-3 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-bold hover:opacity-90 disabled:opacity-40 transition"
           >
             →
