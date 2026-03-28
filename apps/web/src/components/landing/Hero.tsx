@@ -442,7 +442,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
           ))}
         </div>
         <p className="fade-up fade-up-3 text-lg text-white/60 max-w-2xl mb-10 leading-relaxed">
-          Describe your business. AKAI builds it, runs it, and grows it — <span className="text-white">while you close deals.</span>
+          Your AI business partner — finds leads, books meetings, handles enquiries, and <span className="text-white">grows your revenue while you sleep.</span>
         </p>
 
         {/* CTA row */}

@@ -40,7 +40,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/20">
-          <p>© {new Date().getFullYear()} AKAI. All rights reserved. ABN 50 179 250 215</p>
+          <p>© 2026 AKAI · <a href="https://getakai.ai" className="hover:text-white/50 transition-colors">getakai.ai</a> · Made in Sydney 🇦🇺</p>
           <p>
             Built on <span className="text-[#F59E0B]/60">AI</span>. Powered by results.
           </p>

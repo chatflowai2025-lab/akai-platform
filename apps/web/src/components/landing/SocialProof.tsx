@@ -37,6 +37,15 @@ export default function SocialProof() {
 
       <div className="max-w-5xl mx-auto space-y-16">
 
+        {/* Trust banner */}
+        <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-white/40 font-medium">
+          <span>✅ Trusted by businesses across Sydney</span>
+          <span className="hidden sm:inline text-white/10">·</span>
+          <span>⚡ 24/7 AI operations</span>
+          <span className="hidden sm:inline text-white/10">·</span>
+          <span>🚀 Zero setup required</span>
+        </div>
+
         {/* Stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/[0.06]">
           <div className="bg-[#0a0a0a] px-6 py-5 text-center">

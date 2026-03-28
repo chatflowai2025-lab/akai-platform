@@ -6,6 +6,7 @@ import Hero from '@/components/landing/Hero';
 import AITeam from '@/components/landing/AITeam';
 import SocialProof from '@/components/landing/SocialProof';
 import HowItWorks from '@/components/landing/HowItWorks';
+import ModuleShowcase from '@/components/landing/ModuleShowcase';
 import Modules from '@/components/landing/Modules';
 import Pricing from '@/components/landing/Pricing';
 import Footer from '@/components/landing/Footer';
@@ -126,6 +127,7 @@ export default function Home() {
       <Hero onOpenCapture={() => setCaptureOpen(true)} onOpenChat={() => setChatOpen(true)} />
       <AITeam />
       <SocialProof />
+      <ModuleShowcase />
       <HowItWorks />
       <Modules />
       <Pricing onOpenCapture={() => setCaptureOpen(true)} />

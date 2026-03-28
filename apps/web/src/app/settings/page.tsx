@@ -79,6 +79,8 @@ export default function SettingsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [notifSaved, setNotifSaved] = useState(false);
   const [notifError, setNotifError] = useState<string | null>(null);
+  const [resettingOnboarding, setResettingOnboarding] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   // Sophie voice
   const [selectedVoice, setSelectedVoice] = useState('sophie-au');
@@ -385,6 +387,33 @@ export default function SettingsPage() {
     }
   };
 
+  const resetOnboarding = async () => {
+    if (!user?.uid || resettingOnboarding) return;
+    setResettingOnboarding(true);
+    try {
+      const db = getFirebaseDb();
+      if (db) {
+        await setDoc(doc(db, 'users', user.uid), { onboarding: null }, { merge: true });
+      }
+      window.location.href = '/onboard';
+    } catch (err) {
+      console.error('[RESET ONBOARDING]', err);
+      setResettingOnboarding(false);
+    }
+  };
+
+  const signOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await getFirebaseAuth()?.signOut();
+      window.location.href = '/login';
+    } catch (err) {
+      console.error('[SIGN OUT]', err);
+      setSigningOut(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
@@ -522,7 +551,7 @@ export default function SettingsPage() {
           {bizSaved && (
             <div className="flex items-center gap-2 text-sm bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-2 text-green-400 font-semibold animate-in fade-in">
               <span>✅</span>
-              <span>Business profile saved — Sophie is now updated with your latest details.</span>
+              <span>Settings saved — Sophie is now updated with your latest details.</span>
             </div>
           )}
           <button
@@ -938,7 +967,39 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <Section title="Danger Zone">
-        <p className="text-sm text-gray-400">Permanently delete your account and all associated data. This cannot be undone.</p>
+        <p className="text-sm text-gray-400">Manage account actions. Destructive actions cannot be undone.</p>
+
+        {/* Reset onboarding */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5">
+          <div>
+            <p className="text-sm font-semibold text-white">Reset Onboarding</p>
+            <p className="text-xs text-gray-500 mt-0.5">Clears your onboarding progress and takes you back to setup.</p>
+          </div>
+          <button
+            onClick={resetOnboarding}
+            disabled={resettingOnboarding}
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-red-500/40 text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
+          >
+            {resettingOnboarding ? '⏳ Resetting…' : '↩ Reset Onboarding'}
+          </button>
+        </div>
+
+        {/* Sign out */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl border border-red-500/20 bg-red-500/5">
+          <div>
+            <p className="text-sm font-semibold text-white">Sign Out</p>
+            <p className="text-xs text-gray-500 mt-0.5">Signs you out of AKAI on this device.</p>
+          </div>
+          <button
+            onClick={signOut}
+            disabled={signingOut}
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-red-500/40 text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
+          >
+            {signingOut ? '⏳ Signing out…' : '🚪 Sign Out'}
+          </button>
+        </div>
+
+        {/* Delete account */}
         <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 space-y-3">
           <p className="text-xs text-red-400 font-semibold">This will permanently delete:</p>
           <ul className="text-xs text-gray-500 space-y-1 list-disc list-inside">
