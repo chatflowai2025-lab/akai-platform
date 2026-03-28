@@ -1179,13 +1179,13 @@ function BuildTab() {
             <div>
               <label className="block text-xs text-gray-400 font-medium mb-1.5">Contact email</label>
               <input value={contactEmail} onChange={e => setContactEmail(e.target.value)}
-                placeholder="you@example.com" type="email"
+                placeholder="you@example.com" type="email" autoComplete="email"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
             </div>
             <div>
               <label className="block text-xs text-gray-400 font-medium mb-1.5">Phone</label>
               <input value={contactPhone} onChange={e => setContactPhone(e.target.value)}
-                placeholder="+61 400 000 000" type="tel"
+                placeholder="+61 400 000 000" type="tel" autoComplete="tel"
                 className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50" />
             </div>
           </div>
