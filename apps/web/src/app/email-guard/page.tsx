@@ -891,6 +891,13 @@ function EmailGuardContent({
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${eq.status === 'sent' ? 'bg-green-400' : 'bg-[#D4AF37] animate-pulse'}`} />
                           <p className="text-sm font-semibold text-white truncate">{eq.subject || '(No subject)'}</p>
+                          <a
+                            href={`/deals/${eq.id}`}
+                            onClick={e => e.stopPropagation()}
+                            className="text-xs text-gray-600 hover:text-[#D4AF37] transition flex-shrink-0"
+                          >
+                            View deal →
+                          </a>
                         </div>
                         <p className="text-xs text-gray-500 truncate">{eq.from}</p>
                         <p className="text-xs text-gray-600 mt-1 truncate">{eq.body?.slice(0, 80)}…</p>
