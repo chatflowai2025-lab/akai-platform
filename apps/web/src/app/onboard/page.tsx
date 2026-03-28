@@ -179,84 +179,70 @@ export default function OnboardPage() {
     const { businessName, industry, goal, location, contact } = finalState.data;
 
     try {
-      let db = null;
-      try { db = getFirebaseDb(); } catch { /* ignore */ }
-      if (db) {
-        const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber, calendarProvider } = finalState.data;
-        // Save full onboarding data + mark complete
-        await setDoc(
-          doc(db, 'users', user.uid),
-          {
-            onboarding: {
+      // Non-fatal: save to Firestore
+      try {
+        const db = getFirebaseDb();
+        if (db) {
+          const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber, calendarProvider } = finalState.data;
+          await setDoc(
+            doc(db, 'users', user.uid),
+            {
+              onboarding: {
+                businessName: businessName || '',
+                industry: industry || '',
+                goal: goal || '',
+                location: location || '',
+                contact: contact || '',
+                completedAt: new Date().toISOString(),
+                calendarProvider: calendarProvider || null,
+              },
+              campaignConfig: {
+                businessName: businessName || '',
+                industry: industry || '',
+                location: location || '',
+                targetCustomer: '',
+                goal: goal || '',
+              },
+              notificationPrefs: {
+                email: notifEmail !== false,
+                sms: notifSms || false,
+                smsNumber: notifSmsNumber || '',
+                whatsapp: notifWhatsapp || false,
+                whatsappNumber: notifWhatsappNumber || '',
+              },
+              calendarConfig: { provider: calendarProvider || null, connected: false },
+              onboardingComplete: true,
               businessName: businessName || '',
-              industry: industry || '',
-              goal: goal || '',
-              location: location || '',
-              contact: contact || '',
-              completedAt: new Date().toISOString(),
-              calendarProvider: calendarProvider || null,
+              displayName: businessName || '',
             },
-            // campaignConfig — used by AK when launching campaigns
-            campaignConfig: {
-              businessName: businessName || '',
-              industry: industry || '',
-              location: location || '',
-              targetCustomer: '',
-              goal: goal || '',
-            },
-            // Notification preferences
-            notificationPrefs: {
-              email: notifEmail !== false,
-              sms: notifSms || false,
-              smsNumber: notifSmsNumber || '',
-              whatsapp: notifWhatsapp || false,
-              whatsappNumber: notifWhatsappNumber || '',
-            },
-            // Calendar config from onboarding
-            calendarConfig: {
-              provider: calendarProvider || null,
-              connected: false,
-            },
-            onboardingComplete: true,
-            businessName: businessName || '',
-            displayName: businessName || '',
-          },
-          { merge: true }
-        );
-
+            { merge: true }
+          );
+        }
+      } catch (err) {
+        console.error('[ONBOARD] Firestore save failed (non-fatal):', err);
       }
-    } catch (err) {
-      console.error('[ONBOARD] Firestore save failed (non-fatal):', err);
+
+      // Non-fatal: notify Railway
+      try {
+        await fetch(`${RAILWAY_API}/api/onboarding/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+          body: JSON.stringify({
+            userId: user.uid, email: user.email || contact || '',
+            name: user.displayName || businessName || '',
+            businessName: businessName || '', industry: industry || '',
+            location: location || '', contact: contact || '',
+            uid: user.uid, selectedPlan: 'trial',
+          }),
+        });
+      } catch (err) {
+        console.error('[ONBOARD] Railway call failed (non-fatal):', err);
+      }
+    } finally {
+      // ALWAYS redirect — completing resets, user never gets stuck
+      setCompleting(false);
+      router.replace('/dashboard');
     }
-
-    // Call Railway to configure account
-    try {
-      const res = await fetch(`${RAILWAY_API}/api/onboarding/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': RAILWAY_API_KEY,
-        },
-        body: JSON.stringify({
-          userId: user.uid,
-          email: user.email || contact || '',
-          name: user.displayName || businessName || '',
-          businessName: businessName || '',
-          industry: industry || '',
-          location: location || '',
-          contact: contact || '',
-          uid: user.uid,
-          selectedPlan: 'trial',
-        }),
-      });
-      await res.json().catch(() => {});
-
-    } catch (err) {
-      console.error('[ONBOARD] Railway call failed (non-fatal):', err);
-    }
-
-    // Redirect to dashboard — always fires, errors above are non-fatal
-    router.replace('/dashboard');
   };
 
   const sendMessage = async () => {
