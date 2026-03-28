@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/landing/Navbar';
-import Modules from '@/components/landing/Modules';
-import Pricing from '@/components/landing/Pricing';
 import { DemoModal } from '@/components/landing/Hero';
-import LeadCaptureModal from '@/components/LeadCaptureModal';
+
+const Modules = dynamic(() => import('@/components/landing/Modules'), { ssr: false });
+const Pricing = dynamic(() => import('@/components/landing/Pricing'), { ssr: false });
+const LeadCaptureModal = dynamic(() => import('@/components/LeadCaptureModal'), { ssr: false });
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
@@ -161,12 +163,12 @@ function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpen
       </p>
 
       {/* CTAs */}
-      <div className="flex flex-col items-center gap-3 mb-10">
-        <div className="flex flex-col sm:flex-row gap-3 items-center">
+      <div className="flex flex-col items-center gap-3 mb-10 w-full max-w-xs sm:max-w-none px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
           <button
             onClick={onOpenCapture}
             aria-label="Start free trial"
-            className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20 min-w-[180px]"
+            className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20 w-full sm:min-w-[180px] sm:w-auto"
           >
             Start free →
           </button>
@@ -178,7 +180,7 @@ function Hero({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpen
                 if (btn) btn.click();
               }, 600);
             }}
-            className="inline-flex items-center justify-center gap-2 bg-[#111] border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition-all min-w-[180px]"
+            className="inline-flex items-center justify-center gap-2 bg-[#111] border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition-all w-full sm:min-w-[180px] sm:w-auto"
           >
             Watch it work →
           </button>

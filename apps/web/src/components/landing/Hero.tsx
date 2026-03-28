@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -400,10 +400,55 @@ function SuccessState({ msg, sub }: { msg: string; sub: string }) {
   );
 }
 
+/* ─── Rotating Hero Banners ─── */
+const HERO_BANNERS = [
+  {
+    headline: ['AK', ' Your AI', '\nBusiness Partner'],
+    gradient: 'Business Partner',
+    sub: 'Finds leads, books meetings, handles enquiries, and grows your revenue while you sleep.',
+  },
+  {
+    headline: ['While You Work,', ' Play', '\nor Sleep'],
+    gradient: 'or Sleep',
+    sub: 'AKAI runs 24/7 — calling leads, closing deals, and filling your calendar. Automatically.',
+  },
+  {
+    headline: ['From', ' Finding', '\nto Closing'],
+    gradient: 'to Closing',
+    sub: 'Every lead captured. Every follow-up sent. Every meeting booked. Zero effort from you.',
+  },
+  {
+    headline: ['Your AI', ' Executive', '\nTeam. $599/mo.'],
+    gradient: 'Team. $599/mo.',
+    sub: 'Sales. Recruiter. Web. Ads. Social. All nine specialists working for you around the clock.',
+  },
+  {
+    headline: ['Stop Paying', ' Agencies', '\n$13,000/mo'],
+    gradient: '$13,000/mo',
+    sub: 'AKAI does everything a full-stack digital agency does — at a fraction of the cost.',
+  },
+];
+
 /* ─── Main Hero ─── */
 export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: () => void; onOpenChat?: () => void }) {
   const { user, loading } = useAuth();
   const [modal, setModal] = useState<ModalType>(null);
+  const [bannerIdx, setBannerIdx] = useState(0);
+  const [fading, setFading] = useState(false);
+
+  // Auto-rotate every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setBannerIdx(i => (i + 1) % HERO_BANNERS.length);
+        setFading(false);
+      }, 400);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const banner = HERO_BANNERS[bannerIdx]!;
 
   return (
     <>
@@ -428,22 +473,49 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
           <span className="text-white/50">AI-powered business automation</span>
         </div>
 
-        {/* Headline */}
-        <h1 className="fade-up fade-up-2 text-4xl sm:text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight max-w-4xl">
-          <span className="text-white">AK</span><span className="text-[#D4AF37]"> Your AI</span>
-          <br />
-          <span className="gradient-text">Business Partner</span>
-        </h1>
+        {/* Rotating Headline */}
+        <div
+          className="fade-up fade-up-2 transition-opacity duration-400 max-w-4xl"
+          style={{ opacity: fading ? 0 : 1 }}
+        >
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black mb-6 leading-[0.95] tracking-tight">
+            {banner.headline.map((part, i) => {
+              const isGradient = part.trim() === banner.gradient || part === banner.gradient;
+              const lines = part.split('\n');
+              return lines.map((line, j) => (
+                <span key={`${i}-${j}`}>
+                  {j > 0 && <br />}
+                  <span className={isGradient && j === lines.length - 1 ? 'gradient-text' : i === 1 ? 'text-[#D4AF37]' : 'text-white'}>
+                    {line}
+                  </span>
+                </span>
+              ));
+            })}
+          </h1>
 
-        {/* Sub */}
-        <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-x-4 gap-y-1 max-w-2xl mb-3">
+          {/* Sub */}
+          <p className="text-lg text-white/60 max-w-2xl mx-auto mb-4 leading-relaxed">
+            {banner.sub}
+          </p>
+        </div>
+
+        {/* Module pills — static */}
+        <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-x-4 gap-y-1 max-w-2xl mb-6">
           {['Sales','Voice','Recruit','Web','Ads','Social','Email Guard','Calendar','Proposals'].map(m => (
             <span key={m} className="text-sm text-white/40 font-medium">{m}</span>
           ))}
         </div>
-        <p className="fade-up fade-up-3 text-lg text-white/60 max-w-2xl mb-10 leading-relaxed">
-          Your AI business partner — finds leads, books meetings, handles enquiries, and <span className="text-white">grows your revenue while you sleep.</span>
-        </p>
+
+        {/* Banner dots */}
+        <div className="flex gap-2 mb-8">
+          {HERO_BANNERS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { setFading(true); setTimeout(() => { setBannerIdx(i); setFading(false); }, 400); }}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${i === bannerIdx ? 'bg-[#D4AF37] w-6' : 'bg-white/20 hover:bg-white/40'}`}
+            />
+          ))}
+        </div>
 
         {/* CTA row */}
         <div className="fade-up fade-up-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-3xl">

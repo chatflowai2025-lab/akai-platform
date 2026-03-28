@@ -57,66 +57,7 @@ function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
   );
 }
 
-// Completion screen shown after setup finishes
-function CompletionScreen() {
-  const router = useRouter();
-
-  const cards = [
-    {
-      icon: '✉️',
-      title: 'Connect your inbox',
-      desc: 'Let AKAI monitor and respond to enquiries',
-      href: '/email-guard',
-    },
-    {
-      icon: '📞',
-      title: 'Trigger your first call',
-      desc: 'Sophie is ready — send your first AI call now',
-      href: '/voice',
-    },
-    {
-      icon: '🔍',
-      title: 'Run a web audit',
-      desc: "See exactly what's missing from your site",
-      href: '/web',
-    },
-  ];
-
-  return (
-    <div className="flex-1 flex items-center justify-center p-6">
-      <div className="w-full max-w-xl text-center">
-        <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-3xl font-bold text-white mb-2">AKAI is ready!</h1>
-        <p className="text-gray-400 text-base mb-8">
-          Your AI executive team is online. Here&apos;s where to start:
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {cards.map(card => (
-            <button
-              key={card.href}
-              onClick={() => router.push(card.href)}
-              className="flex flex-col items-center gap-3 p-5 bg-[#111] border border-[#2a2a2a] rounded-2xl hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition group cursor-pointer"
-            >
-              <span className="text-3xl">{card.icon}</span>
-              <div>
-                <p className="text-white font-semibold text-sm group-hover:text-[#D4AF37] transition">{card.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5 leading-snug">{card.desc}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <button
-          onClick={() => router.replace('/dashboard')}
-          className="px-8 py-3 bg-[#D4AF37] text-black font-bold rounded-xl hover:opacity-90 transition text-sm"
-        >
-          Go to Dashboard →
-        </button>
-      </div>
-    </div>
-  );
-}
+// CompletionScreen removed — handleComplete now redirects straight to /dashboard
 
 interface OnboardData {
   industry?: string;
@@ -222,21 +163,34 @@ export default function OnboardPage() {
         console.error('[ONBOARD] Firestore save failed (non-fatal):', err);
       }
 
-      // Non-fatal: notify Railway
+      // Non-fatal: notify Railway (10s timeout, retry once)
+      const railwayPayload = JSON.stringify({
+        userId: user.uid, email: user.email || contact || '',
+        name: user.displayName || businessName || '',
+        businessName: businessName || '', industry: industry || '',
+        location: location || '', contact: contact || '',
+        uid: user.uid, selectedPlan: 'trial',
+      });
+      const tryRailway = async () => {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 10000);
+        try {
+          await fetch(`${RAILWAY_API}/api/onboarding/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+            body: railwayPayload,
+            signal: ctrl.signal,
+          });
+        } finally {
+          clearTimeout(t);
+        }
+      };
       try {
-        await fetch(`${RAILWAY_API}/api/onboarding/complete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
-          body: JSON.stringify({
-            userId: user.uid, email: user.email || contact || '',
-            name: user.displayName || businessName || '',
-            businessName: businessName || '', industry: industry || '',
-            location: location || '', contact: contact || '',
-            uid: user.uid, selectedPlan: 'trial',
-          }),
-        });
-      } catch (err) {
-        console.error('[ONBOARD] Railway call failed (non-fatal):', err);
+        await tryRailway();
+      } catch {
+        try { await tryRailway(); } catch (err) {
+          console.error('[ONBOARD] Railway call failed (non-fatal):', err);
+        }
       }
     } finally {
       // ALWAYS redirect — completing resets, user never gets stuck
@@ -309,15 +263,12 @@ export default function OnboardPage() {
     );
   }
 
-  // Show completion screen when done
+  // On completion, always redirect to dashboard (never show an intermediate screen)
   if (state.step === 'complete' && !completing) {
+    router.replace('/dashboard');
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
-        <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f]">
-          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-sm">A</div>
-          <span className="font-semibold text-white">AKAI Setup</span>
-        </header>
-        <CompletionScreen />
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

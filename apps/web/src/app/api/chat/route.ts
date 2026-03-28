@@ -692,6 +692,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ── Intent shortcuts — resolve before hitting Anthropic ──────────────────
+    const intentMsg = message.toLowerCase().trim();
+    if (userId !== 'anonymous') {
+      // "show my leads"
+      if (intentMsg.includes('show my leads') || intentMsg.includes('my leads') || intentMsg === 'leads') {
+        let leadsCount: number | null = null;
+        try {
+          const db = getAdminFirestore();
+          if (db) {
+            const snap = await db.collection('users').doc(userId).get();
+            leadsCount = snap.data()?.leadsCount ?? null;
+          }
+        } catch { /* non-fatal */ }
+        const countText = leadsCount !== null ? `**${leadsCount}**` : 'an unknown number of';
+        return NextResponse.json({ message: `You currently have ${countText} leads in your pipeline. Head to **Sales** for the full breakdown — hot leads, meetings booked, and follow-ups due.` });
+      }
+
+      // "book a call"
+      if (intentMsg.includes('book a call') || intentMsg.includes('book a meeting') || intentMsg.includes('schedule a call with aaron') || intentMsg.includes('talk to aaron')) {
+        return NextResponse.json({ message: "I'll have Aaron reach out to you directly — expect a message within 24 hours. Alternatively, you can book a time that works for you at **cal.com/aaronkersten** (or whatever your booking link is). Either way, we'll get it sorted." });
+      }
+
+      // "what's my plan"
+      if (intentMsg.includes("what's my plan") || intentMsg.includes('what is my plan') || intentMsg.includes('my plan') || intentMsg.includes('which plan am i on') || intentMsg.includes('what plan')) {
+        let plan: string | null = null;
+        try {
+          const db = getAdminFirestore();
+          if (db) {
+            const snap = await db.collection('users').doc(userId).get();
+            plan = snap.data()?.plan || snap.data()?.planTier || null;
+          }
+        } catch { /* non-fatal */ }
+        const planName = plan || 'Trial';
+        const planDetails: Record<string, string> = {
+          trial: 'You\'re on the **Trial** plan — all 9 modules active, exploring for free.',
+          starter: 'You\'re on **Starter ($297/mo)** — 50 leads/month, all core modules (Email Guard, Sophie, Dashboard).',
+          growth: 'You\'re on **Growth ($597/mo)** — 150 leads/month, 3 team seats, everything in Starter plus priority support.',
+          scale: 'You\'re on **Scale ($1,197/mo)** — 500 leads/month, unlimited seats, full AKAI OS, white-glove onboarding.',
+        };
+        const detail = planDetails[planName.toLowerCase()] || `You\'re on the **${planName}** plan.`;
+        return NextResponse.json({ message: `${detail}\n\nWant to upgrade or see what's included in each tier? Go to **Settings → Billing**.` });
+      }
+    }
+
     // Build module-specific context suffix
     const moduleContextMap: Record<string, string> = {
       sales: '\n\nMODULE CONTEXT: User is currently in the Sales module. Prioritise responses about Sophie AI, outbound calling, lead qualification, campaign configuration, and pipeline management. Suggest Sales-specific actions first.',
