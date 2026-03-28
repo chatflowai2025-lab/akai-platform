@@ -421,7 +421,7 @@ function PricingCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
         <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
           Start free. No credit card.
           <br />
-          <span className="text-[#D4AF37]">AKAI gets smarter from day one.</span>
+          <span className="text-white">AK<span className="text-[#D4AF37]">AI</span> gets smarter from day one.</span>
         </h2>
         <p className="text-gray-500 text-lg mb-8">
           Your first 14 days are free. Cancel any time. The AI keeps improving regardless.
