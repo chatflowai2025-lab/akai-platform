@@ -200,8 +200,9 @@ test('5. Health check — CTA on homepage links to /health (auth-gated)', async 
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1000);
 
-  // Verify the "Free Digital Health Check" CTA exists somewhere on the homepage
-  const healthCTA = page.getByText('Free Digital Health Check').first();
+  // Verify the Health module tile exists on the homepage (links to /health)
+  // The tile is a link containing the "Health" heading in the modules grid
+  const healthCTA = page.locator('a[href="/health"]').first();
   await expect(healthCTA).toBeVisible({ timeout: 10000 });
 
   // Check it resolves to an href pointing at /health
