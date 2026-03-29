@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import BugCapture from '@/components/BugCapture';
+
+const GA_ID = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-VVSLMYCV04';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
@@ -94,6 +97,21 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
       </head>
       <body className={`${inter.className} bg-[#0a0a0a] text-white antialiased`}>
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
         {/* JSON-LD structured data — SoftwareApplication schema */}
         <script
           type="application/ld+json"
