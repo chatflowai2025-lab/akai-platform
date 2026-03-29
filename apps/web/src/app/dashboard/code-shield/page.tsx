@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { getFirebaseDb } from '@/lib/firebase';
+import { collection, query, orderBy, limit, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -157,6 +159,111 @@ function HistoryItem({ run, isCurrent }: { run: RunResult; isCurrent: boolean })
   );
 }
 
+// ── Bug Reports ───────────────────────────────────────────────────────────────
+
+interface BugReport {
+  id: string;
+  error: string;
+  route: string;
+  userId?: string | null;
+  timestamp?: { toDate?: () => Date } | null;
+  clientTimestamp?: string | null;
+  status: 'open' | 'fixed';
+  priority: number;
+  suggestion: string;
+  description?: string | null;
+}
+
+function priorityColor(priority: number): string {
+  if (priority >= 8) return 'text-red-400';
+  if (priority >= 6) return 'text-orange-400';
+  if (priority >= 4) return 'text-yellow-400';
+  return 'text-green-400';
+}
+
+function priorityBadge(priority: number): string {
+  if (priority >= 8) return 'bg-red-500/10 border-red-500/20 text-red-400';
+  if (priority >= 6) return 'bg-orange-500/10 border-orange-500/20 text-orange-400';
+  if (priority >= 4) return 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400';
+  return 'bg-green-500/10 border-green-500/20 text-green-400';
+}
+
+function BugReportCard({ bug, onMarkFixed }: { bug: BugReport; onMarkFixed: (id: string) => void }) {
+  const [marking, setMarking] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleMarkFixed = async () => {
+    setMarking(true);
+    try {
+      const db = getFirebaseDb();
+      if (db) {
+        await updateDoc(doc(db, 'bugReports', bug.id), { status: 'fixed' });
+      }
+      onMarkFixed(bug.id);
+    } catch (err) {
+      console.error('Failed to mark bug fixed:', err);
+    } finally {
+      setMarking(false);
+    }
+  };
+
+  const timestamp = bug.timestamp?.toDate?.() ?? (bug.clientTimestamp ? new Date(bug.clientTimestamp) : null);
+
+  return (
+    <div className={`bg-[#0d0d0d] border rounded-xl overflow-hidden ${bug.status === 'fixed' ? 'border-green-500/20 opacity-70' : 'border-[#1f1f1f]'}`}>
+      <div
+        className="flex items-start gap-3 p-4 cursor-pointer hover:bg-[#141414] transition"
+        onClick={() => setExpanded(e => !e)}
+      >
+        <span className={`text-xl font-black flex-shrink-0 mt-0.5 ${priorityColor(bug.priority)}`}>
+          P{bug.priority}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <code className="text-xs bg-[#1a1a1a] px-2 py-0.5 rounded text-gray-300">{bug.route}</code>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${priorityBadge(bug.priority)}`}>
+              Priority {bug.priority}/10
+            </span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${bug.status === 'fixed' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-[#1a1a1a] border-[#2a2a2a] text-gray-500'}`}>
+              {bug.status === 'fixed' ? '✅ Fixed' : '🔴 Open'}
+            </span>
+          </div>
+          <p className="text-sm text-white truncate">{bug.error}</p>
+          {timestamp && (
+            <p suppressHydrationWarning className="text-[11px] text-gray-600 mt-0.5">
+              {timestamp.toLocaleString('en-AU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
+        </div>
+        <span className={`text-gray-600 text-xs transition flex-shrink-0 ${expanded ? 'rotate-180' : ''}`}>▼</span>
+      </div>
+
+      {expanded && (
+        <div className="border-t border-[#1f1f1f] bg-[#080808] p-4 space-y-3">
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1">Error</p>
+            <p className="text-xs text-red-400 font-mono">{bug.error}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1">💡 AI Suggestion</p>
+            <p className="text-xs text-[#D4AF37] leading-relaxed">{bug.suggestion}</p>
+          </div>
+          {bug.status === 'open' && (
+            <button
+              onClick={handleMarkFixed}
+              disabled={marking}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold hover:bg-green-500/20 transition disabled:opacity-50"
+            >
+              {marking && <span className="w-3 h-3 border border-green-400 border-t-transparent rounded-full animate-spin" />}
+              ✅ Mark Fixed
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function CodeShieldPage() {
@@ -168,6 +275,8 @@ export default function CodeShieldPage() {
   const [running, setRunning] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bugReports, setBugReports] = useState<BugReport[]>([]);
+  const [loadingBugs, setLoadingBugs] = useState(false);
 
   // Auth guard
   useEffect(() => {
@@ -207,6 +316,51 @@ export default function CodeShieldPage() {
       loadLastRun();
     }
   }, [user, loadLastRun]);
+
+  // Load bug reports from Firestore
+  const loadBugReports = useCallback(async () => {
+    setLoadingBugs(true);
+    try {
+      const db = getFirebaseDb();
+      if (!db) return;
+      const q = query(
+        collection(db, 'bugReports'),
+        orderBy('timestamp', 'desc'),
+        limit(10)
+      );
+      const snap = await getDocs(q);
+      const reports: BugReport[] = snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          error: (data.error as string) ?? 'Unknown error',
+          route: (data.route as string) ?? 'unknown',
+          userId: data.userId as string | null ?? null,
+          timestamp: data.timestamp as BugReport['timestamp'] ?? null,
+          clientTimestamp: data.clientTimestamp as string | null ?? null,
+          status: (data.status as 'open' | 'fixed') ?? 'open',
+          priority: (data.priority as number) ?? 5,
+          suggestion: (data.suggestion as string) ?? '',
+          description: data.description as string | null ?? null,
+        };
+      });
+      setBugReports(reports);
+    } catch (err) {
+      console.error('[code-shield] Failed to load bug reports:', err);
+    } finally {
+      setLoadingBugs(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      void loadBugReports();
+    }
+  }, [user, loadBugReports]);
+
+  const handleMarkFixed = useCallback((id: string) => {
+    setBugReports(prev => prev.map(b => b.id === id ? { ...b, status: 'fixed' } : b));
+  }, []);
 
   // Run gates on demand
   const runGates = useCallback(async () => {
@@ -422,6 +576,41 @@ export default function CodeShieldPage() {
               </div>
             </section>
           )}
+
+          {/* ── Bug Reports ───────────────────────────────────────────────── */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Bug Reports</h2>
+              <button
+                onClick={() => void loadBugReports()}
+                disabled={loadingBugs}
+                className="text-xs text-gray-500 hover:text-white transition flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {loadingBugs ? (
+                  <span className="w-3 h-3 border border-gray-500 border-t-white rounded-full animate-spin" />
+                ) : '↻'} Refresh
+              </button>
+            </div>
+
+            {loadingBugs && bugReports.length === 0 ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-16 bg-[#111] border border-[#1f1f1f] rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : bugReports.length === 0 ? (
+              <div className="bg-[#0d0d0d] border border-dashed border-[#2a2a2a] rounded-xl p-8 text-center">
+                <div className="text-3xl mb-2">🐛</div>
+                <p className="text-sm text-gray-500">No bug reports yet — the app is clean.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {bugReports.map(bug => (
+                  <BugReportCard key={bug.id} bug={bug} onMarkFixed={handleMarkFixed} />
+                ))}
+              </div>
+            )}
+          </section>
 
           {/* ── Deploy advice ─────────────────────────────────────────────── */}
           <section>

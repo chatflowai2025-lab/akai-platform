@@ -84,27 +84,40 @@ interface WaitlistState {
 
 // ── X Connect Modal ───────────────────────────────────────────────────────────
 
-function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
-  const [handle, setHandle] = useState('');
-  const [state, setState] = useState<WaitlistState>({ submitted: false, loading: false, error: '' });
+interface XAccount {
+  username: string;
+  name: string;
+  profileImageUrl?: string;
+  followersCount: number;
+}
 
-  const handleNotify = async () => {
-    if (!handle.trim()) return;
-    setState(s => ({ ...s, loading: true, error: '' }));
-    const cleanHandle = handle.trim().replace(/^@/, '');
-    // Best-effort save — never show an error for a waitlist signup
+interface XConnectState {
+  status: 'idle' | 'connecting' | 'connected' | 'error';
+  account?: XAccount;
+  error?: string;
+}
+
+function XConnectModal({ onClose, uid, onConnected }: { onClose: () => void; uid: string; onConnected?: (account: XAccount) => void }) {
+  const [state, setState] = useState<XConnectState>({ status: 'idle' });
+
+  const handleConnect = async () => {
+    setState({ status: 'connecting' });
     try {
-      const db = getFirebaseDb();
-      if (db) {
-        await setDoc(
-          doc(db, 'users', uid),
-          { socialWaitlist: { x: { handle: cleanHandle, notifiedAt: serverTimestamp() } } },
-          { merge: true }
-        );
+      const res = await fetch('/api/social/x/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid }),
+      });
+      const data = await res.json() as { success?: boolean; account?: XAccount; error?: string };
+      if (res.ok && data.success && data.account) {
+        setState({ status: 'connected', account: data.account });
+        onConnected?.(data.account);
+      } else {
+        setState({ status: 'error', error: data.error ?? 'Failed to connect X account' });
       }
-    } catch { /* non-fatal */ }
-    // Always succeed from user's perspective
-    setState({ submitted: true, loading: false, error: '' });
+    } catch {
+      setState({ status: 'error', error: 'Network error — please try again' });
+    }
   };
 
   return (
@@ -118,50 +131,45 @@ function XConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-black border border-white/10 flex items-center justify-center text-xl font-bold text-white">𝕏</div>
             <div>
-              <h2 className="text-white font-bold text-lg">🔗 X OAuth — almost there!</h2>
-              <p className="text-xs text-gray-500">Finalising the integration</p>
+              <h2 className="text-white font-bold text-lg">Connect X</h2>
+              <p className="text-xs text-gray-500">@getakai_ai</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
         </div>
 
-        {state.submitted ? (
+        {state.status === 'connected' && state.account ? (
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
-            <p className="text-white font-semibold mb-1">You&apos;re on the list!</p>
-            <p className="text-sm text-gray-400">
-              We&apos;ll connect you directly at <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> when X is ready.
+            <p className="text-white font-semibold mb-1">Connected!</p>
+            <p className="text-sm text-gray-400 mb-1">
+              <span className="text-[#D4AF37] font-bold">@{state.account.username}</span>
             </p>
-            <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+            <p className="text-xs text-gray-500 mb-5">
+              {state.account.followersCount.toLocaleString()} followers
+            </p>
+            <button onClick={onClose} className="px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              We&apos;re finalising the integration. Drop your handle below and we&apos;ll connect you directly when it&apos;s ready.
+              Connect the AKAI X account <span className="text-white font-medium">@getakai_ai</span> to enable posting directly from the platform.
             </p>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
-                <span className="text-gray-500 text-sm">@</span>
-                <input
-                  type="text"
-                  value={handle}
-                  onChange={e => setHandle(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleNotify(); }}
-                  placeholder="yourhandle"
-                  className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
-                  autoFocus
-                />
+            {state.status === 'error' && (
+              <div className="mb-4 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <p className="text-xs text-red-400">{state.error}</p>
               </div>
-              {state.error && <p className="text-xs text-red-400">{state.error}</p>}
-              <button
-                onClick={handleNotify}
-                disabled={!handle.trim() || state.loading}
-                className="w-full py-3 rounded-xl bg-white text-black text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
-              >
-                {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
-                Notify me
-              </button>
-            </div>
+            )}
+            <button
+              onClick={handleConnect}
+              disabled={state.status === 'connecting'}
+              className="w-full py-3 rounded-xl bg-white text-black text-sm font-bold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {state.status === 'connecting' && (
+                <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              )}
+              {state.status === 'connecting' ? 'Connecting…' : 'Connect @getakai_ai'}
+            </button>
           </>
         )}
       </div>
@@ -181,7 +189,7 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
     const cleanHandle = handle.trim().replace(/^@/, '');
     try {
       const db = getFirebaseDb();
-      if (db) await setDoc(doc(db, 'users', uid), { socialWaitlist: { instagram: { handle: cleanHandle, notifiedAt: serverTimestamp() } } }, { merge: true });
+      if (db) await setDoc(doc(db, 'users', uid, 'socialWaitlist', 'instagram'), { handle: cleanHandle, notifiedAt: serverTimestamp() }, { merge: true });
     } catch { /* non-fatal */ }
     setState({ submitted: true, loading: false, error: '' });
   };
@@ -197,8 +205,8 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-xl">📸</div>
             <div>
-              <h2 className="text-white font-bold text-lg">🔗 Instagram OAuth — almost there!</h2>
-              <p className="text-xs text-gray-500">Finalising the integration</p>
+              <h2 className="text-white font-bold text-lg">Instagram — Coming Soon</h2>
+              <p className="text-xs text-gray-500">Join the waitlist</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
@@ -209,14 +217,17 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
             <div className="text-4xl mb-3">✅</div>
             <p className="text-white font-semibold mb-1">You&apos;re on the list!</p>
             <p className="text-sm text-gray-400">
-              We&apos;ll connect your Instagram <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> directly when it&apos;s ready.
+              We&apos;ll notify you at <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> when Instagram Connect launches.
             </p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              We&apos;re finalising the integration. Drop your handle below and we&apos;ll connect you directly when it&apos;s ready.
+            <p className="text-sm text-gray-400 mb-2 leading-relaxed">
+              We&apos;re building Instagram Connect — it&apos;s not ready yet.
+            </p>
+            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+              Drop your handle below and we&apos;ll notify you when it launches.
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
@@ -238,7 +249,7 @@ function InstagramConnectModal({ onClose, uid }: { onClose: () => void; uid: str
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                Notify me
+                Notify me when ready
               </button>
             </div>
           </>
@@ -259,7 +270,7 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
     setState(s => ({ ...s, loading: true, error: '' }));
     try {
       const db = getFirebaseDb();
-      if (db) await setDoc(doc(db, 'users', uid), { socialWaitlist: { linkedin: { handle: handle.trim(), notifiedAt: serverTimestamp() } } }, { merge: true });
+      if (db) await setDoc(doc(db, 'users', uid, 'socialWaitlist', 'linkedin'), { handle: handle.trim(), notifiedAt: serverTimestamp() }, { merge: true });
     } catch { /* non-fatal */ }
     setState({ submitted: true, loading: false, error: '' });
   };
@@ -275,8 +286,8 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center text-xl">💼</div>
             <div>
-              <h2 className="text-white font-bold text-lg">🔗 LinkedIn OAuth — almost there!</h2>
-              <p className="text-xs text-gray-500">Finalising the integration</p>
+              <h2 className="text-white font-bold text-lg">LinkedIn — Coming Soon</h2>
+              <p className="text-xs text-gray-500">Join the waitlist</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
@@ -286,13 +297,16 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
             <p className="text-white font-semibold mb-1">You&apos;re on the list!</p>
-            <p className="text-sm text-gray-400">We&apos;ll connect your LinkedIn when it&apos;s ready.</p>
+            <p className="text-sm text-gray-400">We&apos;ll notify you when LinkedIn Connect launches.</p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              We&apos;re finalising the integration. Drop your profile URL or handle below and we&apos;ll connect you directly when it&apos;s ready.
+            <p className="text-sm text-gray-400 mb-2 leading-relaxed">
+              We&apos;re building LinkedIn Connect — it&apos;s not ready yet.
+            </p>
+            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+              Drop your profile URL below and we&apos;ll notify you when it launches.
             </p>
             <div className="space-y-3">
               <input
@@ -311,7 +325,7 @@ function LinkedInConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-400 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                Notify me
+                Notify me when ready
               </button>
             </div>
           </>
@@ -332,7 +346,7 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
     setState(s => ({ ...s, loading: true, error: '' }));
     try {
       const db = getFirebaseDb();
-      if (db) await setDoc(doc(db, 'users', uid), { socialWaitlist: { facebook: { handle: handle.trim(), notifiedAt: serverTimestamp() } } }, { merge: true });
+      if (db) await setDoc(doc(db, 'users', uid, 'socialWaitlist', 'facebook'), { handle: handle.trim(), notifiedAt: serverTimestamp() }, { merge: true });
     } catch { /* non-fatal */ }
     setState({ submitted: true, loading: false, error: '' });
   };
@@ -348,8 +362,8 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-xl">👥</div>
             <div>
-              <h2 className="text-white font-bold text-lg">🔗 Facebook OAuth — almost there!</h2>
-              <p className="text-xs text-gray-500">Finalising the integration</p>
+              <h2 className="text-white font-bold text-lg">Facebook — Coming Soon</h2>
+              <p className="text-xs text-gray-500">Join the waitlist</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
@@ -359,13 +373,16 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
             <p className="text-white font-semibold mb-1">You&apos;re on the list!</p>
-            <p className="text-sm text-gray-400">We&apos;ll connect your Facebook Page when it&apos;s ready.</p>
+            <p className="text-sm text-gray-400">We&apos;ll notify you when Facebook Connect launches.</p>
             <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-400 mb-5 leading-relaxed">
-              We&apos;re finalising the integration. Drop your Page name or URL below and we&apos;ll connect you directly when it&apos;s ready.
+            <p className="text-sm text-gray-400 mb-2 leading-relaxed">
+              We&apos;re building Facebook Connect — it&apos;s not ready yet.
+            </p>
+            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+              Drop your Page name or URL below and we&apos;ll notify you when it launches.
             </p>
             <div className="space-y-3">
               <input
@@ -384,7 +401,7 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                Notify me
+                Notify me when ready
               </button>
             </div>
           </>
@@ -510,6 +527,13 @@ function StatusBadge({ status }: { status: ScheduledPost['status'] }) {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+interface XConnectionInfo {
+  username: string;
+  name: string;
+  profileImageUrl?: string;
+  followersCount: number;
+}
+
 type ConnectingPlatform = 'Instagram' | 'LinkedIn' | 'Facebook' | 'X (Twitter)' | null;
 
 interface SchedulePending {
@@ -531,6 +555,7 @@ export default function SocialPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [connectingPlatform, setConnectingPlatform] = useState<ConnectingPlatform>(null);
+  const [xConnection, setXConnection] = useState<XConnectionInfo | null>(null);
 
   // Content generator state
   const [brief, setBrief] = useState('');
@@ -697,32 +722,54 @@ export default function SocialPage() {
                 btnColor: 'bg-white text-black hover:opacity-90',
                 btnLabel: 'Connect X →',
               },
-            ].map(p => (
-              <div
-                key={p.label}
-                className={`flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r ${p.gradient} border ${p.border}`}
-              >
-                <span className="text-2xl flex-shrink-0">{p.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className={`text-sm font-semibold ${p.text} truncate`}>{p.label}</div>
-                  <span className="inline-block mt-0.5 text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-500 font-medium">
-                    Not connected
-                  </span>
-                </div>
-                <button
-                  onClick={() => setConnectingPlatform(p.label)}
-                  className={`flex-shrink-0 text-xs px-3 py-2 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap ${p.btnColor}`}
+            ].map(p => {
+              const isXConnected = p.label === 'X (Twitter)' && xConnection;
+              return (
+                <div
+                  key={p.label}
+                  className={`flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r ${p.gradient} border ${isXConnected ? 'border-green-500/30' : p.border}`}
                 >
-                  {p.btnLabel}
-                </button>
-              </div>
-            ))}
+                  <span className="text-2xl flex-shrink-0">{p.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-semibold ${p.text} truncate`}>{p.label}</div>
+                    {isXConnected ? (
+                      <span className="inline-block mt-0.5 text-[11px] px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 font-medium">
+                        ✅ @{xConnection.username}
+                      </span>
+                    ) : (
+                      <span className="inline-block mt-0.5 text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-500 font-medium">
+                        Not connected
+                      </span>
+                    )}
+                  </div>
+                  {isXConnected ? (
+                    <span className="flex-shrink-0 text-xs text-green-400 font-semibold">
+                      {xConnection.followersCount.toLocaleString()} followers
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setConnectingPlatform(p.label)}
+                      className={`flex-shrink-0 text-xs px-3 py-2 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap ${p.btnColor}`}
+                    >
+                      {p.btnLabel}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
 
         {/* Connect Modals */}
         {connectingPlatform === 'X (Twitter)' && (
-          <XConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
+          <XConnectModal
+            uid={user.uid}
+            onClose={() => setConnectingPlatform(null)}
+            onConnected={(account) => {
+              setXConnection(account);
+              setConnectingPlatform(null);
+            }}
+          />
         )}
         {connectingPlatform === 'Instagram' && (
           <InstagramConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />

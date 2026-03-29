@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import BugCapture from '@/components/BugCapture';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
@@ -99,9 +99,9 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <ErrorBoundary>
+        <BugCapture>
           {children}
-        </ErrorBoundary>
+        </BugCapture>
       </body>
     </html>
   );
