@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
     response_type: 'code',
     scope: [
       'https://www.googleapis.com/auth/analytics.readonly',
+      'https://www.googleapis.com/auth/analytics.manage.users.readonly',
       'https://www.googleapis.com/auth/userinfo.email',
     ].join(' '),
     access_type: 'offline',

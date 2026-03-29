@@ -1525,6 +1525,7 @@ function SkeletonBar({ width = 'w-full' }: { width?: string }) {
 }
 
 function GA4AnalyticsTab({ uid }: { uid: string }) {
+  const { user } = useAuth();
   const [connection, setConnection] = useState<GA4Connection | null>(null);
   const [connLoading, setConnLoading] = useState(true);
   const [data, setData] = useState<GA4Data | null>(null);
@@ -1651,9 +1652,33 @@ function GA4AnalyticsTab({ uid }: { uid: string }) {
       </div>
 
       {dataError && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          Failed to load analytics data: {dataError}
-          {dataError === 'ga4_not_connected' && ' — try reconnecting.'}
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400 space-y-2">
+          <p>Failed to load analytics data: {dataError}</p>
+          {dataError === 'no_property_id' && (
+            <div className="pt-2">
+              <p className="text-gray-300 text-xs mb-2">Your GA4 property wasn&apos;t detected automatically. Enter your Property ID manually:</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. properties/123456789"
+                  className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50"
+                  onKeyDown={async (e) => {
+                    if (e.key === 'Enter') {
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (!val || !user?.uid) return;
+                      const pid = val.startsWith('properties/') ? val : `properties/${val}`;
+                      const db = getFirebaseDb();
+                      if (!db) return;
+                      await setDoc(doc(db, 'users', user.uid), { ga4Connection: { propertyId: pid } }, { merge: true });
+                      setConnection(prev => prev ? { ...prev, propertyId: pid } : prev);
+                    }
+                  }}
+                />
+                <span className="text-gray-500 text-xs self-center">Press Enter</span>
+              </div>
+              <p className="text-gray-600 text-xs mt-1">Find it in Google Analytics → Admin → Property Settings</p>
+            </div>
+          )}
         </div>
       )}
 
