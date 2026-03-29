@@ -384,13 +384,13 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
     {
       icon: '✉️',
       label: 'Connect your email',
-      hint: 'So Sophie can send and receive on your behalf',
+      hint: 'So AK can send and receive on your behalf',
       action: () => router.push('/email-guard'),
     },
     {
       icon: '📅',
       label: 'Connect your calendar',
-      hint: 'Let Sophie book meetings automatically',
+      hint: 'Let AK book meetings automatically',
       action: () => router.push('/calendar'),
     },
     {
