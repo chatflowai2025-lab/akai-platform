@@ -1643,6 +1643,31 @@ function GA4AnalyticsTab({ uid }: { uid: string }) {
             {connection.propertyName || connection.propertyId} · last 7 days
           </p>
         </div>
+        {/* Manual property ID input — shown when property not detected */}
+        {(!connection.propertyId || dataError === 'no_property_id') && (
+          <div className="flex items-center gap-2 mr-4">
+            <input
+              type="text"
+              placeholder="GA4 Property ID (e.g. 123456789)"
+              className="bg-black/40 border border-[#D4AF37]/40 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] w-56"
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter') {
+                  const val = (e.target as HTMLInputElement).value.trim();
+                  if (!val || !user?.uid) return;
+                  const pid = val.startsWith('properties/') ? val : `properties/${val}`;
+                  const db = getFirebaseDb();
+                  if (!db) return;
+                  try {
+                    await setDoc(doc(db, 'users', user.uid), { ga4Connection: { propertyId: pid } }, { merge: true });
+                    setConnection(prev => prev ? { ...prev, propertyId: pid } : prev);
+                    setDataError(null);
+                  } catch { /* ignore */ }
+                }
+              }}
+            />
+            <span className="text-[#D4AF37] text-xs whitespace-nowrap">↵ Enter</span>
+          </div>
+        )}
         <button
           onClick={handleDisconnect}
           className="text-xs text-gray-600 hover:text-red-400 transition"
