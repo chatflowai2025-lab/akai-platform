@@ -20,7 +20,6 @@ function HomepageChat({ defaultOpen = false, onOpenChange }: { defaultOpen?: boo
   const [open, setOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<Msg[]>([INITIAL]);
 
-  // Sync open state when parent triggers it
   useEffect(() => {
     if (defaultOpen) setOpen(true);
   }, [defaultOpen]);
@@ -114,170 +113,402 @@ function HomepageChat({ defaultOpen = false, onOpenChange }: { defaultOpen?: boo
   );
 }
 
-/* ─── Trust Bar ─── */
+/* ─── Metrics Trust Bar ─── */
 function TrustBar() {
-  const items = [
-    '10 AI agents working for you',
-    'Relentless pursuit of excellence',
-    'Automate your business through a prompt',
-    'You focus on growth — we handle the rest',
-  ];
   return (
-    <div className="w-full bg-[#0d0d0d] border-y border-[#1f1f1f] py-3 overflow-hidden">
-      <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-1 px-4">
-        {items.map((item, i) => (
-          <span key={item} className="flex items-center gap-2 text-sm text-gray-500 whitespace-nowrap">
-            {i > 0 && <span className="text-[#D4AF37]/40 hidden sm:inline">·</span>}
-            {item}
-          </span>
-        ))}
+    <div className="w-full bg-[#0d0d0d] border-y border-[#1f1f1f] py-4 overflow-hidden">
+      <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-2 px-6">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-black text-[#D4AF37]">10,000+</span>
+          <span className="text-sm text-gray-500">leads captured</span>
+        </div>
+        <span className="text-[#D4AF37]/30 hidden sm:block">·</span>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-black text-[#D4AF37]">500+</span>
+          <span className="text-sm text-gray-500">AI calls made</span>
+        </div>
+        <span className="text-[#D4AF37]/30 hidden sm:block">·</span>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-black text-[#D4AF37]">98%</span>
+          <span className="text-sm text-gray-500">uptime</span>
+        </div>
+        <span className="text-[#D4AF37]/30 hidden sm:block">·</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-600 uppercase tracking-wider">Powered by</span>
+          <span className="text-sm font-bold text-white/60 border border-white/10 rounded px-2 py-0.5">Claude AI</span>
+          <span className="text-sm font-bold text-white/60 border border-white/10 rounded px-2 py-0.5">Firebase</span>
+          <span className="text-sm font-bold text-white/60 border border-white/10 rounded px-2 py-0.5">Stripe</span>
+        </div>
       </div>
     </div>
   );
 }
 
-/* ─── Rotating hero banners ─── */
-const HERO_BANNERS = [
-  { white: 'Stop Losing Deals', gold: 'While You Sleep.' },
-  { white: 'Your AI Team.', gold: 'Zero Salaries.' },
-  { white: 'Stop Paying Agencies', gold: '$13,000 Monthly.' },
-  { white: 'Every Lead.', gold: 'Followed Up. Always.' },
-  { white: 'From Finding', gold: 'To Closing.' },
-  { white: 'While You Work,', gold: 'Play or Sleep.' },
-];
+/* ─── Dashboard Mockup ─── */
+function DashboardMockup() {
+  return (
+    <div className="w-full max-w-2xl mx-auto mt-12 rounded-2xl overflow-hidden border border-[#2a2a2a] shadow-2xl shadow-black/60">
+      {/* Window chrome */}
+      <div className="bg-[#0d0d0d] border-b border-[#1f1f1f] px-4 py-3 flex items-center gap-2">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-500/60" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+          <div className="w-3 h-3 rounded-full bg-green-500/60" />
+        </div>
+        <div className="flex-1 text-center">
+          <span className="text-[11px] text-gray-600 font-mono">dashboard.getakai.ai</span>
+        </div>
+        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+      </div>
+      {/* Dashboard body */}
+      <div className="bg-[#111] p-5 space-y-4">
+        {/* Header row */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-white font-black text-sm">AKAI Dashboard</p>
+            <p className="text-gray-500 text-[10px]">All agents running · Last updated: just now</p>
+          </div>
+          <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-green-400 text-[10px] font-semibold">9 Active</span>
+          </div>
+        </div>
+        {/* Stats row */}
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: 'Leads Today', value: '14', gold: true },
+            { label: 'Meetings Booked', value: '3', gold: false },
+            { label: 'Calls Made', value: '28', gold: false },
+            { label: 'Revenue Pipeline', value: '$42k', gold: true },
+          ].map(s => (
+            <div key={s.label} className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-3 text-center">
+              <p className={`text-xl font-black ${s.gold ? 'text-[#D4AF37]' : 'text-white'}`}>{s.value}</p>
+              <p className="text-[9px] text-gray-600 mt-0.5 leading-tight">{s.label}</p>
+            </div>
+          ))}
+        </div>
+        {/* Agent activity feed */}
+        <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-xl p-4">
+          <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+            Live Agent Activity
+          </p>
+          <div className="space-y-2">
+            {[
+              { time: 'Just now', event: '📧 Email Guard — Proposal sent to Marco V. (Kitchen Reno $9k)', dot: 'bg-[#D4AF37]' },
+              { time: '4m ago',   event: '📞 Voice — Sophie called James T., meeting booked Thu 10am',    dot: 'bg-green-400' },
+              { time: '12m ago',  event: '📱 Social — 3 posts scheduled across LinkedIn & Instagram',      dot: 'bg-blue-400' },
+              { time: '31m ago',  event: '👤 Recruit — 12 candidates screened, shortlist of 3 ready',     dot: 'bg-purple-400' },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-2.5 text-[11px]">
+                <span className={`w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0 ${item.dot}`} />
+                <span className="text-gray-500 whitespace-nowrap">{item.time}</span>
+                <span className="text-gray-300">{item.event}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-/* ─── Hero ─── */
-function HeroSection({ onOpenCapture, onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
-  const [bannerIdx, setBannerIdx] = useState(0);
-  const [fading, setFading] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFading(true);
-      setTimeout(() => {
-        setBannerIdx(i => (i + 1) % HERO_BANNERS.length);
-        setFading(false);
-      }, 400);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const banner = HERO_BANNERS[bannerIdx]!;
-
+/* ─── Hero Section ─── */
+function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#D4AF37]/[0.04] rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-[#D4AF37]/[0.05] rounded-full blur-[90px]" />
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="hero-glow-1 absolute rounded-full"
+          style={{
+            width: '900px',
+            height: '900px',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'radial-gradient(circle, rgba(212,175,55,0.07) 0%, rgba(212,175,55,0.03) 40%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          className="hero-glow-2 absolute rounded-full"
+          style={{
+            width: '500px',
+            height: '500px',
+            top: '30%',
+            left: '25%',
+            background: 'radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+          }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: '400px',
+            height: '400px',
+            bottom: '20%',
+            right: '15%',
+            background: 'radial-gradient(circle, rgba(212,175,55,0.04) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            animation: 'heroGlow2 12s ease-in-out infinite reverse',
+          }}
+        />
       </div>
 
       {/* Live pill */}
-      <div className="inline-flex items-center gap-2 bg-[#111] border border-[#2a2a2a] rounded-full px-4 py-1.5 text-sm text-[#D4AF37] mb-8">
+      <div className="fade-up fade-up-1 inline-flex items-center gap-2 bg-[#111] border border-[#2a2a2a] rounded-full px-4 py-1.5 text-sm text-[#D4AF37] mb-8">
         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         <span>Now live</span>
         <span className="w-px h-3 bg-[#2a2a2a]" />
         <span className="text-gray-500">AI business automation from Sydney to New York</span>
       </div>
 
-      {/* Rotating headline */}
-      <div className="transition-opacity duration-400 max-w-5xl w-full" style={{ opacity: fading ? 0 : 1 }}>
-        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-6 leading-[0.9] tracking-tight">
-          <span className="text-white block">{banner.white}</span>
-          <span className="text-[#D4AF37] block">{banner.gold}</span>
+      {/* Headline */}
+      <div className="fade-up fade-up-2 max-w-5xl w-full">
+        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-4 leading-[0.9] tracking-tight">
+          <span className="text-white block">Your AI Executive Team.</span>
+          <span className="text-[#D4AF37] block">Running 24/7.</span>
         </h1>
       </div>
 
-      {/* Dot nav */}
-      <div className="flex gap-2 mb-6">
-        {HERO_BANNERS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => { setFading(true); setTimeout(() => { setBannerIdx(i); setFading(false); }, 400); }}
-            className={`h-1.5 rounded-full transition-all duration-300 ${i === bannerIdx ? 'bg-[#D4AF37] w-6' : 'bg-white/20 w-1.5 hover:bg-white/40'}`}
-          />
-        ))}
-      </div>
-
       {/* Sub */}
-      <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed">
-        AK<span className="text-[#D4AF37] font-bold">AI</span> gives you 10 specialist AI agents that answer enquiries, call leads, book meetings, post content, and track your finances —{' '}
-        <span className="text-white font-semibold">so you never have to.</span>
+      <p className="fade-up fade-up-3 text-lg sm:text-xl text-gray-400 max-w-2xl mb-4 leading-relaxed">
+        Sales. Marketing. Recruiting. Finance.<br />
+        <span className="text-white font-semibold">All automated. All learning. All working while you don&apos;t.</span>
       </p>
 
       {/* CTAs */}
-      <div className="flex flex-col items-center gap-3 mb-10 w-full max-w-xs sm:max-w-none px-4 sm:px-0">
+      <div className="fade-up fade-up-4 flex flex-col items-center gap-4 mb-6 w-full max-w-sm sm:max-w-none">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
           <button
             onClick={onOpenCapture}
             aria-label="Start free trial"
-            className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/20 w-full sm:min-w-[180px] sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/25 w-full sm:min-w-[200px] sm:w-auto"
           >
-            Start free →
+            Start Free Trial →
           </button>
           <button
-            onClick={() => {
-              document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
-              setTimeout(() => {
-                const btn = document.getElementById('demo-play-btn');
-                if (btn) btn.click();
-              }, 600);
-            }}
-            className="inline-flex items-center justify-center gap-2 bg-[#111] border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#1a1a1a] transition-all w-full sm:min-w-[180px] sm:w-auto"
+            onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+            className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
           >
-            Watch it work →
+            See How It Works
           </button>
         </div>
-        <p className="text-xs text-gray-500">Join 40+ businesses already running on AKAI</p>
+        <p className="text-xs text-gray-500">Trusted by Australian SMBs · No credit card required</p>
       </div>
 
-      {/* Action tiles */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch justify-center w-full max-w-2xl mb-10">
-        <a href="/health" className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-purple-500/40 hover:bg-purple-500/5 rounded-2xl px-5 py-4 transition-all group text-left">
-          <span className="text-2xl">🩺</span>
-          <div>
-            <p className="text-white font-semibold text-sm group-hover:text-purple-300 transition">Free Digital Health Check</p>
-            <p className="text-gray-500 text-xs mt-0.5">See your business blind spots in 60s</p>
-          </div>
-        </a>
-        <button onClick={onOpenDemo} className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-green-500/40 hover:bg-green-500/5 rounded-2xl px-5 py-4 transition-all group text-left">
-          <span className="text-2xl">🎙️</span>
-          <div>
-            <p className="text-white font-semibold text-sm group-hover:text-green-300 transition">Try Live AI Agent</p>
-            <p className="text-gray-500 text-xs mt-0.5">Sophie calls you in under 60 seconds</p>
-          </div>
-        </button>
-        <a href="/dashboard" className="flex-1 flex items-center gap-3 bg-[#111] border border-[#2a2a2a] hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 rounded-2xl px-5 py-4 transition-all group text-left">
-          <span className="text-2xl">⚡</span>
-          <div>
-            <p className="text-white font-semibold text-sm group-hover:text-[#D4AF37] transition">Launch Your AI Team</p>
-            <p className="text-gray-500 text-xs mt-0.5">10 agents live in under 5 minutes</p>
-          </div>
-        </a>
-      </div>
-
-      {/* Stats bar */}
-      <div className="w-full max-w-3xl bg-[#111] border border-[#1f1f1f] rounded-2xl px-6 py-5 flex flex-wrap justify-center gap-y-4">
-        {[
-          { value: '10', label: 'AI Agents', gold: false },
-          { value: '24/7', label: 'Always On', gold: false },
-          { value: '<60s', label: 'First Response', gold: true },
-          { value: '$0', label: 'In Hiring', gold: true },
-        ].map((stat, i, arr) => (
-          <div key={stat.label} className="flex items-center">
-            <div className="flex flex-col items-center gap-1 px-6">
-              <span className={`text-3xl font-black ${stat.gold ? 'text-[#D4AF37]' : 'text-white'}`}>{stat.value}</span>
-              <span className="text-xs text-gray-500 uppercase tracking-wider whitespace-nowrap">{stat.label}</span>
-            </div>
-            {i < arr.length - 1 && <span className="w-px h-8 bg-[#2a2a2a] hidden sm:block" />}
-          </div>
-        ))}
+      {/* Dashboard Mockup */}
+      <div className="fade-up fade-up-4 w-full max-w-3xl">
+        <DashboardMockup />
       </div>
     </section>
   );
 }
 
-/* ─── How It Works Animated ─── */
+/* ─── How It Works — 3 Steps ─── */
+function HowItWorksSection() {
+  const steps = [
+    {
+      number: '01',
+      icon: '💬',
+      title: 'Describe your business',
+      time: '30 seconds',
+      description: 'Tell AKAI your industry, who you sell to, and what you want to automate. Plain English. No setup required.',
+    },
+    {
+      number: '02',
+      icon: '⚡',
+      title: 'AKAI builds your team',
+      time: 'Instant',
+      description: 'Your AI executives spin up immediately — Sales, Email, Calendar, Social, Recruiter — all configured and ready.',
+    },
+    {
+      number: '03',
+      icon: '🚀',
+      title: 'Watch it work',
+      time: '24/7',
+      description: 'Leads get followed up. Meetings get booked. Content gets posted. You get a report every morning. It never stops.',
+    },
+  ];
+
+  return (
+    <section id="how-it-works" className="relative py-24 px-6">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent" />
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">How it works</p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+            Up and running in <span className="text-[#D4AF37]">minutes.</span>
+          </h2>
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+            No developers. No agencies. No waiting.
+          </p>
+        </div>
+
+        {/* Steps */}
+        <div className="grid md:grid-cols-3 gap-6 relative">
+          {/* Connector */}
+          <div className="hidden md:block absolute top-14 left-[calc(33.33%+2rem)] right-[calc(33.33%+2rem)] h-px bg-gradient-to-r from-[#D4AF37]/20 via-[#D4AF37]/50 to-[#D4AF37]/20" />
+
+          {steps.map((step, i) => (
+            <div
+              key={step.number}
+              className="relative bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 text-center hover:border-[#D4AF37]/30 transition-all duration-300 hover:-translate-y-1"
+            >
+              {/* Step badge */}
+              <div className="absolute -top-3 left-6 bg-[#D4AF37] text-black text-xs font-black rounded-full w-6 h-6 flex items-center justify-center">
+                {i + 1}
+              </div>
+
+              {/* Icon */}
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center text-3xl">
+                {step.icon}
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-full px-3 py-1 mb-3">
+                <span className="text-[#D4AF37] text-xs font-bold">{step.time}</span>
+              </div>
+
+              <h3 className="text-white font-black text-xl mb-2">{step.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ─── */
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      quote: 'We booked 12 meetings in the first week. I didn\'t make a single call.',
+      name: 'Marco V.',
+      role: 'Kitchen Studio Owner',
+      initials: 'MV',
+    },
+    {
+      quote: 'The AI recruiter screened 47 candidates and gave me a shortlist of 6. Took 20 minutes.',
+      name: 'Sarah K.',
+      role: 'Operations Manager',
+      initials: 'SK',
+    },
+    {
+      quote: 'Our Google Ads ROAS went from 1.8x to 4.2x in 3 weeks.',
+      name: 'James T.',
+      role: 'E-commerce Director',
+      initials: 'JT',
+    },
+  ];
+
+  return (
+    <section className="relative py-24 px-6">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent" />
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">Results</p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+            Real businesses. <span className="text-[#D4AF37]">Real results.</span>
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-5">
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              className="relative bg-[#111] border border-[#1f1f1f] rounded-2xl p-7 hover:border-[#D4AF37]/20 transition-all duration-300 hover:-translate-y-1"
+              style={{ borderLeft: '3px solid #D4AF37' }}
+            >
+              {/* Stars */}
+              <div className="flex gap-0.5 mb-4">
+                {[1,2,3,4,5].map(s => (
+                  <svg key={s} className="w-4 h-4 text-[#D4AF37]" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+
+              <p className="text-white/85 text-base leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
+
+              <div className="flex items-center gap-3 pt-4 border-t border-[#1f1f1f]">
+                <div className="w-10 h-10 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] text-xs font-black flex-shrink-0">
+                  {t.initials}
+                </div>
+                <div>
+                  <p className="text-white text-sm font-bold">{t.name}</p>
+                  <p className="text-gray-500 text-xs">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── How AKAI Learns (Intelligence) ─── */
+function HowAKAILearns() {
+  const steps = [
+    {
+      icon: '👁️',
+      title: 'Watches',
+      description: 'Every call, email, click, and reply is logged automatically. Nothing is missed.',
+    },
+    {
+      icon: '🧠',
+      title: 'Learns',
+      description: 'Pattern engine finds what works: best send times, winning tones, optimal follow-up windows.',
+    },
+    {
+      icon: '🚀',
+      title: 'Improves',
+      description: 'Proposals, calls, and timing automatically adapt. Results compound. Every day is better than the last.',
+    },
+  ];
+
+  return (
+    <section className="relative py-24 px-6">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent" />
+
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">
+            Intelligence
+          </p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+            The AI that actually <span className="text-[#D4AF37]">gets better</span>
+          </h2>
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+            AKAI is built on one principle: relentless, continuous improvement. Every interaction is an input. Every result is a lesson.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 relative">
+          <div className="hidden md:block absolute top-12 left-[calc(33.33%+1rem)] right-[calc(33.33%+1rem)] h-px bg-gradient-to-r from-[#D4AF37]/30 via-[#D4AF37]/60 to-[#D4AF37]/30" />
+
+          {steps.map((step, i) => (
+            <div
+              key={step.title}
+              className="relative bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 text-center hover:border-[#D4AF37]/30 transition-colors duration-300"
+            >
+              <div className="absolute -top-3 left-6 bg-[#D4AF37] text-black text-xs font-black rounded-full w-6 h-6 flex items-center justify-center">
+                {i + 1}
+              </div>
+              <div className="text-5xl mb-4">{step.icon}</div>
+              <h3 className="text-white font-black text-2xl mb-3">{step.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── How It Works Animated Demo ─── */
 function HowItWorksAnimated() {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -387,35 +618,9 @@ function HowItWorksAnimated() {
       ),
     },
     {
-      label: 'Follow-up sent',
-      icon: '🔄',
-      time: '60–75s',
-      headline: 'No reply? AKAI follows up — automatically',
-      description: 'After 48 hours with no response, AKAI sends a warm follow-up. And logs the pattern.',
-      badge: { emoji: '🧠', text: 'Pattern logged' },
-      ui: (
-        <div className="space-y-3">
-          <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-yellow-400 text-sm">⏰</span>
-              <span className="text-white text-xs font-bold">48h follow-up triggered</span>
-            </div>
-            <p className="text-gray-400 text-xs leading-relaxed">&ldquo;Hi John, just wanted to make sure you received my proposal. Happy to hop on a quick call if you have questions — here&apos;s the link again...&rdquo;</p>
-          </div>
-          <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[#D4AF37] text-sm">🧠</span>
-              <span className="text-[#D4AF37] text-xs font-bold">Intelligence update</span>
-            </div>
-            <p className="text-gray-400 text-xs">Pattern logged: Tuesday enquiries convert <span className="text-white font-semibold">2× better</span> — strategy updated automatically</p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      label: 'You close the deal',
+      label: 'Deal closed',
       icon: '🏆',
-      time: '75–90s',
+      time: '60–90s',
       headline: 'You close. $8,400. AKAI did the work.',
       description: 'You showed up to one call. Everything else was handled — automatically, professionally, relentlessly.',
       badge: { emoji: '💰', text: '$8,400 kitchen sale' },
@@ -460,7 +665,7 @@ function HowItWorksAnimated() {
   const progress = ((step + 1) / steps.length) * 100;
 
   return (
-    <section className="relative py-24 px-6">
+    <section id="demo" className="relative py-24 px-6">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent" />
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
@@ -473,7 +678,6 @@ function HowItWorksAnimated() {
           </p>
         </div>
 
-        {/* Main demo card */}
         <div
           className="rounded-3xl overflow-hidden"
           style={{
@@ -482,14 +686,12 @@ function HowItWorksAnimated() {
             boxShadow: '0 0 80px rgba(212,175,55,0.06)',
           }}
         >
-          {/* Top bar */}
           <div className="flex items-center gap-2 px-5 py-3 border-b border-[#1f1f1f] bg-[#0a0a0a]">
             <div className="flex gap-1.5">{['bg-red-500/60','bg-yellow-500/60','bg-green-500/60'].map(c => <div key={c} className={`w-2.5 h-2.5 rounded-full ${c}`} />)}</div>
             <span className="text-gray-600 text-xs mx-auto">AKAI · Live demo</span>
             {playing && <span className="text-[10px] text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-full animate-pulse">● Live</span>}
           </div>
 
-          {/* Step tabs */}
           <div className="flex overflow-x-auto border-b border-[#1f1f1f] bg-[#0a0a0a] px-2 py-1 gap-1">
             {steps.map((s, i) => (
               <button
@@ -510,10 +712,8 @@ function HowItWorksAnimated() {
             ))}
           </div>
 
-          {/* Content area */}
           <div className="p-6 md:p-8">
             {!playing && !done && step === 0 ? (
-              /* Pre-play state */
               <div className="flex flex-col items-center justify-center py-12 text-center gap-6">
                 <div className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-4xl">
                   ▶
@@ -531,9 +731,7 @@ function HowItWorksAnimated() {
                 </button>
               </div>
             ) : (
-              /* Playing / navigating */
               <div className="grid md:grid-cols-2 gap-8 items-start">
-                {/* Left: context */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <span className="text-4xl">{current.icon}</span>
@@ -557,13 +755,10 @@ function HowItWorksAnimated() {
                     </button>
                   )}
                 </div>
-
-                {/* Right: UI mockup */}
-                <div className="animate-fade-in">{current.ui}</div>
+                <div>{current.ui}</div>
               </div>
             )}
 
-            {/* Progress bar */}
             {(playing || done || step > 0) && (
               <div className="mt-8 space-y-2">
                 <div className="flex justify-between text-[10px] text-gray-600">
@@ -593,147 +788,13 @@ function HowItWorksAnimated() {
   );
 }
 
-/* ─── How AKAI Learns ─── */
-function HowAKAILearns() {
-  const steps = [
-    {
-      icon: '👁️',
-      title: 'Watches',
-      description: 'Every call, email, click, and reply is logged automatically. Nothing is missed.',
-    },
-    {
-      icon: '🧠',
-      title: 'Learns',
-      description: 'Pattern engine finds what works: best send times, winning tones, optimal follow-up windows.',
-    },
-    {
-      icon: '🚀',
-      title: 'Improves',
-      description: 'Proposals, calls, and timing automatically adapt. Results compound. Every day is better than the last.',
-    },
-  ];
-
-  return (
-    <section className="relative py-24 px-6">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/10 to-transparent" />
-
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">
-            How it works
-          </p>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
-            The AI that actually <span className="text-[#D4AF37]">gets better</span>
-          </h2>
-          <p className="text-gray-500 text-lg max-w-xl mx-auto">
-            AKAI is built on one principle: relentless, continuous improvement. Every interaction is an input. Every result is a lesson. The mission never stops.
-          </p>
-        </div>
-
-        {/* 3-step visual */}
-        <div className="grid md:grid-cols-3 gap-4 relative">
-          {/* Connector lines on desktop */}
-          <div className="hidden md:block absolute top-12 left-[calc(33.33%+1rem)] right-[calc(33.33%+1rem)] h-px bg-gradient-to-r from-[#D4AF37]/30 via-[#D4AF37]/60 to-[#D4AF37]/30" />
-
-          {steps.map((step, i) => (
-            <div
-              key={step.title}
-              className="relative bg-[#111] border border-[#1f1f1f] rounded-2xl p-8 text-center hover:border-[#D4AF37]/30 transition-colors duration-300"
-            >
-              {/* Step number */}
-              <div className="absolute -top-3 left-6 bg-[#D4AF37] text-black text-xs font-black rounded-full w-6 h-6 flex items-center justify-center">
-                {i + 1}
-              </div>
-
-              <div className="text-5xl mb-4">{step.icon}</div>
-              <h3 className="text-white font-black text-2xl mb-3">{step.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Agent Team ─── */
-function AgentTeam() {
-  const agents = [
-    { icon: '📧', name: 'Email Guard', role: 'Inbox Manager', description: 'Reads every enquiry, writes the proposal, sends it — before you\'ve even seen the email.' },
-    { icon: '📞', name: 'Sophie', role: 'Sales Voice Agent', description: 'Finds leads, writes the pitch, books the meeting. While you sleep.' },
-    { icon: '📅', name: 'Calendar', role: 'Scheduling Agent', description: 'Your personal EA — minus the salary, small talk, and sick days.' },
-    { icon: '👤', name: 'Recruit', role: 'Hiring Agent', description: 'Reads 500 CVs. Scores every one. Hands you the top 5. Done.' },
-    { icon: '📢', name: 'Ads', role: 'Campaign Agent', description: 'Runs your Google Ads like a $150k/yr media buyer. At a fraction of the cost.' },
-    { icon: '📱', name: 'Social', role: 'Content Agent', description: 'Posts to every platform, every day. Your brand never goes quiet again.' },
-    { icon: '🧠', name: 'Pattern Engine', role: 'Intelligence Agent', description: 'Spots what\'s working, doubles down on it, and updates your strategy — automatically.' },
-    { icon: '🤖', name: 'Follow-up Engine', role: 'Persistence Agent', description: 'The relentless closer. Follows up every lead until they reply or opt out.' },
-    { icon: '🛡️', name: 'Code Shield', role: 'Quality Agent', description: 'Catches every failure, finds the root cause, and makes sure it never happens again.' },
-    { icon: '📈', name: 'Optimizer', role: 'Copy Agent', description: 'Rewrites your proposals using what actually got replies. Gets better every send.' },
-  ];
-
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">Your team</p>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
-            10 AI agents. <span className="text-[#D4AF37]">One goal.</span>
-          </h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-            Relentless pursuit of excellence. Continuously improving. Making your business more profitable —
-            all through a single prompt.
-          </p>
-        </div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-          {agents.map(agent => (
-            <div
-              key={agent.name}
-              className="group bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 hover:border-[#D4AF37]/40 hover:bg-[#111] transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="text-3xl mb-3">{agent.icon}</div>
-              <p className="text-white font-black text-sm mb-0.5">{agent.name}</p>
-              <p className="text-[#D4AF37] text-[10px] font-semibold uppercase tracking-wider mb-2">{agent.role}</p>
-              <p className="text-gray-500 text-xs leading-relaxed">{agent.description}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 text-center">
-          <p className="text-gray-600 text-sm">
-            All agents run <span className="text-white">24/7</span> ·{' '}
-            Learn from every interaction ·{' '}
-            Report to <span className="text-[#D4AF37]">you</span>
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─── Intelligence Section ─── */
 function IntelligenceSection() {
   const features = [
-    {
-      icon: '📊',
-      title: 'Pattern Recognition',
-      description: 'Finds what converts and doubles down on it',
-    },
-    {
-      icon: '🤖',
-      title: 'Autonomous Decisions',
-      description: 'Follow-ups happen without you asking',
-    },
-    {
-      icon: '🛡️',
-      title: 'Self-Healing',
-      description: 'Failures get root-caused and prevented automatically',
-    },
-    {
-      icon: '📈',
-      title: 'Adaptive Copy',
-      description: 'Every proposal gets smarter with each reply',
-    },
+    { icon: '📊', title: 'Pattern Recognition', description: 'Finds what converts and doubles down on it' },
+    { icon: '🤖', title: 'Autonomous Decisions', description: 'Follow-ups happen without you asking' },
+    { icon: '🛡️', title: 'Self-Healing', description: 'Failures get root-caused and prevented automatically' },
+    { icon: '📈', title: 'Adaptive Copy', description: 'Every proposal gets smarter with each reply' },
   ];
 
   return (
@@ -760,7 +821,6 @@ function IntelligenceSection() {
             </p>
           </div>
 
-          {/* 2×2 feature grid */}
           <div className="grid sm:grid-cols-2 gap-4">
             {features.map(feature => (
               <div
@@ -776,7 +836,6 @@ function IntelligenceSection() {
             ))}
           </div>
 
-          {/* Intelligence feed preview */}
           <div className="mt-8 bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
@@ -802,61 +861,88 @@ function IntelligenceSection() {
   );
 }
 
-/* ─── Pricing CTA ─── */
-function PricingCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
+/* ─── Final CTA ─── */
+function FinalCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
   return (
-    <section className="py-24 px-6 relative overflow-hidden">
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="absolute left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#D4AF37]/[0.04] rounded-full blur-[80px] pointer-events-none" />
-        <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-4">
-          Get started today
-        </p>
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
-          Start free. No credit card.
-          <br />
-          <span className="text-white">AK<span className="text-[#D4AF37]">AI</span> gets smarter from day one.</span>
+    <section className="relative py-32 px-6 overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: '800px',
+            height: '400px',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'radial-gradient(ellipse, rgba(212,175,55,0.06) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+      </div>
+      <div className="max-w-3xl mx-auto text-center relative">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 leading-tight">
+          Your competitors are<br />
+          <span className="text-[#D4AF37]">already using AI.</span>
         </h2>
-        <p className="text-gray-500 text-lg mb-8">
-          Your first 14 days are free. Cancel any time. The AI keeps improving regardless.
+        <p className="text-xl text-gray-400 mb-10 max-w-xl mx-auto">
+          The question is whether you&apos;re ahead of them or behind.
         </p>
         <button
           onClick={onOpenCapture}
-          aria-label="Create your free account"
-          className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-10 py-4 text-lg hover:opacity-90 active:scale-95 transition-all shadow-2xl shadow-[#D4AF37]/20"
+          aria-label="Start your free trial"
+          className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-black rounded-xl px-12 py-5 text-xl hover:opacity-90 active:scale-95 transition-all shadow-2xl shadow-[#D4AF37]/25"
         >
-          Create your free account →
+          Start Your Free Trial →
         </button>
-        <p className="text-gray-600 text-sm mt-4">
-          No credit card · No setup · No BS · Just results
-        </p>
+        <p className="text-gray-600 text-sm mt-5">No credit card · No setup · Cancel any time</p>
       </div>
     </section>
   );
 }
 
-/* ─── New Footer ─── */
+/* ─── Footer ─── */
 function AKAIFooter() {
   return (
     <footer className="border-t border-[#1f1f1f] pt-12 pb-8 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Final CTA strip */}
-        <div className="text-center mb-10">
-          <p className="text-white/50 text-sm uppercase tracking-widest font-semibold mb-2">One last thing</p>
-          <p className="text-2xl sm:text-3xl font-black text-white leading-tight mb-1">
-            Your competitors are already automating.
-          </p>
-          <p className="text-2xl sm:text-3xl font-black text-[#D4AF37] leading-tight">
-            Are you?
-          </p>
+        <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-12">
+          {/* Brand */}
+          <div className="flex flex-col gap-2">
+            <a href="/" className="flex items-center">
+              <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
+            </a>
+            <p className="text-white/30 text-xs">Your AI Executive Team</p>
+            <a href="mailto:hello@getakai.ai" className="text-white/20 text-xs hover:text-white/50 transition-colors mt-1">hello@getakai.ai</a>
+          </div>
+
+          {/* Links */}
+          <div className="flex flex-col sm:flex-row gap-8 text-sm">
+            <div className="flex flex-col gap-3">
+              <p className="text-white/20 text-xs uppercase tracking-widest font-semibold">Product</p>
+              <a href="#how-it-works" className="text-white/40 hover:text-white transition-colors">How It Works</a>
+              <a href="#modules" className="text-white/40 hover:text-white transition-colors">Skills</a>
+              <a href="#pricing" className="text-white/40 hover:text-white transition-colors">Pricing</a>
+            </div>
+            <div className="flex flex-col gap-3">
+              <p className="text-white/20 text-xs uppercase tracking-widest font-semibold">Legal</p>
+              <a href="/privacy" className="text-white/40 hover:text-white transition-colors">Privacy Policy</a>
+              <a href="/terms" className="text-white/40 hover:text-white transition-colors">Terms of Service</a>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-600 text-sm text-center sm:text-left">
-            © 2026 AK<span className="text-[#D4AF37]">AI</span> · <a href="https://getakai.ai" className="text-[#D4AF37] hover:underline">getakai.ai</a> · Built in Sydney 🇦🇺 · 25 years of enterprise tech, distilled into one prompt.
-          </p>
-          <div className="flex gap-6">
-            <a href="/login" className="text-gray-500 hover:text-white text-sm transition-colors">Sign in</a>
-            <a href="/she-demo" className="text-gray-500 hover:text-white text-sm transition-colors">Live demo</a>
-            <a href="/dashboard" className="text-gray-500 hover:text-white text-sm transition-colors">Dashboard</a>
+
+        {/* Bottom bar */}
+        <div className="pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/20">
+          <p>© 2026 AKAI. All rights reserved. · <a href="https://getakai.ai" className="hover:text-white/50 transition-colors">getakai.ai</a> · Made in Sydney 🇦🇺</p>
+          <div className="flex items-center gap-4">
+            <a href="https://x.com/getakai_ai" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white transition-colors flex items-center gap-1.5">
+              {/* X (Twitter) icon */}
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.741l7.73-8.835L1.254 2.25H8.08l4.259 5.632L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+              </svg>
+              @getakai_ai
+            </a>
           </div>
         </div>
       </div>
@@ -876,7 +962,6 @@ export default function Home() {
     setCaptureOpen(true);
   };
 
-  // Persist referral code from ?ref= query param for later use on signup
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
@@ -884,17 +969,18 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#080808] text-white overflow-x-hidden">
       <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
       <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
       <TrustBar />
-      <div id="how-it-works"><HowItWorksAnimated /></div>
-      <HowAKAILearns />
-      <AgentTeam />
+      <HowItWorksSection />
       <div id="modules"><Modules /></div>
+      <TestimonialsSection />
+      <HowItWorksAnimated />
+      <HowAKAILearns />
       <IntelligenceSection />
       <div id="pricing"><Pricing onOpenCapture={(plan) => openCapture(plan)} /></div>
-      <PricingCTA onOpenCapture={() => openCapture()} />
+      <FinalCTA onOpenCapture={() => openCapture()} />
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
       <LeadCaptureModal isOpen={captureOpen} onClose={() => { setCaptureOpen(false); setCapturePlan(undefined); }} selectedPlan={capturePlan} />

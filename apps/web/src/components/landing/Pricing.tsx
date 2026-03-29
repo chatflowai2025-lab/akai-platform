@@ -1,120 +1,115 @@
+'use client';
+
+import { useState } from 'react';
+
 const PLANS = [
   {
     name: 'Starter',
-    price: '$299',
-    annual: '$1,470/yr',
-    annualNote: 'Save 2 months',
+    monthlyPrice: '$49',
+    annualPrice: '$39',
     period: '/mo',
+    annualNote: 'Save 20% annually',
     description: 'One AI agent, fully operational.',
-    roiBadge: '13× ROI',
     features: [
       '1 AKAI agent of your choice',
-      'Social is the most popular starter',
       'AI automation included',
       'Full dashboard access',
-      '60 voice mins · 5k emails · 1k AI tasks/mo',
-      'Replaces a part-time VA (~$2,000/mo)',
+      '60 voice mins · 5k emails/mo',
+      '1,000 AI tasks/month',
     ],
-    cta: 'Start 14-day free trial →',
+    cta: 'Start Free Trial →',
     highlight: false,
     badge: null,
   },
   {
     name: 'Growth',
-    price: '$599',
-    annual: '$4,970/yr',
-    annualNote: 'Save 2 months',
+    monthlyPrice: '$149',
+    annualPrice: '$119',
     period: '/mo',
+    annualNote: 'Save 20% annually',
     description: 'Three agents. Sales rep + marketer + VA — replaced.',
-    roiBadge: '27× ROI',
     features: [
       '3 AKAI agents of your choice',
       'Sales + Email Guard + Social recommended',
       'Team seats (up to 5)',
-      'Advanced analytics',
+      'Advanced analytics & reporting',
       'Onboarding call included',
-      '300 voice mins · 25k emails · 5k AI tasks/mo',
-      'Replaces sales rep + marketing + VA (~$13,500/mo)',
+      '300 voice mins · 25k emails/mo',
     ],
-    cta: 'Start 14-day free trial →',
+    cta: 'Start Free Trial →',
     highlight: true,
     badge: 'Most Popular',
   },
   {
-    name: 'Scale',
-    price: '$1,200',
-    annual: '$14,970/yr',
-    annualNote: 'Save 2 months',
+    name: 'Agency',
+    monthlyPrice: '$399',
+    annualPrice: '$319',
     period: '/mo',
-    description: 'All 10 agents. Your entire ops team — automated.',
-    roiBadge: '20× ROI',
+    annualNote: 'Save 20% annually',
+    description: 'All 9 agents. Your entire ops team — automated.',
     features: [
-      'All 10 AKAI agents',
-      'Sales, Voice, Web, Email Guard, Calendar',
-      'Proposals, Ads, Recruit, Social & Health',
+      'All 9 AKAI agents',
       'Unlimited team seats',
       'Dedicated account manager',
-      '1,200 voice mins · unlimited emails · unlimited AI tasks',
-      'White-label option + SLA guarantee',
-      'Replaces your entire ops team (~$30,000/mo)',
+      '1,200 voice mins · unlimited emails',
+      'White-label option available',
     ],
-    cta: 'Start 14-day free trial →',
+    cta: 'Start Free Trial →',
     highlight: false,
     badge: null,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    annual: '',
-    annualNote: '',
-    period: '',
-    description: 'Dedicated environment. Custom integrations. Full white-label.',
-    roiBadge: null,
-    features: [
-      'Dedicated cloud environment',
-      'Custom API integrations',
-      'White-label under your brand',
-      'Multi-location & multi-tenant',
-      'Enterprise SLA (99.99% uptime)',
-      'Dedicated success team',
-      'Volume pricing available',
-      'On-site onboarding option',
-    ],
-    cta: 'Contact us →',
-    highlight: false,
-    badge: 'Enterprise',
   },
 ];
 
 export default function Pricing({ onOpenCapture }: { onOpenCapture?: (plan?: string) => void }) {
+  const [annual, setAnnual] = useState(false);
+
   return (
     <section id="pricing" className="relative py-32 px-6 overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black mb-5 leading-tight">
-            Your ops team.{' '}
-            <span className="gradient-text">At 1% of the cost.</span>
+        <div className="text-center mb-12">
+          <p className="text-[#D4AF37] text-sm font-semibold uppercase tracking-widest mb-3">Pricing</p>
+          <h2 className="text-4xl md:text-5xl font-black mb-5 leading-tight text-white">
+            Your AI team.{' '}
+            <span className="text-[#D4AF37]">At 1% of the cost.</span>
           </h2>
-          <p className="text-white/40 text-lg">
+          <p className="text-white/40 text-lg mb-8">
             14-day free trial · Cancel anytime · No setup fees
           </p>
-          <p className="text-white/30 text-sm mt-2">
-            Annual plans available — pay yearly, save 2 months
-          </p>
+
+          {/* Annual toggle */}
+          <div className="inline-flex items-center gap-3 bg-[#111] border border-[#2a2a2a] rounded-full p-1 pr-4">
+            <button
+              onClick={() => setAnnual(false)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                !annual ? 'bg-[#D4AF37] text-black' : 'text-gray-500 hover:text-white'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setAnnual(true)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                annual ? 'bg-[#D4AF37] text-black' : 'text-gray-500 hover:text-white'
+              }`}
+            >
+              Annual
+            </button>
+            <span className="text-[#D4AF37] text-xs font-bold">Save 20%</span>
+          </div>
         </div>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-5">
           {PLANS.map(plan => (
             <div
               key={plan.name}
               className={`relative rounded-2xl p-7 flex flex-col overflow-hidden transition-all duration-200 ${
                 plan.highlight
                   ? 'border-gradient glow-gold'
-                  : 'glass card-hover'
+                  : 'bg-[#111] border border-[#1f1f1f] hover:border-[#D4AF37]/20'
               }`}
             >
               {/* Highlight glow */}
@@ -132,34 +127,25 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: (plan?: str
               )}
 
               <div className="relative mt-4 flex flex-col flex-1">
-                {/* Plan name + ROI badge */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-xs text-white/40 uppercase tracking-widest">{plan.name}</div>
-                  {plan.roiBadge && (
-                    <div className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      plan.highlight ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'bg-white/[0.06] text-white/50'
-                    }`}>
-                      {plan.roiBadge}
-                    </div>
-                  )}
-                </div>
+                {/* Plan name */}
+                <div className="text-xs text-white/40 uppercase tracking-widest mb-3">{plan.name}</div>
 
                 {/* Price */}
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-xs text-white/30 font-semibold mr-0.5">from</span>
-                  <span className={`text-5xl font-black tracking-tight ${plan.highlight ? 'gradient-text' : 'text-white'}`}>
-                    {plan.price}
+                  <span className={`text-5xl font-black tracking-tight ${plan.highlight ? 'text-[#D4AF37]' : 'text-white'}`}>
+                    {annual ? plan.annualPrice : plan.monthlyPrice}
                   </span>
                   <span className="text-white/30 text-sm">{plan.period}</span>
                 </div>
 
-                {/* Annual option */}
-                {plan.annual && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-white/30 text-xs">{plan.annual}</span>
-                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                      plan.highlight ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'bg-white/[0.04] text-white/30'
-                    }`}>{plan.annualNote}</span>
+                {/* Annual note */}
+                {annual && (
+                  <div className="mb-3">
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
+                      plan.highlight ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'bg-white/[0.06] text-white/40'
+                    }`}>
+                      {plan.annualNote}
+                    </span>
                   </div>
                 )}
 
@@ -168,8 +154,8 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: (plan?: str
                 {/* Features */}
                 <ul className="space-y-3 flex-1 mb-8">
                   {plan.features.map(f => (
-                    <li key={f} className="flex items-center gap-3 text-sm text-white/60">
-                      <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold ${
+                    <li key={f} className="flex items-start gap-3 text-sm text-white/60">
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold mt-0.5 ${
                         plan.highlight ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'bg-white/[0.06] text-white/40'
                       }`}>
                         ✓
@@ -184,8 +170,8 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: (plan?: str
                   onClick={() => onOpenCapture?.(plan.name)}
                   className={`block w-full text-center py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-200 ${
                     plan.highlight
-                      ? 'bg-[#D4AF37] text-black hover:opacity-90 glow-gold-sm'
-                      : 'glass border border-white/[0.08] text-white hover:border-white/20'
+                      ? 'bg-[#D4AF37] text-black hover:opacity-90 shadow-lg shadow-[#D4AF37]/20'
+                      : 'bg-white/[0.06] border border-white/[0.08] text-white hover:border-white/20 hover:bg-white/[0.08]'
                   }`}
                 >
                   {plan.cta}
@@ -195,17 +181,17 @@ export default function Pricing({ onOpenCapture }: { onOpenCapture?: (plan?: str
           ))}
         </div>
 
-        {/* Enterprise / Custom */}
-        <div className="mt-6 rounded-2xl glass border border-white/[0.06] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Enterprise row */}
+        <div className="mt-6 rounded-2xl bg-[#111] border border-[#1f1f1f] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <p className="text-white font-bold text-sm">Custom — Enterprise</p>
+            <p className="text-white font-bold text-sm">Enterprise — Custom Pricing</p>
             <p className="text-white/40 text-sm mt-0.5">
               Multi-location, white-label, custom integrations, volume pricing. We&apos;ll build a plan around your team.
             </p>
           </div>
           <a
             href="mailto:hello@getakai.ai"
-            className="flex-shrink-0 px-5 py-2.5 rounded-xl border border-[#D4AF37]/40 text-[#D4AF37] text-sm font-semibold hover:bg-[#D4AF37]/10 transition-all"
+            className="flex-shrink-0 px-5 py-2.5 rounded-xl border border-[#D4AF37]/40 text-[#D4AF37] text-sm font-semibold hover:bg-[#D4AF37]/10 transition-all whitespace-nowrap"
           >
             Talk to us →
           </a>

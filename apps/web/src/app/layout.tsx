@@ -36,18 +36,18 @@ export const metadata: Metadata = {
   verification: {
     google: 'VNpyDRPV_WUxGG6u5z3kJNFGVq0xvXp5QCLcb5hENvI',
   },
-  title: 'AKAI — 10 AI Agents | Automate Your Business, 24/7',
+  title: 'AKAI — Your AI Business Partner',
   description:
-    'Put 10 AI agents to work for your business — AKAI handles sales, email, calendar, social, ads and recruiting 24/7. Gets smarter every day. Start free today.',
+    'AI-powered executive team for SMBs. Sales, marketing, recruiting and finance — automated, running 24/7.',
   keywords: [
     'AI business',
     'AI sales',
     'AI recruitment',
-    'AI website builder',
+    'AI executive team',
     'AKAI',
     'AI agents',
     'business automation',
-    '10 AI agents',
+    'Australian SMB AI',
   ],
   metadataBase: new URL(SITE_URL),
   alternates: {
@@ -58,9 +58,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'AKAI — 10 AI Agents | Automate Your Business, 24/7',
+    title: 'AKAI — Your AI Business Partner',
     description:
-      'Put 10 AI agents to work for your business — AKAI handles sales, email, calendar, social, ads and recruiting 24/7. Gets smarter every day. Start free today.',
+      'AI-powered executive team for SMBs. Sales, marketing, recruiting and finance — automated, running 24/7.',
     url: SITE_URL,
     siteName: 'AKAI',
     images: [
@@ -68,16 +68,16 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'AKAI — 10 AI Agents That Run Your Business 24/7',
+        alt: 'AKAI — Your AI Business Partner',
       },
     ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AKAI — 10 AI Agents | Automate Your Business, 24/7',
+    title: 'AKAI — Your AI Business Partner',
     description:
-      'Put 10 AI agents to work for your business — AKAI handles sales, email, calendar, social, ads and recruiting 24/7. Start free today.',
+      'AI-powered executive team for SMBs. Sales, marketing, recruiting and finance — automated, running 24/7.',
     images: [`${SITE_URL}/og-image.png`],
   },
 };
