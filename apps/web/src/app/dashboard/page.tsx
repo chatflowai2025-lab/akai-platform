@@ -547,13 +547,14 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
-  // ── Welcome email — fires once per browser session, Firestore guards server-side ──
+  // ── Welcome email — fires ONCE EVER per user (localStorage + Firestore double-guard) ──
   useEffect(() => {
     if (!user) return;
-    // Client-side session guard — never fires twice in the same tab session
-    const sessionKey = `akai_welcome_sent_${user.uid}`;
-    if (sessionStorage.getItem(sessionKey)) return;
-    sessionStorage.setItem(sessionKey, '1');
+    // localStorage guard — persists across sessions and tabs forever
+    const localKey = `akai_welcome_sent_${user.uid}`;
+    if (localStorage.getItem(localKey)) return;
+    // Mark immediately to prevent any race condition
+    localStorage.setItem(localKey, '1');
     fetch('/api/welcome', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
