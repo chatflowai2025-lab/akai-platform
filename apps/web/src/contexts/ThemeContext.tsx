@@ -51,10 +51,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+const DEFAULT_THEME: ThemeContextValue = {
+  theme: 'dark',
+  toggleTheme: () => {},
+};
+
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return ctx;
+  // Return default during SSR/prerender — ThemeProvider applies on client
+  return ctx ?? DEFAULT_THEME;
 }

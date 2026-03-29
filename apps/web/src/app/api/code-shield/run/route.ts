@@ -19,7 +19,7 @@ interface GateResult {
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'aiclozr_api_key_2026_prod';
 
-async function runGateViaRailway(gate: string): Promise<{ pass: boolean; output: string; ms: number }> {
+async function _runGateViaRailway(gate: string): Promise<{ pass: boolean; output: string; ms: number }> {
   const start = Date.now();
   try {
     const res = await fetch(`${RAILWAY_API}/api/code-shield/gate/${gate}`, {
