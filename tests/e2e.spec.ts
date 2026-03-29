@@ -72,3 +72,50 @@ test('10. Logo icon span shows "AK" not just "A"', async ({ page }) => {
   const logoIconSpan = page.locator('.rounded-lg.bg-\\[\\#D4AF37\\] span').first();
   await expect(logoIconSpan).toHaveText('AK');
 });
+
+// ─── Firestore Rules Tests (RCA #8) ──────────────────────────────────────────
+// These tests catch the class of failure where Firestore rules aren't deployed
+// to named databases. Aaron should NEVER find a "Missing or insufficient
+// permissions" error in production. These tests catch it first.
+
+test('RCA-8a. Settings page loads without Firestore permission errors', async ({ page }) => {
+  // Settings page must load — if Firestore rules are wrong it throws on mount
+  const response = await page.goto('/settings');
+  expect(response?.status()).toBe(200);
+  // Should not contain permission error text anywhere on the page
+  const body = await page.locator('body').textContent();
+  expect(body).not.toContain('Missing or insufficient permissions');
+  expect(body).not.toContain('permission-denied');
+  expect(body).not.toContain('PERMISSION_DENIED');
+});
+
+test('RCA-8b. Settings page contains Business Profile section', async ({ page }) => {
+  await page.goto('/settings');
+  await expect(page.locator('body')).toContainText('Business Profile');
+});
+
+test('RCA-8c. Dashboard page loads without Firestore permission errors', async ({ page }) => {
+  const response = await page.goto('/dashboard');
+  // Redirects to login — that's fine, we just want no 500s
+  expect([200, 302, 307, 308]).toContain(response?.status());
+  const body = await page.locator('body').textContent();
+  expect(body).not.toContain('Missing or insufficient permissions');
+  expect(body).not.toContain('PERMISSION_DENIED');
+});
+
+test('RCA-8d. No console errors on settings page load', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on('console', msg => {
+    if (msg.type() === 'error') consoleErrors.push(msg.text());
+  });
+  await page.goto('/settings');
+  await page.waitForTimeout(2000);
+  // Filter out known safe errors (e.g. font preload warnings)
+  const realErrors = consoleErrors.filter(e =>
+    !e.includes('fonts') &&
+    !e.includes('favicon') &&
+    !e.includes('preload') &&
+    !e.includes('ERR_BLOCKED_BY_CLIENT')
+  );
+  expect(realErrors).toHaveLength(0);
+});
