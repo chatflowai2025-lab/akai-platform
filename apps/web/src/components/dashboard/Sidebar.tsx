@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 // ── Module groups ─────────────────────────────────────────────────────────────
 const MODULE_GROUPS = [
@@ -75,7 +76,7 @@ export default function Sidebar() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-[#1f1f1f]">
+      <div className="px-6 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
         <Link href="/dashboard" className="flex items-center justify-between">
           <span className="text-xl font-black tracking-tight">
             AK<span className="text-[#D4AF37]">AI</span>
@@ -144,7 +145,14 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom — Settings + Sign Out */}
-      <div className="px-3 py-4 border-t border-[#1f1f1f] space-y-1">
+      <div className="px-3 py-4 space-y-1" style={{ borderTop: '1px solid var(--border)' }}>
+        {/* Theme toggle row */}
+        <div className="flex items-center gap-3 px-3 py-2 text-sm text-gray-400">
+          <span>🎨</span>
+          <span className="flex-1">Theme</span>
+          <ThemeToggle />
+        </div>
+
         <Link
           href="/settings"
           onClick={() => setMobileOpen(false)}
@@ -160,7 +168,7 @@ export default function Sidebar() {
         </Link>
 
         {/* User + Sign Out */}
-        <div className="pt-2 mt-1 border-t border-[#1a1a1a]">
+        <div className="pt-2 mt-1" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="px-3 py-2 mb-1 flex items-center gap-2">
             {avatarPhotoUrl ? (
               <Image
@@ -195,7 +203,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 bg-[#080808] border-r border-[#1f1f1f] flex-col h-full overflow-y-auto">
+      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col h-full overflow-y-auto" style={{ backgroundColor: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
         {sidebarContent}
       </aside>
 
@@ -206,14 +214,14 @@ export default function Sidebar() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative w-64 h-full bg-[#080808] border-r border-[#1f1f1f] flex flex-col overflow-y-auto">
+          <aside className="relative w-64 h-full flex flex-col overflow-y-auto" style={{ backgroundColor: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
             {sidebarContent}
           </aside>
         </div>
       )}
 
       {/* Mobile bottom nav bar — 4 most-used modules */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#080808] border-t border-[#1f1f1f] flex items-center justify-around px-2 py-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 py-2" style={{ backgroundColor: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
         <Link
           href="/dashboard"
           className={cn(

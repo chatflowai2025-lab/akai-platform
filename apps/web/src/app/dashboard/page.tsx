@@ -820,7 +820,7 @@ export default function DashboardPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg)' }}>
         <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -850,7 +850,7 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
+      <header className="flex items-center justify-between px-8 py-4" style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)' }}>
         <div>
           <h1 suppressHydrationWarning className="text-xl font-black text-white">
             {getGreeting()}, <span className="text-[#D4AF37]">{displayName}</span>{resolvedBusinessName ? ' 🚀' : ' 👋'}
@@ -879,7 +879,7 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
           {/* ── Header row: score ring + micro-stats ──────────────────────── */}
-          <section className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
+          <section className="rounded-2xl p-5" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <WeeklyScoreRing score={learnings.weeklyScore} loading={learnings.loading} />
               <div className="flex-1 grid grid-cols-3 gap-4">
@@ -973,7 +973,7 @@ export default function DashboardPage() {
           {/* ── AKAI learned this week ───────────────────────────────────── */}
           {(insightsData.insights.length > 0 || !insightsData.loading) && (
             <section>
-              <div className="bg-[#111] border border-[#1f1f1f] border-l-2 border-l-[#D4AF37]/60 rounded-2xl p-5">
+              <div className="rounded-2xl p-5 border-l-2 border-l-[#D4AF37]/60" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderLeftWidth: '2px', borderLeftColor: 'rgba(212,175,55,0.6)' }}>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-sm font-black text-white">🧠 What AKAI learned this week</h2>
                   <span className="text-[11px] text-gray-600 bg-[#1a1a1a] px-2 py-0.5 rounded-full">Last 7 days</span>

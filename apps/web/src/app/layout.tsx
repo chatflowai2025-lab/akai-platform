@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import BugCapture from '@/components/BugCapture';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const GA_ID = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-VVSLMYCV04';
 
@@ -91,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="dns-prefetch" href={`//${(process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app').replace(/^https?:\/\//, '')}`} />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -117,9 +118,11 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <BugCapture>
-          {children}
-        </BugCapture>
+        <ThemeProvider>
+          <BugCapture>
+            {children}
+          </BugCapture>
+        </ThemeProvider>
       </body>
     </html>
   );

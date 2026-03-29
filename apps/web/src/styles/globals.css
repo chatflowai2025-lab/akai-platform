@@ -90,6 +90,34 @@
 }
 
 /* ============================================================
+   Theme-aware CSS Custom Properties
+   (applied via class on <html>)
+   ============================================================ */
+
+:root {
+  --bg:           #0a0a0a;
+  --surface:      #111111;
+  --border:       #1f1f1f;
+  --text-primary: #ffffff;
+  --text-muted:   #888888;
+  --gold:         #D4AF37;
+}
+
+:root.light {
+  --bg:           #f8f8f8;
+  --surface:      #ffffff;
+  --border:       #e5e5e5;
+  --text-primary: #0a0a0a;
+  --text-muted:   #666666;
+  --gold:         #B8960C;
+}
+
+/* Smooth theme transition on structural elements */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ============================================================
    Animations
    ============================================================ */
 
@@ -244,12 +272,13 @@ html {
 }
 
 body {
-  background-color: var(--akai-black);
-  color: var(--akai-text-primary);
+  background-color: var(--bg, var(--akai-black));
+  color: var(--text-primary, var(--akai-text-primary));
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.6;
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ============================================================
