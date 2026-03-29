@@ -888,12 +888,12 @@ export default function Home() {
       <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
       <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
       <TrustBar />
-      <div id="demo"><HowItWorksAnimated /></div>
+      <div id="how-it-works"><HowItWorksAnimated /></div>
       <HowAKAILearns />
       <AgentTeam />
-      <Modules />
+      <div id="modules"><Modules /></div>
       <IntelligenceSection />
-      <Pricing onOpenCapture={(plan) => openCapture(plan)} />
+      <div id="pricing"><Pricing onOpenCapture={(plan) => openCapture(plan)} /></div>
       <PricingCTA onOpenCapture={() => openCapture()} />
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />

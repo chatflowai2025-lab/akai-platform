@@ -33,9 +33,9 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
 
           {/* Nav links — desktop */}
           <div className="hidden md:flex items-center gap-8 text-sm text-white/40">
-            <a href="#how-it-works" className="hover:text-white transition-colors duration-200">How It Works</a>
-            <a href="#modules" className="hover:text-white transition-colors duration-200">Skills</a>
-            <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
+            <a href="#how-it-works" onClick={e => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors duration-200 cursor-pointer">How It Works</a>
+            <a href="#modules" onClick={e => { e.preventDefault(); document.getElementById('modules')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors duration-200 cursor-pointer">Skills</a>
+            <a href="#pricing" onClick={e => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors duration-200 cursor-pointer">Pricing</a>
           </div>
 
           {/* CTA — desktop */}
@@ -92,9 +92,9 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/[0.06] px-6 py-4 flex flex-col gap-4">
-            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm text-white/60 hover:text-white transition-colors">How It Works</a>
-            <a href="#modules" onClick={() => setMobileMenuOpen(false)} className="text-sm text-white/60 hover:text-white transition-colors">Skills</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm text-white/60 hover:text-white transition-colors">Pricing</a>
+            <a href="#how-it-works" onClick={e => { e.preventDefault(); setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-sm text-white/60 hover:text-white transition-colors cursor-pointer">How It Works</a>
+            <a href="#modules" onClick={e => { e.preventDefault(); setMobileMenuOpen(false); document.getElementById('modules')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-sm text-white/60 hover:text-white transition-colors cursor-pointer">Skills</a>
+            <a href="#pricing" onClick={e => { e.preventDefault(); setMobileMenuOpen(false); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-sm text-white/60 hover:text-white transition-colors cursor-pointer">Pricing</a>
             {!loading && !user && (
               <>
                 <a href="/login" className="text-sm text-white/60 hover:text-white transition-colors">Sign In</a>
