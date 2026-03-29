@@ -46,9 +46,9 @@ const PLANS = [
     annualPrice: '$319',
     period: '/mo',
     annualNote: 'Save 20% annually',
-    description: 'All 9 agents. Your entire ops team — automated.',
+    description: 'All 10 agents. Your entire ops team — automated.',
     features: [
-      'All 9 AKAI agents',
+      'All 10 AKAI agents',
       'Unlimited team seats',
       'Dedicated account manager',
       '1,200 voice mins · unlimited emails',
