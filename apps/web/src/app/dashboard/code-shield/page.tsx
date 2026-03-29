@@ -147,7 +147,7 @@ function HistoryItem({ run, isCurrent }: { run: RunResult; isCurrent: boolean })
     <div className={`flex items-center gap-3 px-4 py-3 border-b border-[#1a1a1a] last:border-0 ${isCurrent ? 'bg-[#0d0d0d]' : ''}`}>
       <span className="text-base flex-shrink-0">{run.overallStatus === 'pass' ? '✅' : run.overallStatus === 'running' ? '⏳' : '❌'}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-white font-medium">{formatDate(run.startedAt)}</p>
+        <p suppressHydrationWarning className="text-xs text-white font-medium">{formatDate(run.startedAt)}</p>
         <p className="text-[11px] text-gray-500 mt-0.5">{passCount} pass · {failCount} fail</p>
       </div>
       {isCurrent && (
@@ -345,7 +345,7 @@ export default function CodeShieldPage() {
                     ? 'All gates passed'
                     : `${failCount} gate${failCount !== 1 ? 's' : ''} failed`}
                 </p>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p suppressHydrationWarning className="text-sm text-gray-500 mt-0.5">
                   {!hasRun
                     ? 'Hit "Run gates" to execute all quality checks'
                     : running
