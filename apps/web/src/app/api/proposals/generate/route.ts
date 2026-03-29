@@ -190,9 +190,9 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `You are AKAI's senior proposal writer. Generate compelling, personalised sales proposals that win clients.
 
 AKAI PLATFORM — 10 live modules, bundled into simple plans:
-- Starter $49/mo — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar — up to 200 leads/mo
-- Growth $149/mo — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts — up to 5 clients (MOST POPULAR)
-- Agency $399/mo — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients
+- Starter $199/mo — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar — up to 200 leads/mo
+- Growth $599/mo — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts — up to 5 clients (MOST POPULAR)
+- Agency $1,200/mo — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients
 
 Modules included:
 - Sales (Sophie AI outbound calling) — Sophie calls leads, qualifies them, books meetings 24/7

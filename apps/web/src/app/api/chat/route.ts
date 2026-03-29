@@ -65,13 +65,13 @@ When user describes how they want emails handled, extract the rule and save it:
 - "hold until 9am" → action: hold, holdUntil: 9am
 
 PRICING & PLAN DETAILS:
-- Starter $49/mo — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar — up to 200 leads/mo
-- Growth $149/mo — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts — up to 5 clients (MOST POPULAR)
-- Agency $399/mo — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients
-- Annual pricing (20% off): Starter $39/mo, Growth $119/mo, Agency $319/mo
+- Starter $199/mo — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar — up to 200 leads/mo
+- Growth $599/mo — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts — up to 5 clients (MOST POPULAR)
+- Agency $1,200/mo — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients
+- Annual pricing (20% off): Starter $159/mo, Growth $479/mo, Agency $960/mo
 - When user uploads leads, check against their plan limit
 - If they exceed limit: "You've uploaded [N] leads. Your [Plan] plan includes [X]/mo. Want to upgrade to Growth for unlimited leads?"
-- If they ask for more leads: "Growth at $149/mo gives you unlimited leads — a solid upgrade if you're hitting limits."
+- If they ask for more leads: "Growth at $599/mo gives you unlimited leads — a solid upgrade if you're hitting limits."
 
 NOTIFICATION PREFERENCES:
 - When user picks Email for notifications, say: "I'll send notifications to **[their email from userContext]** — your account email. Is that the best one, or do you want a different address?" 
@@ -90,7 +90,7 @@ ACCOUNT MANAGEMENT — answer these honestly:
 - "how do I cancel": "You can cancel anytime in Settings → Billing. No lock-in, no cancellation fees. Your data stays for 30 days in case you change your mind."
 - "delete my account": Direct to Settings → Danger Zone (scroll to the bottom). Warn: this permanently deletes all data and is irreversible.
 - "change my email": "Email changes go through Settings → Account. Firebase Auth sends a verification to your current email — click the link to confirm. If you've lost access to the old email, contact hello@getakai.ai."
-- "how do I add a team member": "Team seats are on Growth (up to 5 clients, $149/mo) and Agency (unlimited clients, $399/mo). Go to Settings → Team → Invite Member."
+- "how do I add a team member": "Team seats are on Growth (up to 5 clients, $599/mo) and Agency (unlimited clients, $1,200/mo). Go to Settings → Team → Invite Member."
 
 MOBILE: AKAI is fully responsive at getakai.ai. Also works via OpenClaw on iPhone (native app experience).
 
@@ -141,7 +141,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   // ── Pricing questions ─────────────────────────────────────────────────────
   if (msg.includes('how much') && (msg.includes('cost') || msg.includes('price') || msg.includes('pricing')) ||
       msg === 'pricing' || msg === 'price' || msg.includes('what does it cost') || msg.includes("what's the price")) {
-    return "Three plans:\n\n• **Starter $49/mo** — Core AI team: Sales, Email Guard, Voice (Sophie), Calendar. Up to 200 leads/mo. Best for solo operators.\n• **Growth $149/mo** — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts. Up to 5 clients. **Most Popular.**\n• **Agency $399/mo** — Everything in Growth + multi-client dashboard, white-label, dedicated support, unlimited clients.\n\nAnnual billing saves 20%. Most businesses on Starter see a meeting booked in the first week — one closed deal typically pays for months. Want to see which plan fits your volume?";
+    return "Three plans:\n\n• **Starter $199/mo** — Core AI team: Sales, Email Guard, Voice (Sophie), Calendar. Up to 200 leads/mo. Best for solo operators.\n• **Growth $599/mo** — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts. Up to 5 clients. **Most Popular.**\n• **Agency $1,200/mo** — Everything in Growth + multi-client dashboard, white-label, dedicated support, unlimited clients.\n\nAnnual billing saves 20% (Starter $159/mo, Growth $479/mo, Agency $960/mo). Most businesses on Starter see a meeting booked in the first week — one closed deal typically pays for months. Want to see which plan fits your volume?";
   }
 
   if (msg.includes('upgrade') || msg.includes('change my plan') || msg.includes('change plan') || msg.includes('switch plan')) {
@@ -165,7 +165,7 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   // ── Team members ──────────────────────────────────────────────────────────
   if (msg.includes('add a team member') || msg.includes('add team member') || msg.includes('invite') && msg.includes('team') ||
       msg.includes('add a user') || msg.includes('add user')) {
-    return "Team seats are on Growth (up to 5 clients, $149/mo) and Agency (unlimited clients, $399/mo).\n\nIf you're on one of those plans: **Settings → Team → Invite Member** — enter their email and they'll get a link.\n\nIf you're on Starter and need team access, upgrading to Growth is the move.";
+    return "Team seats are on Growth (up to 5 clients, $599/mo) and Agency (unlimited clients, $1,200/mo).\n\nIf you're on one of those plans: **Settings → Team → Invite Member** — enter their email and they'll get a link.\n\nIf you're on Starter and need team access, upgrading to Growth is the move.";
   }
 
   // ── Can AKAI send emails ──────────────────────────────────────────────────
@@ -766,7 +766,7 @@ export async function POST(req: NextRequest) {
 
     // Help / what can AKAI do
     if (intentMsg === 'help' || intentMsg === 'what can you do' || intentMsg.includes('what can akai do') || intentMsg.includes('what do you do') || intentMsg.includes('show me what you can do')) {
-      return NextResponse.json({ message: "Here's what AKAI does — 10 modules, all live:\n\n📞 **Sales** — Sophie AI calls your leads, qualifies them, books meetings\n✉️ **Email Guard** — Monitors inbox, auto-drafts proposals from every enquiry\n🌐 **Web** — Website audit + AI content, SEO fixes in seconds\n📣 **Ads** — Google & Meta campaigns built with AI copy, ready to launch\n🗣️ **Voice** — Configure Sophie's script, voice, call hours\n🎯 **Recruit** — Source candidates, write JDs, screen applicants with AI\n📱 **Social** — Month of content across Instagram, LinkedIn, Facebook\n📄 **Proposals** — Professional client proposals generated in seconds\n📅 **Calendar** — Google/Outlook sync, meetings auto-booked by Sophie\n\nWhat do you want to tackle first?" });
+      return NextResponse.json({ message: "Here's what AKAI does — 10 modules, all live:\n\n📞 **Sales** — Sophie AI calls your leads, qualifies them, books meetings\n✉️ **Email Guard** — Monitors inbox, auto-drafts proposals from every enquiry\n🌐 **Web** — Website audit + AI content, SEO fixes in seconds\n📣 **Ads** — Google & Meta campaigns built with AI copy, ready to launch\n🗣️ **Voice** — Configure Sophie's script, voice, call hours\n🎯 **Recruit** — Source candidates, write JDs, screen applicants with AI\n📱 **Social** — Month of content across Instagram, LinkedIn, Facebook\n📄 **Proposals** — Professional client proposals generated in seconds\n📅 **Calendar** — Google/Outlook sync, meetings auto-booked by Sophie\n\nPlans from $199/mo. What do you want to tackle first?" });
     }
 
     if (userId !== 'anonymous') {
@@ -802,10 +802,10 @@ export async function POST(req: NextRequest) {
         const planName = plan || 'Trial';
         const planDetails: Record<string, string> = {
           trial: 'You\'re on the **Trial** plan — all 10 modules active, exploring for free.',
-          starter: 'You\'re on **Starter ($49/mo)** — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar. Up to 200 leads/mo.',
-          growth: 'You\'re on **Growth ($149/mo)** — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts. Up to 5 clients.',
-          agency: 'You\'re on **Agency ($399/mo)** — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients.',
-          scale: 'You\'re on **Agency ($399/mo)** — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients.',
+          starter: 'You\'re on **Starter ($199/mo)** — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar. Up to 200 leads/mo.',
+          growth: 'You\'re on **Growth ($599/mo)** — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts. Up to 5 clients.',
+          agency: 'You\'re on **Agency ($1,200/mo)** — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients.',
+          scale: 'You\'re on **Agency ($1,200/mo)** — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients.',
         };
         const detail = planDetails[planName.toLowerCase()] || `You\'re on the **${planName}** plan.`;
         return NextResponse.json({ message: `${detail}\n\nWant to upgrade or see what's included in each tier? Go to **Settings → Billing**.` });
@@ -827,7 +827,7 @@ SALES CONVERSATION RULES:
 4. Always personalise. Use their industry, their pain, their language back at them.
 5. After 2-3 exchanges, move toward the close: "The best way to see this is to just try it — 14 days free, no card needed. You can be set up in 10 minutes. Want me to walk you through it?"
 6. Close with a direct link: "Sign up here: getakai.ai/login — takes 2 minutes. I'll be there on the other side to help you get going."
-7. If they ask pricing: "Starts at $49/mo — honestly less than a cup of coffee a day. But try it free first — 14 days, no card needed. If AKAI doesn't save you 5 hours in your first week, cancel. No one has yet."
+7. If they ask pricing: "Starts at $199/mo — and consider what one extra client per month is worth to your business. Try it free first — 14 days, no card needed. If AKAI doesn't save you 5 hours in your first week, cancel. No one has yet."
 8. NEVER be pushy. Be genuinely curious about their business. The sale comes from understanding, not pitching.
 9. Keep responses SHORT — 2-4 sentences max. This is a chat, not an essay.
 10. If they're ready to sign up: send them directly to getakai.ai/login`,

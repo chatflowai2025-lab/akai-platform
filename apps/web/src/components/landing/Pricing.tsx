@@ -5,8 +5,8 @@ import { useState } from 'react';
 const PLANS = [
   {
     name: 'Starter',
-    monthlyPrice: '$49',
-    annualPrice: '$39',
+    monthlyPrice: '$199',
+    annualPrice: '$159',
     period: '/mo',
     annualNote: 'Save 20% annually',
     description: 'Your AI sales & email team. Running from day one.',
@@ -23,8 +23,8 @@ const PLANS = [
   },
   {
     name: 'Growth',
-    monthlyPrice: '$149',
-    annualPrice: '$119',
+    monthlyPrice: '$599',
+    annualPrice: '$479',
     period: '/mo',
     annualNote: 'Save 20% annually',
     description: 'All 10 agents. Your entire back office — automated.',
@@ -42,8 +42,8 @@ const PLANS = [
   },
   {
     name: 'Agency',
-    monthlyPrice: '$399',
-    annualPrice: '$319',
+    monthlyPrice: '$1,200',
+    annualPrice: '$960',
     period: '/mo',
     annualNote: 'Save 20% annually',
     description: 'All 10 agents. Your entire ops team — automated.',
