@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { collection, query, orderBy, limit, getDocs, doc, updateDoc } from 'firebase/firestore';
@@ -445,6 +446,7 @@ export default function CodeShieldPage() {
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
           <div>
+            <Breadcrumb module="Code Shield" />
             <h1 className="text-xl font-black text-white">🛡️ Code Shield</h1>
             <p className="text-xs text-gray-500 mt-0.5">Automated quality gates — catch failures before they hit production</p>
           </div>

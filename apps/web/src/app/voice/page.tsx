@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 
 // ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
@@ -1297,6 +1298,7 @@ function VoicePageInner() {
     <DashboardLayout>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
+          <Breadcrumb module="Voice" />
           <div className="flex items-center gap-2">
             <span className="text-xl">🎙️</span>
             <h1 className="text-xl font-black text-white">Voice</h1>

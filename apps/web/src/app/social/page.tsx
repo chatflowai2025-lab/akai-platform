@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -654,7 +655,11 @@ export default function SocialPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
-          <h1 className="text-xl font-black text-white">Social</h1>
+          <Breadcrumb module="Social" />
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📱</span>
+            <h1 className="text-xl font-black text-white">Social</h1>
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">AI-powered content for Instagram, LinkedIn, Facebook & X</p>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 font-medium">Live</span>

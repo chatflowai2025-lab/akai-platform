@@ -12,6 +12,7 @@ import {
   isMicrosoftConnected, microsoftEmail,
   isGoogleCalendarConnected, googleCalendarEmail,
 } from '@/lib/firestore-schema';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -458,7 +459,11 @@ export default function SettingsPage() {
     <DashboardLayout>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
-          <h1 className="text-xl font-black text-white">Settings</h1>
+          <Breadcrumb module="Settings" />
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚙️</span>
+            <h1 className="text-xl font-black text-white">Settings</h1>
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">Account and workspace configuration</p>
         </div>
       </header>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 import { isSafeMode } from '@/lib/beta-config';
 import { getFirebaseDb } from '@/lib/firebase';
@@ -579,6 +580,7 @@ function EmailGuardContent({
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
+          <Breadcrumb module="Email Guard" />
           <h1 className="text-xl font-black text-white">✉️ Email Guard</h1>
           <p className="text-xs text-gray-500 mt-0.5">Reads enquiries, generates proposals automatically</p>
         </div>

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { isSafeMode } from '@/lib/beta-config';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -1377,6 +1378,7 @@ export default function SalesPage() {
     <DashboardLayout>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
+          <Breadcrumb module="Sales" />
           <div className="flex items-center gap-2">
             <span className="text-xl">📞</span>
             <h1 className="text-xl font-black text-white">Sales</h1>

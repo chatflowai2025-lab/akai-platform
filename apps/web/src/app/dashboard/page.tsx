@@ -16,6 +16,13 @@ function formatTime(timestamp: string): string {
   }
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface FeedItem {
   id: string;
@@ -64,10 +71,10 @@ const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-produ
 const API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 const STAT_DEFAULTS = {
-  leads: 24,
-  proposalsSent: 18,
-  meetingsBooked: 6,
-  revenuePipeline: '$48,200',
+  leads: 0,
+  proposalsSent: 0,
+  meetingsBooked: 0,
+  revenuePipeline: '—',
 };
 
 interface StatsSummary {
@@ -150,7 +157,8 @@ function TodayColumn({ items, loading, onRefresh }: { items: FeedItem[]; loading
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center flex-1">
           <p className="text-2xl mb-2">🤫</p>
-          <p className="text-gray-500 text-sm">All quiet — AKAI is watching for activity</p>
+          <p className="text-gray-500 text-sm">No activity yet — get started above</p>
+          <p className="text-gray-700 text-xs mt-1">AKAI is watching for activity</p>
         </div>
       ) : (
         <div className="space-y-2 overflow-y-auto flex-1 pr-1">
@@ -645,10 +653,39 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // ── Activity feed (mount + every 60s) ────────────────────────────────────
+  // ── Activity feed (mount + every 60s, with Firestore activityLog fallback) ──
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
+
+    const loadFromFirestore = async (): Promise<FeedItem[]> => {
+      try {
+        const { getFirebaseDb } = await import('@/lib/firebase');
+        const { collection, getDocs, orderBy, limit, query } = await import('firebase/firestore');
+        const db = getFirebaseDb();
+        if (!db) return [];
+        const q = query(
+          collection(db, 'users', user.uid, 'activityLog'),
+          orderBy('timestamp', 'desc'),
+          limit(5)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map((d, i) => {
+          const data = d.data();
+          return {
+            id: d.id || String(i),
+            type: (data.type as string) || 'event',
+            insight: (data.message as string) || (data.insight as string) || 'Activity recorded',
+            timestamp: (data.timestamp as { toDate?: () => Date } | string)?.toString?.() || new Date().toISOString(),
+            outcome: (data.outcome as string) || 'success',
+            priority: (data.priority as number) || 0,
+          };
+        });
+      } catch {
+        return [];
+      }
+    };
+
     const fetchFeed = async () => {
       try {
         const idToken = await user.getIdToken().catch(() => '');
@@ -661,9 +698,20 @@ export default function DashboardPage() {
         clearTimeout(timeoutId);
         if (!res.ok) throw new Error('Feed unavailable');
         const data = await res.json() as { items: FeedItem[]; generatedAt: string };
-        if (!cancelled) setFeedData({ items: data.items ?? [], generatedAt: data.generatedAt ?? '', loading: false });
+        const items = data.items ?? [];
+        if (!cancelled) {
+          // If Railway returns empty, try Firestore activityLog
+          if (items.length === 0) {
+            const fsItems = await loadFromFirestore();
+            if (!cancelled) setFeedData({ items: fsItems, generatedAt: data.generatedAt ?? '', loading: false });
+          } else {
+            setFeedData({ items, generatedAt: data.generatedAt ?? '', loading: false });
+          }
+        }
       } catch {
-        if (!cancelled) setFeedData(prev => ({ ...prev, loading: false }));
+        // Railway failed — fall back to Firestore
+        const fsItems = await loadFromFirestore();
+        if (!cancelled) setFeedData({ items: fsItems, generatedAt: '', loading: false });
       }
     };
     fetchFeed();
@@ -803,13 +851,12 @@ export default function DashboardPage() {
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
-          <h1 className="text-xl font-black text-white">
-            {resolvedBusinessName ? (
-              <>Command Centre — <span className="text-[#D4AF37]">{resolvedBusinessName}</span> 🚀</>
-            ) : (
-              <>Welcome back, <span className="text-[#D4AF37]">{displayName}</span> 👋</>
-            )}
+          <h1 suppressHydrationWarning className="text-xl font-black text-white">
+            {getGreeting()}, <span className="text-[#D4AF37]">{displayName}</span>{resolvedBusinessName ? ' 🚀' : ' 👋'}
           </h1>
+          {resolvedBusinessName && (
+            <p className="text-xs text-gray-400 mt-0.5 font-medium">{resolvedBusinessName}</p>
+          )}
           <p className="text-xs text-gray-600 mt-0.5">{userEmail}</p>
         </div>
         <div className="flex items-center gap-3">
@@ -857,34 +904,35 @@ export default function DashboardPage() {
 
           {/* ── Quick actions ────────────────────────────────────────────── */}
           <section>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <p className="text-xs text-gray-600 uppercase tracking-wider font-semibold mb-3">Quick Actions</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-x-auto pb-1">
               <button
-                onClick={() => router.push('/email-guard')}
-                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition"
+                onClick={() => router.push('/voice')}
+                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
-                <span className="text-2xl">📨</span>
-                <span>Check inbox</span>
+                <span className="text-2xl">📞</span>
+                <span>Start a call</span>
+              </button>
+              <button
+                onClick={() => router.push('/social')}
+                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
+              >
+                <span className="text-2xl">✍️</span>
+                <span>Generate content</span>
               </button>
               <button
                 onClick={() => router.push('/sales')}
-                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition"
+                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
-                <span className="text-2xl">📞</span>
-                <span>Trigger Sophie</span>
-              </button>
-              <button
-                onClick={() => router.push('/calendar')}
-                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition"
-              >
-                <span className="text-2xl">📅</span>
-                <span>Calendar</span>
+                <span className="text-2xl">🎯</span>
+                <span>View leads</span>
               </button>
               <button
                 onClick={() => router.push('/health')}
-                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition"
+                className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
                 <span className="text-2xl">🔍</span>
-                <span>Web audit</span>
+                <span>Run health check</span>
               </button>
             </div>
           </section>

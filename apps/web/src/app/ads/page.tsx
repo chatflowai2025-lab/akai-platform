@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -1012,7 +1013,11 @@ export default function AdsPage() {
     <DashboardLayout>
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
-          <h1 className="text-xl font-black text-white">Ads</h1>
+          <Breadcrumb module="Ads" />
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📣</span>
+            <h1 className="text-xl font-black text-white">Ads</h1>
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">AI-powered Google & Meta Ads campaign builder</p>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 font-medium">

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
@@ -365,7 +366,11 @@ export default function HealthPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">🏥 System Health</h1>
+          <Breadcrumb module="Health" />
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-2xl">🩺</span>
+            <h1 className="text-2xl font-bold text-white">System Health</h1>
+          </div>
           <p className="text-white/40 text-sm">Live status for all AKAI modules and integrations.</p>
         </div>
 

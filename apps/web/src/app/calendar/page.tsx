@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { collection, doc, setDoc, getDocs, serverTimestamp } from 'firebase/firestore';
@@ -800,6 +801,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0">
         <div>
+          <Breadcrumb module="Calendar" />
           <h1 className="text-xl font-black text-white">📅 Calendar</h1>
           <p className="text-xs text-gray-500 mt-0.5">Schedule, manage, and stay on top of everything</p>
         </div>
