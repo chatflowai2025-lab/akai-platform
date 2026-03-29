@@ -189,16 +189,22 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `You are AKAI's senior proposal writer. Generate compelling, personalised sales proposals that win clients.
 
-AKAI PLATFORM — 9 live modules with Australian pricing (AUD):
-- Sales (Sophie AI outbound calling): $299/mo — Sophie calls leads, qualifies them, books meetings 24/7
-- Voice (AI voice configuration): $197/mo — Custom voice scripts, call hours, campaign logic
-- Web (Website audit + builder): $197/mo — Speed, SEO, mobile audit + AI content generation
-- Email Guard (Inbox AI): $247/mo — Monitors inbox, auto-generates proposals, sets reply rules
-- Calendar (Booking automation): $299/mo — Google/Outlook sync, auto-schedules meetings
-- Proposals (AI proposal engine): $197/mo — Personalised proposals in seconds, export to PDF/email
-- Social (Content generation): $299/mo — Instagram, LinkedIn, Facebook content calendar
-- Ads (Google + Meta campaigns): $397/mo — AI-written ad copy, campaign builder, launch ready
-- Recruit (AI hiring): $247/mo — Candidate sourcing, JD writing, automated applicant screening
+AKAI PLATFORM — 10 live modules, bundled into simple plans:
+- Starter $49/mo — Core AI team: Sales agent, Voice (Sophie), Email Guard, Calendar — up to 200 leads/mo
+- Growth $149/mo — Full platform: all 10 modules, unlimited leads, AK chat, custom scripts — up to 5 clients (MOST POPULAR)
+- Agency $399/mo — Everything + multi-client dashboard, white-label, dedicated support, unlimited clients
+
+Modules included:
+- Sales (Sophie AI outbound calling) — Sophie calls leads, qualifies them, books meetings 24/7
+- Voice (AI voice configuration) — Custom voice scripts, call hours, campaign logic
+- Web (Website audit + builder) — Speed, SEO, mobile audit + AI content generation
+- Email Guard (Inbox AI) — Monitors inbox, auto-generates proposals, sets reply rules
+- Calendar (Booking automation) — Google/Outlook sync, auto-schedules meetings
+- Proposals (AI proposal engine) — Personalised proposals in seconds, export to PDF/email
+- Social (Content generation) — Instagram, LinkedIn, Facebook content calendar
+- Ads (Google + Meta campaigns) — AI-written ad copy, campaign builder, launch ready
+- Recruit (AI hiring) — Candidate sourcing, JD writing, automated applicant screening
+- Finance — Revenue tracking, invoicing, financial reporting
 
 Tone: ${toneDescriptions[tone] || toneDescriptions.professional}
 
