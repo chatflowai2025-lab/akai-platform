@@ -54,6 +54,18 @@ All backend writes MUST update this doc first if adding new fields.
 | `microsoftCalendarConnected` | boolean | Railway `/api/calendar/ms/callback` | true when connected |
 | `microsoftCalendarEmail` | string | Railway | user's MS email |
 
+### Google Analytics (GA4)
+| Field | Type | Written by | Notes |
+|---|---|---|---|
+| `ga4Connection.propertyId` | string | Next.js `/api/analytics/ga4/callback` | e.g. `"properties/123456789"` |
+| `ga4Connection.propertyName` | string | Next.js callback | GA4 property display name |
+| `ga4Connection.connected` | boolean | Next.js callback | true when OAuth complete |
+| `ga4Connection.accessToken` | string | Next.js callback | OAuth access token (short-lived) |
+| `ga4Connection.refreshToken` | string | Next.js callback | OAuth refresh token (long-lived) |
+| `ga4Connection.connectedAt` | string | Next.js callback | ISO timestamp |
+
+Detection: `data?.ga4Connection?.connected === true`
+
 ### Voice / Sophie
 | Field | Type | Written by |
 |---|---|---|

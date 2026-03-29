@@ -12,7 +12,30 @@ const API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type SiteType = 'wordpress' | 'github' | 'url';
-type WebTab = 'audit' | 'build' | 'history' | 'compare';
+type WebTab = 'audit' | 'build' | 'history' | 'compare' | 'analytics';
+
+// ── GA4 Types ─────────────────────────────────────────────────────────────────
+interface GA4Connection {
+  propertyId: string;
+  propertyName: string;
+  connected: boolean;
+  accessToken: string;
+  refreshToken: string;
+  connectedAt: string;
+}
+
+interface GA4Data {
+  propertyId: string;
+  propertyName: string;
+  sessions: number;
+  pageViews: number;
+  activeUsers: number;
+  sessionsPct: number;
+  pageViewsPct: number;
+  activeUsersPct: number;
+  topPages: { path: string; views: number }[];
+  referrers: { source: string; sessions: number }[];
+}
 
 interface AuditHistoryEntry {
   id: string;
@@ -1486,6 +1509,255 @@ function CompareTab() {
   );
 }
 
+// ── GA4 Analytics Widget ──────────────────────────────────────────────────────
+function PctBadge({ pct }: { pct: number }) {
+  if (pct === 0) return <span className="text-xs text-gray-500">—</span>;
+  const positive = pct > 0;
+  return (
+    <span className={`text-xs font-semibold ${positive ? 'text-green-400' : 'text-red-400'}`}>
+      {positive ? '▲' : '▼'} {Math.abs(pct)}%
+    </span>
+  );
+}
+
+function SkeletonBar({ width = 'w-full' }: { width?: string }) {
+  return <div className={`h-4 ${width} bg-[#2a2a2a] rounded animate-pulse`} />;
+}
+
+function GA4AnalyticsTab({ uid }: { uid: string }) {
+  const [connection, setConnection] = useState<GA4Connection | null>(null);
+  const [connLoading, setConnLoading] = useState(true);
+  const [data, setData] = useState<GA4Data | null>(null);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
+
+  // Load GA4 connection state from Firestore
+  useEffect(() => {
+    const db = getFirebaseDb();
+    if (!db || !uid) { setConnLoading(false); return; }
+    getDoc(doc(db, 'users', uid))
+      .then(snap => {
+        if (snap.exists()) {
+          const d = snap.data() as Record<string, unknown>;
+          if (d.ga4Connection && (d.ga4Connection as GA4Connection).connected) {
+            setConnection(d.ga4Connection as GA4Connection);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setConnLoading(false));
+  }, [uid]);
+
+  // Fetch GA4 data when connected
+  useEffect(() => {
+    if (!connection?.connected) return;
+    setDataLoading(true);
+    setDataError(null);
+    fetch(`/api/analytics/ga4/data?uid=${encodeURIComponent(uid)}`)
+      .then(async res => {
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({})) as { error?: string };
+          throw new Error(j.error ?? 'fetch_failed');
+        }
+        return res.json() as Promise<GA4Data>;
+      })
+      .then(setData)
+      .catch(err => setDataError((err as Error).message))
+      .finally(() => setDataLoading(false));
+  }, [connection, uid]);
+
+  const handleConnect = async () => {
+    setConnecting(true);
+    try {
+      const res = await fetch(`/api/analytics/ga4/auth-url?uid=${encodeURIComponent(uid)}`);
+      const { url } = await res.json() as { url: string };
+      if (url) window.location.href = url;
+    } catch {
+      setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    const db = getFirebaseDb();
+    if (db && uid) {
+      try {
+        await setDoc(doc(db, 'users', uid), { ga4Connection: { connected: false } }, { merge: true });
+      } catch { /* non-fatal */ }
+    }
+    setConnection(null);
+    setData(null);
+  };
+
+  if (connLoading) {
+    return (
+      <div className="flex flex-col h-full overflow-y-auto p-6 gap-6">
+        <div className="grid grid-cols-3 gap-4">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 space-y-3">
+              <SkeletonBar width="w-1/2" />
+              <SkeletonBar width="w-3/4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Not connected — show CTA
+  if (!connection?.connected) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center text-4xl">
+          📊
+        </div>
+        <div>
+          <h2 className="text-white font-black text-2xl mb-2">Connect Google Analytics</h2>
+          <p className="text-gray-400 text-sm max-w-sm">
+            Connect your GA4 property to see real traffic data — sessions, page views, top pages, and referrers for the last 7 days.
+          </p>
+        </div>
+        <button
+          onClick={handleConnect}
+          disabled={connecting}
+          className="px-6 py-3 bg-[#D4AF37] text-black rounded-xl font-black text-sm hover:opacity-90 disabled:opacity-60 transition flex items-center gap-2"
+        >
+          {connecting ? (
+            <><span role="status" aria-label="Connecting" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> Connecting…</>
+          ) : '🔗 Connect GA4'}
+        </button>
+        <p className="text-xs text-gray-600">Read-only access · No ads data · Disconnect anytime</p>
+      </div>
+    );
+  }
+
+  // Connected — show data or loading skeleton
+  return (
+    <div className="flex flex-col h-full overflow-y-auto p-6 gap-6">
+      {/* Header bar */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-white font-bold text-lg">Traffic Overview</h2>
+          <p className="text-gray-500 text-xs mt-0.5">
+            {connection.propertyName || connection.propertyId} · last 7 days
+          </p>
+        </div>
+        <button
+          onClick={handleDisconnect}
+          className="text-xs text-gray-600 hover:text-red-400 transition"
+        >
+          Disconnect
+        </button>
+      </div>
+
+      {dataError && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+          Failed to load analytics data: {dataError}
+          {dataError === 'ga4_not_connected' && ' — try reconnecting.'}
+        </div>
+      )}
+
+      {/* Metric cards */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: 'Sessions', value: data?.sessions, pct: data?.sessionsPct },
+          { label: 'Page Views', value: data?.pageViews, pct: data?.pageViewsPct },
+          { label: 'Active Users', value: data?.activeUsers, pct: data?.activeUsersPct },
+        ].map(({ label, value, pct }) => (
+          <div key={label} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">{label}</p>
+            {dataLoading ? (
+              <div className="space-y-2">
+                <SkeletonBar width="w-2/3" />
+                <SkeletonBar width="w-1/3" />
+              </div>
+            ) : (
+              <>
+                <p className="text-2xl font-black text-white">{(value ?? 0).toLocaleString()}</p>
+                <div className="mt-1">
+                  <PctBadge pct={pct ?? 0} />
+                  <span className="text-xs text-gray-600 ml-1">vs prev 7d</span>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Top Pages */}
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">Top Pages</p>
+        {dataLoading ? (
+          <div className="space-y-3">
+            {[0, 1, 2, 3, 4].map(i => <SkeletonBar key={i} />)}
+          </div>
+        ) : data?.topPages && data.topPages.length > 0 ? (
+          <div className="space-y-3">
+            {(() => {
+              const maxViews = Math.max(...(data.topPages.map(p => p.views)), 1);
+              return data.topPages.map((page, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-xs text-gray-600 w-4 flex-shrink-0">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs text-gray-300 truncate font-mono">{page.path}</span>
+                      <span className="text-xs text-gray-500 flex-shrink-0">{page.views.toLocaleString()}</span>
+                    </div>
+                    {/* CSS bar chart */}
+                    <div className="h-1.5 bg-[#1f1f1f] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#D4AF37] rounded-full transition-all duration-700"
+                        style={{ width: `${Math.round((page.views / maxViews) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600">No page data available</p>
+        )}
+      </div>
+
+      {/* Top Referrers */}
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">Top Referrers</p>
+        {dataLoading ? (
+          <div className="space-y-3">
+            {[0, 1, 2, 3, 4].map(i => <SkeletonBar key={i} />)}
+          </div>
+        ) : data?.referrers && data.referrers.length > 0 ? (
+          <div className="space-y-3">
+            {(() => {
+              const maxSessions = Math.max(...(data.referrers.map(r => r.sessions)), 1);
+              return data.referrers.map((ref, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-xs text-gray-600 w-4 flex-shrink-0">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs text-gray-300 truncate">{ref.source}</span>
+                      <span className="text-xs text-gray-500 flex-shrink-0">{ref.sessions.toLocaleString()} sessions</span>
+                    </div>
+                    <div className="h-1.5 bg-[#1f1f1f] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 rounded-full transition-all duration-700"
+                        style={{ width: `${Math.round((ref.sessions / maxSessions) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600">No referrer data available</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Tab Bar ───────────────────────────────────────────────────────────────────
 function TabBar({ active, onChange }: { active: WebTab; onChange: (t: WebTab) => void }) {
   const tabs: { id: WebTab; label: string }[] = [
@@ -1493,6 +1765,7 @@ function TabBar({ active, onChange }: { active: WebTab; onChange: (t: WebTab) =>
     { id: 'build', label: '🏗️ Build' },
     { id: 'history', label: '📋 History' },
     { id: 'compare', label: '⚔️ Compare' },
+    { id: 'analytics', label: '📊 Analytics' },
   ];
 
   return (
@@ -1520,6 +1793,21 @@ export default function WebPage() {
   const { user, loading } = useAuth();
   const [webConfig, setWebConfig] = useState<WebConfig | null>(null);
   const [activeTab, setActiveTab] = useState<WebTab>('audit');
+  const [ga4Banner, setGA4Banner] = useState<'connected' | 'error' | null>(null);
+
+  // Handle ?ga4=connected redirect from OAuth callback
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const ga4Param = params.get('ga4');
+    if (ga4Param === 'connected' || ga4Param === 'error') {
+      setGA4Banner(ga4Param);
+      if (ga4Param === 'connected') setActiveTab('analytics');
+      // Clean URL
+      const clean = window.location.pathname;
+      window.history.replaceState({}, '', clean);
+    }
+  }, []);
 
   // Load saved webConfig
   useEffect(() => {
@@ -1573,8 +1861,23 @@ export default function WebPage() {
           <h1 className="text-lg font-black text-white">Web</h1>
           <p className="text-xs text-gray-500 mt-0.5">AI-powered website manager</p>
         </div>
-
       </header>
+
+      {/* GA4 OAuth result banner */}
+      {ga4Banner === 'connected' && (
+        <div className="flex items-center gap-3 px-6 py-3 bg-green-500/10 border-b border-green-500/20 flex-shrink-0">
+          <span className="text-green-400">✅</span>
+          <p className="text-sm text-green-400 font-semibold">Google Analytics connected! Your traffic data is loading below.</p>
+          <button onClick={() => setGA4Banner(null)} className="ml-auto text-xs text-green-600 hover:text-green-400">✕</button>
+        </div>
+      )}
+      {ga4Banner === 'error' && (
+        <div className="flex items-center gap-3 px-6 py-3 bg-red-500/10 border-b border-red-500/20 flex-shrink-0">
+          <span className="text-red-400">❌</span>
+          <p className="text-sm text-red-400 font-semibold">Google Analytics connection failed. Please try again.</p>
+          <button onClick={() => setGA4Banner(null)} className="ml-auto text-xs text-red-600 hover:text-red-400">✕</button>
+        </div>
+      )}
 
       <div className="flex flex-col flex-1 overflow-hidden min-h-0">
         <TabBar active={activeTab} onChange={setActiveTab} />
@@ -1585,6 +1888,8 @@ export default function WebPage() {
           {activeTab === 'history' && <HistoryTab />}
 
           {activeTab === 'compare' && <CompareTab />}
+
+          {activeTab === 'analytics' && <GA4AnalyticsTab uid={user.uid} />}
 
           {activeTab === 'audit' && (
             <>
