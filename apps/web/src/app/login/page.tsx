@@ -39,6 +39,7 @@ function LoginContent() {
     if (msg.includes('weak-password')) return 'Password must be at least 6 characters.';
     if (msg.includes('invalid-email')) return 'Please enter a valid email address.';
     if (msg.includes('popup-closed')) return 'Sign-in cancelled.';
+    if (msg.includes('account-exists-with-different-credential')) return 'This email is already linked to a different sign-in method. Try signing in with Google or Microsoft instead.';
     return msg;
   };
 
