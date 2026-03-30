@@ -449,14 +449,18 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
 
   // Auto-rotate every 4 seconds
   useEffect(() => {
+    let fadeTimeout: ReturnType<typeof setTimeout> | null = null;
     const interval = setInterval(() => {
       setFading(true);
-      setTimeout(() => {
+      fadeTimeout = setTimeout(() => {
         setBannerIdx(i => (i + 1) % HERO_BANNERS.length);
         setFading(false);
       }, 400);
     }, 4000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (fadeTimeout) clearTimeout(fadeTimeout);
+    };
   }, []);
 
   const banner = HERO_BANNERS[bannerIdx]!;

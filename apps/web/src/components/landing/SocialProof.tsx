@@ -57,14 +57,18 @@ export default function SocialProof() {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
+    let fadeTimeout: ReturnType<typeof setTimeout> | null = null;
     const interval = setInterval(() => {
       setFading(true);
-      setTimeout(() => {
+      fadeTimeout = setTimeout(() => {
         setActiveIdx(i => (i + 1) % TESTIMONIALS.length);
         setFading(false);
       }, 400);
     }, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (fadeTimeout) clearTimeout(fadeTimeout);
+    };
   }, []);
 
   const active = TESTIMONIALS[activeIdx]!;
