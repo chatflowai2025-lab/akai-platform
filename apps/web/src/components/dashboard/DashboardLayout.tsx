@@ -7,9 +7,12 @@ import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import Sidebar from './Sidebar';
+import TrialBanner from './TrialBanner';
+import TrialExpiredOverlay from './TrialExpiredOverlay';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { isSafeMode } from '@/lib/beta-config';
+import { isSafeMode, TRIAL_MODE_ACTIVE } from '@/lib/beta-config';
 import { isTrailblazerMember } from '@/lib/discord-gates';
+import { useTrialStatus } from '@/hooks/useTrialStatus';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import type { ChatMessage } from '@/lib/shared-types';
 import { buildUserContext } from '@/lib/firestore-schema';
@@ -601,6 +604,8 @@ function DashboardLayoutInner({
   const [chatQueue, setChatQueue] = useState<string | null>(null);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const trial = useTrialStatus(TRIAL_MODE_ACTIVE ? user : null);
 
   const injectMessage = useCallback((text: string) => {
     setChatQueue(text);
@@ -616,8 +621,14 @@ function DashboardLayoutInner({
               <span className="text-yellow-400 text-xs font-semibold">🧪 Beta / Safe Mode — Full experience. No live calls or emails will be sent.</span>
             </div>
           )}
+          {/* Trial banner — renders nothing when TRIAL_MODE_ACTIVE=false or user is a Trailblazer */}
+          <TrialBanner trial={trial} />
           <ErrorBoundary>
-            {children}
+            {/* Relative wrapper so the expired overlay can position itself */}
+            <div className="relative flex flex-col flex-1 overflow-hidden min-h-0">
+              <TrialExpiredOverlay show={trial.status === 'expired'} />
+              {children}
+            </div>
           </ErrorBoundary>
         </div>
         {!noChat && (

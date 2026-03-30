@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { TRIAL_MODE_ACTIVE, isWhitelisted } from '@/lib/beta-config';
 
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
 const TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8320254721';
@@ -109,6 +110,14 @@ export async function POST(req: NextRequest) {
 
     // Persist to Firestore trialLeads
     const db = getAdminFirestore();
+    // Determine if this person is a Trailblazer (whitelisted) or a waitlist signup
+    const isTrailblazer = isWhitelisted(email);
+    // When trial mode is active, non-whitelisted signups are waitlisted — no platform access yet
+    const isWaitlisted = TRIAL_MODE_ACTIVE && !isTrailblazer;
+    // When trial mode is OFF, ALL signups are waitlisted (closed beta, Trailblazers only)
+    const isClosedBetaWaitlist = !TRIAL_MODE_ACTIVE && !isTrailblazer;
+    const needsWaitlist = isWaitlisted || isClosedBetaWaitlist;
+
     const leadRecord = {
       name: name || '',
       email,
@@ -120,16 +129,37 @@ export async function POST(req: NextRequest) {
       phone: phone || '',
       website: website || '',
       createdAt: new Date().toISOString(),
+      // Waitlist flag — Aaron manually adds to whitelist when ready
+      waitlisted: needsWaitlist,
+      trialModeActiveAtSignup: TRIAL_MODE_ACTIVE,
+      isTrailblazer,
     };
 
     const savePromise = db
       ? db.collection('trialLeads').add(leadRecord).catch(() => { /* non-fatal */ })
       : Promise.resolve();
 
-    // Fire all notifications in parallel
+    // Enrich Aaron's notification with waitlist context
+    const enrichedTgMsg = needsWaitlist
+      ? `${tgMsg}\n⏳ <b>WAITLISTED</b> — not added to platform yet. Add to whitelist in beta-config.ts when ready.`
+      : tgMsg;
+
+    if (needsWaitlist) {
+      // Waitlisted signup — notify Aaron only, do NOT send platform welcome email
+      await Promise.allSettled([
+        savePromise,
+        notifyTelegram(enrichedTgMsg),
+        sendGmailNotification({ name, email, businessName, focus, source }),
+        // No welcome email — waitlisted users don't have platform access yet
+      ]);
+      // Return a waitlisted response (frontend can show "you're on the list")
+      return NextResponse.json({ ok: true, waitlisted: true });
+    }
+
+    // Trailblazer or open signup — fire the full welcome flow
     await Promise.allSettled([
       savePromise,
-      notifyTelegram(tgMsg),
+      notifyTelegram(enrichedTgMsg),
       sendGmailNotification({ name, email, businessName, focus, source }),
       fireWelcomeEmail(email, name),
     ]);

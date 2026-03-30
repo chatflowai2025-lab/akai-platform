@@ -1,79 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { getFirebaseDb } from '@/lib/firebase';
-import type { User } from 'firebase/auth';
+/**
+ * TrialBadge — small pill shown in the dashboard header.
+ * Uses useTrialStatus, which respects TRIAL_MODE_ACTIVE and Trailblazer whitelist.
+ * When TRIAL_MODE_ACTIVE=false or user is a Trailblazer → renders nothing.
+ */
 
-const TRIAL_DAYS = 7;
+import { useTrialStatus } from '@/hooks/useTrialStatus';
+import type { User } from 'firebase/auth';
 
 interface TrialBadgeProps {
   user: User;
 }
 
 export default function TrialBadge({ user }: TrialBadgeProps) {
-  const [daysLeft, setDaysLeft] = useState<number | null>(null);
-  const [isExpired, setIsExpired] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
+  const trial = useTrialStatus(user);
 
-  useEffect(() => {
-    async function checkTrial() {
-      try {
-        const db = getFirebaseDb();
-        if (!db) return;
+  // Don't render while loading, or subscribed, or no active trial system
+  if (trial.loading) return null;
+  if (trial.status === 'subscribed') return null;
 
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (!snap.exists()) return;
-
-        const data = snap.data();
-
-        // If user is on a paid plan, don't show the badge
-        if (data?.plan && data.plan !== 'trial') {
-          setIsPaid(true);
-          return;
-        }
-
-        // Get createdAt — could be Firestore Timestamp or ISO string
-        const createdAt = data?.createdAt;
-        if (!createdAt) return;
-
-        let createdMs: number;
-        if (typeof createdAt === 'object' && 'toDate' in createdAt) {
-          createdMs = createdAt.toDate().getTime();
-        } else if (typeof createdAt === 'string') {
-          createdMs = new Date(createdAt).getTime();
-        } else if (typeof createdAt === 'number') {
-          createdMs = createdAt;
-        } else {
-          return;
-        }
-
-        const nowMs = Date.now();
-        const elapsed = nowMs - createdMs;
-        const trialMs = TRIAL_DAYS * 24 * 60 * 60 * 1000;
-        const remaining = Math.ceil((trialMs - elapsed) / (24 * 60 * 60 * 1000));
-
-        if (remaining <= 0) {
-          setIsExpired(true);
-          setDaysLeft(0);
-        } else {
-          setDaysLeft(remaining);
-        }
-      } catch {
-        // Non-fatal — don't crash dashboard
-      }
-    }
-
-    checkTrial();
-  }, [user.uid]);
-
-  // Don't show if paid or data not loaded
-  if (isPaid || daysLeft === null) return null;
-
-  if (isExpired) {
+  // Active — subtle gold pill
+  if (trial.status === 'active') {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-500/30 bg-red-500/10">
-        <span className="text-xs text-red-400 font-semibold">⚠️ Trial expired</span>
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10">
+        <span className="text-xs text-[#D4AF37] font-semibold whitespace-nowrap">
+          🔥 Trial — {trial.daysLeft} day{trial.daysLeft !== 1 ? 's' : ''} left
+        </span>
         <a
           href="/settings#upgrade"
           className="text-xs bg-[#D4AF37] text-black font-bold px-2.5 py-0.5 rounded-full hover:opacity-90 transition whitespace-nowrap"
@@ -84,16 +37,36 @@ export default function TrialBadge({ user }: TrialBadgeProps) {
     );
   }
 
+  // Ending
+  if (trial.status === 'ending') {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/10">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+        </span>
+        <span className="text-xs text-amber-300 font-bold whitespace-nowrap">
+          {trial.daysLeft}d left
+        </span>
+        <a
+          href="/settings#upgrade"
+          className="text-xs bg-amber-400 text-black font-bold px-2.5 py-0.5 rounded-full hover:opacity-90 transition whitespace-nowrap"
+        >
+          Subscribe →
+        </a>
+      </div>
+    );
+  }
+
+  // Expired
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10">
-      <span className="text-xs text-[#D4AF37] font-semibold whitespace-nowrap">
-        🔥 14-day trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
-      </span>
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-500/30 bg-red-500/10">
+      <span className="text-xs text-red-400 font-semibold">⚠️ Trial ended</span>
       <a
         href="/settings#upgrade"
         className="text-xs bg-[#D4AF37] text-black font-bold px-2.5 py-0.5 rounded-full hover:opacity-90 transition whitespace-nowrap"
       >
-        Upgrade →
+        Subscribe →
       </a>
     </div>
   );

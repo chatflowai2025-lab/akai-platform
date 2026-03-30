@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Firestore } from 'firebase-admin/firestore';
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { TRIAL_MODE_ACTIVE, TRIAL_DAYS, isTrialUser } from '@/lib/beta-config';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -238,7 +239,24 @@ export async function POST(req: NextRequest) {
         if (snap.exists && snap.data()?.welcomeEmailSent === true) {
           return NextResponse.json({ ok: true, skipped: true });
         }
-        await ref.set({ welcomeEmailSent: true }, { merge: true });
+        // Build the merge payload — always set welcomeEmailSent
+        const mergePayload: Record<string, unknown> = { welcomeEmailSent: true };
+
+        // Stamp trial fields ONLY when:
+        //   (a) trial system is active, AND
+        //   (b) user is not a whitelisted Trailblazer
+        const userEmail: string = email ?? '';
+        if (TRIAL_MODE_ACTIVE && isTrialUser(userEmail)) {
+          const existingData = snap.data();
+          // Only set trialStartedAt once — never overwrite
+          if (!existingData?.trialStartedAt) {
+            mergePayload.trialStartedAt = new Date().toISOString();
+            mergePayload.trialDays = TRIAL_DAYS;
+            mergePayload.trialStatus = 'active';
+          }
+        }
+
+        await ref.set(mergePayload, { merge: true });
 
         // Track signup in dedicated collection for analytics
         try {
