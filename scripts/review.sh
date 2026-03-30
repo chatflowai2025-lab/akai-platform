@@ -11,7 +11,11 @@
 set -euo pipefail
 
 BASE_BRANCH="${1:-main}"
-ANTHROPIC_KEY="REMOVED_FROM_HISTORY"
+ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
+if [ -z "$ANTHROPIC_KEY" ]; then
+  echo "⚠️  ANTHROPIC_API_KEY not set — skipping AI review"
+  exit 0
+fi
 
 # ── Get the diff ──────────────────────────────────────────────────────────────
 # Try diff against main first; fall back to HEAD~1 if main is same commit
