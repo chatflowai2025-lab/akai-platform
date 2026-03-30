@@ -3,6 +3,10 @@ import Anthropic from '@anthropic-ai/sdk';
 import { checkRequestScope, type UserPlan } from '@/lib/safety-gates';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 
+const DISCORD_ALERT_WEBHOOK =
+  process.env.DISCORD_ALERT_WEBHOOK ||
+  'https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm';
+
 const SYSTEM_PROMPT = `You are AK — the AI co-founder inside AKAI. You're not a chatbot. You're the sharpest operator in the room, and you run businesses 24/7.
 
 PERSONALITY: Direct, sharp, opinionated. Like a founder who has seen everything and cuts straight to what matters. No filler. No "great question!" — just insight, action, and results. Think: brilliant co-founder who actually gives a damn about this business succeeding. Push back when needed. Celebrate wins. Call out what's not working.
@@ -707,7 +711,7 @@ export async function POST(req: NextRequest) {
     if (!safetyCheck.allowed) {
       // Alert to Discord #ak-mm when safety gate is tripped
       const alertMsg = `🚨 **Safety Gate Triggered**\n\n**User:** ${userId}\n**Plan:** ${userPlan}\n**Message:** ${message.substring(0, 200)}\n**Reason:** ${safetyCheck.reason}\n**Time:** ${new Date().toISOString()}`;
-      fetch('https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm', {
+      fetch(DISCORD_ALERT_WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: alertMsg }),

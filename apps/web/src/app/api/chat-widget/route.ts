@@ -3,6 +3,10 @@ import Anthropic from '@anthropic-ai/sdk';
 import { checkRequestScope } from '@/lib/safety-gates';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 
+const DISCORD_ALERT_WEBHOOK =
+  process.env.DISCORD_ALERT_WEBHOOK ||
+  'https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm';
+
 interface ConversationMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -161,7 +165,7 @@ export async function POST(req: NextRequest) {
     if (!safetyCheck.allowed) {
       // Alert to Discord #ak-mm
       const alertMsg = `🚨 **Safety Gate Triggered (Chat Widget)**\n\n**ClientId:** ${widgetUserId}\n**Plan:** trial\n**Message:** ${message.substring(0, 200)}\n**Reason:** ${safetyCheck.reason}\n**Time:** ${new Date().toISOString()}`;
-      fetch('https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm', {
+      fetch(DISCORD_ALERT_WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: alertMsg }),
