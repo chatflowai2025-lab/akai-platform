@@ -289,10 +289,10 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
             Start Free Trial →
           </button>
           <button
-            onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={_onOpenDemo}
             className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
           >
-            See How It Works
+            📞 Get a Demo Call
           </button>
         </div>
         <p className="text-xs text-gray-500">Trusted by Australian SMBs · No credit card required</p>
