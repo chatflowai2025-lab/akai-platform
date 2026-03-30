@@ -73,5 +73,19 @@ fi
 echo "▶ Client simulation tests..."
 npx playwright test tests/client-simulation.spec.ts --reporter=list 2>&1 | tail -10
 
+# 5. Security check — OWASP-lite scan on changed files
+echo "▶ Security check..."
+if ! bash scripts/security-check.sh 2>&1; then
+  echo "❌ SECURITY CHECK FAILED — push blocked"
+  exit 1
+fi
+
+# 6. Code review pass — Claude-powered diff review
+echo "▶ Code review pass..."
+if ! bash scripts/review.sh 2>&1; then
+  echo "❌ CODE REVIEW FAILED — push blocked"
+  exit 1
+fi
+
 echo "✅ Pre-push gates passed"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
