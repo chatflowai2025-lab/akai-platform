@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
+import { gtag } from '@/hooks/useGA4Track';
 
 /* ─── Types ─── */
 type ModalType = 'demo' | 'healthcheck' | 'youtube' | null;
@@ -76,6 +77,7 @@ export function DemoModal({ onClose }: { onClose: () => void }) {
 
   async function submit() {
     setStatus('loading');
+    gtag('demo_call_submitted', { industry: form.industry, page: 'homepage' });
     try {
       const res = await fetch('/api/demo-call', {
         method: 'POST',
@@ -84,6 +86,7 @@ export function DemoModal({ onClose }: { onClose: () => void }) {
       });
       if (!res.ok) throw new Error();
       setStatus('success');
+      gtag('demo_call_success', { industry: form.industry, page: 'homepage' });
     } catch {
       setStatus('error');
     }

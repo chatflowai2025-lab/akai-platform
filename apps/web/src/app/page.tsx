@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/landing/Navbar';
 import { DemoModal } from '@/components/landing/Hero';
+import { gtag, initScrollDepthTracking } from '@/hooks/useGA4Track';
 
 const Modules = dynamic(() => import('@/components/landing/Modules'), { ssr: false });
 const Pricing = dynamic(() => import('@/components/landing/Pricing'), { ssr: false });
@@ -289,7 +290,7 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
             Start Free Trial →
           </button>
           <button
-            onClick={_onOpenDemo}
+            onClick={() => { gtag('cta_clicked', { button: 'Get a Demo Call', page: 'homepage' }); _onOpenDemo(); }}
             className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
           >
             📞 Get a Demo Call
@@ -922,7 +923,7 @@ function AKAIFooter() {
               <p className="text-white/20 text-xs uppercase tracking-widest font-semibold">Product</p>
               <a href="#how-it-works" className="text-white/40 hover:text-white transition-colors">How It Works</a>
               <a href="#modules" className="text-white/40 hover:text-white transition-colors">Skills</a>
-              <a href="#pricing" className="text-white/40 hover:text-white transition-colors">Pricing</a>
+              <a href="#pricing" onClick={() => gtag('cta_clicked', { button: 'See Pricing', page: 'homepage' })} className="text-white/40 hover:text-white transition-colors">Pricing</a>
             </div>
             <div className="flex flex-col gap-3">
               <p className="text-white/20 text-xs uppercase tracking-widest font-semibold">Legal</p>
@@ -960,7 +961,20 @@ export default function Home() {
   const openCapture = (plan?: string) => {
     setCapturePlan(plan);
     setCaptureOpen(true);
+    gtag('cta_clicked', { button: 'Start Free Trial', plan: plan ?? 'default', page: 'homepage' });
   };
+
+  // ── GA4: page view + scroll depth ─────────────────────────────────────
+  useEffect(() => {
+    gtag('page_view', { page: 'homepage' });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const cleanup = initScrollDepthTracking();
+    return cleanup ?? undefined;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -968,10 +982,15 @@ export default function Home() {
     if (ref) localStorage.setItem('akai_ref_code', ref);
   }, []);
 
+  const handleOpenDemo = () => {
+    gtag('demo_modal_opened', { page: 'homepage' });
+    setDemoOpen(true);
+  };
+
   return (
     <main className="min-h-screen bg-[#080808] text-white overflow-x-hidden">
       <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
-      <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={() => setDemoOpen(true)} />
+      <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={handleOpenDemo} />
       <TrustBar />
       <HowItWorksSection />
       <div id="modules"><Modules /></div>

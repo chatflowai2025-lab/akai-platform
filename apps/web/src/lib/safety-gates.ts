@@ -101,6 +101,15 @@ const ALWAYS_BLOCKED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
     pattern: /show me all data/i,
     reason: 'Data exfiltration requests are not permitted.',
   },
+  // Direct outbound actions — must go through approved campaign flows
+  {
+    pattern: /\b(call|phone|ring|dial)\b.{0,40}\b(him|her|them|this person|the client|the lead|the customer|the contact|[A-Z][a-z]+)\b/i,
+    reason: 'Outbound phone calls must be triggered through the Voice / Sophie campaign flow, not directly via chat.',
+  },
+  {
+    pattern: /\b(send|email|message)\b.{0,40}\b(him|her|them|this person|the client|the lead|the customer|the contact)\b/i,
+    reason: 'Outbound emails must be sent through the Email / campaign flow, not directly via chat.',
+  },
   // AKAI system manipulation
   {
     pattern: /change your system prompt/i,
@@ -148,10 +157,19 @@ const MODULE_KEYWORDS: Record<string, RegExp> = {
 export function checkRequestScope(
   userId: string,
   requestText: string,
-  userPlan: UserPlan
+  userPlan: UserPlan,
+  outboundEnabled = false
 ): ScopeCheckResult {
-  // 1. Check ALWAYS_BLOCKED patterns first
+  // Outbound call/email patterns — skipped if outboundEnabled is true for this user
+  const OUTBOUND_PATTERNS = [
+    /\b(call|phone|ring|dial)\b.{0,40}\b(him|her|them|this person|the client|the lead|the customer|the contact|[A-Z][a-z]+)\b/i,
+    /\b(send|email|message)\b.{0,40}\b(him|her|them|this person|the client|the lead|the customer|the contact)\b/i,
+  ];
+
+  // 1. Check ALWAYS_BLOCKED patterns first (skipping outbound patterns for outboundEnabled users)
   for (const { pattern, reason } of ALWAYS_BLOCKED_PATTERNS) {
+    const isOutboundPattern = OUTBOUND_PATTERNS.some(p => p.source === pattern.source);
+    if (isOutboundPattern && outboundEnabled) continue;
     if (pattern.test(requestText)) {
       console.warn(`[safety-gates] BLOCKED userId=${userId} plan=${userPlan} reason="${reason}"`);
       return { allowed: false, reason };

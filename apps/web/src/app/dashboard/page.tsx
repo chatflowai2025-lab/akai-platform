@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import TrialBadge from '@/components/dashboard/TrialBadge';
 import { useAuth } from '@/hooks/useAuth';
+import { useTrackBehaviour } from '@/hooks/useTrackBehaviour';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatTime(timestamp: string): string {
@@ -364,6 +365,7 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
   const router = useRouter();
   const { sendMessage } = useDashboardChat();
   const [dismissing, setDismissing] = useState(false);
+  const { track } = useTrackBehaviour();
 
   const handleDismiss = async () => {
     setDismissing(true);
@@ -391,28 +393,28 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
       icon: businessSet ? '✅' : '🏢',
       label: 'Set up your business profile',
       hint: 'Your name, industry and location so AK knows who it\'s working for',
-      action: () => router.push('/settings'),
+      action: () => { track('setup_step_clicked', { step: 'business_profile' }); router.push('/settings'); },
       done: businessSet,
     },
     {
       icon: emailConnected ? '✅' : '✉️',
       label: 'Connect your email',
       hint: 'So AK can send and receive on your behalf — from YOUR address',
-      action: () => router.push('/email-guard'),
+      action: () => { track('setup_step_clicked', { step: 'email' }); router.push('/email-guard'); },
       done: emailConnected,
     },
     {
       icon: calendarConnected ? '✅' : '📅',
       label: 'Connect your calendar',
       hint: 'So clients can book meetings with you and see your real availability',
-      action: () => router.push('/calendar'),
+      action: () => { track('setup_step_clicked', { step: 'calendar' }); router.push('/calendar'); },
       done: calendarConnected,
     },
     {
       icon: '💬',
       label: 'Talk to AK — tell it what you need',
       hint: 'Get personalised setup advice for your business',
-      action: () => sendMessage('Hi AK, what should I set up first?'),
+      action: () => { track('setup_step_clicked', { step: 'talk_to_ak' }); sendMessage('Hi AK, what should I set up first?'); },
       done: false,
     },
   ];
@@ -461,6 +463,7 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
 export default function DashboardPage() {
   const router = useRouter();
   const { user, userProfile, loading, logout } = useAuth();
+  const { track } = useTrackBehaviour();
 
   const [stats, setStats] = useState<StatsSummary>({
     leads: 0,
@@ -561,6 +564,13 @@ export default function DashboardPage() {
         // Non-fatal
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
+
+  // ── Track dashboard viewed ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    track('dashboard_viewed');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
@@ -925,28 +935,28 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-600 uppercase tracking-wider font-semibold mb-3">Quick Actions</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-x-auto pb-1">
               <button
-                onClick={() => router.push('/voice')}
+                onClick={() => { track('quick_action_clicked', { action: 'Start a call' }); router.push('/voice'); }}
                 className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
                 <span className="text-2xl">📞</span>
                 <span>Start a call</span>
               </button>
               <button
-                onClick={() => router.push('/social')}
+                onClick={() => { track('quick_action_clicked', { action: 'Generate content' }); router.push('/social'); }}
                 className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
                 <span className="text-2xl">✍️</span>
                 <span>Generate content</span>
               </button>
               <button
-                onClick={() => router.push('/sales')}
+                onClick={() => { track('quick_action_clicked', { action: 'View leads' }); router.push('/sales'); }}
                 className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
                 <span className="text-2xl">🎯</span>
                 <span>View leads</span>
               </button>
               <button
-                onClick={() => router.push('/health')}
+                onClick={() => { track('quick_action_clicked', { action: 'Run health check' }); router.push('/health'); }}
                 className="flex flex-col items-center gap-2 p-4 bg-[#111] border border-[#2f2f2f] text-white rounded-2xl text-sm font-medium hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition min-w-[120px]"
               >
                 <span className="text-2xl">🔍</span>

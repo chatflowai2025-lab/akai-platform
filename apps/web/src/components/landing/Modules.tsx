@@ -65,9 +65,16 @@ const MODULES: Module[] = [
 ];
 
 function ModuleCard({ mod }: { mod: Module }) {
+  const handleClick = () => {
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+      window.gtag('event', 'module_card_clicked', { module: mod.name, page: 'homepage' });
+    }
+  };
+
   return (
     <a
       href={mod.href}
+      onClick={handleClick}
       className="group relative block bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:border-[#D4AF37]/50 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(212,175,55,0.10)]"
     >
       {/* Gold glow on hover */}
