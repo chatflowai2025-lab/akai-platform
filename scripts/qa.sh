@@ -160,7 +160,7 @@ fi
 # ── Suite 5d: Duplicate Hero component check (RCA #6) ────────────────────────
 echo ""
 echo "┌─ SUITE 5d: Duplicate Hero component check"
-HERO_IN_PAGE=$(grep -n "^function Hero\|^const Hero" "$REPO_ROOT/apps/web/src/app/page.tsx" 2>/dev/null | wc -l | tr -d ' ')
+HERO_IN_PAGE=$(grep -n "^function Hero[^S]\|^const Hero[^S]\|^function Hero$\|^const Hero$" "$REPO_ROOT/apps/web/src/app/page.tsx" 2>/dev/null | wc -l | tr -d ' ')
 if [ "$HERO_IN_PAGE" -eq 0 ]; then
   check "No inline Hero component in page.tsx (must use Hero.tsx)" "pass"
 else

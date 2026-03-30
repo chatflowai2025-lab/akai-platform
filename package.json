@@ -18,7 +18,7 @@
     "pnpm": ">=8.0.0"
   },
   "dependencies": {
-    "undici": "^6.0.0"
+    "undici": "^6.24.1"
   },
   "packageManager": "pnpm@9.15.0"
 }
