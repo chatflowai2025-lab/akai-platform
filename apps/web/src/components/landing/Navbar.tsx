@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+
 
 export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: () => void; onOpenChat?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
@@ -40,7 +40,7 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
 
           {/* CTA — desktop */}
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle className="text-white/60 hover:text-white" />
+            
             {!loading && !user && (
               <>
                 <a href="/login" className="text-sm text-white/60 hover:text-white transition-colors duration-200">
@@ -106,7 +106,7 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
             )}
             <div className="flex items-center gap-2 text-sm text-white/60">
               <span>Theme</span>
-              <ThemeToggle className="text-white/60 hover:text-white" />
+              
             </div>
           </div>
         )}

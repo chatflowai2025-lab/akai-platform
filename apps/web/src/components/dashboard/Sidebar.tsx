@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+
 
 // ── Module groups ─────────────────────────────────────────────────────────────
 const MODULE_GROUPS = [
@@ -150,7 +150,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-3 px-3 py-2 text-sm text-gray-400">
           <span>🎨</span>
           <span className="flex-1">Theme</span>
-          <ThemeToggle />
+          
         </div>
 
         <Link
