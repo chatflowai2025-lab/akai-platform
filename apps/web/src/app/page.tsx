@@ -215,7 +215,51 @@ function DashboardMockup() {
 }
 
 /* ─── Hero Section ─── */
+const HERO_HEADLINES = [
+  {
+    line1: 'Your entire business.',
+    line2: 'One prompt.',
+    sub: 'Describe what you do. AKAI builds your AI executive team — sales, email, voice, recruiting, ads, proposals — and runs it 24/7.',
+  },
+  {
+    line1: 'Your AI Executive Team.',
+    line2: 'Running 24/7.',
+    sub: 'Sales. Marketing. Recruiting. Finance. All automated. All learning. All working while you don\'t.',
+  },
+  {
+    line1: 'Stop losing leads',
+    line2: 'after hours.',
+    sub: 'Every enquiry answered. Every follow-up sent. Every meeting booked — automatically, while you sleep.',
+  },
+  {
+    line1: '10 AI agents.',
+    line2: '$199/month.',
+    sub: 'Replace your back office, not your team. Sales agent, voice agent, email guard, recruiter, ads manager and more — all running today.',
+  },
+  {
+    line1: 'Once manual.',
+    line2: 'Always automated.',
+    sub: 'Every task you do twice becomes a task AKAI does forever. Describe your business and watch it work.',
+  },
+];
+
 function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
+  const [heroIdx, setHeroIdx] = useState(0);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setHeroIdx(i => (i + 1) % HERO_HEADLINES.length);
+        setFading(false);
+      }, 400);
+    }, 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  const hero = HERO_HEADLINES[heroIdx]!;
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 overflow-hidden">
       {/* Animated gradient background */}
@@ -265,19 +309,27 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
         <span className="text-gray-500">AI business automation from Sydney to New York</span>
       </div>
 
-      {/* Headline */}
-      <div className="fade-up fade-up-2 max-w-5xl w-full">
+      {/* Headline — rotating */}
+      <div className="fade-up fade-up-2 max-w-5xl w-full" style={{ transition: 'opacity 0.4s', opacity: fading ? 0 : 1 }}>
         <h1 className="text-5xl sm:text-7xl md:text-8xl font-black mb-4 leading-[0.9] tracking-tight">
-          <span className="text-white block">Your AI Executive Team.</span>
-          <span className="text-[#D4AF37] block">Running 24/7.</span>
+          <span className="text-white block">{hero.line1}</span>
+          <span className="text-[#D4AF37] block">{hero.line2}</span>
         </h1>
       </div>
 
-      {/* Sub */}
-      <p className="fade-up fade-up-3 text-lg sm:text-xl text-gray-400 max-w-2xl mb-4 leading-relaxed">
-        Sales. Marketing. Recruiting. Finance.<br />
-        <span className="text-white font-semibold">All automated. All learning. All working while you don&apos;t.</span>
+      {/* Sub — rotating */}
+      <p className="fade-up fade-up-3 text-lg sm:text-xl text-gray-400 max-w-2xl mb-4 leading-relaxed" style={{ transition: 'opacity 0.4s', opacity: fading ? 0 : 1 }}>
+        <span className="text-white font-semibold">{hero.sub}</span>
       </p>
+
+      {/* Headline dots indicator */}
+      <div className="flex gap-1.5 mb-4">
+        {HERO_HEADLINES.map((_, i) => (
+          <button key={i} onClick={() => { setFading(true); setTimeout(() => { setHeroIdx(i); setFading(false); }, 400); }}
+            className={`w-1.5 h-1.5 rounded-full transition-all ${i === heroIdx ? 'bg-[#D4AF37] w-4' : 'bg-white/20'}`}
+          />
+        ))}
+      </div>
 
       {/* CTAs */}
       <div className="fade-up fade-up-4 flex flex-col items-center gap-4 mb-6 w-full max-w-sm sm:max-w-none">
