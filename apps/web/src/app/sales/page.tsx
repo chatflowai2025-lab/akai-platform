@@ -1,11 +1,13 @@
 'use client';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { doc, getDoc } from 'firebase/firestore';
 import { isSafeMode } from '@/lib/beta-config';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { getFirebaseDb } from '@/lib/firebase';
 
 function safeSend(fn: (t: string) => void, text: string) { try { fn(text); } catch { /* chat not ready */ } }
 
@@ -947,6 +949,150 @@ function buildOutreachEmail(p: Prospect, sender?: SenderProfile): { subject: str
   return { subject, body };
 }
 
+// ── Send Email Modal ──────────────────────────────────────────────────────
+
+interface SendEmailModalProps {
+  prospect: Prospect;
+  senderProfile: SenderProfile;
+  uid: string;
+  inboxEmail: string;
+  inboxProvider: 'gmail' | 'microsoft' | null;
+  onClose: () => void;
+  onSent: (prospectId: number) => void;
+}
+
+function SendEmailModal({
+  prospect,
+  senderProfile,
+  uid,
+  inboxEmail,
+  inboxProvider,
+  onClose,
+  onSent,
+}: SendEmailModalProps) {
+  const { subject: defaultSubject, body: defaultBody } = buildOutreachEmail(prospect, senderProfile);
+  const [subject, setSubject] = useState(defaultSubject);
+  const [emailBody, setEmailBody] = useState(defaultBody);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  const handleSend = async () => {
+    if (!prospect.email) return;
+    setSending(true);
+    setSendError(null);
+    try {
+      const res = await fetch('/api/sales/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, to: prospect.email, subject, body: emailBody }),
+      });
+      const data = await res.json() as { ok?: boolean; error?: string };
+      if (data.ok) {
+        setSent(true);
+        onSent(prospect.id);
+        setTimeout(() => onClose(), 1800);
+      } else {
+        setSendError(data.error ?? 'Send failed — please try again');
+      }
+    } catch {
+      setSendError('Network error — please try again');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-lg space-y-4"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-white font-bold text-sm">Send email to {prospect.name}</h3>
+          <button onClick={onClose} aria-label="Close" className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+        </div>
+
+        {/* Inbox status */}
+        {inboxProvider ? (
+          <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-xl">
+            <span className="text-green-400 text-sm">{inboxProvider === 'gmail' ? '📧' : '📮'}</span>
+            <p className="text-xs text-green-400">
+              Send from: <span className="font-semibold">{inboxEmail || inboxProvider}</span>
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between px-3 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+            <p className="text-xs text-yellow-400">⚠️ No inbox connected — connect first to send</p>
+            <a href="/email-guard" className="text-xs text-[#D4AF37] underline hover:text-yellow-300 transition">Connect →</a>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">To</label>
+          <p className="text-sm text-white px-3 py-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl truncate">{prospect.email}</p>
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">Subject</label>
+          <input
+            value={subject}
+            onChange={e => setSubject(e.target.value)}
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">Message</label>
+          <textarea
+            value={emailBody}
+            onChange={e => setEmailBody(e.target.value)}
+            rows={8}
+            className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition-colors resize-none leading-relaxed"
+          />
+        </div>
+
+        {sendError && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <span className="text-red-400 text-sm">❌</span>
+            <p className="text-xs text-red-400">{sendError}</p>
+          </div>
+        )}
+
+        {sent && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-xl">
+            <span className="text-green-400 text-sm">✅</span>
+            <p className="text-xs text-green-400 font-semibold">Email sent!</p>
+          </div>
+        )}
+
+        <div className="flex gap-2 pt-1">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 rounded-xl text-sm font-semibold hover:text-white transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSend}
+            disabled={sending || sent || !inboxProvider}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {sending ? (
+              <><span role="status" aria-label="Sending" className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />Sending…</>
+            ) : sent ? (
+              '✅ Sent!'
+            ) : (
+              'Send email →'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const STATUS_STYLES: Record<string, { label: string; style: string }> = {
   not_contacted:  { label: 'Not contacted', style: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
   contacted:      { label: 'Contacted',     style: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
@@ -963,12 +1109,49 @@ function ProspectsSection() {
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState<number | null>(null);
+  const [emailedIds, setEmailedIds] = useState<Set<number>>(new Set());
+  const [sendModal, setSendModal] = useState<Prospect | null>(null);
+  const [inboxEmail, setInboxEmail] = useState('');
+  const [inboxProvider, setInboxProvider] = useState<'gmail' | 'microsoft' | null>(null);
 
-  const senderProfile: SenderProfile = {
+  const senderProfile: SenderProfile = useMemo(() => ({
     name: (userProfile as { displayName?: string } | null)?.displayName || (userProfile as { businessName?: string } | null)?.businessName || user?.displayName || '',
     email: user?.email || '',
     businessName: (userProfile as { businessName?: string } | null)?.businessName || '',
-  };
+  }), [userProfile, user?.displayName, user?.email]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Read connected inbox from Firestore
+  useEffect(() => {
+    if (!user?.uid) return;
+    const db = getFirebaseDb();
+    if (!db) return;
+    (async () => {
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        const data = snap.data() ?? {};
+        if ((data.gmail as { connected?: boolean; accessToken?: string } | undefined)?.connected === true ||
+            (data.gmail as { accessToken?: string } | undefined)?.accessToken) {
+          setInboxEmail(((data.gmail as { email?: string }) ?? {}).email ?? '');
+          setInboxProvider('gmail');
+        } else if (
+          (data.inboxConnection as { provider?: string } | undefined)?.provider === 'microsoft' ||
+          (data.inboxConnection as { accessTokenEnc?: string } | undefined)?.accessTokenEnc ||
+          (data.inboxConnection as { accessToken?: string } | undefined)?.accessToken
+        ) {
+          setInboxEmail(((data.inboxConnection as { email?: string }) ?? {}).email ?? '');
+          setInboxProvider('microsoft');
+        }
+      } catch (err) {
+        console.error('[ProspectsSection] Firestore inbox read failed:', err);
+      }
+    })();
+  }, [user?.uid]);
+
+  const copyEmailToClipboard = useCallback((p: Prospect) => {
+    const { subject, body } = buildOutreachEmail(p, senderProfile);
+    const text = `Subject: ${subject}\n\n${body}`;
+    navigator.clipboard.writeText(text).catch(() => {});
+  }, [senderProfile]);
 
   useEffect(() => {
     fetch('/api/prospects').then(r => r.json()).then(d => {
@@ -1046,15 +1229,24 @@ function ProspectsSection() {
                       {Object.entries(STATUS_STYLES).map(([val, info]) => <option key={val} value={val}>{info.label}</option>)}
                     </select>
                     {p.email && (
-                      <a
-                        href={(() => { const { subject, body } = buildOutreachEmail(p, senderProfile); return `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; })()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => updateStatus(p.id, 'contacted')}
-                        className="text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition opacity-0 group-hover:opacity-100 font-semibold"
-                      >
-                        Email →
-                      </a>
+                      <div className="flex items-center gap-1">
+                        {emailedIds.has(p.id) && (
+                          <span className="text-[10px] text-green-400 font-semibold">✅</span>
+                        )}
+                        <button
+                          onClick={() => setSendModal(p)}
+                          className="text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition opacity-0 group-hover:opacity-100 font-semibold"
+                        >
+                          {emailedIds.has(p.id) ? 'Resend →' : 'Send →'}
+                        </button>
+                        <button
+                          onClick={() => copyEmailToClipboard(p)}
+                          title="Copy subject + body to clipboard"
+                          className="text-xs px-2 py-1 bg-[#111] border border-[#2a2a2a] text-gray-400 rounded-lg hover:text-white hover:border-[#3a3a3a] transition opacity-0 group-hover:opacity-100"
+                        >
+                          Copy
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -1063,6 +1255,22 @@ function ProspectsSection() {
           </div>
         )}
       </div>
+
+      {sendModal && user && (
+        <SendEmailModal
+          prospect={sendModal}
+          senderProfile={senderProfile}
+          uid={user.uid}
+          inboxEmail={inboxEmail}
+          inboxProvider={inboxProvider}
+          onClose={() => setSendModal(null)}
+          onSent={(id) => {
+            setEmailedIds(prev => new Set([...prev, id]));
+            updateStatus(id, 'contacted');
+            setSendModal(null);
+          }}
+        />
+      )}
     </section>
   );
 }
