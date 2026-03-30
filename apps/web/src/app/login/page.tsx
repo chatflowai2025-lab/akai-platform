@@ -32,6 +32,13 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false); // start false — show buttons immediately, set true only during active auth ops
+  const [waitlistMode, setWaitlistMode] = useState(false);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistName, setWaitlistName] = useState('');
+  const [waitlistUid, setWaitlistUid] = useState('');
+  const [waitlistWebsite, setWaitlistWebsite] = useState('');
+  const [waitlistSent, setWaitlistSent] = useState(false);
+  const [waitlistSending, setWaitlistSending] = useState(false);
 
   const cleanError = (msg: string) => {
     if (msg.includes('user-not-found') || msg.includes('wrong-password') || msg.includes('invalid-credential')) return 'Invalid email or password.';
@@ -62,12 +69,10 @@ function LoginContent() {
         if (!isWhitelisted(userEmail)) {
           await getFirebaseAuth()?.signOut();
           // Fire welcome + health report email for non-trailblazers
-          fetch('/api/welcome', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: currentUser?.uid || '', email: userEmail, name: currentUser?.displayName || '' }),
-          }).catch(() => {});
-          setError(`Thanks for signing up! We'll be in touch shortly — Aaron from AKAI will reach out personally with your free digital health report and next steps.`);
+          setWaitlistEmail(userEmail);
+          setWaitlistName(currentUser?.displayName || '');
+          setWaitlistUid(currentUser?.uid || '');
+          setWaitlistMode(true);
           setLoading(false);
           return;
         }
@@ -92,8 +97,10 @@ function LoginContent() {
       const userEmail = result.user?.email || '';
       if (BETA_MODE && !isWhitelisted(userEmail)) {
         await auth.signOut();
-        fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: result.user?.uid || '', email: userEmail, name: result.user?.displayName || '' }) }).catch(() => {});
-        setError(`Thanks for signing up! Aaron from AKAI will reach out personally with your free digital health report and next steps.`);
+        setWaitlistEmail(userEmail);
+        setWaitlistName(result.user?.displayName || '');
+        setWaitlistUid(result.user?.uid || '');
+        setWaitlistMode(true);
         setLoading(false);
         return;
       }
@@ -157,8 +164,10 @@ function LoginContent() {
             const userEmail = result.user.email || '';
             if (BETA_MODE && !isWhitelisted(userEmail)) {
               await auth.signOut();
-              fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: result.user?.uid || '', email: userEmail, name: result.user?.displayName || '' }) }).catch(() => {});
-              setError(`Thanks for signing up! Aaron from AKAI will reach out personally with your free digital health report and next steps.`);
+              setWaitlistEmail(userEmail);
+              setWaitlistName(result.user?.displayName || '');
+              setWaitlistUid(result.user?.uid || '');
+              setWaitlistMode(true);
               setLoading(false);
               return;
             }
@@ -215,14 +224,63 @@ function LoginContent() {
         <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
       </a>
 
-      {isWelcome && (
+      {/* Waitlist / non-trailblazer capture */}
+      {waitlistMode && (
+        <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8">
+          {!waitlistSent ? (
+            <>
+              <div className="text-center mb-6">
+                <div className="text-3xl mb-3">🎉</div>
+                <h2 className="text-xl font-black text-white mb-2">You&apos;re on the list!</h2>
+                <p className="text-gray-400 text-sm">Aaron from AKAI will reach out personally. Add your website and we&apos;ll include a free digital health report in your email.</p>
+              </div>
+              <div className="space-y-3">
+                <input
+                  type="url"
+                  placeholder="Your website URL (optional)"
+                  value={waitlistWebsite}
+                  onChange={e => setWaitlistWebsite(e.target.value)}
+                  className="w-full bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50"
+                />
+                <button
+                  onClick={async () => {
+                    setWaitlistSending(true);
+                    try {
+                      await fetch('/api/welcome', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ uid: waitlistUid, email: waitlistEmail, name: waitlistName, website: waitlistWebsite }),
+                      });
+                    } catch { /* non-fatal */ }
+                    setWaitlistSent(true);
+                    setWaitlistSending(false);
+                  }}
+                  disabled={waitlistSending}
+                  className="w-full bg-[#D4AF37] text-black font-bold py-3 rounded-xl text-sm hover:opacity-90 transition disabled:opacity-50"
+                >
+                  {waitlistSending ? 'Sending...' : 'Send my report →'}
+                </button>
+                <button onClick={() => setWaitlistMode(false)} className="w-full text-gray-500 text-sm hover:text-gray-300 transition py-2">← Back to sign in</button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <div className="text-4xl mb-4">✅</div>
+              <h2 className="text-lg font-black text-white mb-2">Report on its way!</h2>
+              <p className="text-gray-400 text-sm">Check your inbox at <strong className="text-white">{waitlistEmail}</strong> — your digital health report and next steps are on their way. Aaron will follow up personally.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!waitlistMode && isWelcome && (
         <div className="w-full max-w-md mb-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl px-5 py-4 text-center">
           <p className="text-[#D4AF37] font-bold text-sm mb-1">Welcome to AKAI 👋</p>
           <p className="text-gray-400 text-xs">Sign in below to access your AI business team</p>
         </div>
       )}
 
-      <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8">
+      {!waitlistMode && <div className="w-full max-w-md bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8">
         <div className="flex mb-8 bg-[#0a0a0a] rounded-xl p-1">
           {(['signin', 'signup'] as Tab[]).map(t => (
             <button key={t} onClick={() => { setTab(t); setError(''); }}
@@ -294,7 +352,7 @@ function LoginContent() {
           {tab === 'signin' ? <>Don&apos;t have an account? <button onClick={() => { setTab('signup'); setError(''); }} className="text-[#D4AF37] hover:underline">Create one</button></> 
           : <>Already have an account? <button onClick={() => { setTab('signin'); setError(''); }} className="text-[#D4AF37] hover:underline">Sign in</button></>}
         </p>
-      </div>
+      </div>}
     </div>
   );
 }
