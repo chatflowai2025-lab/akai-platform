@@ -652,6 +652,26 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
   const [campaignName, setCampaignName] = useState('Campaign 1');
+
+  // Load previously uploaded leads from Firestore on mount
+  useEffect(() => {
+    if (!userId) return;
+    (async () => {
+      try {
+        const { getFirebaseDb } = await import('@/lib/firebase');
+        const { doc, getDoc } = await import('firebase/firestore');
+        const db = getFirebaseDb();
+        if (!db) return;
+        const snap = await getDoc(doc(db, 'users', userId, 'salesLeads', 'uploaded'));
+        if (snap.exists()) {
+          const data = snap.data() as { leads?: Lead[] };
+          if (data.leads && data.leads.length > 0) {
+            setUploadedLeads(data.leads);
+          }
+        }
+      } catch { /* non-fatal */ }
+    })();
+  }, [userId]);
   const [launching, setLaunching] = useState(false);
   const [dncResult] = useState<{ safe: string[]; blocked: string[] } | null>(null);
 
@@ -699,6 +719,17 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
     return parsed;
   };
 
+  const saveLeadsToFirestore = async (leads: Lead[]) => {
+    try {
+      const { getFirebaseDb } = await import('@/lib/firebase');
+      const { doc, setDoc } = await import('firebase/firestore');
+      const db = getFirebaseDb();
+      if (db && userId) {
+        await setDoc(doc(db, 'users', userId, 'salesLeads', 'uploaded'), { leads, updatedAt: new Date().toISOString() }, { merge: false });
+      }
+    } catch { /* non-fatal */ }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -706,7 +737,11 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
       const parsed = parseCsv(text);
-      setUploadedLeads(prev => [...prev, ...parsed]);
+      setUploadedLeads(prev => {
+        const updated = [...prev, ...parsed];
+        saveLeadsToFirestore(updated);
+        return updated;
+      });
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -1543,8 +1578,11 @@ export default function SalesPage() {
 
     async function fetchLeads() {
       try {
+        const idToken = await user?.getIdToken().catch(() => '') ?? '';
+        const headers: Record<string, string> = { 'x-api-key': RAILWAY_API_KEY };
+        if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
         const res = await fetch(`${RAILWAY_API}/api/leads`, {
-          headers: { 'x-api-key': RAILWAY_API_KEY },
+          headers,
           cache: 'no-store',
         });
         if (!res.ok) throw new Error('Non-OK response');
