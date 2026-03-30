@@ -912,7 +912,9 @@ function CTASection() {
 
 interface Prospect { id: number; name: string; email: string; phone: string; website: string; status: string; subject: string; industry?: string; location?: string; }
 
-function buildOutreachEmail(p: Prospect): { subject: string; body: string } {
+interface SenderProfile { name: string; email: string; businessName: string; }
+
+function buildOutreachEmail(p: Prospect, sender?: SenderProfile): { subject: string; body: string } {
   const businessName = p.name || 'your business';
   const industry = p.industry ? `in the ${p.industry} space` : 'in your industry';
   const locationLine = p.location ? ` based in ${p.location}` : '';
@@ -920,6 +922,10 @@ function buildOutreachEmail(p: Prospect): { subject: string; body: string } {
   const websiteSegue = p.website
     ? `${websiteLine}great work. I wanted to reach out about something that could directly impact your lead flow.`
     : `${websiteLine}I came across ${businessName} and wanted to reach out directly.`;
+
+  const senderName = sender?.name || sender?.businessName || 'The Team';
+  const senderBiz = sender?.businessName || 'AKAI';
+  const senderEmail = sender?.email || 'hello@getakai.ai';
 
   const subject = p.subject || `Quick question — ${businessName}`;
   const body = [
@@ -933,9 +939,9 @@ function buildOutreachEmail(p: Prospect): { subject: string; body: string } {
     ``,
     `Would you be open to a 10-minute call this week? I'll show you exactly how it works for ${businessName}.`,
     ``,
-    `Aaron Kersten`,
-    `Founder, AKAI`,
-    `getakai.ai | aaron@getakai.ai`,
+    senderName,
+    senderBiz,
+    `getakai.ai | ${senderEmail}`,
   ].join('\n');
 
   return { subject, body };
@@ -951,11 +957,18 @@ const STATUS_STYLES: Record<string, { label: string; style: string }> = {
 };
 
 function ProspectsSection() {
+  const { user, userProfile } = useAuth();
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState<number | null>(null);
+
+  const senderProfile: SenderProfile = {
+    name: (userProfile as { displayName?: string } | null)?.displayName || (userProfile as { businessName?: string } | null)?.businessName || user?.displayName || '',
+    email: user?.email || '',
+    businessName: (userProfile as { businessName?: string } | null)?.businessName || '',
+  };
 
   useEffect(() => {
     fetch('/api/prospects').then(r => r.json()).then(d => {
@@ -1034,7 +1047,7 @@ function ProspectsSection() {
                     </select>
                     {p.email && (
                       <a
-                        href={(() => { const { subject, body } = buildOutreachEmail(p); return `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; })()}
+                        href={(() => { const { subject, body } = buildOutreachEmail(p, senderProfile); return `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; })()}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => updateStatus(p.id, 'contacted')}
