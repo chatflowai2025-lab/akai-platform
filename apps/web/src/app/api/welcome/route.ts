@@ -48,7 +48,7 @@ async function sendEmail(to: string, subject: string, html: string) {
   return res.json();
 }
 
-function buildWelcomeEmail(name: string, email: string): string {
+function buildWelcomeEmail(name: string, email: string, website?: string, auditScore?: number): string {
   const displayName = name || email.split('@')[0] || 'there';
   return `<!DOCTYPE html>
 <html>
@@ -70,9 +70,30 @@ function buildWelcomeEmail(name: string, email: string): string {
       <h1 style="font-size:24px;font-weight:900;color:#0a0a0a;margin:0 0 16px;line-height:1.3;">
         Welcome to AKAI. Your account is live.
       </h1>
-      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 28px;">
-        You now have access to 10 AI agents built to handle your sales pipeline, email, calendar, and more — 24 hours a day. Aaron from AKAI will be reaching out personally to help you get set up and make the most of your trial.
+      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 20px;">
+        Welcome to your 10-agent AI business team. Everything is set up and waiting for you.
       </p>
+
+      <!-- Aaron reaching out -->
+      <div style="background:#0a0a0a;border-radius:8px;padding:20px 24px;margin:0 0 24px;">
+        <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#D4AF37;">👋 Aaron will be reaching out personally</p>
+        <p style="margin:0;font-size:13px;color:#aaa;line-height:1.7;">
+          Within the next 24 hours, Aaron Kersten (Founder, AKAI) will contact you directly to walk through your setup and answer any questions. In the meantime, the platform is fully live — explore at your own pace.
+        </p>
+      </div>
+
+      ${website ? `
+      <!-- Digital Health Report -->
+      <div style="background:#f8f8f8;border-radius:8px;padding:20px 24px;margin:0 0 24px;border:1px solid #eee;">
+        <p style="margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#D4AF37;">🌐 Your Website — Quick Health Check</p>
+        <p style="margin:0 0 8px;font-size:14px;color:#333;"><strong>${website}</strong></p>
+        <div style="display:flex;align-items:center;gap:12px;margin:0 0 12px;">
+          <div style="font-size:36px;font-weight:900;color:#0a0a0a;">${auditScore ?? '?'}<span style="font-size:18px;color:#888;">/10</span></div>
+          <div style="font-size:13px;color:#666;">Digital health score — we'll show you how to improve it inside the Web module.</div>
+        </div>
+        <p style="margin:0;font-size:12px;color:#999;">Full audit available in your dashboard → Web module</p>
+      </div>
+      ` : ''}
 
       <!-- Trial callout -->
       <div style="background:#fffbeb;border-left:4px solid #D4AF37;border-radius:4px;padding:16px 20px;margin:0 0 32px;">
@@ -236,12 +257,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Try to get website + run quick audit for personalisation
+    let website: string | undefined;
+    let auditScore: number | undefined;
+    if (db) {
+      try {
+        const userSnap = await db.collection('users').doc(uid).get();
+        const userData = userSnap.data();
+        website = userData?.website || userData?.onboarding?.website || userData?.campaignConfig?.website;
+        if (website) {
+          // Quick audit via Railway
+          const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
+          const auditRes = await fetch(`${railwayUrl}/api/website-mockup/audit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
+            body: JSON.stringify({ url: website }),
+            signal: AbortSignal.timeout(8000),
+          });
+          if (auditRes.ok) {
+            const auditData = await auditRes.json() as { scores?: { overall?: number } };
+            auditScore = (auditData.scores?.overall ?? 0);
+          }
+        }
+      } catch { /* non-fatal */ }
+    }
+
     // Send the email — always attempt even if Firestore failed
     try {
       await sendEmail(
         email,
         'Your AKAI account is live — here\'s where to start',
-        buildWelcomeEmail(name || '', email)
+        buildWelcomeEmail(name || '', email, website, auditScore)
       );
       console.log(`[welcome] Email sent to ${email}`);
     } catch (emailErr) {
