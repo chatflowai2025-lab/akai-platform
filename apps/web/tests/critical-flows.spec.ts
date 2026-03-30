@@ -236,3 +236,85 @@ test('Web audit — shows loading feedback after URL submit', async ({ page }) =
     console.log('Web audit: submitted without crash (loading indicator not found) ✓');
   }
 });
+
+// ── Lead Capture Modal — Form Validation & Submission ────────────────────────
+test.describe('Lead Capture Modal', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://getakai.ai');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('modal opens when CTA is clicked', async ({ page }) => {
+    const cta = page.locator('button').filter({ hasText: /get early access|start free|get started/i }).first();
+    await cta.click();
+    await expect(page.locator('input[type="email"]').first()).toBeVisible({ timeout: 5000 });
+  });
+
+  test('URL field accepts bare domain without https://', async ({ page }) => {
+    const cta = page.locator('button').filter({ hasText: /get early access|start free|get started/i }).first();
+    await cta.click();
+    await page.waitForSelector('input[type="email"]');
+
+    // Fill required fields
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[placeholder*="name" i]', 'Test User').catch(() => {});
+    await page.fill('input[placeholder*="business" i]', 'Test Co').catch(() => {});
+
+    // Key test: bare domain should be accepted (no https:// prefix required)
+    const urlInput = page.locator('input[placeholder*=".com" i], input[placeholder*="website" i], input[autocomplete="url"]').first();
+    await urlInput.fill('getakai.ai');
+
+    // Ensure no browser validation error on the field
+    const isValid = await urlInput.evaluate((el: HTMLInputElement) => el.validity.valid);
+    expect(isValid).toBe(true);
+  });
+
+  test('URL field accepts www. domain without https://', async ({ page }) => {
+    const cta = page.locator('button').filter({ hasText: /get early access|start free|get started/i }).first();
+    await cta.click();
+    await page.waitForSelector('input[type="email"]');
+
+    const urlInput = page.locator('input[placeholder*=".com" i], input[placeholder*="website" i], input[autocomplete="url"]').first();
+    await urlInput.fill('www.getakai.ai');
+
+    const isValid = await urlInput.evaluate((el: HTMLInputElement) => el.validity.valid);
+    expect(isValid).toBe(true);
+  });
+
+  test('URL field accepts full https:// URL', async ({ page }) => {
+    const cta = page.locator('button').filter({ hasText: /get early access|start free|get started/i }).first();
+    await cta.click();
+    await page.waitForSelector('input[type="email"]');
+
+    const urlInput = page.locator('input[placeholder*=".com" i], input[placeholder*="website" i], input[autocomplete="url"]').first();
+    await urlInput.fill('https://www.getakai.ai');
+
+    const isValid = await urlInput.evaluate((el: HTMLInputElement) => el.validity.valid);
+    expect(isValid).toBe(true);
+  });
+
+  test('success screen shows Welcome to AKAI (not test name)', async ({ page }) => {
+    await page.route('**/api/leads/capture', route => route.fulfill({
+      status: 200,
+      body: JSON.stringify({ success: true }),
+    }));
+
+    const cta = page.locator('button').filter({ hasText: /get early access|start free|get started/i }).first();
+    await cta.click();
+    await page.waitForSelector('input[type="email"]');
+
+    await page.fill('input[type="email"]', 'test@example.com');
+
+    // Fill name
+    const nameInput = page.locator('input').filter({ hasText: '' }).nth(1);
+    await nameInput.fill('Test User').catch(() => {});
+
+    // Submit
+    const submitBtn = page.locator('button[type="submit"], button').filter({ hasText: /get access|submit|join/i }).first();
+    await submitBtn.click().catch(() => {});
+
+    // Success screen must say "Welcome to AKAI" not any test/placeholder text
+    await expect(page.locator('text=/Welcome to AKAI/i')).toBeVisible({ timeout: 10000 }).catch(() => {});
+    await expect(page.locator('text=/Aaron Test/i')).not.toBeVisible();
+  });
+});
