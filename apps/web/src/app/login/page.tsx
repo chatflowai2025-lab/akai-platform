@@ -61,7 +61,13 @@ function LoginContent() {
         const userEmail = currentUser?.email || email || '';
         if (!isWhitelisted(userEmail)) {
           await getFirebaseAuth()?.signOut();
-          setError(`AKAI is currently in private beta. Contact ${BETA_CONTACT_EMAIL} to request access.`);
+          // Fire welcome + health report email for non-trailblazers
+          fetch('/api/welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid: currentUser?.uid || '', email: userEmail, name: currentUser?.displayName || '' }),
+          }).catch(() => {});
+          setError(`Thanks for signing up! We'll be in touch shortly — Aaron from AKAI will reach out personally with your free digital health report and next steps.`);
           setLoading(false);
           return;
         }
@@ -86,7 +92,8 @@ function LoginContent() {
       const userEmail = result.user?.email || '';
       if (BETA_MODE && !isWhitelisted(userEmail)) {
         await auth.signOut();
-        setError(`AKAI is currently in private beta. Contact ${BETA_CONTACT_EMAIL} to request access.`);
+        fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: result.user?.uid || '', email: userEmail, name: result.user?.displayName || '' }) }).catch(() => {});
+        setError(`Thanks for signing up! Aaron from AKAI will reach out personally with your free digital health report and next steps.`);
         setLoading(false);
         return;
       }
@@ -150,7 +157,8 @@ function LoginContent() {
             const userEmail = result.user.email || '';
             if (BETA_MODE && !isWhitelisted(userEmail)) {
               await auth.signOut();
-              setError(`AKAI is currently in private beta. Contact ${BETA_CONTACT_EMAIL} to request access.`);
+              fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: result.user?.uid || '', email: userEmail, name: result.user?.displayName || '' }) }).catch(() => {});
+              setError(`Thanks for signing up! Aaron from AKAI will reach out personally with your free digital health report and next steps.`);
               setLoading(false);
               return;
             }
