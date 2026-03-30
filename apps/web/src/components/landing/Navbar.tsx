@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -27,9 +28,9 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
-          </a>
+          </Link>
 
           {/* Nav links — desktop */}
           <div className="hidden md:flex items-center gap-8 text-sm text-white/40">

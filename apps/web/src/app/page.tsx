@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/landing/Navbar';
 import { DemoModal } from '@/components/landing/Hero';
@@ -962,9 +963,9 @@ function AKAIFooter() {
         <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-12">
           {/* Brand */}
           <div className="flex flex-col gap-2">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
-            </a>
+            </Link>
             <p className="text-white/30 text-xs">Your AI Executive Team</p>
             <a href="mailto:hello@getakai.ai" className="text-white/20 text-xs hover:text-white/50 transition-colors mt-1">hello@getakai.ai</a>
           </div>

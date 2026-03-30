@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export const metadata = {
   title: 'Terms of Service — AKAI',
   description: 'Terms and conditions for using the AKAI platform.',
@@ -7,7 +9,7 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white px-6 py-24">
       <div className="max-w-3xl mx-auto">
-        <a href="/" className="text-sm text-white/40 hover:text-white transition-colors mb-8 inline-block">← Back to home</a>
+        <Link href="/" className="text-sm text-white/40 hover:text-white transition-colors mb-8 inline-block">← Back to home</Link>
 
         <h1 className="text-4xl font-black mb-2">Terms of Service</h1>
         <p className="text-white/40 text-sm mb-12">Effective date: 28 March 2026 · Last updated: 28 March 2026 · Governing law: New South Wales, Australia</p>

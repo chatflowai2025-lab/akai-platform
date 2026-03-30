@@ -2,6 +2,7 @@
 
 
 import { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
@@ -220,9 +221,9 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 overflow-hidden">
-      <a href="/" className="flex items-center mb-8">
+      <Link href="/" className="flex items-center mb-8">
         <span className="text-xl font-black tracking-tight">AK<span className="text-[#D4AF37]">AI</span></span>
-      </a>
+      </Link>
 
       {/* Waitlist / non-trailblazer capture */}
       {waitlistMode && (
