@@ -91,19 +91,19 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
               <span className="text-3xl">🎉</span>
             </div>
             <h2 className="text-2xl font-black text-white mb-3">
-              Welcome to AKAI{form.name ? `, ${form.name}` : ''}! 🚀
+              Welcome to AKAI! 🚀
             </h2>
             <p className="text-white/70 text-base leading-relaxed mb-2">
-              Check your inbox — your free digital health report is on its way.
+              You&apos;re in. Check your inbox — your free digital health report is on its way.
             </p>
             <p className="text-[#D4AF37] font-semibold text-sm mb-5">
-              AK will be reaching out shortly.
+              Aaron, the human behind AKAI, will be in touch personally.
             </p>
             <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4 mb-5">
               <p className="text-xs text-white/40 uppercase tracking-wider mb-3">What&apos;s coming your way</p>
               <ul className="text-sm text-white/70 text-left space-y-2.5">
                 <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> Free digital health report for your website</li>
-                <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> Personal note from Aaron — founder of AKAI</li>
+                <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> A personal note from Aaron, founder of AKAI</li>
                 <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> Your AI team setup, tailored to your business</li>
               </ul>
             </div>
