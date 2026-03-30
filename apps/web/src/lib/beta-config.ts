@@ -11,6 +11,8 @@ export const BETA_WHITELIST: Record<string, { name: string; safeMode: boolean }>
   'danielle.avissar@gmail.com': { name: 'Danielle', safeMode: false },
   'henrik.mortensen@live.com.au': { name: 'Henrik', safeMode: true },
   'kemalarafeh@gmail.com': { name: 'Kemal', safeMode: true },
+  'im.dan.vallejos@gmail.com': { name: 'Dan', safeMode: true },
+  'shawnsellar@gmail.com': { name: 'Shawn', safeMode: true },
   'jilljjqb@gmail.com': { name: 'Jill', safeMode: true },
   'chatflowai2025@gmail.com': { name: 'Aaron', safeMode: false },
   'getakainow@outlook.com': { name: 'Aaron', safeMode: false },
