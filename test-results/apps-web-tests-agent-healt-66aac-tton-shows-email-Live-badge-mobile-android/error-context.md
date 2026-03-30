@@ -1,0 +1,101 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - link "🏠 Home" [ref=e5] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e6]: 🏠
+        - generic [ref=e7]: Home
+      - link "✉️ Email" [ref=e8] [cursor=pointer]:
+        - /url: /email-guard
+        - generic [ref=e9]: ✉️
+        - generic [ref=e10]: Email
+      - link "📞 Sales" [ref=e11] [cursor=pointer]:
+        - /url: /sales
+        - generic [ref=e12]: 📞
+        - generic [ref=e13]: Sales
+      - link "📅 Calendar" [ref=e14] [cursor=pointer]:
+        - /url: /calendar
+        - generic [ref=e15]: 📅
+        - generic [ref=e16]: Calendar
+      - button "☰ Menu" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ☰
+        - generic [ref=e19]: Menu
+    - generic [ref=e21]:
+      - banner [ref=e22]:
+        - generic [ref=e23]:
+          - navigation "Breadcrumb" [ref=e24]:
+            - link "Dashboard" [ref=e25] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e26]: ›
+            - generic [ref=e27]: Email Guard
+          - heading "✉️ Email Guard" [level=1] [ref=e28]
+          - paragraph [ref=e29]: Reads enquiries, generates proposals automatically
+        - button "⚙️ Help" [ref=e30] [cursor=pointer]
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - heading "Connected inboxes" [level=2] [ref=e34]
+            - paragraph [ref=e35]: Connect one or both — AKAI monitors all of them
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - img [ref=e39]
+              - generic [ref=e44]:
+                - paragraph [ref=e45]: Microsoft / Outlook
+                - paragraph [ref=e46]: Not connected
+            - button "Connect →" [ref=e47] [cursor=pointer]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - img [ref=e51]
+              - generic [ref=e56]:
+                - paragraph [ref=e57]: Gmail / Google Workspace
+                - paragraph [ref=e58]: Not connected
+            - button "Connect →" [ref=e59] [cursor=pointer]
+          - paragraph [ref=e60]: Connect Gmail to read enquiries and send proposals — you control what gets sent.
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - heading "This is what lands in your dashboard" [level=2] [ref=e63]
+            - paragraph [ref=e64]: Connect your inbox and enquiries like this arrive automatically — with proposals already drafted.
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]:
+                - paragraph [ref=e70]: Kitchen renovation enquiry
+                - paragraph [ref=e71]: john.smith@gmail.com
+                - paragraph [ref=e72]: Hi, I'm interested in a custom kitchen for my Mosman home, budget around $40k…
+              - generic [ref=e73]: ✨ Proposal ready
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: AI-generated proposal
+              - generic [ref=e76]:
+                - paragraph [ref=e77]: Hi John,
+                - paragraph [ref=e78]: Thank you for reaching out about your kitchen renovation in Mosman. Based on your budget of $40,000, we'd love to create something exceptional for you…
+                - paragraph [ref=e79]: Our custom cabinetry starts from premium European materials, and we'll include a full design consultation at no charge. We've completed over 40 kitchens in the…
+              - generic [ref=e80]:
+                - button "✉️ Send this proposal" [disabled] [ref=e81]
+                - generic: Connect inbox to enable
+          - paragraph [ref=e82]: ⬆️ Connect your inbox above to start receiving real enquiries like this
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - heading "Rules Engine" [level=2] [ref=e85]
+            - button "+ Add rule" [ref=e86] [cursor=pointer]
+          - generic [ref=e91]:
+            - paragraph [ref=e92]: All enquiries→Draft proposal→Notify Discord
+            - paragraph [ref=e93]: Default rule — always active
+  - navigation [ref=e94]:
+    - link "📊 Home" [ref=e95] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=e96]: 📊
+      - generic [ref=e97]: Home
+    - link "📞 Sales" [ref=e98] [cursor=pointer]:
+      - /url: /sales
+      - generic [ref=e99]: 📞
+      - generic [ref=e100]: Sales
+    - button "💬 AK Chat" [ref=e101] [cursor=pointer]:
+      - generic [ref=e102]: 💬
+      - generic [ref=e103]: AK Chat
+    - button "☰ Menu" [ref=e104] [cursor=pointer]:
+      - generic [ref=e105]: ☰
+      - generic [ref=e106]: Menu
+```

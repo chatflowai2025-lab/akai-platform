@@ -2,21 +2,22 @@
 
 ```yaml
 - generic [active] [ref=e1]:
-  - main [ref=e2]:
-    - navigation [ref=e3]:
-      - generic [ref=e4]:
-        - link "AK AKAI" [ref=e5] [cursor=pointer]:
+  - alert [ref=e2]
+  - main [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "AKAI" [ref=e6] [cursor=pointer]:
           - /url: /
-          - generic [ref=e7]: AK
-          - generic [ref=e8]: AKAI
-        - generic [ref=e9]:
-          - link "How It Works" [ref=e10] [cursor=pointer]:
+          - generic [ref=e7]: AKAI
+        - generic [ref=e8]:
+          - link "How It Works" [ref=e9] [cursor=pointer]:
             - /url: "#how-it-works"
-          - link "Skills" [ref=e11] [cursor=pointer]:
+          - link "Skills" [ref=e10] [cursor=pointer]:
             - /url: "#modules"
-          - link "Pricing" [ref=e12] [cursor=pointer]:
+          - link "Pricing" [ref=e11] [cursor=pointer]:
             - /url: "#pricing"
-        - generic [ref=e13]:
+        - generic [ref=e12]:
+          - button "Switch to light mode" [ref=e13] [cursor=pointer]: ☀️
           - link "Sign In" [ref=e14] [cursor=pointer]:
             - /url: /login
           - button "💬 Talk to AK" [ref=e15] [cursor=pointer]
@@ -35,7 +36,7 @@
       - generic [ref=e28]:
         - generic [ref=e29]:
           - button "Start free trial" [ref=e30] [cursor=pointer]: Start Free Trial →
-          - button "See How It Works" [ref=e31] [cursor=pointer]
+          - button "📞 Get a Demo Call" [ref=e31] [cursor=pointer]
         - paragraph [ref=e32]: Trusted by Australian SMBs · No credit card required
       - generic [ref=e34]:
         - generic [ref=e40]: dashboard.getakai.ai
@@ -341,58 +342,58 @@
         - generic [ref=e404]:
           - generic [ref=e405]: Starter
           - generic [ref=e406]:
-            - generic [ref=e407]: $49
+            - generic [ref=e407]: $199
             - generic [ref=e408]: /mo
-          - paragraph [ref=e409]: One AI agent, fully operational.
+          - paragraph [ref=e409]: Your AI sales & email team. Running from day one.
           - list [ref=e410]:
             - listitem [ref=e411]:
               - generic [ref=e412]: ✓
-              - text: 1 AKAI agent of your choice
+              - text: Sales agent — books meetings automatically
             - listitem [ref=e413]:
               - generic [ref=e414]: ✓
-              - text: AI automation included
+              - text: Email Guard — triages every enquiry
             - listitem [ref=e415]:
               - generic [ref=e416]: ✓
-              - text: Full dashboard access
+              - text: Voice agent (Sophie) — calls your leads
             - listitem [ref=e417]:
               - generic [ref=e418]: ✓
-              - text: 60 voice mins · 5k emails/mo
+              - text: Calendar — books appointments 24/7
             - listitem [ref=e419]:
               - generic [ref=e420]: ✓
-              - text: 1,000 AI tasks/month
+              - text: 200 leads/mo · 60 voice mins
           - button "Start Free Trial →" [ref=e421] [cursor=pointer]
         - generic [ref=e422]:
           - generic [ref=e424]: Most Popular
           - generic [ref=e425]:
             - generic [ref=e426]: Growth
             - generic [ref=e427]:
-              - generic [ref=e428]: $149
+              - generic [ref=e428]: $599
               - generic [ref=e429]: /mo
-            - paragraph [ref=e430]: Three agents. Sales rep + marketer + VA — replaced.
+            - paragraph [ref=e430]: All 10 agents. Your entire back office — automated.
             - list [ref=e431]:
               - listitem [ref=e432]:
                 - generic [ref=e433]: ✓
-                - text: 3 AKAI agents of your choice
+                - text: All 10 AKAI agents unlocked
               - listitem [ref=e434]:
                 - generic [ref=e435]: ✓
-                - text: Sales + Email Guard + Social recommended
+                - text: Sales · Voice · Email · Ads · Social · Recruit · Web · Proposals · Calendar · Health
               - listitem [ref=e436]:
                 - generic [ref=e437]: ✓
-                - text: Team seats (up to 5)
+                - text: Unlimited leads & emails
               - listitem [ref=e438]:
                 - generic [ref=e439]: ✓
-                - text: Advanced analytics & reporting
+                - text: Up to 5 team seats
               - listitem [ref=e440]:
                 - generic [ref=e441]: ✓
                 - text: Onboarding call included
               - listitem [ref=e442]:
                 - generic [ref=e443]: ✓
-                - text: 300 voice mins · 25k emails/mo
+                - text: 300 voice mins/mo
             - button "Start Free Trial →" [ref=e444] [cursor=pointer]
         - generic [ref=e446]:
           - generic [ref=e447]: Agency
           - generic [ref=e448]:
-            - generic [ref=e449]: $399
+            - generic [ref=e449]: $1,200
             - generic [ref=e450]: /mo
           - paragraph [ref=e451]: All 10 agents. Your entire ops team — automated.
           - list [ref=e452]:
@@ -465,5 +466,4 @@
         - generic [ref=e505]: Your AI Business Partner
       - button "Chat with AK" [ref=e506] [cursor=pointer]:
         - img [ref=e507]
-  - alert [ref=e509]
 ```

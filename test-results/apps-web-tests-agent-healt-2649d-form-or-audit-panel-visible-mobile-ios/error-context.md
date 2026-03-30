@@ -1,0 +1,78 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - link "🏠 Home" [ref=e5]:
+        - /url: /dashboard
+        - generic [ref=e6]: 🏠
+        - generic [ref=e7]: Home
+      - link "✉️ Email" [ref=e8]:
+        - /url: /email-guard
+        - generic [ref=e9]: ✉️
+        - generic [ref=e10]: Email
+      - link "📞 Sales" [ref=e11]:
+        - /url: /sales
+        - generic [ref=e12]: 📞
+        - generic [ref=e13]: Sales
+      - link "📅 Calendar" [ref=e14]:
+        - /url: /calendar
+        - generic [ref=e15]: 📅
+        - generic [ref=e16]: Calendar
+      - button "☰ Menu" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ☰
+        - generic [ref=e19]: Menu
+    - generic [ref=e20]:
+      - banner [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Web" [level=1] [ref=e23]
+          - paragraph [ref=e24]: AI-powered website manager
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - button "🔍 Audit" [ref=e27] [cursor=pointer]
+          - button "🏗️ Build" [ref=e28] [cursor=pointer]
+          - button "📋 History" [ref=e29] [cursor=pointer]
+          - button "⚔️ Compare" [ref=e30] [cursor=pointer]
+          - button "📊 Analytics" [ref=e31] [cursor=pointer]
+        - main [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e34]: 🌐
+            - heading "Connect your site" [level=2] [ref=e35]
+            - paragraph [ref=e36]: Connect via WordPress, GitHub, or any public URL to run an instant AI audit and surface quick wins.
+            - generic [ref=e37]:
+              - button "🟦 WordPress Full read/write — URL + application password ▼" [ref=e39] [cursor=pointer]:
+                - generic [ref=e40]: 🟦
+                - generic [ref=e41]:
+                  - paragraph [ref=e42]: WordPress
+                  - paragraph [ref=e43]: Full read/write — URL + application password
+                - generic [ref=e44]: ▼
+              - button "⬛ GitHub Repo URL + personal access token ▼" [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]: ⬛
+                - generic [ref=e48]:
+                  - paragraph [ref=e49]: GitHub
+                  - paragraph [ref=e50]: Repo URL + personal access token
+                - generic [ref=e51]: ▼
+              - button "🔍 URL Only Read-only audit — no login required ▼" [ref=e53] [cursor=pointer]:
+                - generic [ref=e54]: 🔍
+                - generic [ref=e55]:
+                  - paragraph [ref=e56]: URL Only
+                  - paragraph [ref=e57]: Read-only audit — no login required
+                - generic [ref=e58]: ▼
+  - navigation [ref=e59]:
+    - link "📊 Home" [ref=e60]:
+      - /url: /dashboard
+      - generic [ref=e61]: 📊
+      - generic [ref=e62]: Home
+    - link "📞 Sales" [ref=e63]:
+      - /url: /sales
+      - generic [ref=e64]: 📞
+      - generic [ref=e65]: Sales
+    - button "💬 AK Chat" [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: 💬
+      - generic [ref=e68]: AK Chat
+    - button "☰ Menu" [ref=e69] [cursor=pointer]:
+      - generic [ref=e70]: ☰
+      - generic [ref=e71]: Menu
+```

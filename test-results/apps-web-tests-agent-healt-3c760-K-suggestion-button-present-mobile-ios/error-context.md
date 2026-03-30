@@ -1,0 +1,89 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - link "🏠 Home" [ref=e5]:
+        - /url: /dashboard
+        - generic [ref=e6]: 🏠
+        - generic [ref=e7]: Home
+      - link "✉️ Email" [ref=e8]:
+        - /url: /email-guard
+        - generic [ref=e9]: ✉️
+        - generic [ref=e10]: Email
+      - link "📞 Sales" [ref=e11]:
+        - /url: /sales
+        - generic [ref=e12]: 📞
+        - generic [ref=e13]: Sales
+      - link "📅 Calendar" [ref=e14]:
+        - /url: /calendar
+        - generic [ref=e15]: 📅
+        - generic [ref=e16]: Calendar
+      - button "☰ Menu" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ☰
+        - generic [ref=e19]: Menu
+    - generic [ref=e20]:
+      - banner [ref=e21]:
+        - generic [ref=e22]:
+          - navigation "Breadcrumb" [ref=e23]:
+            - link "Dashboard" [ref=e24]:
+              - /url: /dashboard
+            - generic [ref=e25]: ›
+            - generic [ref=e26]: Voice
+          - generic [ref=e27]:
+            - generic [ref=e28]: 🎙️
+            - heading "Voice" [level=1] [ref=e29]
+          - paragraph [ref=e30]: Sophie AI — outbound calls, lead qualification, meeting booking
+      - generic [ref=e32]:
+        - generic [ref=e34]:
+          - generic [ref=e35]: 🎙️
+          - generic [ref=e36]:
+            - paragraph [ref=e37]: Sophie
+            - paragraph [ref=e38]: AI Sales Agent
+          - generic [ref=e39]: Setup needed
+        - generic [ref=e41]:
+          - generic [ref=e50]: Step 2 of 6
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]:
+                - heading "What should Sophie say?" [level=2] [ref=e54]
+                - paragraph [ref=e55]: We've written options based on your business — just pick the ones that fit.
+              - button "✨ Get AK's suggestions" [ref=e56] [cursor=pointer]
+            - generic [ref=e57]:
+              - generic [ref=e58]: Opening line
+              - textbox [ref=e59]: "Hi, is that {{name}}? This is Sophie calling from {{businessName}}."
+              - paragraph [ref=e60]: "Use {{name}} and {{businessName}} as placeholders"
+            - generic [ref=e61]:
+              - generic [ref=e62]: Hook — choose one
+              - textbox "E.g. We help your industry businesses get more qualified enquiries without the manual follow-up." [ref=e63]
+            - generic [ref=e64]:
+              - generic [ref=e65]: Qualifying question — choose one
+              - textbox "Are you currently handling your own lead follow-up, or do you have someone doing that?" [ref=e66]
+            - generic [ref=e67]:
+              - generic [ref=e68]: Goal of the call
+              - generic [ref=e69]:
+                - button "Book a call" [ref=e70] [cursor=pointer]
+                - button "Get a quote" [ref=e71] [cursor=pointer]
+                - button "Schedule a visit" [ref=e72] [cursor=pointer]
+                - button "Book a consultation" [ref=e73] [cursor=pointer]
+            - generic [ref=e74]:
+              - button "← Back" [ref=e75] [cursor=pointer]
+              - button "Next →" [disabled] [ref=e76]
+  - navigation [ref=e77]:
+    - link "📊 Home" [ref=e78]:
+      - /url: /dashboard
+      - generic [ref=e79]: 📊
+      - generic [ref=e80]: Home
+    - link "📞 Sales" [ref=e81]:
+      - /url: /sales
+      - generic [ref=e82]: 📞
+      - generic [ref=e83]: Sales
+    - button "💬 AK Chat" [ref=e84] [cursor=pointer]:
+      - generic [ref=e85]: 💬
+      - generic [ref=e86]: AK Chat
+    - button "☰ Menu" [ref=e87] [cursor=pointer]:
+      - generic [ref=e88]: ☰
+      - generic [ref=e89]: Menu
+```

@@ -1,0 +1,278 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - link "🏠 Home" [ref=e5] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e6]: 🏠
+        - generic [ref=e7]: Home
+      - link "✉️ Email" [ref=e8] [cursor=pointer]:
+        - /url: /email-guard
+        - generic [ref=e9]: ✉️
+        - generic [ref=e10]: Email
+      - link "📞 Sales" [ref=e11] [cursor=pointer]:
+        - /url: /sales
+        - generic [ref=e12]: 📞
+        - generic [ref=e13]: Sales
+      - link "📅 Calendar" [ref=e14] [cursor=pointer]:
+        - /url: /calendar
+        - generic [ref=e15]: 📅
+        - generic [ref=e16]: Calendar
+      - button "☰ Menu" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ☰
+        - generic [ref=e19]: Menu
+    - generic [ref=e20]:
+      - banner [ref=e21]:
+        - generic [ref=e22]:
+          - navigation "Breadcrumb" [ref=e23]:
+            - link "Dashboard" [ref=e24] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e25]: ›
+            - generic [ref=e26]: Settings
+          - generic [ref=e27]:
+            - generic [ref=e28]: ⚙️
+            - heading "Settings" [level=1] [ref=e29]
+          - paragraph [ref=e30]: Account and workspace configuration
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - heading "Account" [level=2] [ref=e34]
+          - generic [ref=e35]:
+            - generic [ref=e37]: Q
+            - generic [ref=e38]:
+              - paragraph [ref=e39]: QA User
+              - paragraph [ref=e40]: qa@getakai.ai
+              - generic [ref=e41]:
+                - button "#D4AF37" [ref=e42] [cursor=pointer]
+                - button "#3B82F6" [ref=e43] [cursor=pointer]
+                - button "#10B981" [ref=e44] [cursor=pointer]
+                - button "#EF4444" [ref=e45] [cursor=pointer]
+                - button "#8B5CF6" [ref=e46] [cursor=pointer]
+                - button "#F97316" [ref=e47] [cursor=pointer]
+                - button "📷 Upload" [ref=e48] [cursor=pointer]
+            - generic [ref=e49]: Free Trial
+        - generic [ref=e50]:
+          - heading "Business Profile" [level=2] [ref=e51]
+          - paragraph [ref=e52]: This information is used by Sophie AI and your campaign scripts.
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - generic [ref=e55]: Business Name
+              - textbox "e.g. Smith Plumbing" [ref=e56]
+            - generic [ref=e57]:
+              - generic [ref=e58]: Industry
+              - textbox "e.g. Trades, Legal, Real Estate" [ref=e59]
+            - generic [ref=e60]:
+              - generic [ref=e61]: Location
+              - textbox "e.g. Sydney, NSW" [ref=e62]
+          - button "Save Business Profile" [ref=e63] [cursor=pointer]
+        - generic [ref=e64]:
+          - heading "Connected Accounts" [level=2] [ref=e65]
+          - paragraph [ref=e66]: Integration status for all connected services.
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e69]: 📧
+              - paragraph [ref=e71]: Microsoft Outlook
+              - generic [ref=e72]:
+                - generic [ref=e73]: Not connected
+                - link "Connect →" [ref=e74] [cursor=pointer]:
+                  - /url: /email-guard
+            - generic [ref=e75]:
+              - generic [ref=e76]: 📩
+              - paragraph [ref=e78]: Gmail
+              - generic [ref=e79]:
+                - generic [ref=e80]: Not connected
+                - link "Connect →" [ref=e81] [cursor=pointer]:
+                  - /url: /email-guard
+            - generic [ref=e82]:
+              - generic [ref=e83]: 📅
+              - paragraph [ref=e85]: Google Calendar
+              - generic [ref=e86]:
+                - generic [ref=e87]: Not connected
+                - link "Connect →" [ref=e88] [cursor=pointer]:
+                  - /url: /calendar
+            - generic [ref=e89]:
+              - generic [ref=e90]: 📸
+              - paragraph [ref=e92]: Instagram
+              - generic [ref=e93]:
+                - generic [ref=e94]: Not connected
+                - link "Connect →" [ref=e95] [cursor=pointer]:
+                  - /url: /social
+            - generic [ref=e96]:
+              - generic [ref=e97]: 💼
+              - paragraph [ref=e99]: LinkedIn
+              - generic [ref=e100]:
+                - generic [ref=e101]: Not connected
+                - link "Connect →" [ref=e102] [cursor=pointer]:
+                  - /url: /social
+            - generic [ref=e103]:
+              - generic [ref=e104]: 👥
+              - paragraph [ref=e106]: Facebook
+              - generic [ref=e107]:
+                - generic [ref=e108]: Not connected
+                - link "Connect →" [ref=e109] [cursor=pointer]:
+                  - /url: /social
+            - generic [ref=e110]:
+              - generic [ref=e111]: 𝕏
+              - paragraph [ref=e113]: X (Twitter)
+              - generic [ref=e114]:
+                - generic [ref=e115]: Not connected
+                - link "Connect →" [ref=e116] [cursor=pointer]:
+                  - /url: /social
+        - generic [ref=e117]:
+          - heading "Plan" [level=2] [ref=e118]
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - paragraph [ref=e121]: Current Plan
+              - paragraph [ref=e122]: Billing managed via Stripe
+            - generic [ref=e123]: Free Trial
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - paragraph [ref=e126]: Starter
+              - paragraph [ref=e127]: $199/mo
+            - generic [ref=e128]:
+              - paragraph [ref=e129]: Growth
+              - paragraph [ref=e130]: $599/mo
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: Agency
+              - paragraph [ref=e133]: $1,200/mo
+          - link "Upgrade Plan →" [ref=e134] [cursor=pointer]:
+            - /url: /pricing
+        - generic [ref=e135]:
+          - heading "Notification Preferences" [level=2] [ref=e136]
+          - paragraph [ref=e137]: How would you like AKAI to notify you? Select one or more channels.
+          - generic [ref=e138]:
+            - button "📧 Email We'll email you at qa@getakai.ai ✓" [ref=e139] [cursor=pointer]:
+              - generic [ref=e140]: 📧
+              - generic [ref=e141]:
+                - paragraph [ref=e142]: Email
+                - paragraph [ref=e143]: We'll email you at qa@getakai.ai
+              - generic [ref=e145]: ✓
+            - button "💬 SMS We'll text you when a lead qualifies" [ref=e147] [cursor=pointer]:
+              - generic [ref=e148]: 💬
+              - generic [ref=e149]:
+                - paragraph [ref=e150]: SMS
+                - paragraph [ref=e151]: We'll text you when a lead qualifies
+            - button "📱 WhatsApp We'll message you on WhatsApp" [ref=e154] [cursor=pointer]:
+              - generic [ref=e155]: 📱
+              - generic [ref=e156]:
+                - paragraph [ref=e157]: WhatsApp
+                - paragraph [ref=e158]: We'll message you on WhatsApp
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e162]: ✈️
+              - generic [ref=e163]:
+                - paragraph [ref=e164]: Telegram Notifications
+                - paragraph [ref=e165]: Get lead alerts, meeting bookings, and daily briefings in Telegram
+            - link "Connect Telegram →" [ref=e167] [cursor=pointer]:
+              - /url: https://t.me/mmwinningbot?start=test-uid-akai-qa
+            - paragraph [ref=e168]: Click “Connect Telegram” → opens Telegram → bot links your account automatically
+          - button "🔵 Signal Private and encrypted notifications via Signal" [ref=e170] [cursor=pointer]:
+            - generic [ref=e171]: 🔵
+            - generic [ref=e172]:
+              - paragraph [ref=e173]: Signal
+              - paragraph [ref=e174]: Private and encrypted notifications via Signal
+          - button "Save Notifications" [ref=e176] [cursor=pointer]
+        - generic [ref=e177]:
+          - heading "Sophie AI — Voice Settings" [level=2] [ref=e178]
+          - paragraph [ref=e179]: Choose the voice Sophie uses when calling your leads.
+          - generic [ref=e180]:
+            - button "Sophie — Australian English Default Warm, professional Australian accent" [ref=e181] [cursor=pointer]:
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - paragraph [ref=e184]: Sophie — Australian English
+                  - generic [ref=e185]: Default
+                - paragraph [ref=e186]: Warm, professional Australian accent
+            - button "Sophie — American English Neutral American accent" [ref=e189] [cursor=pointer]:
+              - generic [ref=e190]:
+                - paragraph [ref=e192]: Sophie — American English
+                - paragraph [ref=e193]: Neutral American accent
+            - button "Olivia — Australian English Friendly, upbeat tone" [ref=e195] [cursor=pointer]:
+              - generic [ref=e196]:
+                - paragraph [ref=e198]: Olivia — Australian English
+                - paragraph [ref=e199]: Friendly, upbeat tone
+          - generic [ref=e204]: Powered by Bland.ai BTTS
+        - generic [ref=e205]:
+          - heading "Email Guard — Connect your inbox" [level=2] [ref=e206]
+          - paragraph [ref=e207]: Point your enquiry inbox at AKAI. Every inbound email is parsed, classified, and a tailored proposal is generated automatically.
+          - generic [ref=e208]:
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - generic [ref=e211]: Option A — Email Forwarding
+                - generic [ref=e212]: Recommended
+              - paragraph [ref=e213]: "Set up an auto-forward rule in your email client to this address:"
+              - generic [ref=e214]:
+                - code [ref=e215]: inbound@getakai.ai
+                - button "Copy" [ref=e216] [cursor=pointer]
+            - generic [ref=e217]:
+              - generic [ref=e219]: Option B — Webhook
+              - generic [ref=e220]:
+                - code [ref=e221]: https://api-server-production-2a27.up.railway.app/api/mail-guard/inbound
+                - button "Copy" [ref=e222] [cursor=pointer]
+          - link "✉️ View Email Guard →" [ref=e223] [cursor=pointer]:
+            - /url: /email-guard
+        - generic [ref=e224]:
+          - heading "Refer a Friend" [level=2] [ref=e225]
+          - paragraph [ref=e226]:
+            - text: Refer a business to AKAI → they get
+            - strong [ref=e227]: 1 month free
+            - text: · you get
+            - strong [ref=e228]: 1 month free
+            - text: .
+          - generic [ref=e229]:
+            - generic [ref=e230]:
+              - textbox [ref=e231]: getakai.ai/?ref=akai-exq1
+              - button "Copy" [ref=e232] [cursor=pointer]
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - paragraph [ref=e235]: "0"
+                - paragraph [ref=e236]: businesses referred
+              - generic [ref=e238]:
+                - paragraph [ref=e239]: "0"
+                - paragraph [ref=e240]: credits earned
+            - generic [ref=e241]:
+              - link "💼 Share on LinkedIn" [ref=e242] [cursor=pointer]:
+                - /url: https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgetakai.ai%2F%3Fref%3Dakai-exq1
+              - link "✉️ Share via Email" [ref=e243] [cursor=pointer]:
+                - /url: "mailto:?subject=Try AKAI free for a month&body=Hey! I've been using AKAI for my business and thought you'd love it. Use my referral link for a free month: https://getakai.ai/?ref=akai-exq1"
+        - generic [ref=e244]:
+          - heading "Danger Zone" [level=2] [ref=e245]
+          - paragraph [ref=e246]: Manage account actions. Destructive actions cannot be undone.
+          - generic [ref=e247]:
+            - generic [ref=e248]:
+              - paragraph [ref=e249]: Reset Onboarding
+              - paragraph [ref=e250]: Clears your onboarding progress and takes you back to setup.
+            - button "↩ Reset Onboarding" [ref=e251] [cursor=pointer]
+          - generic [ref=e252]:
+            - generic [ref=e253]:
+              - paragraph [ref=e254]: Sign Out
+              - paragraph [ref=e255]: Signs you out of AKAI on this device.
+            - button "🚪 Sign Out" [ref=e256] [cursor=pointer]
+          - generic [ref=e257]:
+            - paragraph [ref=e258]: "This will permanently delete:"
+            - list [ref=e259]:
+              - listitem [ref=e260]: Your business profile and all settings
+              - listitem [ref=e261]: All email connections and OAuth tokens
+              - listitem [ref=e262]: Campaign history and lead data
+              - listitem [ref=e263]: All chat conversations and proposals
+            - generic [ref=e264]:
+              - generic [ref=e265]: Type DELETE to confirm
+              - textbox "Type DELETE to confirm" [ref=e266]
+              - button "🗑️ Delete My Account" [disabled] [ref=e267]
+  - navigation [ref=e268]:
+    - link "📊 Home" [ref=e269] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=e270]: 📊
+      - generic [ref=e271]: Home
+    - link "📞 Sales" [ref=e272] [cursor=pointer]:
+      - /url: /sales
+      - generic [ref=e273]: 📞
+      - generic [ref=e274]: Sales
+    - button "💬 AK Chat" [ref=e275] [cursor=pointer]:
+      - generic [ref=e276]: 💬
+      - generic [ref=e277]: AK Chat
+    - button "☰ Menu" [ref=e278] [cursor=pointer]:
+      - generic [ref=e279]: ☰
+      - generic [ref=e280]: Menu
+```

@@ -1,0 +1,298 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - main [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "AKAI" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]: AKAI
+        - generic [ref=e8]:
+          - link "How It Works" [ref=e9] [cursor=pointer]:
+            - /url: "#how-it-works"
+          - link "Skills" [ref=e10] [cursor=pointer]:
+            - /url: "#modules"
+          - link "Pricing" [ref=e11] [cursor=pointer]:
+            - /url: "#pricing"
+        - generic [ref=e12]:
+          - button "Switch to light mode" [ref=e13] [cursor=pointer]: ☀️
+          - link "Get Started →" [ref=e14] [cursor=pointer]:
+            - /url: /login
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e18]: Now live
+        - generic [ref=e20]: AI business automation from Sydney to New York
+      - heading "Your AI Executive Team. Running 24/7." [level=1] [ref=e22]:
+        - generic [ref=e23]: Your AI Executive Team.
+        - generic [ref=e24]: Running 24/7.
+      - paragraph [ref=e25]:
+        - text: Sales. Marketing. Recruiting. Finance.
+        - text: All automated. All learning. All working while you don't.
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - button "Start free trial" [ref=e28] [cursor=pointer]: Start Free Trial →
+          - button "📞 Get a Demo Call" [ref=e29] [cursor=pointer]
+        - paragraph [ref=e30]: Trusted by Australian SMBs · No credit card required
+      - generic [ref=e32]:
+        - generic [ref=e38]: dashboard.getakai.ai
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - paragraph [ref=e43]: AKAI Dashboard
+              - paragraph [ref=e44]: "All agents running · Last updated: just now"
+            - generic [ref=e47]: 9 Active
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - paragraph [ref=e50]: "14"
+              - paragraph [ref=e51]: Leads Today
+            - generic [ref=e52]:
+              - paragraph [ref=e53]: "3"
+              - paragraph [ref=e54]: Meetings Booked
+            - generic [ref=e55]:
+              - paragraph [ref=e56]: "28"
+              - paragraph [ref=e57]: Calls Made
+            - generic [ref=e58]:
+              - paragraph [ref=e59]: $42k
+              - paragraph [ref=e60]: Revenue Pipeline
+          - generic [ref=e61]:
+            - paragraph [ref=e62]: Live Agent Activity
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - generic [ref=e67]: Just now
+                - generic [ref=e68]: 📧 Email Guard — Proposal sent to Marco V. (Kitchen Reno $9k)
+              - generic [ref=e69]:
+                - generic [ref=e71]: 4m ago
+                - generic [ref=e72]: 📞 Voice — Sophie called James T., meeting booked Thu 10am
+              - generic [ref=e73]:
+                - generic [ref=e75]: 12m ago
+                - generic [ref=e76]: 📱 Social — 3 posts scheduled across LinkedIn & Instagram
+              - generic [ref=e77]:
+                - generic [ref=e79]: 31m ago
+                - generic [ref=e80]: 👤 Recruit — 12 candidates screened, shortlist of 3 ready
+    - generic [ref=e82]:
+      - generic [ref=e83]:
+        - generic [ref=e84]: 10,000+
+        - generic [ref=e85]: leads captured
+      - generic [ref=e86]: ·
+      - generic [ref=e87]:
+        - generic [ref=e88]: 500+
+        - generic [ref=e89]: AI calls made
+      - generic [ref=e90]: ·
+      - generic [ref=e91]:
+        - generic [ref=e92]: 98%
+        - generic [ref=e93]: uptime
+      - generic [ref=e94]: ·
+      - generic [ref=e95]:
+        - generic [ref=e96]: Powered by
+        - generic [ref=e97]: Claude AI
+        - generic [ref=e98]: Firebase
+        - generic [ref=e99]: Stripe
+    - generic [ref=e102]:
+      - generic [ref=e103]:
+        - paragraph [ref=e104]: How it works
+        - heading "Up and running in minutes." [level=2] [ref=e105]
+        - paragraph [ref=e106]: No developers. No agencies. No waiting.
+      - generic [ref=e107]:
+        - generic [ref=e109]:
+          - generic [ref=e110]: "1"
+          - generic [ref=e111]: 💬
+          - generic [ref=e113]: 30 seconds
+          - heading "Describe your business" [level=3] [ref=e114]
+          - paragraph [ref=e115]: Tell AKAI your industry, who you sell to, and what you want to automate. Plain English. No setup required.
+        - generic [ref=e116]:
+          - generic [ref=e117]: "2"
+          - generic [ref=e118]: ⚡
+          - generic [ref=e120]: Instant
+          - heading "AKAI builds your team" [level=3] [ref=e121]
+          - paragraph [ref=e122]: Your AI executives spin up immediately — Sales, Email, Calendar, Social, Recruiter — all configured and ready.
+        - generic [ref=e123]:
+          - generic [ref=e124]: "3"
+          - generic [ref=e125]: 🚀
+          - generic [ref=e127]: 24/7
+          - heading "Watch it work" [level=3] [ref=e128]
+          - paragraph [ref=e129]: Leads get followed up. Meetings get booked. Content gets posted. You get a report every morning. It never stops.
+    - generic [ref=e132]:
+      - generic [ref=e133]:
+        - paragraph [ref=e134]: Results
+        - heading "Real businesses. Real results." [level=2] [ref=e135]
+      - generic [ref=e136]:
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - img [ref=e139]
+            - img [ref=e141]
+            - img [ref=e143]
+            - img [ref=e145]
+            - img [ref=e147]
+          - paragraph [ref=e149]: “We booked 12 meetings in the first week. I didn't make a single call.”
+          - generic [ref=e150]:
+            - generic [ref=e151]: MV
+            - generic [ref=e152]:
+              - paragraph [ref=e153]: Marco V.
+              - paragraph [ref=e154]: Kitchen Studio Owner
+        - generic [ref=e155]:
+          - generic [ref=e156]:
+            - img [ref=e157]
+            - img [ref=e159]
+            - img [ref=e161]
+            - img [ref=e163]
+            - img [ref=e165]
+          - paragraph [ref=e167]: “The AI recruiter screened 47 candidates and gave me a shortlist of 6. Took 20 minutes.”
+          - generic [ref=e168]:
+            - generic [ref=e169]: SK
+            - generic [ref=e170]:
+              - paragraph [ref=e171]: Sarah K.
+              - paragraph [ref=e172]: Operations Manager
+        - generic [ref=e173]:
+          - generic [ref=e174]:
+            - img [ref=e175]
+            - img [ref=e177]
+            - img [ref=e179]
+            - img [ref=e181]
+            - img [ref=e183]
+          - paragraph [ref=e185]: “Our Google Ads ROAS went from 1.8x to 4.2x in 3 weeks.”
+          - generic [ref=e186]:
+            - generic [ref=e187]: JT
+            - generic [ref=e188]:
+              - paragraph [ref=e189]: James T.
+              - paragraph [ref=e190]: E-commerce Director
+    - generic [ref=e193]:
+      - generic [ref=e194]:
+        - paragraph [ref=e195]: See it live
+        - heading "Lead in. Deal closed. 90 seconds." [level=2] [ref=e196]
+        - paragraph [ref=e197]: Watch AKAI turn a cold enquiry into a booked meeting and a closed sale — without you lifting a finger.
+      - generic [ref=e198]:
+        - generic [ref=e204]: AKAI · Live demo
+        - generic [ref=e205]:
+          - button "📧 Lead emails in" [ref=e206] [cursor=pointer]:
+            - generic [ref=e207]: 📧
+            - generic [ref=e208]: Lead emails in
+          - button "🧠 AKAI scores & responds" [ref=e209] [cursor=pointer]:
+            - generic [ref=e210]: 🧠
+            - generic [ref=e211]: AKAI scores & responds
+          - button "✉️ Proposal sent" [ref=e212] [cursor=pointer]:
+            - generic [ref=e213]: ✉️
+            - generic [ref=e214]: Proposal sent
+          - button "📅 Meeting booked" [ref=e215] [cursor=pointer]:
+            - generic [ref=e216]: 📅
+            - generic [ref=e217]: Meeting booked
+          - button "🏆 Deal closed" [ref=e218] [cursor=pointer]:
+            - generic [ref=e219]: 🏆
+            - generic [ref=e220]: Deal closed
+        - generic [ref=e222]:
+          - generic [ref=e223]: ▶
+          - generic [ref=e224]:
+            - paragraph [ref=e225]: Watch the 90-second demo
+            - paragraph [ref=e226]: See how AKAI handles a real lead from first email to closed deal — automatically.
+          - button "▶ Watch the 90-second demo" [ref=e227] [cursor=pointer]
+    - generic [ref=e230]:
+      - generic [ref=e231]:
+        - paragraph [ref=e232]: Intelligence
+        - heading "The AI that actually gets better" [level=2] [ref=e233]
+        - paragraph [ref=e234]: "AKAI is built on one principle: relentless, continuous improvement. Every interaction is an input. Every result is a lesson."
+      - generic [ref=e235]:
+        - generic [ref=e237]:
+          - generic [ref=e238]: "1"
+          - generic [ref=e239]: 👁️
+          - heading "Watches" [level=3] [ref=e240]
+          - paragraph [ref=e241]: Every call, email, click, and reply is logged automatically. Nothing is missed.
+        - generic [ref=e242]:
+          - generic [ref=e243]: "2"
+          - generic [ref=e244]: 🧠
+          - heading "Learns" [level=3] [ref=e245]
+          - paragraph [ref=e246]: "Pattern engine finds what works: best send times, winning tones, optimal follow-up windows."
+        - generic [ref=e247]:
+          - generic [ref=e248]: "3"
+          - generic [ref=e249]: 🚀
+          - heading "Improves" [level=3] [ref=e250]
+          - paragraph [ref=e251]: Proposals, calls, and timing automatically adapt. Results compound. Every day is better than the last.
+    - generic [ref=e254]:
+      - generic [ref=e255]:
+        - generic [ref=e256]: Intelligence layer
+        - heading "The AI that learns while you sleep" [level=2] [ref=e258]
+        - paragraph [ref=e259]: Four modules. One brain. Every failure becomes a lesson. Every win becomes a pattern.
+      - generic [ref=e260]:
+        - generic [ref=e261]:
+          - generic [ref=e262]: 📊
+          - generic [ref=e263]:
+            - heading "Pattern Recognition" [level=3] [ref=e264]
+            - paragraph [ref=e265]: Finds what converts and doubles down on it
+        - generic [ref=e266]:
+          - generic [ref=e267]: 🤖
+          - generic [ref=e268]:
+            - heading "Autonomous Decisions" [level=3] [ref=e269]
+            - paragraph [ref=e270]: Follow-ups happen without you asking
+        - generic [ref=e271]:
+          - generic [ref=e272]: 🛡️
+          - generic [ref=e273]:
+            - heading "Self-Healing" [level=3] [ref=e274]
+            - paragraph [ref=e275]: Failures get root-caused and prevented automatically
+        - generic [ref=e276]:
+          - generic [ref=e277]: 📈
+          - generic [ref=e278]:
+            - heading "Adaptive Copy" [level=3] [ref=e279]
+            - paragraph [ref=e280]: Every proposal gets smarter with each reply
+      - generic [ref=e281]:
+        - generic [ref=e284]: ⚡ Real-time intelligence feed
+        - generic [ref=e285]:
+          - generic [ref=e286]:
+            - generic [ref=e287]: Just now
+            - generic [ref=e288]: 📧 Email Guard detected high-intent enquiry — proposal sent in 12 seconds
+          - generic [ref=e289]:
+            - generic [ref=e290]: 4m ago
+            - generic [ref=e291]: "🧠 Pattern: Tuesday 9am sends convert 3× better — schedule updated"
+          - generic [ref=e292]:
+            - generic [ref=e293]: 11m ago
+            - generic [ref=e294]: "📞 Sophie called lead #47 — meeting booked, logged for analysis"
+          - generic [ref=e295]:
+            - generic [ref=e296]: 28m ago
+            - generic [ref=e297]: 🛡️ Root cause detected for missed follow-up — prevention gate added
+    - generic [ref=e300]:
+      - heading "Your competitors are already using AI." [level=2] [ref=e301]:
+        - text: Your competitors are
+        - text: already using AI.
+      - paragraph [ref=e302]: The question is whether you're ahead of them or behind.
+      - button "Start your free trial" [ref=e303] [cursor=pointer]: Start Your Free Trial →
+      - paragraph [ref=e304]: No credit card · No setup · Cancel any time
+    - generic [ref=e306]:
+      - generic [ref=e307]:
+        - generic [ref=e308]:
+          - link "AKAI" [ref=e309] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e310]: AKAI
+          - paragraph [ref=e311]: Your AI Executive Team
+          - link "hello@getakai.ai" [ref=e312] [cursor=pointer]:
+            - /url: mailto:hello@getakai.ai
+        - generic [ref=e313]:
+          - generic [ref=e314]:
+            - paragraph [ref=e315]: Product
+            - link "How It Works" [ref=e316] [cursor=pointer]:
+              - /url: "#how-it-works"
+            - link "Skills" [ref=e317] [cursor=pointer]:
+              - /url: "#modules"
+            - link "Pricing" [ref=e318] [cursor=pointer]:
+              - /url: "#pricing"
+          - generic [ref=e319]:
+            - paragraph [ref=e320]: Legal
+            - link "Privacy Policy" [ref=e321] [cursor=pointer]:
+              - /url: /privacy
+            - link "Terms of Service" [ref=e322] [cursor=pointer]:
+              - /url: /terms
+      - generic [ref=e323]:
+        - paragraph [ref=e324]:
+          - text: © 2026 AKAI. All rights reserved. ·
+          - link "getakai.ai" [ref=e325] [cursor=pointer]:
+            - /url: https://getakai.ai
+          - text: · Made in Sydney 🇦🇺
+        - link "@getakai_ai" [ref=e327] [cursor=pointer]:
+          - /url: https://x.com/getakai_ai
+          - img [ref=e328]
+          - text: "@getakai_ai"
+    - generic [ref=e331]:
+      - generic [ref=e332]:
+        - generic [ref=e333]: AK
+        - generic [ref=e334]: Your AI Business Partner
+      - button "Chat with AK" [ref=e335] [cursor=pointer]:
+        - img [ref=e336]
+```

@@ -1,0 +1,122 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - link "🏠 Home" [ref=e5]:
+        - /url: /dashboard
+        - generic [ref=e6]: 🏠
+        - generic [ref=e7]: Home
+      - link "✉️ Email" [ref=e8]:
+        - /url: /email-guard
+        - generic [ref=e9]: ✉️
+        - generic [ref=e10]: Email
+      - link "📞 Sales" [ref=e11]:
+        - /url: /sales
+        - generic [ref=e12]: 📞
+        - generic [ref=e13]: Sales
+      - link "📅 Calendar" [ref=e14]:
+        - /url: /calendar
+        - generic [ref=e15]: 📅
+        - generic [ref=e16]: Calendar
+      - button "☰ Menu" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ☰
+        - generic [ref=e19]: Menu
+    - generic [ref=e20]:
+      - banner [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Good afternoon, QA User 🚀" [level=1] [ref=e23]
+          - paragraph [ref=e24]: QA User
+          - paragraph [ref=e25]: qa@getakai.ai
+        - generic [ref=e26]:
+          - generic [ref=e29]: AKAI live
+          - button "Sign out" [ref=e30] [cursor=pointer]
+      - generic [ref=e32]:
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - img [ref=e37]
+              - generic [ref=e40]:
+                - generic [ref=e41]: "0"
+                - generic [ref=e42]: /100
+            - generic [ref=e43]:
+              - paragraph [ref=e44]: Weekly Score
+              - paragraph [ref=e45]: AKAI pattern engine
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - paragraph [ref=e48]: 📄
+              - paragraph [ref=e49]: "0"
+              - paragraph [ref=e50]: Proposals this week
+            - generic [ref=e51]:
+              - paragraph [ref=e52]: 📅
+              - paragraph [ref=e53]: "0"
+              - paragraph [ref=e54]: Meetings this week
+            - generic [ref=e55]:
+              - paragraph [ref=e56]: 🎯
+              - paragraph [ref=e57]: "0"
+              - paragraph [ref=e58]: Active leads
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Quick Actions
+          - generic [ref=e61]:
+            - button "📞 Start a call" [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: 📞
+              - generic [ref=e64]: Start a call
+            - button "✍️ Generate content" [ref=e65] [cursor=pointer]:
+              - generic [ref=e66]: ✍️
+              - generic [ref=e67]: Generate content
+            - button "🎯 View leads" [ref=e68] [cursor=pointer]:
+              - generic [ref=e69]: 🎯
+              - generic [ref=e70]: View leads
+            - button "🔍 Run health check" [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]: 🔍
+              - generic [ref=e73]: Run health check
+        - generic [ref=e74]:
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - heading "📋 Today" [level=2] [ref=e78]
+              - generic [ref=e79]:
+                - generic [ref=e80]: Live feed
+                - button "↻" [ref=e81] [cursor=pointer]
+            - generic [ref=e82]:
+              - paragraph [ref=e83]: 🤫
+              - paragraph [ref=e84]: No activity yet — get started above
+              - paragraph [ref=e85]: AKAI is watching for activity
+          - generic [ref=e87]:
+            - generic [ref=e88]:
+              - heading "⚡ Now" [level=2] [ref=e89]
+              - generic [ref=e90]: Active
+            - generic [ref=e91]:
+              - paragraph [ref=e92]: ✅
+              - paragraph [ref=e93]: All clear
+              - paragraph [ref=e94]: AKAI is on top of everything
+          - generic [ref=e96]:
+            - heading "🙋 Needs you" [level=2] [ref=e99]
+            - generic [ref=e100]:
+              - paragraph [ref=e101]: 🎉
+              - paragraph [ref=e102]: Nothing needs you right now
+              - paragraph [ref=e103]: AKAI is handling everything autonomously
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - heading "🧠 What AKAI learned this week" [level=2] [ref=e107]
+            - generic [ref=e108]: Last 7 days
+          - generic [ref=e109]:
+            - paragraph [ref=e110]: No patterns yet — AKAI learns as you use it.
+            - paragraph [ref=e111]: Once you run campaigns and receive leads, AKAI will surface what's working.
+  - navigation [ref=e112]:
+    - link "📊 Home" [ref=e113]:
+      - /url: /dashboard
+      - generic [ref=e114]: 📊
+      - generic [ref=e115]: Home
+    - link "📞 Sales" [ref=e116]:
+      - /url: /sales
+      - generic [ref=e117]: 📞
+      - generic [ref=e118]: Sales
+    - button "💬 AK Chat" [ref=e119] [cursor=pointer]:
+      - generic [ref=e120]: 💬
+      - generic [ref=e121]: AK Chat
+    - button "☰ Menu" [ref=e122] [cursor=pointer]:
+      - generic [ref=e123]: ☰
+      - generic [ref=e124]: Menu
+```

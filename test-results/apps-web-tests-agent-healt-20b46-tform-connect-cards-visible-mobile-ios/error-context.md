@@ -1,0 +1,137 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - link "🏠 Home" [ref=e5]:
+        - /url: /dashboard
+        - generic [ref=e6]: 🏠
+        - generic [ref=e7]: Home
+      - link "✉️ Email" [ref=e8]:
+        - /url: /email-guard
+        - generic [ref=e9]: ✉️
+        - generic [ref=e10]: Email
+      - link "📞 Sales" [ref=e11]:
+        - /url: /sales
+        - generic [ref=e12]: 📞
+        - generic [ref=e13]: Sales
+      - link "📅 Calendar" [ref=e14]:
+        - /url: /calendar
+        - generic [ref=e15]: 📅
+        - generic [ref=e16]: Calendar
+      - button "☰ Menu" [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ☰
+        - generic [ref=e19]: Menu
+    - generic [ref=e20]:
+      - banner [ref=e21]:
+        - generic [ref=e22]:
+          - navigation "Breadcrumb" [ref=e23]:
+            - link "Dashboard" [ref=e24]:
+              - /url: /dashboard
+            - generic [ref=e25]: ›
+            - generic [ref=e26]: Social
+          - generic [ref=e27]:
+            - generic [ref=e28]: 📱
+            - heading "Social" [level=1] [ref=e29]
+          - paragraph [ref=e30]: AI-powered content for Instagram, LinkedIn, Facebook & X
+        - generic [ref=e31]: Live
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e36]: 📡
+              - generic [ref=e37]: Reach
+            - paragraph [ref=e38]: 4,200
+            - paragraph [ref=e39]: this month
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: 💬
+              - generic [ref=e43]: Engagement
+            - paragraph [ref=e44]: 8.3%
+            - paragraph [ref=e45]: avg rate
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - generic [ref=e48]: 📝
+              - generic [ref=e49]: Posts
+            - paragraph [ref=e50]: "12"
+            - paragraph [ref=e51]: this month
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - generic [ref=e54]: 🏆
+              - generic [ref=e55]: Best Post
+            - paragraph [ref=e56]: "\"Why AI is transforming...\""
+            - paragraph [ref=e57]: top performer
+        - generic [ref=e58]:
+          - heading "Connect Accounts" [level=2] [ref=e59]
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: 📸
+              - generic [ref=e63]:
+                - generic [ref=e64]: Instagram
+                - generic [ref=e65]: Not connected
+              - button "Connect Instagram →" [ref=e66] [cursor=pointer]
+            - generic [ref=e67]:
+              - generic [ref=e68]: 💼
+              - generic [ref=e69]:
+                - generic [ref=e70]: LinkedIn
+                - generic [ref=e71]: Not connected
+              - button "Connect LinkedIn →" [ref=e72] [cursor=pointer]
+            - generic [ref=e73]:
+              - generic [ref=e74]: 👥
+              - generic [ref=e75]:
+                - generic [ref=e76]: Facebook
+                - generic [ref=e77]: Not connected
+              - button "Connect Facebook →" [ref=e78] [cursor=pointer]
+            - generic [ref=e79]:
+              - generic [ref=e80]: 𝕏
+              - generic [ref=e81]:
+                - generic [ref=e82]: X (Twitter)
+                - generic [ref=e83]: Not connected
+              - button "Connect X →" [ref=e84] [cursor=pointer]
+        - generic [ref=e85]:
+          - button "✨ Content Generator" [ref=e86] [cursor=pointer]
+          - button "⚡ Quick Post" [ref=e87] [cursor=pointer]
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - heading "What do you want to post about?" [level=3] [ref=e90]
+            - paragraph [ref=e91]: Describe your topic, product, or idea — AK writes it for all platforms simultaneously.
+            - generic [ref=e92]:
+              - paragraph [ref=e93]: Tone
+              - generic [ref=e94]:
+                - button "🎯 Professional" [ref=e95] [cursor=pointer]
+                - button "😊 Casual" [ref=e96] [cursor=pointer]
+                - button "😂 Funny" [ref=e97] [cursor=pointer]
+                - button "💡 Inspirational" [ref=e98] [cursor=pointer]
+            - textbox "e.g. We just launched a new AI tool that helps SMBs get more leads without cold calling..." [ref=e99]
+            - generic [ref=e100]:
+              - generic [ref=e101]: Cmd+Enter to generate
+              - button "✨ Generate Posts" [disabled] [ref=e102]
+          - generic [ref=e103]:
+            - generic [ref=e104]: ✨
+            - paragraph [ref=e105]: Your generated content will appear here — one card per platform, editable and ready to copy or schedule.
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - heading "Scheduled Posts" [level=2] [ref=e108]
+            - generic [ref=e109]: 0 posts
+          - generic [ref=e110]:
+            - generic [ref=e111]: 🗓️
+            - paragraph [ref=e112]: No posts scheduled
+            - paragraph [ref=e113]: Generate content above to get started
+  - navigation [ref=e114]:
+    - link "📊 Home" [ref=e115]:
+      - /url: /dashboard
+      - generic [ref=e116]: 📊
+      - generic [ref=e117]: Home
+    - link "📞 Sales" [ref=e118]:
+      - /url: /sales
+      - generic [ref=e119]: 📞
+      - generic [ref=e120]: Sales
+    - button "💬 AK Chat" [ref=e121] [cursor=pointer]:
+      - generic [ref=e122]: 💬
+      - generic [ref=e123]: AK Chat
+    - button "☰ Menu" [ref=e124] [cursor=pointer]:
+      - generic [ref=e125]: ☰
+      - generic [ref=e126]: Menu
+```

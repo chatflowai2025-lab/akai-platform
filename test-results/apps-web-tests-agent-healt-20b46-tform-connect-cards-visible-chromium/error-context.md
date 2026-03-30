@@ -1,0 +1,213 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "AKAI" [ref=e6] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e7]: AKAI
+      - link "🏠 Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e10]: 🏠
+        - generic [ref=e11]: Dashboard
+      - navigation [ref=e12]:
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: Core
+          - generic [ref=e15]:
+            - link "📞 Sales ⌘1" [ref=e16] [cursor=pointer]:
+              - /url: /sales
+              - generic [ref=e17]: 📞
+              - generic [ref=e18]: Sales
+              - generic [ref=e22]: ⌘1
+            - link "🎙️ Voice ⌘2" [ref=e23] [cursor=pointer]:
+              - /url: /voice
+              - generic [ref=e24]: 🎙️
+              - generic [ref=e25]: Voice
+              - generic [ref=e29]: ⌘2
+            - link "✉️ Email ⌘3" [ref=e30] [cursor=pointer]:
+              - /url: /email-guard
+              - generic [ref=e31]: ✉️
+              - generic [ref=e32]: Email
+              - generic [ref=e36]: ⌘3
+            - link "📅 Calendar ⌘4" [ref=e37] [cursor=pointer]:
+              - /url: /calendar
+              - generic [ref=e38]: 📅
+              - generic [ref=e39]: Calendar
+              - generic [ref=e43]: ⌘4
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Growth
+          - generic [ref=e46]:
+            - link "📣 Ads ⌘5" [ref=e47] [cursor=pointer]:
+              - /url: /ads
+              - generic [ref=e48]: 📣
+              - generic [ref=e49]: Ads
+              - generic [ref=e53]: ⌘5
+            - link "📱 Social ⌘6" [ref=e54] [cursor=pointer]:
+              - /url: /social
+              - generic [ref=e55]: 📱
+              - generic [ref=e56]: Social
+              - generic [ref=e60]: ⌘6
+            - link "🎯 Recruit ⌘7" [ref=e61] [cursor=pointer]:
+              - /url: /recruit
+              - generic [ref=e62]: 🎯
+              - generic [ref=e63]: Recruit
+              - generic [ref=e67]: ⌘7
+            - link "🌐 Web ⌘8" [ref=e68] [cursor=pointer]:
+              - /url: /web
+              - generic [ref=e69]: 🌐
+              - generic [ref=e70]: Web
+              - generic [ref=e74]: ⌘8
+            - link "📄 Proposals ⌘9" [ref=e75] [cursor=pointer]:
+              - /url: /proposals
+              - generic [ref=e76]: 📄
+              - generic [ref=e77]: Proposals
+              - generic [ref=e81]: ⌘9
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: Intelligence
+          - generic [ref=e84]:
+            - link "🩺 Health ⌘H" [ref=e85] [cursor=pointer]:
+              - /url: /health
+              - generic [ref=e86]: 🩺
+              - generic [ref=e87]: Health
+              - generic [ref=e91]: ⌘H
+            - link "🛡️ Code Shield ⌘K" [ref=e92] [cursor=pointer]:
+              - /url: /dashboard/code-shield
+              - generic [ref=e93]: 🛡️
+              - generic [ref=e94]: Code Shield
+              - generic [ref=e98]: ⌘K
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: 🎨
+          - generic [ref=e102]: Theme
+          - button "Switch to light mode" [ref=e103] [cursor=pointer]: ☀️
+        - link "⚙️ Settings" [ref=e104] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e105]: ⚙️
+          - generic [ref=e106]: Settings
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]: Q
+            - paragraph [ref=e110]: qa@getakai.ai
+          - button "↩ Sign Out" [ref=e111] [cursor=pointer]:
+            - generic [ref=e112]: ↩
+            - generic [ref=e113]: Sign Out
+    - generic [ref=e114]:
+      - banner [ref=e115]:
+        - generic [ref=e116]:
+          - navigation "Breadcrumb" [ref=e117]:
+            - link "Dashboard" [ref=e118] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e119]: ›
+            - generic [ref=e120]: Social
+          - generic [ref=e121]:
+            - generic [ref=e122]: 📱
+            - heading "Social" [level=1] [ref=e123]
+          - paragraph [ref=e124]: AI-powered content for Instagram, LinkedIn, Facebook & X
+        - generic [ref=e125]: Live
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - generic [ref=e130]: 📡
+              - generic [ref=e131]: Reach
+            - paragraph [ref=e132]: 4,200
+            - paragraph [ref=e133]: this month
+          - generic [ref=e134]:
+            - generic [ref=e135]:
+              - generic [ref=e136]: 💬
+              - generic [ref=e137]: Engagement
+            - paragraph [ref=e138]: 8.3%
+            - paragraph [ref=e139]: avg rate
+          - generic [ref=e140]:
+            - generic [ref=e141]:
+              - generic [ref=e142]: 📝
+              - generic [ref=e143]: Posts
+            - paragraph [ref=e144]: "12"
+            - paragraph [ref=e145]: this month
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e148]: 🏆
+              - generic [ref=e149]: Best Post
+            - paragraph [ref=e150]: "\"Why AI is transforming...\""
+            - paragraph [ref=e151]: top performer
+        - generic [ref=e152]:
+          - heading "Connect Accounts" [level=2] [ref=e153]
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - generic [ref=e156]: 📸
+              - generic [ref=e157]:
+                - generic [ref=e158]: Instagram
+                - generic [ref=e159]: Not connected
+              - button "Connect Instagram →" [ref=e160] [cursor=pointer]
+            - generic [ref=e161]:
+              - generic [ref=e162]: 💼
+              - generic [ref=e163]:
+                - generic [ref=e164]: LinkedIn
+                - generic [ref=e165]: Not connected
+              - button "Connect LinkedIn →" [ref=e166] [cursor=pointer]
+            - generic [ref=e167]:
+              - generic [ref=e168]: 👥
+              - generic [ref=e169]:
+                - generic [ref=e170]: Facebook
+                - generic [ref=e171]: Not connected
+              - button "Connect Facebook →" [ref=e172] [cursor=pointer]
+            - generic [ref=e173]:
+              - generic [ref=e174]: 𝕏
+              - generic [ref=e175]:
+                - generic [ref=e176]: X (Twitter)
+                - generic [ref=e177]: Not connected
+              - button "Connect X →" [ref=e178] [cursor=pointer]
+        - generic [ref=e179]:
+          - button "✨ Content Generator" [ref=e180] [cursor=pointer]
+          - button "⚡ Quick Post" [ref=e181] [cursor=pointer]
+        - generic [ref=e182]:
+          - generic [ref=e183]:
+            - heading "What do you want to post about?" [level=3] [ref=e184]
+            - paragraph [ref=e185]: Describe your topic, product, or idea — AK writes it for all platforms simultaneously.
+            - generic [ref=e186]:
+              - paragraph [ref=e187]: Tone
+              - generic [ref=e188]:
+                - button "🎯 Professional" [ref=e189] [cursor=pointer]
+                - button "😊 Casual" [ref=e190] [cursor=pointer]
+                - button "😂 Funny" [ref=e191] [cursor=pointer]
+                - button "💡 Inspirational" [ref=e192] [cursor=pointer]
+            - textbox "e.g. We just launched a new AI tool that helps SMBs get more leads without cold calling..." [ref=e193]
+            - generic [ref=e194]:
+              - generic [ref=e195]: Cmd+Enter to generate
+              - button "✨ Generate Posts" [disabled] [ref=e196]
+          - generic [ref=e197]:
+            - generic [ref=e198]: ✨
+            - paragraph [ref=e199]: Your generated content will appear here — one card per platform, editable and ready to copy or schedule.
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - heading "Scheduled Posts" [level=2] [ref=e202]
+            - generic [ref=e203]: 0 posts
+          - generic [ref=e204]:
+            - generic [ref=e205]: 🗓️
+            - paragraph [ref=e206]: No posts scheduled
+            - paragraph [ref=e207]: Generate content above to get started
+    - complementary [ref=e209]:
+      - generic [ref=e211]:
+        - generic [ref=e212]: AK
+        - generic [ref=e213]:
+          - generic [ref=e214]: AK
+          - generic [ref=e215]: Your AI Business Partner
+        - button "🧠" [ref=e216] [cursor=pointer]
+      - generic [ref=e218]:
+        - generic [ref=e221]: Hey! I'm AK — your AI Business Partner. Ask me anything, launch a campaign, or just tell me what you need.
+        - generic [ref=e222]:
+          - paragraph [ref=e223]: Try asking
+          - generic [ref=e224]:
+            - button "❓ What should I do first?" [ref=e225] [cursor=pointer]
+            - button "🔍 Run a health check on my site" [ref=e226] [cursor=pointer]
+            - button "📊 Show my leads" [ref=e227] [cursor=pointer]
+            - button "✉️ Connect my email" [ref=e228] [cursor=pointer]
+            - button "🤖 How does AK work?" [ref=e229] [cursor=pointer]
+      - generic [ref=e231]:
+        - button "📎" [ref=e232] [cursor=pointer]
+        - textbox "Message AK" [ref=e233]:
+          - /placeholder: Ask AK anything...
+        - button "Send message" [disabled] [ref=e234]: →
+```

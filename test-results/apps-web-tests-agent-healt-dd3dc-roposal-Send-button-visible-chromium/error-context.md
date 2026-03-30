@@ -1,0 +1,177 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "AKAI" [ref=e6] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e7]: AKAI
+      - link "🏠 Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e10]: 🏠
+        - generic [ref=e11]: Dashboard
+      - navigation [ref=e12]:
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: Core
+          - generic [ref=e15]:
+            - link "📞 Sales ⌘1" [ref=e16] [cursor=pointer]:
+              - /url: /sales
+              - generic [ref=e17]: 📞
+              - generic [ref=e18]: Sales
+              - generic [ref=e22]: ⌘1
+            - link "🎙️ Voice ⌘2" [ref=e23] [cursor=pointer]:
+              - /url: /voice
+              - generic [ref=e24]: 🎙️
+              - generic [ref=e25]: Voice
+              - generic [ref=e29]: ⌘2
+            - link "✉️ Email ⌘3" [ref=e30] [cursor=pointer]:
+              - /url: /email-guard
+              - generic [ref=e31]: ✉️
+              - generic [ref=e32]: Email
+              - generic [ref=e36]: ⌘3
+            - link "📅 Calendar ⌘4" [ref=e37] [cursor=pointer]:
+              - /url: /calendar
+              - generic [ref=e38]: 📅
+              - generic [ref=e39]: Calendar
+              - generic [ref=e43]: ⌘4
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Growth
+          - generic [ref=e46]:
+            - link "📣 Ads ⌘5" [ref=e47] [cursor=pointer]:
+              - /url: /ads
+              - generic [ref=e48]: 📣
+              - generic [ref=e49]: Ads
+              - generic [ref=e53]: ⌘5
+            - link "📱 Social ⌘6" [ref=e54] [cursor=pointer]:
+              - /url: /social
+              - generic [ref=e55]: 📱
+              - generic [ref=e56]: Social
+              - generic [ref=e60]: ⌘6
+            - link "🎯 Recruit ⌘7" [ref=e61] [cursor=pointer]:
+              - /url: /recruit
+              - generic [ref=e62]: 🎯
+              - generic [ref=e63]: Recruit
+              - generic [ref=e67]: ⌘7
+            - link "🌐 Web ⌘8" [ref=e68] [cursor=pointer]:
+              - /url: /web
+              - generic [ref=e69]: 🌐
+              - generic [ref=e70]: Web
+              - generic [ref=e74]: ⌘8
+            - link "📄 Proposals ⌘9" [ref=e75] [cursor=pointer]:
+              - /url: /proposals
+              - generic [ref=e76]: 📄
+              - generic [ref=e77]: Proposals
+              - generic [ref=e81]: ⌘9
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: Intelligence
+          - generic [ref=e84]:
+            - link "🩺 Health ⌘H" [ref=e85] [cursor=pointer]:
+              - /url: /health
+              - generic [ref=e86]: 🩺
+              - generic [ref=e87]: Health
+              - generic [ref=e91]: ⌘H
+            - link "🛡️ Code Shield ⌘K" [ref=e92] [cursor=pointer]:
+              - /url: /dashboard/code-shield
+              - generic [ref=e93]: 🛡️
+              - generic [ref=e94]: Code Shield
+              - generic [ref=e98]: ⌘K
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: 🎨
+          - generic [ref=e102]: Theme
+          - button "Switch to light mode" [ref=e103] [cursor=pointer]: ☀️
+        - link "⚙️ Settings" [ref=e104] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e105]: ⚙️
+          - generic [ref=e106]: Settings
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]: Q
+            - paragraph [ref=e110]: qa@getakai.ai
+          - button "↩ Sign Out" [ref=e111] [cursor=pointer]:
+            - generic [ref=e112]: ↩
+            - generic [ref=e113]: Sign Out
+    - generic [ref=e115]:
+      - banner [ref=e116]:
+        - generic [ref=e117]:
+          - navigation "Breadcrumb" [ref=e118]:
+            - link "Dashboard" [ref=e119] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e120]: ›
+            - generic [ref=e121]: Email Guard
+          - heading "✉️ Email Guard" [level=1] [ref=e122]
+          - paragraph [ref=e123]: Reads enquiries, generates proposals automatically
+        - button "⚙️ Help" [ref=e124] [cursor=pointer]
+      - generic [ref=e125]:
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - heading "Connected inboxes" [level=2] [ref=e128]
+            - paragraph [ref=e129]: Connect one or both — AKAI monitors all of them
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - img [ref=e133]
+              - generic [ref=e138]:
+                - paragraph [ref=e139]: Microsoft / Outlook
+                - paragraph [ref=e140]: Not connected
+            - button "Connect →" [ref=e141] [cursor=pointer]
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - img [ref=e145]
+              - generic [ref=e150]:
+                - paragraph [ref=e151]: Gmail / Google Workspace
+                - paragraph [ref=e152]: Not connected
+            - button "Connect →" [ref=e153] [cursor=pointer]
+          - paragraph [ref=e154]: Connect Gmail to read enquiries and send proposals — you control what gets sent.
+        - generic [ref=e155]:
+          - generic [ref=e156]:
+            - heading "This is what lands in your dashboard" [level=2] [ref=e157]
+            - paragraph [ref=e158]: Connect your inbox and enquiries like this arrive automatically — with proposals already drafted.
+          - generic [ref=e159]:
+            - generic [ref=e160]:
+              - generic [ref=e161]:
+                - paragraph [ref=e164]: Kitchen renovation enquiry
+                - paragraph [ref=e165]: john.smith@gmail.com
+                - paragraph [ref=e166]: Hi, I'm interested in a custom kitchen for my Mosman home, budget around $40k…
+              - generic [ref=e167]: ✨ Proposal ready
+            - generic [ref=e168]:
+              - paragraph [ref=e169]: AI-generated proposal
+              - generic [ref=e170]:
+                - paragraph [ref=e171]: Hi John,
+                - paragraph [ref=e172]: Thank you for reaching out about your kitchen renovation in Mosman. Based on your budget of $40,000, we'd love to create something exceptional for you…
+                - paragraph [ref=e173]: Our custom cabinetry starts from premium European materials, and we'll include a full design consultation at no charge. We've completed over 40 kitchens in the…
+              - generic [ref=e174]:
+                - button "✉️ Send this proposal" [disabled] [ref=e175]
+                - generic: Connect inbox to enable
+          - paragraph [ref=e176]: ⬆️ Connect your inbox above to start receiving real enquiries like this
+        - generic [ref=e177]:
+          - generic [ref=e178]:
+            - heading "Rules Engine" [level=2] [ref=e179]
+            - button "+ Add rule" [ref=e180] [cursor=pointer]
+          - generic [ref=e185]:
+            - paragraph [ref=e186]: All enquiries→Draft proposal→Notify Discord
+            - paragraph [ref=e187]: Default rule — always active
+    - complementary [ref=e189]:
+      - generic [ref=e191]:
+        - generic [ref=e192]: AK
+        - generic [ref=e193]:
+          - generic [ref=e194]: AK
+          - generic [ref=e195]: Your AI Business Partner
+        - button "🧠" [ref=e196] [cursor=pointer]
+      - generic [ref=e198]:
+        - generic [ref=e201]: Hey! I'm AK — your AI Business Partner. Ask me anything, launch a campaign, or just tell me what you need.
+        - generic [ref=e202]:
+          - paragraph [ref=e203]: Try asking
+          - generic [ref=e204]:
+            - button "❓ What should I do first?" [ref=e205] [cursor=pointer]
+            - button "🔍 Run a health check on my site" [ref=e206] [cursor=pointer]
+            - button "📊 Show my leads" [ref=e207] [cursor=pointer]
+            - button "✉️ Connect my email" [ref=e208] [cursor=pointer]
+            - button "🤖 How does AK work?" [ref=e209] [cursor=pointer]
+      - generic [ref=e211]:
+        - button "📎" [ref=e212] [cursor=pointer]
+        - textbox "Message AK" [ref=e213]:
+          - /placeholder: Ask AK anything...
+        - button "Send message" [disabled] [ref=e214]: →
+```

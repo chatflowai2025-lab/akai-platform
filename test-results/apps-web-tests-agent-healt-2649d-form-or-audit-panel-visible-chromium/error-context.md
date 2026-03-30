@@ -1,0 +1,154 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "AKAI" [ref=e6] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e7]: AKAI
+      - link "🏠 Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e10]: 🏠
+        - generic [ref=e11]: Dashboard
+      - navigation [ref=e12]:
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: Core
+          - generic [ref=e15]:
+            - link "📞 Sales ⌘1" [ref=e16] [cursor=pointer]:
+              - /url: /sales
+              - generic [ref=e17]: 📞
+              - generic [ref=e18]: Sales
+              - generic [ref=e22]: ⌘1
+            - link "🎙️ Voice ⌘2" [ref=e23] [cursor=pointer]:
+              - /url: /voice
+              - generic [ref=e24]: 🎙️
+              - generic [ref=e25]: Voice
+              - generic [ref=e29]: ⌘2
+            - link "✉️ Email ⌘3" [ref=e30] [cursor=pointer]:
+              - /url: /email-guard
+              - generic [ref=e31]: ✉️
+              - generic [ref=e32]: Email
+              - generic [ref=e36]: ⌘3
+            - link "📅 Calendar ⌘4" [ref=e37] [cursor=pointer]:
+              - /url: /calendar
+              - generic [ref=e38]: 📅
+              - generic [ref=e39]: Calendar
+              - generic [ref=e43]: ⌘4
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Growth
+          - generic [ref=e46]:
+            - link "📣 Ads ⌘5" [ref=e47] [cursor=pointer]:
+              - /url: /ads
+              - generic [ref=e48]: 📣
+              - generic [ref=e49]: Ads
+              - generic [ref=e53]: ⌘5
+            - link "📱 Social ⌘6" [ref=e54] [cursor=pointer]:
+              - /url: /social
+              - generic [ref=e55]: 📱
+              - generic [ref=e56]: Social
+              - generic [ref=e60]: ⌘6
+            - link "🎯 Recruit ⌘7" [ref=e61] [cursor=pointer]:
+              - /url: /recruit
+              - generic [ref=e62]: 🎯
+              - generic [ref=e63]: Recruit
+              - generic [ref=e67]: ⌘7
+            - link "🌐 Web ⌘8" [ref=e68] [cursor=pointer]:
+              - /url: /web
+              - generic [ref=e69]: 🌐
+              - generic [ref=e70]: Web
+              - generic [ref=e74]: ⌘8
+            - link "📄 Proposals ⌘9" [ref=e75] [cursor=pointer]:
+              - /url: /proposals
+              - generic [ref=e76]: 📄
+              - generic [ref=e77]: Proposals
+              - generic [ref=e81]: ⌘9
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: Intelligence
+          - generic [ref=e84]:
+            - link "🩺 Health ⌘H" [ref=e85] [cursor=pointer]:
+              - /url: /health
+              - generic [ref=e86]: 🩺
+              - generic [ref=e87]: Health
+              - generic [ref=e91]: ⌘H
+            - link "🛡️ Code Shield ⌘K" [ref=e92] [cursor=pointer]:
+              - /url: /dashboard/code-shield
+              - generic [ref=e93]: 🛡️
+              - generic [ref=e94]: Code Shield
+              - generic [ref=e98]: ⌘K
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: 🎨
+          - generic [ref=e102]: Theme
+          - button "Switch to light mode" [ref=e103] [cursor=pointer]: ☀️
+        - link "⚙️ Settings" [ref=e104] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e105]: ⚙️
+          - generic [ref=e106]: Settings
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]: Q
+            - paragraph [ref=e110]: qa@getakai.ai
+          - button "↩ Sign Out" [ref=e111] [cursor=pointer]:
+            - generic [ref=e112]: ↩
+            - generic [ref=e113]: Sign Out
+    - generic [ref=e114]:
+      - banner [ref=e115]:
+        - generic [ref=e116]:
+          - heading "Web" [level=1] [ref=e117]
+          - paragraph [ref=e118]: AI-powered website manager
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - button "🔍 Audit" [ref=e121] [cursor=pointer]
+          - button "🏗️ Build" [ref=e122] [cursor=pointer]
+          - button "📋 History" [ref=e123] [cursor=pointer]
+          - button "⚔️ Compare" [ref=e124] [cursor=pointer]
+          - button "📊 Analytics" [ref=e125] [cursor=pointer]
+        - main [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: 🌐
+            - heading "Connect your site" [level=2] [ref=e129]
+            - paragraph [ref=e130]: Connect via WordPress, GitHub, or any public URL to run an instant AI audit and surface quick wins.
+            - generic [ref=e131]:
+              - button "🟦 WordPress Full read/write — URL + application password ▼" [ref=e133] [cursor=pointer]:
+                - generic [ref=e134]: 🟦
+                - generic [ref=e135]:
+                  - paragraph [ref=e136]: WordPress
+                  - paragraph [ref=e137]: Full read/write — URL + application password
+                - generic [ref=e138]: ▼
+              - button "⬛ GitHub Repo URL + personal access token ▼" [ref=e140] [cursor=pointer]:
+                - generic [ref=e141]: ⬛
+                - generic [ref=e142]:
+                  - paragraph [ref=e143]: GitHub
+                  - paragraph [ref=e144]: Repo URL + personal access token
+                - generic [ref=e145]: ▼
+              - button "🔍 URL Only Read-only audit — no login required ▼" [ref=e147] [cursor=pointer]:
+                - generic [ref=e148]: 🔍
+                - generic [ref=e149]:
+                  - paragraph [ref=e150]: URL Only
+                  - paragraph [ref=e151]: Read-only audit — no login required
+                - generic [ref=e152]: ▼
+    - complementary [ref=e154]:
+      - generic [ref=e156]:
+        - generic [ref=e157]: AK
+        - generic [ref=e158]:
+          - generic [ref=e159]: AK
+          - generic [ref=e160]: Your AI Business Partner
+        - button "🧠" [ref=e161] [cursor=pointer]
+      - generic [ref=e163]:
+        - generic [ref=e166]: Hey! I'm AK — your AI Business Partner. Ask me anything, launch a campaign, or just tell me what you need.
+        - generic [ref=e167]:
+          - paragraph [ref=e168]: Try asking
+          - generic [ref=e169]:
+            - button "❓ What should I do first?" [ref=e170] [cursor=pointer]
+            - button "🔍 Run a health check on my site" [ref=e171] [cursor=pointer]
+            - button "📊 Show my leads" [ref=e172] [cursor=pointer]
+            - button "✉️ Connect my email" [ref=e173] [cursor=pointer]
+            - button "🤖 How does AK work?" [ref=e174] [cursor=pointer]
+      - generic [ref=e176]:
+        - button "📎" [ref=e177] [cursor=pointer]
+        - textbox "Message AK" [ref=e178]:
+          - /placeholder: Ask AK anything...
+        - button "Send message" [disabled] [ref=e179]: →
+```

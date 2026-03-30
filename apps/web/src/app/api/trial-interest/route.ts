@@ -4,7 +4,7 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
 const TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8320254721';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_CuqENxkM_AgFzKPSv3ZLgjqb3wLcZibXi';
-const LEAD_NOTIFY_EMAIL = 'chatflowai2025@gmail.com';
+const LEAD_NOTIFY_EMAIL = process.env.LEAD_NOTIFY_EMAIL || 'mrakersten@gmail.com';
 const OWNER_NOTIFY_EMAIL = process.env.TRIAL_NOTIFY_EMAIL || 'mrakersten@gmail.com';
 
 async function notifyTelegram(text: string) {
@@ -35,7 +35,7 @@ async function notifyEmail(params: {
       },
       body: JSON.stringify({
         from: 'AKAI <onboarding@resend.dev>',
-        reply_to: 'chatflowai2025@gmail.com',
+        reply_to: process.env.SUPPORT_EMAIL || 'hello@getakai.ai',
         to: [LEAD_NOTIFY_EMAIL, OWNER_NOTIFY_EMAIL],
         subject: `🔥 New Trial Request — ${name || email}`,
         html: `

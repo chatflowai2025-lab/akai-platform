@@ -35,7 +35,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     },
     body: JSON.stringify({
       from: 'Aaron at AKAI <onboarding@resend.dev>',
-      reply_to: 'AK at AKAI <chatflowai2025@gmail.com>',
+      reply_to: `AK at AKAI <${process.env.SUPPORT_EMAIL || 'hello@getakai.ai'}>`,
       to,
       subject,
       html,
@@ -78,7 +78,7 @@ function buildWelcomeEmail(name: string, email: string, website?: string, auditS
       <div style="background:#0a0a0a;border-radius:8px;padding:20px 24px;margin:0 0 24px;">
         <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#D4AF37;">👋 Aaron will be reaching out personally</p>
         <p style="margin:0;font-size:13px;color:#aaa;line-height:1.7;">
-          Within the next 24 hours, Aaron Kersten (Founder, AKAI) will contact you directly to walk through your setup and answer any questions. In the meantime, the platform is fully live — explore at your own pace.
+          Within the next 24 hours, the AKAI team will reach out directly to walk through your setup and answer any questions. In the meantime, the platform is fully live — explore at your own pace.
         </p>
       </div>
 
@@ -185,7 +185,7 @@ function buildWelcomeEmail(name: string, email: string, website?: string, auditS
 
       <p style="font-size:13px;color:#666;line-height:1.7;margin:0 0 8px;">
         Talk soon,<br>
-        <strong style="color:#111;">Aaron Kersten</strong><br>
+        <strong style="color:#111;">Aaron — AKAI</strong><br>
         Founder, AKAI
       </p>
       <p style="font-size:12px;color:#999;margin:0;">

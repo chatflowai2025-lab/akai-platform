@@ -1,0 +1,256 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "AKAI" [ref=e6] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e7]: AKAI
+      - link "🏠 Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e10]: 🏠
+        - generic [ref=e11]: Dashboard
+      - navigation [ref=e12]:
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: Core
+          - generic [ref=e15]:
+            - link "📞 Sales ⌘1" [ref=e16] [cursor=pointer]:
+              - /url: /sales
+              - generic [ref=e17]: 📞
+              - generic [ref=e18]: Sales
+              - generic [ref=e22]: ⌘1
+            - link "🎙️ Voice ⌘2" [ref=e23] [cursor=pointer]:
+              - /url: /voice
+              - generic [ref=e24]: 🎙️
+              - generic [ref=e25]: Voice
+              - generic [ref=e29]: ⌘2
+            - link "✉️ Email ⌘3" [ref=e30] [cursor=pointer]:
+              - /url: /email-guard
+              - generic [ref=e31]: ✉️
+              - generic [ref=e32]: Email
+              - generic [ref=e36]: ⌘3
+            - link "📅 Calendar ⌘4" [ref=e37] [cursor=pointer]:
+              - /url: /calendar
+              - generic [ref=e38]: 📅
+              - generic [ref=e39]: Calendar
+              - generic [ref=e43]: ⌘4
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Growth
+          - generic [ref=e46]:
+            - link "📣 Ads ⌘5" [ref=e47] [cursor=pointer]:
+              - /url: /ads
+              - generic [ref=e48]: 📣
+              - generic [ref=e49]: Ads
+              - generic [ref=e53]: ⌘5
+            - link "📱 Social ⌘6" [ref=e54] [cursor=pointer]:
+              - /url: /social
+              - generic [ref=e55]: 📱
+              - generic [ref=e56]: Social
+              - generic [ref=e60]: ⌘6
+            - link "🎯 Recruit ⌘7" [ref=e61] [cursor=pointer]:
+              - /url: /recruit
+              - generic [ref=e62]: 🎯
+              - generic [ref=e63]: Recruit
+              - generic [ref=e67]: ⌘7
+            - link "🌐 Web ⌘8" [ref=e68] [cursor=pointer]:
+              - /url: /web
+              - generic [ref=e69]: 🌐
+              - generic [ref=e70]: Web
+              - generic [ref=e74]: ⌘8
+            - link "📄 Proposals ⌘9" [ref=e75] [cursor=pointer]:
+              - /url: /proposals
+              - generic [ref=e76]: 📄
+              - generic [ref=e77]: Proposals
+              - generic [ref=e81]: ⌘9
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: Intelligence
+          - generic [ref=e84]:
+            - link "🩺 Health ⌘H" [ref=e85] [cursor=pointer]:
+              - /url: /health
+              - generic [ref=e86]: 🩺
+              - generic [ref=e87]: Health
+              - generic [ref=e91]: ⌘H
+            - link "🛡️ Code Shield ⌘K" [ref=e92] [cursor=pointer]:
+              - /url: /dashboard/code-shield
+              - generic [ref=e93]: 🛡️
+              - generic [ref=e94]: Code Shield
+              - generic [ref=e98]: ⌘K
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: 🎨
+          - generic [ref=e102]: Theme
+          - button "Switch to light mode" [ref=e103] [cursor=pointer]: ☀️
+        - link "⚙️ Settings" [ref=e104] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e105]: ⚙️
+          - generic [ref=e106]: Settings
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]: Q
+            - paragraph [ref=e110]: qa@getakai.ai
+          - button "↩ Sign Out" [ref=e111] [cursor=pointer]:
+            - generic [ref=e112]: ↩
+            - generic [ref=e113]: Sign Out
+    - generic [ref=e115]:
+      - banner [ref=e116]:
+        - generic [ref=e117]:
+          - navigation "Breadcrumb" [ref=e118]:
+            - link "Dashboard" [ref=e119] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e120]: ›
+            - generic [ref=e121]: Calendar
+          - heading "📅 Calendar" [level=1] [ref=e122]
+          - paragraph [ref=e123]: Schedule, manage, and stay on top of everything
+        - generic [ref=e124]:
+          - button "🔗 Copy booking link" [ref=e125] [cursor=pointer]
+          - button "+ Add Event" [ref=e126] [cursor=pointer]
+          - generic [ref=e127]:
+            - button "month" [ref=e128] [cursor=pointer]
+            - button "week" [ref=e129] [cursor=pointer]
+            - button "day" [ref=e130] [cursor=pointer]
+            - button "📋" [ref=e131] [cursor=pointer]
+      - generic [ref=e134]:
+        - generic [ref=e135]: 📅
+        - generic [ref=e136]:
+          - paragraph [ref=e137]: Connect your calendar
+          - paragraph [ref=e138]: AKAI syncs your calendar and books meetings directly — no back-and-forth.
+          - generic [ref=e139]:
+            - button "Google Calendar" [ref=e140] [cursor=pointer]:
+              - img [ref=e141]
+              - text: Google Calendar
+            - button "Outlook Calendar" [ref=e146] [cursor=pointer]:
+              - img [ref=e147]
+              - text: Outlook Calendar
+      - generic [ref=e153]:
+        - generic [ref=e154]:
+          - button "Previous month" [ref=e155] [cursor=pointer]: ‹
+          - heading "March 2026" [level=2] [ref=e156]
+          - button "Next month" [ref=e157] [cursor=pointer]: ›
+        - generic [ref=e158]:
+          - generic [ref=e159]:
+            - generic [ref=e160]: Mon
+            - generic [ref=e161]: Tue
+            - generic [ref=e162]: Wed
+            - generic [ref=e163]: Thu
+            - generic [ref=e164]: Fri
+            - generic [ref=e165]: Sat
+            - generic [ref=e166]: Sun
+          - generic [ref=e167]:
+            - generic [ref=e175] [cursor=pointer]:
+              - generic [ref=e176]: "1"
+              - button "+" [ref=e177]
+            - generic [ref=e179] [cursor=pointer]:
+              - generic [ref=e180]: "2"
+              - button "+" [ref=e181]
+            - generic [ref=e183] [cursor=pointer]:
+              - generic [ref=e184]: "3"
+              - button "+" [ref=e185]
+            - generic [ref=e187] [cursor=pointer]:
+              - generic [ref=e188]: "4"
+              - button "+" [ref=e189]
+            - generic [ref=e191] [cursor=pointer]:
+              - generic [ref=e192]: "5"
+              - button "+" [ref=e193]
+            - generic [ref=e195] [cursor=pointer]:
+              - generic [ref=e196]: "6"
+              - button "+" [ref=e197]
+            - generic [ref=e199] [cursor=pointer]:
+              - generic [ref=e200]: "7"
+              - button "+" [ref=e201]
+            - generic [ref=e203] [cursor=pointer]:
+              - generic [ref=e204]: "8"
+              - button "+" [ref=e205]
+            - generic [ref=e207] [cursor=pointer]:
+              - generic [ref=e208]: "9"
+              - button "+" [ref=e209]
+            - generic [ref=e211] [cursor=pointer]:
+              - generic [ref=e212]: "10"
+              - button "+" [ref=e213]
+            - generic [ref=e215] [cursor=pointer]:
+              - generic [ref=e216]: "11"
+              - button "+" [ref=e217]
+            - generic [ref=e219] [cursor=pointer]:
+              - generic [ref=e220]: "12"
+              - button "+" [ref=e221]
+            - generic [ref=e223] [cursor=pointer]:
+              - generic [ref=e224]: "13"
+              - button "+" [ref=e225]
+            - generic [ref=e227] [cursor=pointer]:
+              - generic [ref=e228]: "14"
+              - button "+" [ref=e229]
+            - generic [ref=e231] [cursor=pointer]:
+              - generic [ref=e232]: "15"
+              - button "+" [ref=e233]
+            - generic [ref=e235] [cursor=pointer]:
+              - generic [ref=e236]: "16"
+              - button "+" [ref=e237]
+            - generic [ref=e239] [cursor=pointer]:
+              - generic [ref=e240]: "17"
+              - button "+" [ref=e241]
+            - generic [ref=e243] [cursor=pointer]:
+              - generic [ref=e244]: "18"
+              - button "+" [ref=e245]
+            - generic [ref=e247] [cursor=pointer]:
+              - generic [ref=e248]: "19"
+              - button "+" [ref=e249]
+            - generic [ref=e251] [cursor=pointer]:
+              - generic [ref=e252]: "20"
+              - button "+" [ref=e253]
+            - generic [ref=e255] [cursor=pointer]:
+              - generic [ref=e256]: "21"
+              - button "+" [ref=e257]
+            - generic [ref=e259] [cursor=pointer]:
+              - generic [ref=e260]: "22"
+              - button "+" [ref=e261]
+            - generic [ref=e263] [cursor=pointer]:
+              - generic [ref=e264]: "23"
+              - button "+" [ref=e265]
+            - generic [ref=e267] [cursor=pointer]:
+              - generic [ref=e268]: "24"
+              - button "+" [ref=e269]
+            - generic [ref=e271] [cursor=pointer]:
+              - generic [ref=e272]: "25"
+              - button "+" [ref=e273]
+            - generic [ref=e275] [cursor=pointer]:
+              - generic [ref=e276]: "26"
+              - button "+" [ref=e277]
+            - generic [ref=e279] [cursor=pointer]:
+              - generic [ref=e280]: "27"
+              - button "+" [ref=e281]
+            - generic [ref=e283] [cursor=pointer]:
+              - generic [ref=e284]: "28"
+              - button "+" [ref=e285]
+            - generic [ref=e287] [cursor=pointer]:
+              - generic [ref=e288]: "29"
+              - button "+" [ref=e289]
+            - generic [ref=e291] [cursor=pointer]:
+              - generic [ref=e292]: "30"
+              - button "+" [ref=e293]
+            - generic [ref=e295] [cursor=pointer]:
+              - generic [ref=e296]: "31"
+              - button "+" [ref=e297]
+    - complementary [ref=e304]:
+      - generic [ref=e306]:
+        - generic [ref=e307]: AK
+        - generic [ref=e308]:
+          - generic [ref=e309]: AK
+          - generic [ref=e310]: Your AI Business Partner
+        - button "🧠" [ref=e311] [cursor=pointer]
+      - generic [ref=e313]:
+        - generic [ref=e316]: Hey! I'm AK — your AI Business Partner. Ask me anything, launch a campaign, or just tell me what you need.
+        - generic [ref=e317]:
+          - paragraph [ref=e318]: Try asking
+          - generic [ref=e319]:
+            - button "❓ What should I do first?" [ref=e320] [cursor=pointer]
+            - button "🔍 Run a health check on my site" [ref=e321] [cursor=pointer]
+            - button "📊 Show my leads" [ref=e322] [cursor=pointer]
+            - button "✉️ Connect my email" [ref=e323] [cursor=pointer]
+            - button "🤖 How does AK work?" [ref=e324] [cursor=pointer]
+      - generic [ref=e326]:
+        - button "📎" [ref=e327] [cursor=pointer]
+        - textbox "Message AK" [ref=e328]:
+          - /placeholder: Ask AK anything...
+        - button "Send message" [disabled] [ref=e329]: →
+```

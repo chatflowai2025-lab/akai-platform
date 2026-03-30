@@ -1,0 +1,177 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "AKAI" [ref=e6] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e7]: AKAI
+      - link "🏠 Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e10]: 🏠
+        - generic [ref=e11]: Dashboard
+      - navigation [ref=e12]:
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: Core
+          - generic [ref=e15]:
+            - link "📞 Sales ⌘1" [ref=e16] [cursor=pointer]:
+              - /url: /sales
+              - generic [ref=e17]: 📞
+              - generic [ref=e18]: Sales
+              - generic [ref=e22]: ⌘1
+            - link "🎙️ Voice ⌘2" [ref=e23] [cursor=pointer]:
+              - /url: /voice
+              - generic [ref=e24]: 🎙️
+              - generic [ref=e25]: Voice
+              - generic [ref=e29]: ⌘2
+            - link "✉️ Email ⌘3" [ref=e30] [cursor=pointer]:
+              - /url: /email-guard
+              - generic [ref=e31]: ✉️
+              - generic [ref=e32]: Email
+              - generic [ref=e36]: ⌘3
+            - link "📅 Calendar ⌘4" [ref=e37] [cursor=pointer]:
+              - /url: /calendar
+              - generic [ref=e38]: 📅
+              - generic [ref=e39]: Calendar
+              - generic [ref=e43]: ⌘4
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Growth
+          - generic [ref=e46]:
+            - link "📣 Ads ⌘5" [ref=e47] [cursor=pointer]:
+              - /url: /ads
+              - generic [ref=e48]: 📣
+              - generic [ref=e49]: Ads
+              - generic [ref=e53]: ⌘5
+            - link "📱 Social ⌘6" [ref=e54] [cursor=pointer]:
+              - /url: /social
+              - generic [ref=e55]: 📱
+              - generic [ref=e56]: Social
+              - generic [ref=e60]: ⌘6
+            - link "🎯 Recruit ⌘7" [ref=e61] [cursor=pointer]:
+              - /url: /recruit
+              - generic [ref=e62]: 🎯
+              - generic [ref=e63]: Recruit
+              - generic [ref=e67]: ⌘7
+            - link "🌐 Web ⌘8" [ref=e68] [cursor=pointer]:
+              - /url: /web
+              - generic [ref=e69]: 🌐
+              - generic [ref=e70]: Web
+              - generic [ref=e74]: ⌘8
+            - link "📄 Proposals ⌘9" [ref=e75] [cursor=pointer]:
+              - /url: /proposals
+              - generic [ref=e76]: 📄
+              - generic [ref=e77]: Proposals
+              - generic [ref=e81]: ⌘9
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: Intelligence
+          - generic [ref=e84]:
+            - link "🩺 Health ⌘H" [ref=e85] [cursor=pointer]:
+              - /url: /health
+              - generic [ref=e86]: 🩺
+              - generic [ref=e87]: Health
+              - generic [ref=e91]: ⌘H
+            - link "🛡️ Code Shield ⌘K" [ref=e92] [cursor=pointer]:
+              - /url: /dashboard/code-shield
+              - generic [ref=e93]: 🛡️
+              - generic [ref=e94]: Code Shield
+              - generic [ref=e98]: ⌘K
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]: 🎨
+          - generic [ref=e102]: Theme
+          - button "Switch to light mode" [ref=e103] [cursor=pointer]: ☀️
+        - link "⚙️ Settings" [ref=e104] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e105]: ⚙️
+          - generic [ref=e106]: Settings
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]: Q
+            - paragraph [ref=e110]: qa@getakai.ai
+          - button "↩ Sign Out" [ref=e111] [cursor=pointer]:
+            - generic [ref=e112]: ↩
+            - generic [ref=e113]: Sign Out
+    - generic [ref=e115]:
+      - banner [ref=e116]:
+        - generic [ref=e117]:
+          - heading "Proposals" [level=1] [ref=e118]
+          - paragraph [ref=e119]: Track and generate AI-powered proposals
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - button "📊 Pipeline" [ref=e122] [cursor=pointer]
+            - button "✨ Create" [ref=e123] [cursor=pointer]
+          - generic [ref=e124]: Live
+      - generic [ref=e125]:
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: "Total: 0"
+            - generic [ref=e129]: "|"
+            - generic [ref=e130]: "Sent: 0"
+            - generic [ref=e131]: "|"
+            - generic [ref=e132]: "Won: 0"
+            - generic [ref=e133]: "|"
+            - generic [ref=e134]:
+              - text: "Win rate:"
+              - generic [ref=e135]: 0.0%
+          - button "+ New Proposal" [ref=e136] [cursor=pointer]
+        - generic [ref=e137]:
+          - paragraph [ref=e138]: 📄
+          - paragraph [ref=e139]: No proposals yet
+          - paragraph [ref=e140]: Create your first proposal and start winning clients. Each deal starts with a great pitch.
+          - button "✨ Create first proposal →" [ref=e141] [cursor=pointer]
+        - generic [ref=e143]:
+          - generic [ref=e144]:
+            - generic [ref=e146]:
+              - generic [ref=e147]: Draft
+              - generic [ref=e148]: "0"
+            - paragraph [ref=e151]: No proposals
+          - generic [ref=e152]:
+            - generic [ref=e154]:
+              - generic [ref=e155]: Sent
+              - generic [ref=e156]: "0"
+            - paragraph [ref=e159]: No proposals
+          - generic [ref=e160]:
+            - generic [ref=e162]:
+              - generic [ref=e163]: Opened
+              - generic [ref=e164]: "0"
+            - paragraph [ref=e167]: No proposals
+          - generic [ref=e168]:
+            - generic [ref=e170]:
+              - generic [ref=e171]: Replied
+              - generic [ref=e172]: "0"
+            - paragraph [ref=e175]: No proposals
+          - generic [ref=e176]:
+            - generic [ref=e178]:
+              - generic [ref=e179]: Won
+              - generic [ref=e180]: "0"
+            - paragraph [ref=e183]: No proposals
+          - generic [ref=e184]:
+            - generic [ref=e186]:
+              - generic [ref=e187]: Lost
+              - generic [ref=e188]: "0"
+            - paragraph [ref=e191]: No proposals
+    - complementary [ref=e193]:
+      - generic [ref=e195]:
+        - generic [ref=e196]: AK
+        - generic [ref=e197]:
+          - generic [ref=e198]: AK
+          - generic [ref=e199]: Your AI Business Partner
+        - button "🧠" [ref=e200] [cursor=pointer]
+      - generic [ref=e202]:
+        - generic [ref=e205]: Hey! I'm AK — your AI Business Partner. Ask me anything, launch a campaign, or just tell me what you need.
+        - generic [ref=e206]:
+          - paragraph [ref=e207]: Try asking
+          - generic [ref=e208]:
+            - button "❓ What should I do first?" [ref=e209] [cursor=pointer]
+            - button "🔍 Run a health check on my site" [ref=e210] [cursor=pointer]
+            - button "📊 Show my leads" [ref=e211] [cursor=pointer]
+            - button "✉️ Connect my email" [ref=e212] [cursor=pointer]
+            - button "🤖 How does AK work?" [ref=e213] [cursor=pointer]
+      - generic [ref=e215]:
+        - button "📎" [ref=e216] [cursor=pointer]
+        - textbox "Message AK" [ref=e217]:
+          - /placeholder: Ask AK anything...
+        - button "Send message" [disabled] [ref=e218]: →
+```
