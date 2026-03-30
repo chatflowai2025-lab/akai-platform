@@ -14,7 +14,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       body: JSON.stringify({ to, subject, html }),
     });
     if (res.ok) {
-      console.log(`[welcome] Sent via Railway SMTP to ${to}`);
+      console.info(`[welcome] Sent via Railway SMTP to ${to}`);
       return;
     }
     console.warn('[welcome] Railway SMTP failed, falling back to Resend:', await res.text());
@@ -24,7 +24,7 @@ async function sendEmail(to: string, subject: string, html: string) {
 
   // Fallback: Resend
   if (!RESEND_API_KEY) {
-    console.log(`[welcome] Mock mode — would send to ${to}`);
+    console.warn(`[welcome] Mock mode — would send to ${to}`);
     return;
   }
   const res = await fetch('https://api.resend.com/emails', {
@@ -289,7 +289,7 @@ export async function POST(req: NextRequest) {
         'Your AKAI account is live — here\'s where to start',
         buildWelcomeEmail(name || '', email, website, auditScore)
       );
-      console.log(`[welcome] Email sent to ${email}`);
+      console.info(`[welcome] Email sent to ${email}`);
     } catch (emailErr) {
       console.error('[welcome] Email send failed:', emailErr);
       // Still return success — don't block the user's dashboard load

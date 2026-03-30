@@ -347,7 +347,7 @@ export async function POST(req: NextRequest) {
     } catch { /* non-fatal */ }
 
     if (!resendKey) {
-      console.log(`[health-check] Mock mode — lead from ${email} (${name}), site: ${website}`);
+      console.warn(`[health-check] Mock mode — lead from ${email} (${name}), site: ${website}`);
       return NextResponse.json({ success: true, message: 'Health check booked (mock)' });
     }
 

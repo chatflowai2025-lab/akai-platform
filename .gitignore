@@ -47,3 +47,4 @@ coverage/
 404.html
 404/
 .nojekyll
+test-results/

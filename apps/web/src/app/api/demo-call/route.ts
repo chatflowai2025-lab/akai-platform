@@ -124,7 +124,7 @@ RULES:
     ]);
 
     if (!apiKey) {
-      console.log(`[demo-call] Mock mode — would call ${phone} for ${name || 'unknown'}`);
+      console.warn(`[demo-call] Mock mode — would call ${phone} for ${name || 'unknown'}`);
       return NextResponse.json({ success: true, message: 'Demo booked (mock)' });
     }
 
