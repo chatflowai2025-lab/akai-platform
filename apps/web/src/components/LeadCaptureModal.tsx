@@ -22,6 +22,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
     email: '',
     name: '',
     businessName: '',
+    website: '',
     focus: '',
   });
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
@@ -29,7 +30,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handleClose = () => {
-    setForm({ email: '', name: '', businessName: '', focus: '' });
+    setForm({ email: '', name: '', businessName: '', website: '', focus: '' });
     setStatus('idle');
     onClose();
   };
@@ -46,6 +47,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
           email: form.email,
           name: form.name,
           businessName: form.businessName,
+          website: form.website || undefined,
           focus: form.focus || 'Not specified',
           source: 'hero_cta',
           plan: selectedPlan || undefined,
@@ -158,6 +160,19 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
                   value={form.businessName}
                   onChange={e => set('businessName', e.target.value)}
                   placeholder="Your company name"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                />
+              </div>
+
+              {/* Website URL — for free health report */}
+              <div>
+                <label className="text-xs text-white/50 mb-1.5 block">Website URL <span className="text-[#D4AF37]/70 text-xs">(get a free health report)</span></label>
+                <input
+                  type="url"
+                  autoComplete="url"
+                  value={form.website}
+                  onChange={e => set('website', e.target.value)}
+                  placeholder="https://yourbusiness.com.au"
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
