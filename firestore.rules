@@ -4,9 +4,13 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ─── users ───────────────────────────────────────────────────────────────
-    // Only the authenticated user can read or write their own document.
+    // Only the authenticated user can read or write their own document + all subcollections.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      match /{subcollection=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // ─── trialLeads ──────────────────────────────────────────────────────────
