@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
   }
 
   const duration = Date.now() - startTime;
-  console.log(`[email-poll-cron] Polled ${usersPolled} users in ${duration}ms, ${errors} errors`);
+  console.info(`[email-poll-cron] Polled ${usersPolled} users in ${duration}ms, ${errors} errors`);
 
   return NextResponse.json({
     ok: true,
