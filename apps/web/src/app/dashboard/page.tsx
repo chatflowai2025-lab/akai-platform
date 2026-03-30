@@ -380,24 +380,40 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
     }
   };
 
+  const { userProfile } = useAuth();
+  const profile = userProfile as Record<string, unknown> | null;
+  const emailConnected = !!(profile?.gmail as Record<string,unknown> | undefined)?.connected || !!(profile?.inboxConnection as Record<string,unknown> | undefined)?.connected;
+  const calendarConnected = !!(profile?.googleCalendarConnected) || !!(profile?.inboxConnection as Record<string,unknown> | undefined)?.connected;
+  const businessSet = !!(profile?.businessName as string | undefined)?.trim();
+
   const items = [
     {
-      icon: '✉️',
-      label: 'Connect your email',
-      hint: 'So AK can send and receive on your behalf',
-      action: () => router.push('/email-guard'),
+      icon: businessSet ? '✅' : '🏢',
+      label: 'Set up your business profile',
+      hint: 'Your name, industry and location so AK knows who it\'s working for',
+      action: () => router.push('/settings'),
+      done: businessSet,
     },
     {
-      icon: '📅',
+      icon: emailConnected ? '✅' : '✉️',
+      label: 'Connect your email',
+      hint: 'So AK can send and receive on your behalf — from YOUR address',
+      action: () => router.push('/email-guard'),
+      done: emailConnected,
+    },
+    {
+      icon: calendarConnected ? '✅' : '📅',
       label: 'Connect your calendar',
-      hint: 'Let AK book meetings automatically',
+      hint: 'So clients can book meetings with you and see your real availability',
       action: () => router.push('/calendar'),
+      done: calendarConnected,
     },
     {
       icon: '💬',
       label: 'Talk to AK — tell it what you need',
-      hint: 'Get personalised advice for your business',
+      hint: 'Get personalised setup advice for your business',
       action: () => sendMessage('Hi AK, what should I set up first?'),
+      done: false,
     },
   ];
 
@@ -423,16 +439,17 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
           <button
             key={i}
             onClick={item.action}
-            className="w-full flex items-center gap-3 p-3 bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition text-left group"
+            className={`w-full flex items-center gap-3 p-3 border rounded-xl transition text-left group ${item.done ? 'bg-green-500/5 border-green-500/20 opacity-70' : 'bg-[#0d0d0d] border-[#2a2a2a] hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5'}`}
           >
-            <div className="w-8 h-8 rounded-full border-2 border-[#2a2a2a] group-hover:border-[#D4AF37]/40 flex items-center justify-center flex-shrink-0 text-base transition">
+            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-base transition ${item.done ? 'border-green-500/40 bg-green-500/10' : 'border-[#2a2a2a] group-hover:border-[#D4AF37]/40'}`}>
               {item.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white">{item.label}</p>
+              <p className={`text-sm font-semibold ${item.done ? 'text-green-400 line-through' : 'text-white'}`}>{item.label}</p>
               <p className="text-xs text-gray-500 mt-0.5">{item.hint}</p>
             </div>
-            <span className="text-gray-600 group-hover:text-[#D4AF37] transition text-sm flex-shrink-0">→</span>
+            {!item.done && <span className="text-gray-600 group-hover:text-[#D4AF37] transition text-sm flex-shrink-0">→</span>}
+            {item.done && <span className="text-green-400 text-sm flex-shrink-0">✓</span>}
           </button>
         ))}
       </div>
