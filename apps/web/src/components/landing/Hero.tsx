@@ -440,6 +440,62 @@ const HERO_BANNERS = [
   },
 ];
 
+/* ─── Inline Micro-Capture ─── */
+function MicroCapture() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/trial-interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'hero_inline', focus: 'Not specified' }),
+      });
+      if (!res.ok) throw new Error();
+      gtag('lead_captured', { method: 'hero_inline', focus: 'quick' });
+      setStatus('done');
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  if (status === 'done') {
+    return (
+      <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 text-green-400 text-sm font-semibold">
+        <span>✓</span>
+        <span>We&apos;ll be in touch — check your inbox.</span>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="flex items-center gap-2 w-full max-w-sm">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="your@email.com"
+        className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/25 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+      />
+      <button
+        type="submit"
+        disabled={status === 'sending' || !email}
+        className="px-4 py-2.5 bg-[#D4AF37] text-black font-bold text-sm rounded-xl hover:opacity-90 transition disabled:opacity-40 whitespace-nowrap"
+      >
+        {status === 'sending' ? '…' : 'Get Access →'}
+      </button>
+      {status === 'error' && (
+        <span className="text-red-400 text-xs">Try again</span>
+      )}
+    </form>
+  );
+}
+
 /* ─── Main Hero ─── */
 export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: () => void; onOpenChat?: () => void }) {
   const { user, loading } = useAuth();
@@ -521,14 +577,14 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
         </div>
 
         {/* CTA row */}
-        <div className="fade-up fade-up-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 items-center mb-20 w-full max-w-3xl">
+        <div className="fade-up fade-up-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 items-center mb-6 w-full max-w-3xl">
           <Button
             href={!loading && user ? '/dashboard' : undefined}
             onClick={!loading && user ? undefined : () => onOpenCapture?.()}
             size="lg"
             className="glow-gold-sm min-w-[180px] min-h-[52px] w-full sm:w-auto"
           >
-            Start Free Trial →
+            Get Early Access →
           </Button>
           <button
             onClick={() => setModal('demo')}
@@ -548,6 +604,12 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
           >
             💬 Talk to AK
           </button>
+        </div>
+
+        {/* Inline micro-capture */}
+        <div className="fade-up fade-up-4 flex flex-col items-center gap-2 mb-10 w-full max-w-md">
+          <MicroCapture />
+          <p className="text-xs text-white/25">No credit card · No spam · Cancel anytime</p>
         </div>
 
         {/* Social proof stats bar */}

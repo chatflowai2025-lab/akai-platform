@@ -1,22 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { gtag } from '@/hooks/useGA4Track';
 
-const INDUSTRIES = [
-  'Trades',
-  'Real Estate',
-  'Legal',
-  'Medical & Health',
-  'Finance',
-  'Retail',
-  'Hospitality',
-  'Recruitment',
-  'Technology',
-  'Marketing & Advertising',
-  'Education',
-  'Construction',
-  'Transport & Logistics',
-  'Other',
+const FOCUS_OPTIONS = [
+  'Sales calls',
+  'Email management',
+  'Recruiting',
+  'Social media',
+  'All of it',
 ];
 
 interface Props {
@@ -27,68 +19,43 @@ interface Props {
 
 export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Props) {
   const [form, setForm] = useState({
-    firstName: '',
-    businessName: '',
     email: '',
-    phone: '',
-    industry: '',
-    website: '',
+    name: '',
+    businessName: '',
+    focus: '',
   });
-  const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
-  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'called'>('idle');
-  const [healthStatus, setHealthStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handleClose = () => {
-    setForm({ firstName: '', businessName: '', email: '', phone: '', industry: '', website: '' });
-    setAgreed(false);
+    setForm({ email: '', name: '', businessName: '', focus: '' });
     setStatus('idle');
-    setCallStatus('idle');
-    setHealthStatus('idle');
     onClose();
   };
 
-  // Auto-fire Sophie call on success — runs once when status flips to 'done'
-  useEffect(() => {
-    if (status !== 'done' || !form.phone) return;
-    setCallStatus('calling');
-    fetch('/api/demo-call', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: form.firstName,
-        phone: form.phone,
-        email: form.email,
-        businessName: form.businessName,
-        industry: form.industry,
-      }),
-    })
-      .then(() => setCallStatus('called'))
-      .catch(() => setCallStatus('called'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]); // intentional: only fire once when status changes to 'done'
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreed) return;
+    if (!form.email || !form.name) return;
     setStatus('sending');
     try {
       const res = await fetch('/api/trial-interest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: form.firstName,
           email: form.email,
-          business: form.businessName,
-          phone: form.phone,
-          industry: form.industry,
-          website: form.website,
-          plan: selectedPlan || 'Trial',
+          name: form.name,
+          businessName: form.businessName,
+          focus: form.focus || 'Not specified',
+          source: 'hero_cta',
+          plan: selectedPlan || undefined,
         }),
       });
       if (!res.ok) throw new Error('Failed');
+
+      // GA4 conversion event
+      gtag('lead_captured', { method: 'hero_cta', focus: form.focus || 'not_selected' });
+
       setStatus('done');
     } catch {
       setStatus('error');
@@ -103,7 +70,7 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-md bg-[#111] border border-[#2a2a2a] rounded-2xl p-7 shadow-2xl relative overflow-y-auto max-h-[92vh]"
+        className="w-full max-w-md bg-[#111] border border-[#2a2a2a] rounded-2xl p-7 shadow-2xl relative"
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
@@ -116,196 +83,100 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
         </button>
 
         {status === 'done' ? (
-          /* ── Success screen ── */
-          <div className="py-4">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🎉</span>
-              </div>
-              <h2 className="text-xl font-bold text-white mb-2">
-                You&apos;re in{form.firstName ? `, ${form.firstName}` : ''}!
+          /* ── Step 2: Success ── */
+          <div className="py-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-5">
+              <span className="text-3xl">🎉</span>
+            </div>
+            <h2 className="text-2xl font-black text-white mb-3">
+              You&apos;re in{form.name ? `, ${form.name}` : ''}!
+            </h2>
+            <p className="text-white/70 text-base leading-relaxed mb-4">
+              We&apos;ll set you up within 24 hours.<br />
+              <span className="text-[#D4AF37] font-semibold">Aaron from AKAI will reach out personally.</span>
+            </p>
+            <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4 mb-5">
+              <p className="text-xs text-white/40 uppercase tracking-wider mb-1">What happens next</p>
+              <ul className="text-sm text-white/70 text-left space-y-2">
+                <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> Check your inbox — welcome email incoming</li>
+                <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> Aaron reviews your setup personally</li>
+                <li className="flex items-start gap-2"><span className="text-[#D4AF37]">✓</span> Your AI team goes live within 24hrs</li>
+              </ul>
+            </div>
+            <p className="text-xs text-white/30">
+              Joined 264+ businesses already automating with AKAI
+            </p>
+          </div>
+        ) : (
+          /* ── Step 1: Form ── */
+          <>
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-white mb-1">
+                {selectedPlan ? `Get ${selectedPlan} Early Access` : 'Get Early Access →'}
               </h2>
-              <p className="text-gray-400 text-sm">
-                {selectedPlan ? `${selectedPlan} — 14-day free trial` : '14-day free trial starting now'}
+              <div className="h-0.5 w-12 rounded-full bg-[#D4AF37] mb-3" />
+              <p className="text-white/40 text-sm leading-relaxed">
+                Tell us what to automate. Aaron will reach out personally within 24 hours.
               </p>
             </div>
 
-            {/* Sophie call status */}
-            <div className={`rounded-xl p-4 mb-3 border ${callStatus === 'called' ? 'bg-green-500/10 border-green-500/20' : 'bg-[#1a1a1a] border-[#2a2a2a]'}`}>
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{callStatus === 'called' ? '✅' : '📞'}</span>
-                <div>
-                  <p className="text-white font-semibold text-sm">
-                    {callStatus === 'calling' ? 'Sophie is calling you now…' : callStatus === 'called' ? 'Sophie is on the way!' : 'Connecting Sophie to your number…'}
-                  </p>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    {callStatus === 'called' ? `Calling ${form.phone} — answer in the next 60 seconds` : 'Your AI sales agent calls within 60 seconds'}
-                  </p>
-                </div>
-                {callStatus === 'calling' && <div role="status" aria-label="Loading" className="ml-auto w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin flex-shrink-0" />}
-              </div>
-            </div>
-
-            {/* Free health report */}
-            <div className="rounded-xl p-4 mb-4 border border-[#2a2a2a] bg-[#111]">
-              <div className="flex items-start gap-3">
-                <span className="text-xl mt-0.5">🩺</span>
-                <div className="flex-1">
-                  <p className="text-white font-semibold text-sm mb-1">Free Digital Health Report</p>
-                  <p className="text-gray-500 text-xs leading-relaxed mb-3">See exactly what&apos;s costing you leads — speed, SEO, mobile, and conversion gaps. Takes 60 seconds.</p>
-                  {healthStatus === 'sent' ? (
-                    <p className="text-green-400 text-xs font-semibold">✅ Report on its way to {form.email}</p>
-                  ) : (
-                    <button
-                      onClick={async () => {
-                        if (!form.website && !form.businessName) return;
-                        setHealthStatus('sending');
-                        try {
-                          await fetch('/api/health-check', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name: form.firstName, email: form.email, business: form.businessName, website: form.website, phone: form.phone }),
-                          });
-                        } catch { /* non-fatal */ }
-                        setHealthStatus('sent');
-                      }}
-                      disabled={healthStatus === 'sending'}
-                      className="px-4 py-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-lg text-xs font-bold hover:bg-[#D4AF37]/20 transition disabled:opacity-50"
-                    >
-                      {healthStatus === 'sending' ? 'Generating…' : 'Get my free report →'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleClose}
-              className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-xl text-sm hover:opacity-90 transition"
-            >
-              Go to dashboard →
-            </button>
-          </div>
-        ) : (
-          /* ── Form ── */
-          <>
-            <h2 className="text-xl font-bold text-white mb-1">
-              {selectedPlan ? `Start ${selectedPlan} — 14 days free` : 'Start your free trial'}
-            </h2>
-            <div className="h-0.5 w-12 rounded-full bg-[#D4AF37] mb-4" />
-            <p className="text-white/40 text-sm mb-6 leading-relaxed">
-              Tell us about your business. Aaron will reach out personally to get your AI team live.
-            </p>
-
-            <form onSubmit={submit} className="space-y-3">
-              {/* First Name */}
-              <div>
-                <label className="text-xs text-white/50 mb-1 block">First Name *</label>
-                <input
-                  required
-                  type="text"
-                  autoComplete="given-name"
-                  value={form.firstName}
-                  onChange={e => set('firstName', e.target.value)}
-                  placeholder="Jane"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
-                />
-              </div>
-
-              {/* Business Name */}
-              <div>
-                <label className="text-xs text-white/50 mb-1 block">Business Name *</label>
-                <input
-                  required
-                  type="text"
-                  autoComplete="organization"
-                  value={form.businessName}
-                  onChange={e => set('businessName', e.target.value)}
-                  placeholder="ACME Pty Ltd"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
-                />
-              </div>
-
+            <form onSubmit={submit} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="text-xs text-white/50 mb-1 block">Email Address *</label>
+                <label className="text-xs text-white/50 mb-1.5 block">Email Address *</label>
                 <input
                   required
                   type="email"
                   autoComplete="email"
                   value={form.email}
                   onChange={e => set('email', e.target.value)}
-                  placeholder="jane@business.com"
+                  placeholder="you@business.com"
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
-              {/* Phone */}
+              {/* First Name */}
               <div>
-                <label className="text-xs text-white/50 mb-1 block">Phone Number *</label>
+                <label className="text-xs text-white/50 mb-1.5 block">First Name *</label>
                 <input
                   required
-                  type="tel"
-                  autoComplete="tel"
-                  value={form.phone}
-                  onChange={e => set('phone', e.target.value)}
-                  placeholder="+61 400 000 000"
+                  type="text"
+                  autoComplete="given-name"
+                  value={form.name}
+                  onChange={e => set('name', e.target.value)}
+                  placeholder="Jane"
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
                 />
               </div>
 
-              {/* Industry */}
+              {/* Business Name (optional) */}
               <div>
-                <label className="text-xs text-white/50 mb-1 block">Industry *</label>
+                <label className="text-xs text-white/50 mb-1.5 block">Business Name <span className="text-white/20">(optional)</span></label>
+                <input
+                  type="text"
+                  autoComplete="organization"
+                  value={form.businessName}
+                  onChange={e => set('businessName', e.target.value)}
+                  placeholder="Your company name"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+                />
+              </div>
+
+              {/* Focus dropdown */}
+              <div>
+                <label className="text-xs text-white/50 mb-1.5 block">What do you want to automate? *</label>
                 <select
                   required
-                  value={form.industry}
-                  onChange={e => set('industry', e.target.value)}
+                  value={form.focus}
+                  onChange={e => set('focus', e.target.value)}
                   className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37] transition-colors text-sm appearance-none"
                 >
-                  <option value="">Select your industry…</option>
-                  {INDUSTRIES.map(i => (
-                    <option key={i} value={i}>{i}</option>
+                  <option value="">Select what matters most…</option>
+                  {FOCUS_OPTIONS.map(o => (
+                    <option key={o} value={o}>{o}</option>
                   ))}
                 </select>
               </div>
-
-              {/* Website */}
-              <div>
-                <label className="text-xs text-white/50 mb-1 block">Website URL</label>
-                <input
-                  type="url"
-                  autoComplete="url"
-                  value={form.website}
-                  onChange={e => set('website', e.target.value)}
-                  placeholder="https://yoursite.com.au"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
-                />
-              </div>
-
-              {/* T&Cs */}
-              <label className="flex items-start gap-3 cursor-pointer group pt-1">
-                <input
-                  type="checkbox"
-                  checked={agreed}
-                  onChange={e => setAgreed(e.target.checked)}
-                  required
-                  className="mt-0.5 w-4 h-4 rounded accent-[#D4AF37] flex-shrink-0"
-                />
-                <span className="text-xs text-white/50 leading-relaxed group-hover:text-white/70 transition-colors">
-                  I agree to the{' '}
-                  <a
-                    href="/terms"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#D4AF37] hover:underline"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    Terms of Service
-                  </a>
-                  {' '}and consent to AKAI contacting me about my trial.
-                </span>
-              </label>
 
               {status === 'error' && (
                 <p className="text-red-400 text-sm">Something went wrong — please try again.</p>
@@ -313,11 +184,15 @@ export default function LeadCaptureModal({ isOpen, onClose, selectedPlan }: Prop
 
               <button
                 type="submit"
-                disabled={status === 'sending' || !agreed}
-                className="w-full bg-[#D4AF37] hover:opacity-90 text-black font-bold py-3.5 rounded-xl transition text-sm disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+                disabled={status === 'sending' || !form.email || !form.name || !form.focus}
+                className="w-full bg-[#D4AF37] hover:opacity-90 text-black font-black py-4 rounded-xl transition text-base disabled:opacity-40 disabled:cursor-not-allowed mt-1"
               >
-                {status === 'sending' ? 'Submitting…' : 'Get Started — It\'s Free →'}
+                {status === 'sending' ? 'Submitting…' : 'Get Early Access →'}
               </button>
+
+              <p className="text-center text-xs text-white/25">
+                No credit card · No spam · Aaron replies personally
+              </p>
             </form>
           </>
         )}

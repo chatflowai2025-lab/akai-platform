@@ -3,10 +3,10 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
 const TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8320254721';
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_CuqENxkM_AgFzKPSv3ZLgjqb3wLcZibXi';
-const LEAD_NOTIFY_EMAIL = process.env.LEAD_NOTIFY_EMAIL || 'mrakersten@gmail.com';
-const OWNER_NOTIFY_EMAIL = process.env.TRIAL_NOTIFY_EMAIL || 'mrakersten@gmail.com';
+const RAILWAY_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
+/* ── Telegram (non-blocking backup) ─────────────────────────────── */
 async function notifyTelegram(text: string) {
   try {
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
@@ -17,76 +17,121 @@ async function notifyTelegram(text: string) {
   } catch { /* non-fatal */ }
 }
 
-async function notifyEmail(params: {
+/* ── Gmail SMTP via Railway relay ────────────────────────────────── */
+async function sendGmailNotification(params: {
   name: string;
   email: string;
-  business: string;
-  phone: string;
-  industry: string;
-  website: string;
+  businessName: string;
+  focus: string;
+  source: string;
 }) {
-  const { name, email, business, phone, industry, website } = params;
+  const { name, email, businessName, focus, source } = params;
+  const subject = `🔥 New AKAI lead — ${name || email} (${focus})`;
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px;">
+      <h2 style="color:#D4AF37;margin:0 0 24px;">🔥 New Lead — Act Fast</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="color:#888;padding:8px 0;width:160px;vertical-align:top;">Name</td><td style="color:#fff;">${name || '—'}</td></tr>
+        <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Email</td><td style="color:#fff;"><a href="mailto:${email}" style="color:#D4AF37;">${email}</a></td></tr>
+        <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Business</td><td style="color:#fff;">${businessName || '—'}</td></tr>
+        <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Wants to automate</td><td style="color:#D4AF37;font-weight:700;">${focus}</td></tr>
+        <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Source</td><td style="color:#fff;">${source}</td></tr>
+      </table>
+      <div style="margin-top:28px;">
+        <a href="mailto:${email}" style="background:#D4AF37;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;">
+          Reply to ${name || 'them'} →
+        </a>
+      </div>
+    </div>`;
+
   try {
-    await fetch('https://api.resend.com/emails', {
+    const res = await fetch(`${RAILWAY_URL}/api/send-welcome`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'AKAI <onboarding@resend.dev>',
-        reply_to: process.env.SUPPORT_EMAIL || 'hello@getakai.ai',
-        to: [LEAD_NOTIFY_EMAIL, OWNER_NOTIFY_EMAIL],
-        subject: `🔥 New Trial Request — ${name || email}`,
-        html: `
-          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px;">
-            <h2 style="color:#D4AF37;margin:0 0 24px;">🔥 New Trial Request</h2>
-            <table style="width:100%;border-collapse:collapse;">
-              <tr><td style="color:#888;padding:8px 0;width:140px;vertical-align:top;">First Name</td><td style="color:#fff;">${name || '—'}</td></tr>
-              <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Business</td><td style="color:#fff;">${business || '—'}</td></tr>
-              <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Email</td><td style="color:#fff;">${email}</td></tr>
-              <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Phone</td><td style="color:#fff;">${phone || '—'}</td></tr>
-              <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Industry</td><td style="color:#fff;">${industry || '—'}</td></tr>
-              <tr><td style="color:#888;padding:8px 0;vertical-align:top;">Website</td><td style="color:#fff;">${website ? `<a href="${website}" style="color:#D4AF37;">${website}</a>` : '—'}</td></tr>
-            </table>
-            <div style="margin-top:24px;">
-              <a href="mailto:${email}" style="background:#D4AF37;color:#000;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;">
-                Reply to ${name || 'them'} →
-              </a>
-            </div>
-          </div>`,
-      }),
+      headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+      body: JSON.stringify({ to: 'mrakersten@gmail.com', subject, html }),
     });
-  } catch { /* non-fatal */ }
+    if (res.ok) {
+      console.info('[trial-interest] Notification email sent via Railway SMTP');
+      return;
+    }
+    console.warn('[trial-interest] Railway SMTP notification failed:', await res.text());
+  } catch (e) {
+    console.warn('[trial-interest] Railway SMTP error:', e);
+  }
 }
 
+/* ── Welcome email via /api/welcome ─────────────────────────────── */
+async function fireWelcomeEmail(email: string, name: string) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://getakai.ai';
+    await fetch(`${baseUrl}/api/welcome`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: email, email, name }),
+    });
+    console.info(`[trial-interest] Welcome email triggered for ${email}`);
+  } catch (e) {
+    console.warn('[trial-interest] Welcome email trigger failed (non-fatal):', e);
+  }
+}
+
+/* ── Main handler ────────────────────────────────────────────────── */
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, business, phone, industry, website, plan } = await req.json();
+    const body = await req.json() as {
+      name?: string;
+      email?: string;
+      businessName?: string;
+      focus?: string;
+      source?: string;
+      plan?: string;
+      // legacy fields — keep backward compat
+      business?: string;
+      phone?: string;
+      industry?: string;
+      website?: string;
+    };
+
+    const {
+      name = '',
+      email = '',
+      businessName = body.business || '',
+      focus = body.industry || '',
+      source = 'hero_cta',
+      plan,
+      phone = '',
+      website = '',
+    } = body;
+
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 
-    const msg = `🔥 <b>New Trial Request</b>${plan ? ` — <b>${plan} plan</b>` : ''}\n\n👤 ${name || 'Unknown'}\n📧 ${email}\n🏢 ${business || '—'}\n📞 ${phone || '—'}\n🏭 ${industry || '—'}\n🌐 ${website || '—'}\n💰 Plan: ${plan || 'Not selected'}`;
+    const tgMsg = `🔥 <b>New AKAI lead</b>${plan ? ` — <b>${plan}</b>` : ''}\n\n👤 ${name || 'Unknown'}\n📧 ${email}\n🏢 ${businessName || '—'}\n🎯 Automate: ${focus || '—'}\n📍 Source: ${source}`;
 
-    // Persist to Firestore (non-blocking — notifications fire in parallel)
+    // Persist to Firestore trialLeads
     const db = getAdminFirestore();
     const leadRecord = {
       name: name || '',
       email,
-      business: business || '',
+      businessName: businessName || '',
+      focus: focus || '',
+      source: source || 'hero_cta',
+      plan: plan || null,
+      // legacy fields for backward compat
       phone: phone || '',
-      industry: industry || '',
       website: website || '',
-      source: 'homepage_modal',
       createdAt: new Date().toISOString(),
     };
+
     const savePromise = db
-      ? db.collection('trialLeads').add(leadRecord).catch(() => {/* non-fatal */})
+      ? db.collection('trialLeads').add(leadRecord).catch(() => { /* non-fatal */ })
       : Promise.resolve();
 
+    // Fire all notifications in parallel
     await Promise.allSettled([
       savePromise,
-      notifyTelegram(msg),
-      notifyEmail({ name, email, business, phone, industry, website }),
+      notifyTelegram(tgMsg),
+      sendGmailNotification({ name, email, businessName, focus, source }),
+      fireWelcomeEmail(email, name),
     ]);
 
     return NextResponse.json({ ok: true });
