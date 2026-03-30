@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout, { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
+import { useTrackBehaviour } from '@/hooks/useTrackBehaviour';
 
 // ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
 function safeSend(sendMessage: (t: string) => void, text: string) {
@@ -570,6 +571,7 @@ function SetupWizard({
   const [testFeedback, setTestFeedback] = useState<'up' | 'down' | null>(null);
   const [improvementNote, setImprovementNote] = useState('');
   const { sendMessage } = useDashboardChat();
+  const { track } = useTrackBehaviour();
 
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const TIMEZONES = ['AEST', 'AEDT', 'ACST', 'ACDT', 'AWST', 'NZST', 'NZT'];
@@ -1009,7 +1011,7 @@ function SetupWizard({
             <p className="text-xs text-green-400/70 mt-1">Upload your leads in the Sales skill to start calling.</p>
           </div>
           <button
-            onClick={onComplete}
+            onClick={() => { track('demo_call_triggered', { step: 'go_live' }); onComplete(); }}
             className="flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition-opacity"
           >
             Go live →
@@ -1415,6 +1417,7 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule, userId }:
 
 function VoicePageInner() {
   const { user, loading, userProfile } = useAuth();
+  const { track } = useTrackBehaviour();
   const router = useRouter();
   const [config, setConfig] = useState<VoiceConfig>(DEFAULT_CONFIG);
   const [configLoading, setConfigLoading] = useState(true);
@@ -1424,8 +1427,13 @@ function VoicePageInner() {
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
+      return;
     }
-  }, [user, loading, router]);
+    if (!loading && user) {
+      track('voice_page_viewed');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, loading]);
 
   useEffect(() => {
     if (!user) return;

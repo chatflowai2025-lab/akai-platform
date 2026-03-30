@@ -7,6 +7,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { collection, doc, setDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { useTrackBehaviour } from '@/hooks/useTrackBehaviour';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -442,10 +443,12 @@ function DayDetailPanel({
 function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (provider: string) => void }) {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const { track } = useTrackBehaviour();
 
   const handleGoogleConnect = async () => {
     setConnecting('google');
     setConnectError(null);
+    track('calendar_connect_clicked', { provider: 'google' });
     try {
       const r = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/oauth-url?userId=${userId}`,
@@ -454,8 +457,10 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
       if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { url } = await r.json();
       window.location.href = url;
-    } catch {
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
       setConnectError('Could not reach the Google Calendar service. Try again in a moment.');
+      track('calendar_connect_failed', { provider: 'google', error });
       setConnecting(null);
     }
   };
@@ -463,6 +468,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
   const handleOutlookConnect = async () => {
     setConnecting('outlook');
     setConnectError(null);
+    track('calendar_connect_clicked', { provider: 'outlook' });
     try {
       const r = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app'}/api/calendar/ms-auth-url?userId=${userId}`,
@@ -471,8 +477,10 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
       if (!r.ok) throw new Error(`Server error ${r.status}`);
       const { authUrl } = await r.json() as { authUrl: string };
       window.location.href = authUrl;
-    } catch {
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
       setConnectError('Could not reach the Outlook Calendar service. Try again in a moment.');
+      track('calendar_connect_failed', { provider: 'outlook', error });
       setConnecting(null);
     }
   };
@@ -600,6 +608,7 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     return localStorage.getItem(`cal_provider_${user.uid}`) || null;
   });
   const [copyToast, setCopyToast] = useState(false);
+  const { track } = useTrackBehaviour();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -613,13 +622,16 @@ function CalendarContent({ user }: { user: { uid: string } }) {
     if (params.get('connected') === 'google') {
       setCalConnected(true);
       setCalProvider('google');
+      track('calendar_connected', { provider: 'google' });
       history.pushState({}, '', window.location.pathname);
     }
     if (params.get('connected') === 'outlook') {
       setCalConnected(true);
       setCalProvider('outlook');
+      track('calendar_connected', { provider: 'outlook' });
       history.pushState({}, '', window.location.pathname);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const reloadCalConfig = useCallback(() => {

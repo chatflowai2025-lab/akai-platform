@@ -8,6 +8,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
+import { useTrackBehaviour } from '@/hooks/useTrackBehaviour';
 
 function safeSend(fn: (t: string) => void, text: string) { try { fn(text); } catch { /* chat not ready */ } }
 
@@ -648,6 +649,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
   userEmail?: string;
   onCallsLaunched?: () => void;
 }) {
+  const { track } = useTrackBehaviour();
   const [mode, setMode] = useState<'manual' | 'csv'>('manual');
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [uploadedLeads, setUploadedLeads] = useState<Lead[]>([]);
@@ -740,6 +742,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
       setUploadedLeads(prev => {
         const updated = [...prev, ...parsed];
         saveLeadsToFirestore(updated);
+        track('leads_uploaded', { count: updated.length, source: 'csv' });
         return updated;
       });
     };
@@ -751,6 +754,7 @@ function LeadUploadSection({ userId, businessName, plan = 'starter', userEmail =
 
   const launchCampaign = async () => {
     if (uploadedLeads.length === 0 || launching) return;
+    track('campaign_launched', { leadCount: uploadedLeads.length, campaign: campaignName });
 
     if (isSafeMode(userEmail)) {
       setLaunching(true);
@@ -1138,6 +1142,7 @@ const STATUS_STYLES: Record<string, { label: string; style: string }> = {
 };
 
 function ProspectsSection() {
+  const { track } = useTrackBehaviour();
   const { user, userProfile } = useAuth();
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1269,7 +1274,7 @@ function ProspectsSection() {
                           <span className="text-[10px] text-green-400 font-semibold">✅</span>
                         )}
                         <button
-                          onClick={() => setSendModal(p)}
+                          onClick={() => { track('email_send_modal_opened', { prospectId: String(p.id) }); setSendModal(p); }}
                           className="text-xs px-2.5 py-1 bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition opacity-0 group-hover:opacity-100 font-semibold"
                         >
                           {emailedIds.has(p.id) ? 'Resend →' : 'Send →'}

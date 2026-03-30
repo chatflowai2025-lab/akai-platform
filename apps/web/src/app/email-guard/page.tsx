@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { isSafeMode } from '@/lib/beta-config';
 import { getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useTrackBehaviour } from '@/hooks/useTrackBehaviour';
 
 // ── Safe sendMessage wrapper — prevents crash if chat context not ready ────
 function safeSend(sendMessage: (t: string) => void, text: string) {
@@ -271,6 +272,7 @@ function EmailGuardContent({
   const chatCtx = useDashboardChat();
   const sendMessage = chatCtx?.sendMessage ?? (() => {});
 
+  const { track } = useTrackBehaviour();
   const [msConnected, setMsConnected] = useState(false);
   const [msEmail, setMsEmail] = useState<string | null>(null);
   const [gmailConnected, setGmailConnected] = useState(false);
@@ -326,6 +328,7 @@ function EmailGuardContent({
     if (initialConnectedParam === 'gmail') {
       setGmailConnected(true);
       setGmailEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
+      track('email_guard_connected', { provider: 'gmail' });
       router.replace('/email-guard');
       safeSend(sendMessage, `My Gmail inbox is now connected. What can you do with it and what should I do first?`);
       triggerFirstPoll();
@@ -334,6 +337,7 @@ function EmailGuardContent({
     if (initialConnectedParam === 'microsoft') {
       setMsConnected(true);
       setMsEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
+      track('email_guard_connected', { provider: 'microsoft' });
       router.replace('/email-guard');
       safeSend(sendMessage, `My Microsoft inbox is now connected. What can you do with it and what should I do first?`);
       triggerFirstPoll();
@@ -364,6 +368,7 @@ function EmailGuardContent({
           if (d.success || d.email) {
             setMsConnected(true);
             setMsEmail(d.email || null);
+            track('email_guard_connected', { provider: 'microsoft' });
             safeSend(sendMessage, `My Microsoft inbox is now connected. What can you do with it and what should I do first?`);
             triggerFirstPoll();
           } else {
@@ -455,6 +460,7 @@ function EmailGuardContent({
   const connectMicrosoft = async () => {
     setConnecting(true);
     setConnectError(null);
+    track('email_guard_connect_clicked', { provider: 'microsoft' });
     try {
       const res = await fetch(`${RAILWAY}/api/email/microsoft/auth-url?userId=${user.uid}`, {
         headers: { 'x-api-key': API_KEY },
@@ -475,6 +481,7 @@ function EmailGuardContent({
   const connectGoogle = async () => {
     setConnecting(true);
     setConnectError(null);
+    track('email_guard_connect_clicked', { provider: 'gmail' });
     try {
       const res = await fetch(`${RAILWAY}/api/email/gmail/auth-url?userId=${user.uid}`, {
         headers: { 'x-api-key': API_KEY },

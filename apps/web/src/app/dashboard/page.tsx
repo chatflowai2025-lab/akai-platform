@@ -686,6 +686,32 @@ export default function DashboardPage() {
     if (!user) return;
     let cancelled = false;
 
+    const EVENT_LABELS: Record<string, string> = {
+      dashboard_viewed:            '🏠 Opened the dashboard',
+      quick_action_clicked:        '⚡ Clicked Quick Action',
+      setup_step_clicked:          '🚀 Tapped a setup step',
+      calendar_connect_clicked:    '📅 Started connecting calendar',
+      calendar_connected:          '📅 Connected Google Calendar',
+      calendar_connect_failed:     '⚠️ Calendar connection failed',
+      email_guard_connect_clicked: '✉️ Started connecting email',
+      email_guard_connected:       '✉️ Connected email inbox',
+      leads_uploaded:              '🎯 Uploaded leads',
+      campaign_launched:           '🚀 Launched a campaign',
+      email_send_modal_opened:     '📧 Opened send-email modal',
+      voice_page_viewed:           '📞 Opened Voice page',
+      demo_call_triggered:         '📞 Triggered a demo call',
+    };
+
+    const humanReadable = (event: string, data: Record<string, unknown>): string => {
+      const base = EVENT_LABELS[event];
+      if (!base) return `📌 ${event.replace(/_/g, ' ')}`;
+      if (event === 'quick_action_clicked' && data.action) return `⚡ ${data.action as string}`;
+      if (event === 'setup_step_clicked' && data.step) return `🚀 Setup: ${(data.step as string).replace(/_/g, ' ')}`;
+      if (event === 'leads_uploaded' && data.count) return `🎯 Uploaded ${data.count} leads`;
+      if (event === 'calendar_connect_failed' && data.error) return `⚠️ Calendar failed: ${data.error as string}`;
+      return base;
+    };
+
     const loadFromFirestore = async (): Promise<FeedItem[]> => {
       try {
         const { getFirebaseDb } = await import('@/lib/firebase');
@@ -695,18 +721,20 @@ export default function DashboardPage() {
         const q = query(
           collection(db, 'users', user.uid, 'activityLog'),
           orderBy('timestamp', 'desc'),
-          limit(5)
+          limit(20)
         );
         const snap = await getDocs(q);
         return snap.docs.map((d, i) => {
           const data = d.data();
+          const eventName = (data.event as string) || (data.type as string) || 'event';
+          const dataPayload = (data.data as Record<string, unknown>) ?? {};
           return {
             id: d.id || String(i),
-            type: (data.type as string) || 'event',
-            insight: (data.message as string) || (data.insight as string) || 'Activity recorded',
-            timestamp: (data.timestamp as { toDate?: () => Date } | string)?.toString?.() || new Date().toISOString(),
-            outcome: (data.outcome as string) || 'success',
-            priority: (data.priority as number) || 0,
+            type: eventName,
+            insight: humanReadable(eventName, dataPayload),
+            timestamp: (data.timestamp as string) || new Date().toISOString(),
+            outcome: 'success',
+            priority: 0,
           };
         });
       } catch {
