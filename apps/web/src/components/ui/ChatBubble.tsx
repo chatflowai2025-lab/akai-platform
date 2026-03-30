@@ -4,9 +4,10 @@ import { cn } from '@/lib/utils';
 
 interface ChatBubbleProps {
   message: ChatMessage;
+  onButtonClick?: (label: string) => void;
 }
 
-export default function ChatBubble({ message }: ChatBubbleProps) {
+export default function ChatBubble({ message, onButtonClick }: ChatBubbleProps) {
   const isAssistant = message.role === 'assistant';
 
   return (
@@ -37,7 +38,7 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
                 variant={btn.primary ? 'primary' : 'secondary'}
                 size="sm"
                 href={btn.url}
-                onClick={btn.action ? () => { /* action handler: implement as needed */ } : undefined}
+                onClick={!btn.url ? () => onButtonClick?.(btn.label) : undefined}
               >
                 {btn.label}
               </Button>

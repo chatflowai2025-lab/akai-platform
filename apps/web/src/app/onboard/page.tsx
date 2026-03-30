@@ -317,7 +317,24 @@ export default function OnboardPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 max-w-2xl mx-auto w-full">
         {messages.map(msg => (
-          <ChatBubble key={msg.id} message={msg} />
+          <ChatBubble
+            key={msg.id}
+            message={msg}
+            onButtonClick={async (label) => {
+              setInput(label);
+              await new Promise(r => setTimeout(r, 50));
+              setInput('');
+              const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: label, timestamp: new Date().toISOString() };
+              setMessages(prev => [...prev, userMsg]);
+              setChatLoading(true);
+              try {
+                const res = await fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: label, state, uid: user.uid }) });
+                const data = await res.json() as { message?: string; buttons?: Array<{label: string; primary?: boolean; url?: string}>; state?: typeof state; action?: string };
+                if (data.message) setMessages(prev => [...prev, { id: (Date.now()+1).toString(), role: 'assistant', content: data.message!, timestamp: new Date().toISOString(), buttons: data.buttons, action: data.action }]);
+                if (data.state) { setState(data.state); if (data.state.step === 'complete' && data.action === 'complete') await handleComplete(data.state); }
+              } catch { /* ignore */ } finally { setChatLoading(false); }
+            }}
+          />
         ))}
         {(chatLoading || completing) && (
           <div className="flex items-center gap-2 text-gray-500 text-sm">
