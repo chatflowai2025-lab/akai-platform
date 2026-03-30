@@ -15,7 +15,7 @@ import { getFirebaseDb } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
+const RAILWAY_API_KEY = process.env.NEXT_PUBLIC_API_KEY || process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -1064,6 +1064,199 @@ function SetupWizard({
   );
 }
 
+// ── Bland Recent Calls ────────────────────────────────────────────────────
+
+interface BlandCall {
+  call_id: string;
+  status: string;
+  created_at: string;
+  call_length: number | null;
+  answered_by: string | null;
+  to: string;
+  recording_url: string | null;
+}
+
+interface BlandTranscriptLine {
+  user: 'assistant' | 'user';
+  text: string;
+}
+
+interface BlandTranscript {
+  call_id: string;
+  status: string;
+  call_length: number | null;
+  transcripts: BlandTranscriptLine[];
+  summary: string | null;
+  recording_url: string | null;
+}
+
+function formatCallDuration(seconds: number | null): string {
+  if (!seconds) return '—';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
+function formatCallStatus(status: string, answeredBy: string | null): string {
+  if (status === 'completed' && answeredBy === 'human') return 'Answered';
+  if (status === 'completed' && answeredBy === 'voicemail') return 'Voicemail';
+  if (status === 'no-answer' || status === 'failed') return 'No answer';
+  if (status === 'completed') return 'Answered';
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function callStatusStyle(status: string, answeredBy: string | null): string {
+  const label = formatCallStatus(status, answeredBy);
+  if (label === 'Answered') return 'bg-green-500/10 text-green-400 border-green-500/20';
+  if (label === 'Voicemail') return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+  return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+}
+
+function BlandRecentCalls() {
+  const [calls, setCalls] = useState<BlandCall[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedCallId, setExpandedCallId] = useState<string | null>(null);
+  const [transcripts, setTranscripts] = useState<Record<string, BlandTranscript>>({});
+  const [transcriptLoading, setTranscriptLoading] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    fetch(`${RAILWAY_API}/api/bland/calls`, {
+      headers: { 'x-api-key': RAILWAY_API_KEY },
+    })
+      .then(r => r.json())
+      .then((d: { calls?: BlandCall[] }) => setCalls((d.calls || []).slice(0, 10)))
+      .catch(() => setCalls([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleExpandCall = async (callId: string) => {
+    if (expandedCallId === callId) {
+      setExpandedCallId(null);
+      return;
+    }
+    setExpandedCallId(callId);
+    if (transcripts[callId]) return; // already loaded
+
+    setTranscriptLoading(prev => ({ ...prev, [callId]: true }));
+    try {
+      const r = await fetch(`${RAILWAY_API}/api/bland/calls/${callId}/transcript`, {
+        headers: { 'x-api-key': RAILWAY_API_KEY },
+      });
+      const data = await r.json() as BlandTranscript;
+      setTranscripts(prev => ({ ...prev, [callId]: data }));
+    } catch {
+      // keep expanded, show error state
+    } finally {
+      setTranscriptLoading(prev => ({ ...prev, [callId]: false }));
+    }
+  };
+
+  return (
+    <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Recent Calls</h3>
+        {loading && <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />}
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-14 bg-[#1a1a1a] rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : calls.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center text-xl">📞</div>
+          <div>
+            <p className="text-white/60 font-semibold text-sm">No calls yet</p>
+            <p className="text-gray-600 text-xs mt-1">Sophie&apos;s call history will appear here</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {calls.map(call => {
+            const isExpanded = expandedCallId === call.call_id;
+            const transcript = transcripts[call.call_id];
+            const isLoadingTranscript = transcriptLoading[call.call_id];
+            const statusLabel = formatCallStatus(call.status, call.answered_by);
+            const statusStyle = callStatusStyle(call.status, call.answered_by);
+            const dateStr = call.created_at
+              ? new Date(call.created_at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+              : '—';
+
+            return (
+              <div key={call.call_id} className="rounded-xl border border-[#1a1a1a] bg-[#0d0d0d] overflow-hidden">
+                {/* Row */}
+                <button
+                  onClick={() => handleExpandCall(call.call_id)}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#111] transition-colors text-left"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold text-white font-mono">{call.to || '—'}</span>
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusStyle}`}>
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-0.5">{dateStr} · {formatCallDuration(call.call_length)}</p>
+                  </div>
+                  <span className={`text-gray-500 text-xs transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+                </button>
+
+                {/* Expanded transcript */}
+                {isExpanded && (
+                  <div className="border-t border-[#1f1f1f] px-4 py-4">
+                    {isLoadingTranscript ? (
+                      <div className="flex items-center gap-2 py-4 text-gray-500 text-sm">
+                        <div role="status" aria-label="Loading" className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                        Loading transcript…
+                      </div>
+                    ) : !transcript ? (
+                      <p className="text-xs text-gray-500 py-2">Failed to load transcript.</p>
+                    ) : transcript.transcripts.length === 0 ? (
+                      <p className="text-xs text-gray-500 py-2">No transcript available for this call.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {transcript.summary && (
+                          <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl px-4 py-3 mb-3">
+                            <p className="text-xs text-[#D4AF37] font-semibold uppercase tracking-wider mb-1">Summary</p>
+                            <p className="text-xs text-gray-300 leading-relaxed">{transcript.summary}</p>
+                          </div>
+                        )}
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {transcript.transcripts.map((line, idx) => (
+                            <div key={idx} className="flex gap-3">
+                              <span className={`text-[11px] font-bold pt-0.5 flex-shrink-0 w-16 ${line.user === 'assistant' ? 'text-[#D4AF37]' : 'text-blue-400'}`}>
+                                {line.user === 'assistant' ? 'Sophie' : 'Prospect'}
+                              </span>
+                              <p className="text-xs text-gray-300 leading-relaxed">{line.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {transcript.recording_url && (
+                          <a
+                            href={transcript.recording_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] border border-[#D4AF37]/20 px-3 py-1.5 rounded-lg hover:bg-[#D4AF37]/10 transition mt-2"
+                          >
+                            🔊 Listen to recording
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Active View ───────────────────────────────────────────────────────────
 
 interface CampaignStatus {
@@ -1186,6 +1379,9 @@ function ActiveView({ config, setConfig, onEditScript, onEditSchedule, userId }:
           </div>
         )}
       </div>
+
+      {/* Bland Recent Calls with transcripts */}
+      <BlandRecentCalls />
 
       {/* Controls */}
       <div className="flex flex-wrap gap-3">
