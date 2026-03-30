@@ -51,9 +51,9 @@ async function fetchViaRestApi(subdomain: string): Promise<SiteRecord | null> {
 // ── GET /api/web/site/[subdomain] ─────────────────────────────────────────────
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { subdomain: string } },
+  { params }: { params: Promise<{ subdomain: string }> },
 ) {
-  const { subdomain } = params;
+  const { subdomain } = await params;
 
   if (!subdomain?.trim()) {
     return NextResponse.json({ error: 'subdomain is required' }, { status: 400 });

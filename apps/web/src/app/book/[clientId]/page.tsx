@@ -521,7 +521,8 @@ function BookPageContent({ clientId }: { clientId: string }) {
 }
 
 // ─── Page export ──────────────────────────────────────────────────────────────
-export default function BookingPage({ params }: { params: { clientId: string } }) {
+export default async function BookingPage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = await params;
   return (
     <Suspense
       fallback={
@@ -530,7 +531,7 @@ export default function BookingPage({ params }: { params: { clientId: string } }
         </div>
       }
     >
-      <BookPageContent clientId={params.clientId} />
+      <BookPageContent clientId={clientId} />
     </Suspense>
   );
 }
