@@ -356,6 +356,8 @@ function AuditPanel({
   }, [userId]);
 
   const runAudit = useCallback(async () => {
+    // Don't fire if URL is not yet loaded
+    if (!url?.trim()) return;
     // Check usage limit
     if (userId && auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit) {
       setError(`You've used all ${auditUsage.limit} web audits for this month. Upgrade to run more.`);
