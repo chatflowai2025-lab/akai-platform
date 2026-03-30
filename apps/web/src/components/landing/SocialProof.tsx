@@ -32,7 +32,7 @@ const TESTIMONIALS = [
     company: 'Luxury Kitchen Co.',
     location: 'Sydney',
     initials: 'MT',
-    tag: 'Early Access',
+    tag: 'Kitchen & Renovation',
   },
   {
     quote: 'I was sceptical about AI calling mortgage leads — but Sophie handled objections better than my junior staff. 8 qualified meetings booked in 48 hours, while I was asleep.',
@@ -40,7 +40,7 @@ const TESTIMONIALS = [
     company: 'Mortgage Broker',
     location: 'Melbourne',
     initials: 'SL',
-    tag: 'Early Access',
+    tag: 'Finance & Mortgage',
   },
   {
     quote: 'The Web agent flagged a missing CTA on our jobs page — we\'d had it wrong for 2 years. Fixed it that afternoon. Applications up 31% the following week.',
@@ -48,7 +48,7 @@ const TESTIMONIALS = [
     company: 'Recruitment Agency',
     location: 'Brisbane',
     initials: 'JK',
-    tag: 'Early Access',
+    tag: 'Recruitment',
   },
 ];
 
@@ -109,8 +109,7 @@ export default function SocialProof() {
         {/* Testimonials carousel */}
         <div>
           <div className="flex items-center justify-center gap-3 mb-8">
-            <p className="text-center text-xs text-white/20 uppercase tracking-widest font-semibold">Early Access Feedback</p>
-            <span className="text-[10px] bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">Beta</span>
+            <p className="text-center text-xs text-white/20 uppercase tracking-widest font-semibold">What Our Clients Are Saying</p>
           </div>
 
           {/* Active testimonial — fades between */}

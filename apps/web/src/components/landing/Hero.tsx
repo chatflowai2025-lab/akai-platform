@@ -541,7 +541,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
           <span className="w-2 h-2 rounded-full bg-green-400 pulse-ring" />
           <span>Now live</span>
           <span className="w-px h-3 bg-white/10" />
-          <span className="text-white/50">AI-powered business automation</span>
+          <span className="text-white/50">14-day free trial · No card required</span>
         </div>
 
         {/* Rotating Headline */}
@@ -584,7 +584,7 @@ export default function Hero({ onOpenCapture, onOpenChat }: { onOpenCapture?: ()
             size="lg"
             className="glow-gold-sm min-w-[180px] min-h-[52px] w-full sm:w-auto"
           >
-            Get Early Access →
+            Start Free Trial →
           </Button>
           <button
             onClick={() => setModal('demo')}
