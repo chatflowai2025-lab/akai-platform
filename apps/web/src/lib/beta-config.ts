@@ -10,6 +10,7 @@ export const BETA_WHITELIST: Record<string, { name: string; safeMode: boolean }>
   'info@apheritageinterior.com.au': { name: 'AP Heritage', safeMode: false },
   'danielle.avissar@gmail.com': { name: 'Danielle', safeMode: false },
   'henrik.mortensen@live.com.au': { name: 'Henrik', safeMode: true },
+  'kemalarafeh@gmail.com': { name: 'Kemal', safeMode: true },
   'jilljjqb@gmail.com': { name: 'Jill', safeMode: true },
   'chatflowai2025@gmail.com': { name: 'Aaron', safeMode: false },
   'getakainow@outlook.com': { name: 'Aaron', safeMode: false },
