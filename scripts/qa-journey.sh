@@ -99,7 +99,7 @@ check "Demo call API reachable (200/201/400/422)" "$([ "$DEMO_OK" = "true" ] && 
 log ""
 log "┌─ JOURNEY 4: Module routes (200 check)"
 
-MODULES=("sales" "marketing" "email-guard" "calendar" "recruiter" "finance" "account-manager" "dashboard")
+MODULES=("sales" "social" "email-guard" "calendar" "recruit" "ads" "voice" "dashboard" "web" "health")
 
 for module in "${MODULES[@]}"; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$BASE_URL/$module" 2>/dev/null || echo "000")
