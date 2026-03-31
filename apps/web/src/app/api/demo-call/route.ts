@@ -10,6 +10,18 @@ function normaliseUrl(url: string): string {
   return `https://${trimmed}`;
 }
 
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm';
+
+async function notifyDiscord(text: string) {
+  try {
+    await fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: text }),
+    });
+  } catch { /* non-fatal */ }
+}
+
 async function notifyTelegram(text: string) {
   try {
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
@@ -116,15 +128,36 @@ RULES:
 - Keep the call under 4 minutes unless they're clearly engaged and want more`;
 
 
-    // Save lead + notify regardless of mock/live mode
+    // Business hours check — AEST (UTC+10/+11)
+    // Call immediately Mon–Fri 8am–6pm AEST, Sat 9am–1pm AEST
+    // Outside hours: notify only, do not call
+    const nowUTC = new Date();
+    const aestOffset = 10; // AEST (DST ends first Sun Apr, currently AEDT=+11 but conservative +10 is fine)
+    const aestHour = (nowUTC.getUTCHours() + aestOffset) % 24;
+    const aestDay = new Date(nowUTC.getTime() + aestOffset * 3600000).getUTCDay(); // 0=Sun,6=Sat
+    const isBusinessHours =
+      (aestDay >= 1 && aestDay <= 5 && aestHour >= 8 && aestHour < 18) || // Mon–Fri 8am–6pm
+      (aestDay === 6 && aestHour >= 9 && aestHour < 13); // Sat 9am–1pm
+
+    // Save lead + notify regardless
     await Promise.all([
       saveLeadToRailway({ name: name || '', phone, email: email || '', businessName: businessName || '', website, industry: industry || '', challenge: challenge || '', leadsPerMonth: leadsPerMonth || '' }),
-      notifyTelegram(`🔔 *New demo request!*\n\n👤 ${name || 'Unknown'}\n📞 ${phone}\n📧 ${email || 'n/a'}\n🏢 ${businessName || 'n/a'} (${industry || 'n/a'})\n🌐 ${website || 'n/a'}\n💬 ${challenge || 'n/a'}`),
+      notifyTelegram(
+        isBusinessHours
+          ? `🔔 *New demo request!*\n\n👤 ${name || 'Unknown'}\n📞 ${phone}\n📧 ${email || 'n/a'}\n🏢 ${businessName || 'n/a'} (${industry || 'n/a'})\n🌐 ${website || 'n/a'}\n💬 ${challenge || 'n/a'}\n\n📞 Sophie calling now...`
+          : `🔔 *New demo request (after hours — NOT calling)*\n\n👤 ${name || 'Unknown'}\n📞 ${phone}\n📧 ${email || 'n/a'}\n🏢 ${businessName || 'n/a'} (${industry || 'n/a'})\n🌐 ${website || 'n/a'}\n💬 ${challenge || 'n/a'}\n\n⏰ ${aestHour}:${String(nowUTC.getUTCMinutes()).padStart(2,'0')} AEST — will not call. Say "call [name]" to trigger manually.`
+      ),
+      notifyDiscord(
+        isBusinessHours
+          ? `🔔 **New demo request** — Sophie calling now\n👤 ${name || 'Unknown'} | 📞 ${phone} | 🏢 ${businessName || 'n/a'} (${industry || 'n/a'})\n💬 ${challenge || 'n/a'} | 🌐 ${website || 'n/a'}`
+          : `🔔 **New demo request (after hours — NOT calling)**\n👤 ${name || 'Unknown'} | 📞 ${phone} | 🏢 ${businessName || 'n/a'} (${industry || 'n/a'})\n💬 ${challenge || 'n/a'}\n⏰ ${aestHour}:${String(nowUTC.getUTCMinutes()).padStart(2,'0')} AEST — say "call [name]" to trigger manually.`
+      ),
     ]);
 
-    if (!apiKey) {
-      console.warn(`[demo-call] Mock mode — would call ${phone} for ${name || 'unknown'}`);
-      return NextResponse.json({ success: true, message: 'Demo booked (mock)' });
+    if (!apiKey || !isBusinessHours) {
+      if (!apiKey) console.warn(`[demo-call] Mock mode — would call ${phone} for ${name || 'unknown'}`);
+      if (!isBusinessHours) console.log(`[demo-call] After hours (${aestHour}:00 AEST) — skipping call for ${phone}`);
+      return NextResponse.json({ success: true, message: isBusinessHours ? 'Demo booked (mock)' : 'Lead captured — after hours, call scheduled for business hours' });
     }
 
     const res = await fetch('https://api.bland.ai/v1/calls', {
