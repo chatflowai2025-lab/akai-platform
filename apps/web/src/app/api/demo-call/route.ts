@@ -132,7 +132,10 @@ RULES:
     // Call immediately Mon–Fri 8am–6pm AEST, Sat 9am–1pm AEST
     // Outside hours: notify only, do not call
     const nowUTC = new Date();
-    const aestOffset = 10; // AEST (DST ends first Sun Apr, currently AEDT=+11 but conservative +10 is fine)
+    // Sydney is AEDT (UTC+11) until first Sunday of April, then AEST (UTC+10)
+    const now = new Date();
+    const aprilFirstSunday2026 = new Date('2026-04-05T16:00:00Z'); // First Sun Apr 2026 = Apr 5, clocks go back at 3am = UTC+11→+10
+    const aestOffset = now < aprilFirstSunday2026 ? 11 : 10;
     const aestHour = (nowUTC.getUTCHours() + aestOffset) % 24;
     const aestDay = new Date(nowUTC.getTime() + aestOffset * 3600000).getUTCDay(); // 0=Sun,6=Sat
     const isBusinessHours =
