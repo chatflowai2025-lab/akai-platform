@@ -178,6 +178,20 @@ fi
 
 # ── Suite 5c: Build deprecation warnings (RCA #5) ────────────────────────────
 echo ""
+echo "┌─ SUITE 5d: Sydney Timezone Gate (RCA #18)"
+if [ -d "$REPO_ROOT/apps/web/src" ]; then
+  # Catch hardcoded UTC+10 offset in business-hours logic (must account for AEDT = UTC+11)
+  BAD_TZ=$(grep -rn "aestOffset = 10\b\|offset.*= 10\b\|UTC+10\b" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -iv "comment\|\/\/" || true)
+  if [ -z "$BAD_TZ" ]; then
+    check "No hardcoded UTC+10 in business-hours logic (AEDT = UTC+11)" "pass"
+  else
+    check "No hardcoded UTC+10 in business-hours logic (AEDT = UTC+11)" "fail" "Sydney is AEDT (UTC+11) until first Sunday April — fix offset"
+    echo "$BAD_TZ" | head -5
+  fi
+else
+  echo "  ⚠️  apps/web/src not found — skipping timezone scan"
+fi
+
 echo "┌─ SUITE 5c: Build Deprecation Check"
 if [ -f "$REPO_ROOT/package.json" ]; then
   BUILD_WARNINGS=$(cd "$REPO_ROOT" && pnpm build 2>&1 | grep -i "deprecated" || true)
