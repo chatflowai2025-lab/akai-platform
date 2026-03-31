@@ -466,7 +466,7 @@ export default function CodeShieldPage() {
           </button>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 w-full max-w-4xl">
 
           {/* ── Error banner ─────────────────────────────────────────────── */}
           {error && (

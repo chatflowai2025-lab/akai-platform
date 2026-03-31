@@ -613,7 +613,7 @@ function EmailGuardContent({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-3xl">
+      <div className="flex-1 overflow-y-auto p-8 space-y-6 w-full max-w-3xl">
 
         {/* ── Connected state ─────────────────────────────────────────── */}
         {/* ── Always show both providers ──────────────────────────────── */}
