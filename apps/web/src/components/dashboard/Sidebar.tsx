@@ -146,13 +146,6 @@ export default function Sidebar() {
 
       {/* Bottom — Settings + Sign Out */}
       <div className="px-3 py-4 space-y-1" style={{ borderTop: '1px solid var(--border)' }}>
-        {/* Theme toggle row */}
-        <div className="flex items-center gap-3 px-3 py-2 text-sm text-gray-400">
-          <span>🎨</span>
-          <span className="flex-1">Theme</span>
-          
-        </div>
-
         <Link
           href="/settings"
           onClick={() => setMobileOpen(false)}

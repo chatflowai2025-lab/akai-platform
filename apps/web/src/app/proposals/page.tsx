@@ -305,7 +305,7 @@ function PipelineTab() {
         </div>
       )}
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
-        <div className="flex h-full gap-0 min-w-max">
+        <div className="flex h-full gap-0 min-w-max mx-auto">
           {PIPELINE_STATUSES.map(status => {
             const cols = proposals.filter(p => p.status === status);
             return (
