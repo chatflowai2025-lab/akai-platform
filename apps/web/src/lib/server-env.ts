@@ -2,33 +2,45 @@
  * server-env.ts — Single source of truth for all server-side credentials.
  *
  * RULES (enforced by qa.sh Suite 5c):
- * - ALL secrets come from process.env — never hardcoded fallbacks with real values
+ * - ALL secrets come from process.env — no hardcoded values, no fallbacks with real values
  * - This file is the ONLY place env vars are read for credentials
  * - All routes import from here, never call process.env directly for secrets
- * - If an env var is missing, we return '' and let the caller handle it gracefully
+ * - Missing required vars throw at import time — fail loud, not silent
  *
  * To add a new credential:
- * 1. Add it here with process.env.VAR_NAME ?? ''
- * 2. Set it in Vercel (and Railway if server-side)
+ * 1. Add it here with require('VAR_NAME')
+ * 2. Set it in Vercel + Railway
  * 3. Never paste the real value into source code
  */
 
-// ── Telegram ────────────────────────────────────────────────────────────────
-export const TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN ?? '';
-export const TG_AARON_CHAT_ID = process.env.TELEGRAM_CHAT_ID ?? '';
+function require(name: string): string {
+  const val = process.env[name];
+  if (!val) {
+    // In production, throw hard. In build/test, warn so CI can still complete type-check.
+    const msg = `[server-env] Missing required env var: ${name}`;
+    if (process.env.NODE_ENV === 'production') throw new Error(msg);
+    if (process.env.NODE_ENV !== 'test') console.warn(msg);
+    return '';
+  }
+  return val;
+}
 
-// ── Resend ───────────────────────────────────────────────────────────────────
-export const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
+// ── Telegram ─────────────────────────────────────────────────────────────────
+export const TG_BOT_TOKEN     = require('TELEGRAM_BOT_TOKEN');
+export const TG_AARON_CHAT_ID = require('TELEGRAM_CHAT_ID');
 
-// ── X (Twitter) / @getakai_ai ────────────────────────────────────────────────
-export const X_API_KEY       = process.env.X_API_KEY       ?? '';
-export const X_API_SECRET    = process.env.X_API_SECRET    ?? '';
-export const X_ACCESS_TOKEN  = process.env.X_ACCESS_TOKEN  ?? '';
-export const X_ACCESS_SECRET = process.env.X_ACCESS_SECRET ?? '';
+// ── Resend ────────────────────────────────────────────────────────────────────
+export const RESEND_API_KEY = require('RESEND_API_KEY');
 
-// ── Railway internal API ─────────────────────────────────────────────────────
+// ── X (Twitter) / @getakai_ai ─────────────────────────────────────────────────
+export const X_API_KEY       = require('X_API_KEY');
+export const X_API_SECRET    = require('X_API_SECRET');
+export const X_ACCESS_TOKEN  = require('X_ACCESS_TOKEN');
+export const X_ACCESS_SECRET = require('X_ACCESS_SECRET');
+
+// ── Railway internal API ──────────────────────────────────────────────────────
 export const RAILWAY_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api-server-production-2a27.up.railway.app';
-export const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY ?? process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '';
+export const RAILWAY_API_KEY = require('RAILWAY_API_KEY');
 
-// ── Anthropic ────────────────────────────────────────────────────────────────
-export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY ?? '';
+// ── Anthropic ─────────────────────────────────────────────────────────────────
+export const ANTHROPIC_API_KEY = require('ANTHROPIC_API_KEY');
