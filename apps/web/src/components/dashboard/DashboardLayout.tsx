@@ -70,6 +70,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const [memoryTurns, setMemoryTurns] = useState<Array<{ userMessage: string; akResponse: string; timestamp: string; date: string }>>([]);
   const [memoryLoading, setMemoryLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLengthRef = useRef<number>(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -161,7 +162,11 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   }, [user]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Only scroll when a new message is genuinely added (not on module navigation or initial load)
+    if (messages.length > prevMessagesLengthRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevMessagesLengthRef.current = messages.length;
   }, [messages]);
 
   // Poll for email enquiry notifications and inject into chat
