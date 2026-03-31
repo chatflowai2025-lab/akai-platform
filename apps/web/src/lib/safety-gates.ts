@@ -154,12 +154,23 @@ const MODULE_KEYWORDS: Record<string, RegExp> = {
  * @param userPlan   - The user's current subscription plan
  * @returns { allowed, reason }
  */
+// ── Internal system users — bypass outbound restrictions ─────────────────────
+// These are AKAI cron jobs and internal agents that legitimately include
+// phone numbers and contact details in their output (e.g. lead research briefs).
+const INTERNAL_SYSTEM_UIDS = new Set([
+  'FTMGBHHYuOVpKFuRYo7frrd1h4w1', // AP Heritage Daily Leads cron
+]);
+
 export function checkRequestScope(
   userId: string,
   requestText: string,
   userPlan: UserPlan,
   outboundEnabled = false
 ): ScopeCheckResult {
+  // Internal system users bypass outbound pattern checks entirely
+  if (INTERNAL_SYSTEM_UIDS.has(userId)) {
+    outboundEnabled = true;
+  }
   // Outbound call/email patterns — skipped if outboundEnabled is true for this user
   const OUTBOUND_PATTERNS = [
     /\b(call|phone|ring|dial)\b.{0,40}\b(him|her|them|this person|the client|the lead|the customer|the contact|[A-Z][a-z]+)\b/i,
