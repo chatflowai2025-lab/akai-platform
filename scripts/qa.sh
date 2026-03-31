@@ -107,6 +107,9 @@ echo "┌─ SUITE 4: Security"
 
 check "HSTS header present" "$(echo "$HEADERS" | grep -qi 'strict-transport-security' && echo pass || echo fail)"
 check "No secret keys in HTML" "$(echo "$HTML" | grep -qE 'sk_live_|whsec_|re_[A-Za-z0-9]{20}' && echo fail || echo pass)"
+check "No FIREBASE_PRIVATE_KEY leaked in HTML" "$(echo "$HTML" | grep -qi 'firebase_private_key\|-----BEGIN RSA PRIVATE KEY' && echo fail || echo pass)"
+check "No GMAIL_APP_PASSWORD leaked in HTML" "$(echo "$HTML" | grep -qi 'gmail_app_password\|GMAIL_APP_PASSWORD' && echo fail || echo pass)"
+check "No RAILWAY_API_KEY leaked in HTML" "$(echo "$HTML" | grep -qi 'railway_api_key\|RAILWAY_API_KEY' && echo fail || echo pass)"
 
 # ── Suite 5a: Security — CVE Audit (RCA #3) ──────────────────────────────────
 echo ""
@@ -167,6 +170,39 @@ else
   check "No inline Hero component in page.tsx (must use Hero.tsx)" "fail" "Found $HERO_IN_PAGE inline Hero definition(s) — import from components/landing/Hero.tsx instead"
 fi
 
+# ── Suite 5e: Critical ENV VAR presence check (RCA — silent email failures) ──
+# These env vars MUST be set in Vercel (or current shell for local runs).
+# Missing vars cause silent failures — emails don't send, Firestore writes fail,
+# but the endpoint still returns 200. This caused bugs 3+4 to ship undetected.
+echo ""
+echo "┌─ SUITE 5e: Critical ENV VAR Check"
+CRITICAL_VARS=(
+  "TELEGRAM_BOT_TOKEN"
+  "TELEGRAM_CHAT_ID"
+  "NEXT_PUBLIC_API_URL"
+  "NEXT_PUBLIC_FIREBASE_API_KEY"
+  "NEXT_PUBLIC_FIREBASE_PROJECT_ID"
+  "FIREBASE_CLIENT_EMAIL"
+  "FIREBASE_PRIVATE_KEY"
+  "GMAIL_APP_PASSWORD"
+)
+# When running locally, check the current environment.
+# In CI/Vercel, these are set via the Vercel dashboard — this check is a reminder.
+ENV_FAIL=0
+for var in "${CRITICAL_VARS[@]}"; do
+  if [ -n "${!var:-}" ]; then
+    check "ENV: $var is set" "pass"
+  else
+    # Warn (not hard fail) for local runs — these are Vercel-side in prod
+    echo "  ⚠️  WARNING: ENV $var is not set in current shell (must be in Vercel env for production)"
+    ENV_FAIL=$((ENV_FAIL+1))
+  fi
+done
+if [ "$ENV_FAIL" -gt 0 ]; then
+  echo "  ℹ️  $ENV_FAIL env var(s) not set in shell — verify all are set in Vercel dashboard before deploy"
+  echo "  ℹ️  Missing env vars = silent failures (emails, Firestore, Telegram all silently skip)"
+fi
+
 # ── Suite 5: /onboard route ───────────────────────────────────────────────────
 echo ""
 echo "┌─ SUITE 5: Onboard route"
@@ -178,6 +214,74 @@ CHAT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -X POST \
   -d '{"message":"Test","state":{"step":"business_name","data":{}}}' \
   "$BASE_URL/api/chat" 2>/dev/null || echo "000")
 check "/api/chat POST returns 200" "$([ "$CHAT_STATUS" = "200" ] && echo pass || echo fail)" "got $CHAT_STATUS"
+
+# ── Suite 6: Bug Regression Source Scans ─────────────────────────────────────
+echo ""
+echo "┌─ SUITE 6: Bug Regression Source Scans"
+
+# BUG 1: type="url" in domain-input fields causes browser to reject bare domains.
+# The health and sales pages had type="url" on website/URL fields.
+# Fix: must use type="text" autoComplete="url" for any field that accepts domains.
+if [ -d "$REPO_ROOT/apps/web/src" ]; then
+  # Scan for type="url" in files where it causes user-facing issues
+  # Allowlist: login page may use type="url" for other purposes
+  TYPE_URL_HITS=$(grep -rn 'type="url"' "$REPO_ROOT/apps/web/src/" \
+    --include="*.tsx" --include="*.ts" \
+    | grep -v "login/page" \
+    | grep -v "//.*type=\"url\"" \
+    | grep -E 'placeholder.*website|placeholder.*yoursite|placeholder.*domain|placeholder.*\.com|autoComplete="url"' \
+    || true)
+  # More direct: scan health and sales pages specifically
+  HEALTH_URL_INPUT=$(grep -n 'type="url"' "$REPO_ROOT/apps/web/src/app/health/page.tsx" 2>/dev/null || true)
+  SALES_URL_INPUT=$(grep -n 'type="url"' "$REPO_ROOT/apps/web/src/app/sales/page.tsx" 2>/dev/null || true)
+  LEAD_URL_INPUT=$(grep -n 'type="url"' "$REPO_ROOT/apps/web/src/components/LeadCaptureModal.tsx" 2>/dev/null || true)
+
+  if [ -n "$HEALTH_URL_INPUT" ]; then
+    check "BUG-1: No type=\"url\" in /health page URL input" "fail" "/health/page.tsx has type=\"url\" — change to type=\"text\" autoComplete=\"url\""
+    echo "    $HEALTH_URL_INPUT"
+  else
+    check "BUG-1: No type=\"url\" in /health page URL input" "pass"
+  fi
+
+  if [ -n "$SALES_URL_INPUT" ]; then
+    check "BUG-1: No type=\"url\" in /sales page website input" "fail" "/sales/page.tsx has type=\"url\" — change to type=\"text\" autoComplete=\"url\""
+    echo "    $SALES_URL_INPUT"
+  else
+    check "BUG-1: No type=\"url\" in /sales page website input" "pass"
+  fi
+
+  if [ -n "$LEAD_URL_INPUT" ]; then
+    check "BUG-1: No type=\"url\" in LeadCaptureModal website input" "fail" "LeadCaptureModal.tsx has type=\"url\" — change to type=\"text\" autoComplete=\"url\""
+  else
+    check "BUG-1: No type=\"url\" in LeadCaptureModal website input" "pass"
+  fi
+else
+  echo "  ⚠️  apps/web/src not found — skipping bug regression source scans"
+fi
+
+# BUG 2: Success screen must NOT interpolate form.name into heading
+# Scan for patterns like `Welcome to AKAI, ${` or `Welcome to AKAI, ` + template literal
+if [ -f "$REPO_ROOT/apps/web/src/components/LeadCaptureModal.tsx" ]; then
+  PERSONALIZED_HEADING=$(grep -n 'Welcome to AKAI.*\${.*name\|Welcome to AKAI.*form\.name' \
+    "$REPO_ROOT/apps/web/src/components/LeadCaptureModal.tsx" 2>/dev/null || true)
+  if [ -n "$PERSONALIZED_HEADING" ]; then
+    check "BUG-2: Success heading not personalized with name" "fail" "LeadCaptureModal heading interpolates form.name"
+    echo "    $PERSONALIZED_HEADING"
+  else
+    check "BUG-2: Success heading not personalized with name" "pass"
+  fi
+fi
+
+# BUG 4: Web audit runAudit must guard against empty URL
+# The guard `if (!url?.trim()) return;` must exist in web/page.tsx
+if [ -f "$REPO_ROOT/apps/web/src/app/web/page.tsx" ]; then
+  AUDIT_GUARD=$(grep -n "url?.trim\(\)\|url\.trim\(\)\|!url" "$REPO_ROOT/apps/web/src/app/web/page.tsx" 2>/dev/null | head -5 || true)
+  if [ -n "$AUDIT_GUARD" ]; then
+    check "BUG-4: Web audit has empty-URL guard" "pass"
+  else
+    check "BUG-4: Web audit has empty-URL guard" "fail" "runAudit in /web/page.tsx must check !url?.trim() before fetching"
+  fi
+fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
