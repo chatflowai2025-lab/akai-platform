@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 // X (Twitter) OAuth 1.0a static credentials for @getakai_ai
-const X_API_KEY        = process.env.X_API_KEY        ?? 'xPUex2YS1zSkKB5zNurC9uVLf';
-const X_API_SECRET     = process.env.X_API_SECRET     ?? '0yew7vWaIgSBQY7SBZxMtHZrBBwu5p6rPgphHrQQgTyiFu1cv1';
-const X_ACCESS_TOKEN   = process.env.X_ACCESS_TOKEN   ?? '1936782514640519168-rqS3UspiWUX3bdf3tVyfGjBHKbAV8W';
-const X_ACCESS_SECRET  = process.env.X_ACCESS_SECRET  ?? 'zCtnKASQbZyBrHBlW6BVMhk1Lchl80DnTJPbmgb1qesma';
+const X_API_KEY        = process.env.X_API_KEY        ?? 'U38OJMeL9VBMJpvrJceaQ4vJx';
+const X_API_SECRET     = process.env.X_API_SECRET     ?? 'AhKOKqNjGjTUK2RljtNFt6z6HyUIGxq12EW07KEQMe1YIUFUxl';
+const X_ACCESS_TOKEN   = process.env.X_ACCESS_TOKEN   ?? '1936782514640519168-A4RoT72IsFfcauBJEKEyCGqjZal8wP';
+const X_ACCESS_SECRET  = process.env.X_ACCESS_SECRET  ?? '2BOFzM6UhxtG3e3aWuG7VjVRjl67lKvXwFbZsdF2Nnfpl';
 
 function percentEncode(s: string): string {
   return encodeURIComponent(s).replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
