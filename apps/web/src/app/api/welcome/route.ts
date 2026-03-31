@@ -50,7 +50,7 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 function buildWelcomeEmail(name: string, email: string, website?: string, auditScore?: number): string {
-  const displayName = name || email.split('@')[0] || 'there';
+  const displayName = (name && name.trim().toLowerCase() !== 'ak test' && name.trim().length > 0) ? name.trim() : 'there';
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -67,7 +67,7 @@ function buildWelcomeEmail(name: string, email: string, website?: string, auditS
 
     <!-- Body -->
     <div style="padding:40px;">
-      <p style="font-size:16px;color:#111;margin:0 0 8px;font-weight:600;">Hi ${displayName},</p>
+      <p style="font-size:16px;color:#111;margin:0 0 8px;font-weight:600;">Hi ${displayName} 👋</p>
       <h1 style="font-size:24px;font-weight:900;color:#0a0a0a;margin:0 0 16px;line-height:1.3;">
         Welcome to AKAI. Your account is live.
       </h1>
