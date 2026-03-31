@@ -144,17 +144,36 @@ else
   echo "  ⚠️  apps/web/src not found — skipping hardcoded URL scan"
 fi
 
-echo "┌─ SUITE 5c: Stale X API Credentials Scan (RCA #17)"
+echo "┌─ SUITE 5c: Hardcoded Credentials Scan (RCA #17 — all creds)"
 if [ -d "$REPO_ROOT/apps/web/src" ]; then
+  # Rule: all credentials must come from @/lib/server-env.ts (which reads process.env)
+  # Fail if any route/component directly hardcodes a known credential pattern as a string fallback
+
+  # Known bad patterns — stale X keys
   STALE_X=$(grep -r "xPUex\|0yew7\|rqS3Us\|zCtnK" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null || true)
-  if [ -z "$STALE_X" ]; then
-    check "No stale X API credentials in source" "pass"
+
+  # Telegram bot token pattern (numeric:alphanum)
+  # Match format: 8-digit-number:alphanum-string (Telegram token format) as a hardcoded string
+  STALE_TG=$(grep -rE "['\"]\d{8,10}:[A-Za-z0-9_-]{35,}['\"]" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "server-env\.ts" || true)
+
+  # Resend API key pattern
+  STALE_RESEND=$(grep -rE "['\"](re_[A-Za-z0-9_-]{30,})['\"]" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "server-env\.ts" || true)
+
+  # Stripe key pattern
+  STALE_STRIPE=$(grep -rE "['\"](sk_live_|sk_test_|pk_live_|pk_test_)[A-Za-z0-9]{20,}['\"]" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "server-env\.ts\|NEXT_PUBLIC_STRIPE" || true)
+
+  # Anthropic key pattern
+  STALE_ANTHROPIC=$(grep -rE "['\"](sk-ant-[A-Za-z0-9_-]{30,})['\"]" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "server-env\.ts" || true)
+
+  COMBINED="$STALE_X$STALE_TG$STALE_RESEND$STALE_STRIPE$STALE_ANTHROPIC"
+  if [ -z "$COMBINED" ]; then
+    check "No hardcoded credentials in source (all must use server-env.ts)" "pass"
   else
-    check "No stale X API credentials in source" "fail" "Stale X keys found — update to canonical keys from TOOLS.md"
-    echo "$STALE_X" | head -5
+    check "No hardcoded credentials in source (all must use server-env.ts)" "fail" "Hardcoded credential found — move to server-env.ts + set env var"
+    echo "$COMBINED" | head -10
   fi
 else
-  echo "  ⚠️  apps/web/src not found — skipping X credential scan"
+  echo "  ⚠️  apps/web/src not found — skipping credential scan"
 fi
 
 # ── Suite 5c: Build deprecation warnings (RCA #5) ────────────────────────────

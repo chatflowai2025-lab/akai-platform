@@ -3,11 +3,7 @@ import crypto from 'crypto';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
-// X (Twitter) OAuth 1.0a static credentials for @getakai_ai
-const X_API_KEY        = process.env.X_API_KEY        ?? 'U38OJMeL9VBMJpvrJceaQ4vJx';
-const X_API_SECRET     = process.env.X_API_SECRET     ?? 'AhKOKqNjGjTUK2RljtNFt6z6HyUIGxq12EW07KEQMe1YIUFUxl';
-const X_ACCESS_TOKEN   = process.env.X_ACCESS_TOKEN   ?? '1936782514640519168-A4RoT72IsFfcauBJEKEyCGqjZal8wP';
-const X_ACCESS_SECRET  = process.env.X_ACCESS_SECRET  ?? '2BOFzM6UhxtG3e3aWuG7VjVRjl67lKvXwFbZsdF2Nnfpl';
+import { X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_SECRET } from '@/lib/server-env';
 
 function percentEncode(s: string): string {
   return encodeURIComponent(s).replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);

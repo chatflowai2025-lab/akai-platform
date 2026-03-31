@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDripMessage } from '@/lib/cmo-campaign';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY ?? 're_CuqENxkM_AgFzKPSv3ZLgjqb3wLcZibXi';
+import { RESEND_API_KEY } from '@/lib/server-env';
 const FROM_EMAIL = `AKAI <${process.env.FROM_EMAIL_ADDRESS || 'onboarding@resend.dev'}>`;
 
 // Aaron is always BCC'd on every drip email so he sees everything that goes out.

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
-const TG_CHAT = '8320254721';
+import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT } from '@/lib/server-env';
 
 function normaliseUrl(url: string): string {
   if (!url) return '';

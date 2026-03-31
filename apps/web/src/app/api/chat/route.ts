@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkRequestScope, type UserPlan } from '@/lib/safety-gates';
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { TG_BOT_TOKEN, TG_AARON_CHAT_ID } from '@/lib/server-env';
 
 const DISCORD_ALERT_WEBHOOK =
   process.env.DISCORD_ALERT_WEBHOOK ||
@@ -739,12 +740,10 @@ export async function POST(req: NextRequest) {
 
     // ── Helper: send Telegram notification to Aaron ──────────────────────────
     const tgNotify = (text: string) => {
-      const TG_TOKEN = '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
-      const AARON_CHAT = '8320254721';
-      fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: AARON_CHAT, text, parse_mode: 'Markdown' }),
+        body: JSON.stringify({ chat_id: TG_AARON_CHAT_ID, text, parse_mode: 'Markdown' }),
       }).catch(() => {});
     };
 

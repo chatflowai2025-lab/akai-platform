@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BETA_WHITELIST } from '@/lib/beta-config';
 
-const TG_TOKEN = '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
-const AARON_CHAT = '8320254721';
+import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as AARON_CHAT } from '@/lib/server-env';
 
 // Simple in-memory log — persists for the life of the serverless instance
 // For durable storage we'd use Firestore, but this works for daily digest
