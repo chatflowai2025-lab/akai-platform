@@ -144,6 +144,19 @@ else
   echo "  ⚠️  apps/web/src not found — skipping hardcoded URL scan"
 fi
 
+echo "┌─ SUITE 5c: Stale X API Credentials Scan (RCA #17)"
+if [ -d "$REPO_ROOT/apps/web/src" ]; then
+  STALE_X=$(grep -r "xPUex\|0yew7\|rqS3Us\|zCtnK" "$REPO_ROOT/apps/web/src/" --include="*.ts" --include="*.tsx" 2>/dev/null || true)
+  if [ -z "$STALE_X" ]; then
+    check "No stale X API credentials in source" "pass"
+  else
+    check "No stale X API credentials in source" "fail" "Stale X keys found — update to canonical keys from TOOLS.md"
+    echo "$STALE_X" | head -5
+  fi
+else
+  echo "  ⚠️  apps/web/src not found — skipping X credential scan"
+fi
+
 # ── Suite 5c: Build deprecation warnings (RCA #5) ────────────────────────────
 echo ""
 echo "┌─ SUITE 5c: Build Deprecation Check"
