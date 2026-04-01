@@ -150,6 +150,7 @@ interface ChatRequest {
   userContext?: Record<string, string>;
   state?: Record<string, unknown>;
   currentModule?: string;
+  sessionId?: string; // anonymous session tracking for homepage chat logs
 }
 
 // ── Smart mock response engine ────────────────────────────────────────────────
@@ -910,44 +911,76 @@ SALES CONVERSATION RULES:
       const content0 = response.content[0];
       const text = content0?.type === 'text' ? content0.text : '';
 
-      // Save conversation turn to memory
-      if (userId !== 'anonymous') {
+      // ── Save conversation turn ────────────────────────────────────────────
+      const saveChat = (userMsg: string, akMsg: string) => {
         try {
           const db = getAdminFirestore();
-          if (db) {
-            const date = new Date().toISOString().slice(0, 10);
+          if (!db) return;
+          const now = new Date().toISOString();
+          if (userId !== 'anonymous') {
+            // Authenticated user — save to per-user conversations subcollection
+            const date = now.slice(0, 10);
             db.collection('conversations').doc(userId)
               .collection(date).add({
-                userMessage: message,
-                akResponse: text,
-                timestamp: new Date().toISOString(),
+                userMessage: userMsg,
+                akResponse: akMsg,
+                timestamp: now,
                 intent: null,
               }).catch(() => {});
+          } else {
+            // Anonymous homepage visitor — log to homepageChats for learning
+            const sessionId = body.sessionId ?? req.headers.get('x-session-id') ?? 'unknown';
+            const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+            db.collection('homepageChats').add({
+              sessionId,
+              userMessage: userMsg,
+              akResponse: akMsg,
+              timestamp: now,
+              module: currentModule,
+              ip, // for dedup/abuse detection only, not shared
+              history: (history ?? []).length,
+            }).catch(() => {});
           }
         } catch { /* non-fatal */ }
-      }
+      };
 
+      saveChat(message, text);
       return NextResponse.json({ message: text });
     } else {
       const mockResponse = await getMockResponse(message, history, userContext);
 
-      // Save mock response to memory too
-      if (userId !== 'anonymous') {
+      // ── Save mock response ────────────────────────────────────────────────
+      const saveMock = (userMsg: string, akMsg: string) => {
         try {
           const db = getAdminFirestore();
-          if (db) {
-            const date = new Date().toISOString().slice(0, 10);
+          if (!db) return;
+          const now = new Date().toISOString();
+          if (userId !== 'anonymous') {
+            const date = now.slice(0, 10);
             db.collection('conversations').doc(userId)
               .collection(date).add({
-                userMessage: message,
-                akResponse: mockResponse,
-                timestamp: new Date().toISOString(),
+                userMessage: userMsg,
+                akResponse: akMsg,
+                timestamp: now,
                 intent: null,
               }).catch(() => {});
+          } else {
+            const sessionId = body.sessionId ?? req.headers.get('x-session-id') ?? 'unknown';
+            const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+            db.collection('homepageChats').add({
+              sessionId,
+              userMessage: userMsg,
+              akResponse: akMsg,
+              timestamp: now,
+              module: currentModule,
+              ip,
+              history: (history ?? []).length,
+            }).catch(() => {});
           }
         } catch { /* non-fatal */ }
-      }
+      };
 
+      saveMock(message, mockResponse);
       return NextResponse.json({ message: mockResponse });
     }
   } catch (err: unknown) {
