@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
         
-      - name: Build
-        run: pnpm --filter @akai/web run build
+      - name: Type-check only (build happens on Vercel with full env)
+        run: pnpm --filter @akai/web run type-check
         env:
           NEXT_PUBLIC_API_URL: 'https://api.getakai.ai'
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
@@ -39,8 +39,8 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
           NEXT_PUBLIC_MICROSOFT_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_MICROSOFT_CLIENT_ID }}
           NEXT_PUBLIC_MICROSOFT_REDIRECT_URI: ${{ secrets.NEXT_PUBLIC_MICROSOFT_REDIRECT_URI }}
-          
-      - name: Deploy to Vercel (prod)
+
+      - name: Deploy to Vercel (prod — full build runs here with all env vars)
         run: npx vercel deploy --prod --yes --token $VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
