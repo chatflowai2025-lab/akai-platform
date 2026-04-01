@@ -485,6 +485,8 @@ const MODULE_LINKS = [
   { href: '/sales', icon: '📞', label: 'Sales' },
   { href: '/voice', icon: '🎙️', label: 'Voice' },
   { href: '/web', icon: '🌐', label: 'Web' },
+  { href: '/seo', icon: '🔍', label: 'SEO' },
+  { href: '/gbp', icon: '📍', label: 'GBP' },
   { href: '/email-guard', icon: '✉️', label: 'Email Guard' },
   { href: '/calendar', icon: '📅', label: 'Calendar' },
   { href: '/proposals', icon: '📄', label: 'Proposals' },

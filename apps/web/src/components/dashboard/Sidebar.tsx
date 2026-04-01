@@ -28,6 +28,8 @@ const MODULE_GROUPS = [
       { id: 'social',   icon: '📱', label: 'Social',   href: '/social',   shortcut: '⌘6' },
       { id: 'recruit',  icon: '🎯', label: 'Recruit',  href: '/recruit',  shortcut: '⌘7' },
       { id: 'web',      icon: '🌐', label: 'Web',      href: '/web',      shortcut: '⌘8' },
+      { id: 'seo',      icon: '🔍', label: 'SEO',      href: '/seo',      shortcut: '⌘S' },
+      { id: 'gbp',      icon: '📍', label: 'GBP',      href: '/gbp',      shortcut: '⌘G' },
       { id: 'proposals',icon: '📄', label: 'Proposals',href: '/proposals',shortcut: '⌘9' },
     ],
   },
