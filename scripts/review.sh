@@ -11,10 +11,10 @@
 set -euo pipefail
 
 BASE_BRANCH="${1:-main}"
-ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
+ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-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}"
 if [ -z "$ANTHROPIC_KEY" ]; then
-  echo "⚠️  ANTHROPIC_API_KEY not set — skipping AI review"
-  exit 0
+  echo "❌ ANTHROPIC_API_KEY not set — AI review cannot run. Failing."
+  exit 1
 fi
 
 # ── Get the diff ──────────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ Only output issues that are real, specific, and actionable. Do not flag style pr
 
 # Escape the prompt for JSON
 PAYLOAD=$(jq -n \
-  --arg model "claude-3-5-haiku-20241022" \
+  --arg model "claude-haiku-4-5-20251001" \
   --arg content "$PROMPT" \
   '{
     model: $model,
