@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -49,7 +49,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function GBPPage() {
+function GBPPageInner() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<GBPTab>('profile');
@@ -659,5 +659,13 @@ export default function GBPPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function GBPPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a]" />}>
+      <GBPPageInner />
+    </Suspense>
   );
 }
