@@ -4,13 +4,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDripMessage } from '@/lib/cmo-campaign';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 
-import { RESEND_API_KEY } from '@/lib/server-env';
+// Lazy import to avoid build-time env var crash
+let RESEND_API_KEY = '';
 const FROM_EMAIL = `AKAI <${process.env.FROM_EMAIL_ADDRESS || 'onboarding@resend.dev'}>`;
 
 // Aaron is always BCC'd on every drip email so he sees everything that goes out.
 const OWNER_BCC = 'mrakersten@gmail.com';
 
 export async function GET(req: NextRequest) {
+  // Load env at runtime only
+  if (!RESEND_API_KEY) RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
 
