@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 
 import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT, RAILWAY_API_URL as RAILWAY_API, RAILWAY_API_KEY } from '@/lib/server-env';

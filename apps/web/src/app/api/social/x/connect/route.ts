@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getAdminFirestore } from '@/lib/firebase-admin';
