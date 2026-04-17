@@ -14,7 +14,7 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
-import { BETA_MODE, BETA_CONTACT_EMAIL, isWhitelisted } from '@/lib/beta-config';
+import { BETA_MODE, isWhitelisted } from '@/lib/beta-config';
 
 type Tab = 'signin' | 'signup';
 

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/users
  * Returns non-sensitive user list for internal monitoring.

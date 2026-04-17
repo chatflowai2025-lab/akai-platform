@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const RAILWAY = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
@@ -521,8 +521,8 @@ function BookPageContent({ clientId }: { clientId: string }) {
 }
 
 // ─── Page export ──────────────────────────────────────────────────────────────
-export default async function BookingPage({ params }: { params: Promise<{ clientId: string }> }) {
-  const { clientId } = await params;
+export default function BookingPage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = use(params);
   return (
     <Suspense
       fallback={

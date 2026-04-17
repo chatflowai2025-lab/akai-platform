@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/homepage-chats
  * Internal read-only endpoint — returns homepage chat logs.

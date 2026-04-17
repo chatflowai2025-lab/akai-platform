@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 
 const CLIENT_ID = process.env.GOOGLE_ANALYTICS_CLIENT_ID ?? '';
