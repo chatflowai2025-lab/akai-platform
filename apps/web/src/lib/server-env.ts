@@ -13,12 +13,15 @@
  * 3. Never paste the real value into source code
  */
 
+// NEXT_PHASE is set by Next.js during build — use it to avoid throwing at build time
+const IS_BUILD = process.env.NEXT_PHASE === 'phase-production-build';
+
 function require(name: string): string {
   const val = process.env[name];
   if (!val) {
-    // In production, throw hard. In build/test, warn so CI can still complete type-check.
     const msg = `[server-env] Missing required env var: ${name}`;
-    if (process.env.NODE_ENV === 'production') throw new Error(msg);
+    // Never throw during build — Next.js needs to collect routes without env vars
+    if (!IS_BUILD && process.env.NODE_ENV === 'production') throw new Error(msg);
     if (process.env.NODE_ENV !== 'test') console.warn(msg);
     return '';
   }
