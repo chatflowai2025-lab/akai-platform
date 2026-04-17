@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Reward Room — Pitch Deck</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #171E38;
+    --navy-light: #1e2847;
+    --navy-mid: #222d52;
+    --gold: #D9A61A;
+    --gold-light: #f0bf30;
+    --white: #ffffff;
+    --white-70: rgba(255,255,255,0.7);
+    --white-40: rgba(255,255,255,0.4);
+    --white-10: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(217,166,26,0.25);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--navy);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #deck {
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 64px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    pointer-events: none;
+  }
+
+  /* ── GOLD ACCENT LINES ─────────────── */
+  .gold-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .gold-line-top { top: 0; }
+  .gold-line-bottom { bottom: 0; }
+
+  /* ── TYPOGRAPHY ─────────────────────── */
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  h1.hero {
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    color: var(--white);
+  }
+
+  h2.title {
+    font-size: clamp(28px, 4.5vw, 54px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+
+  h2.title span.gold { color: var(--gold); }
+
+  .subtitle {
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--white-70);
+    max-width: 640px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .tag {
+    font-size: 14px;
+    color: var(--white-40);
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+
+  /* ── CARDS ──────────────────────────── */
+  .cards {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1000px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 32px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px 28px;
+    flex: 1;
+    min-width: 200px;
+    max-width: 280px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+
+  .card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card .card-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .card .card-body {
+    font-size: 14px;
+    color: var(--white-70);
+    line-height: 1.5;
+  }
+
+  /* ── PAIN POINTS ────────────────────── */
+  .pain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 760px;
+    margin-top: 28px;
+  }
+
+  .pain-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+    opacity: 0;
+    transform: translateX(-24px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .pain-item.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .pain-item .pi-icon { font-size: 24px; flex-shrink: 0; }
+  .pain-item .pi-text { font-size: 15px; color: var(--white-70); line-height: 1.4; }
+  .pain-item .pi-text strong { color: var(--white); }
+
+  /* ── STEPS ──────────────────────────── */
+  .steps {
+    display: flex;
+    gap: 12px;
+    max-width: 960px;
+    width: 100%;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .step {
+    flex: 1;
+    min-width: 150px;
+    max-width: 180px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 20px 16px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .step.visible { opacity: 1; transform: translateY(0); }
+
+  .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 18px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+  }
+
+  .step-icon { font-size: 22px; margin-bottom: 8px; }
+  .step-text { font-size: 13px; color: var(--white-70); line-height: 1.4; }
+  .step-text strong { color: var(--white); display: block; margin-bottom: 3px; font-size: 14px; }
+
+  /* ── CALLOUT ────────────────────────── */
+  .callout {
+    background: rgba(217,166,26,0.12);
+    border: 1.5px solid var(--gold);
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gold-light);
+    margin-top: 20px;
+    max-width: 480px;
+  }
+
+  /* ── SEGMENT TABLE ──────────────────── */
+  .seg-table {
+    width: 100%;
+    max-width: 880px;
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .seg-row {
+    display: grid;
+    grid-template-columns: 48px 180px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: left;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .seg-row.visible { opacity: 1; transform: translateX(0); }
+
+  .seg-emoji { font-size: 24px; }
+  .seg-name { font-size: 14px; font-weight: 700; color: var(--white); }
+  .seg-use { font-size: 13px; color: var(--white-70); }
+  .seg-range { font-size: 13px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+
+  /* ── STATS ──────────────────────────── */
+  .stats-row {
+    display: flex;
+    gap: 24px;
+    max-width: 900px;
+    width: 100%;
+    margin-top: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-box {
+    flex: 1;
+    min-width: 200px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .stat-box.visible { opacity: 1; transform: translateY(0); }
+
+  .stat-num {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--white-70);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── REVENUE TABLE ──────────────────── */
+  .rev-table {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 28px;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  .rev-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white-40);
+    padding: 0 20px 8px;
+    text-align: left;
+  }
+
+  .rev-table td {
+    padding: 18px 20px;
+    font-size: 16px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+    color: var(--white);
+  }
+
+  .rev-table td:first-child {
+    border-left: 1px solid var(--card-border);
+    border-radius: 12px 0 0 12px;
+    font-weight: 700;
+  }
+
+  .rev-table td:last-child {
+    border-right: 1px solid var(--card-border);
+    border-radius: 0 12px 12px 0;
+    text-align: right;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .rev-table tr.highlight td {
+    background: rgba(217,166,26,0.13);
+    border-color: var(--gold);
+  }
+
+  .big-callout {
+    background: var(--gold);
+    color: var(--navy);
+    border-radius: 14px;
+    padding: 18px 36px;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 800;
+    margin-top: 24px;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── PRICING ────────────────────────── */
+  .price-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 720px;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px 22px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .price-row.visible { opacity: 1; transform: translateY(0); }
+
+  .price-icon { font-size: 22px; flex-shrink: 0; }
+  .price-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--white); }
+  .price-detail { font-size: 13px; color: var(--white-70); }
+  .price-value { font-size: 15px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+
+  .price-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .price-stat {
+    background: rgba(217,166,26,0.1);
+    border: 1px solid rgba(217,166,26,0.3);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+
+  /* ── GTM PHASES ─────────────────────── */
+  .phase-cards {
+    display: flex;
+    gap: 20px;
+    max-width: 960px;
+    width: 100%;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .phase-card {
+    flex: 1;
+    min-width: 220px;
+    max-width: 300px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .phase-card.visible { opacity: 1; transform: translateY(0); }
+
+  .phase-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin-bottom: 10px;
+  }
+
+  .phase-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .phase-period {
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .phase-bullets { list-style: none; }
+  .phase-bullets li {
+    font-size: 13px;
+    color: var(--white-70);
+    padding: 4px 0;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .phase-bullets li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 12px;
+  }
+
+  /* ── WHY CHECKS ─────────────────────── */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 28px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .check-item.visible { opacity: 1; transform: translateY(0); }
+
+  .check-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(217,166,26,0.15);
+    border: 1.5px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+
+  .check-text {
+    font-size: 14px;
+    color: var(--white-70);
+    line-height: 1.5;
+  }
+  .check-text strong { color: var(--white); display: block; font-size: 15px; margin-bottom: 2px; }
+
+  /* ── CTA SLIDE ──────────────────────── */
+  .cta-steps {
+    display: flex;
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+    margin: 28px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cta-step {
+    flex: 1;
+    min-width: 180px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .cta-step.visible { opacity: 1; transform: translateY(0); }
+
+  .cta-step-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 16px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+  }
+
+  .cta-step p { font-size: 14px; color: var(--white-70); line-height: 1.4; }
+  .cta-step strong { color: var(--white); font-size: 15px; }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 16px;
+    font-weight: 800;
+    border-radius: 50px;
+    padding: 16px 40px;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 8px;
+  }
+
+  .cta-btn:hover {
+    background: var(--gold-light);
+    transform: scale(1.03);
+  }
+
+  .cta-links {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .cta-links a {
+    font-size: 13px;
+    color: var(--white-40);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+
+  .cta-links a:hover { color: var(--gold); }
+
+  /* ── NAVIGATION ─────────────────────── */
+  #nav-counter {
+    position: fixed;
+    bottom: 24px;
+    right: 32px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white-40);
+    z-index: 100;
+    letter-spacing: 1px;
+    user-select: none;
+  }
+
+  #nav-hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: var(--white-40);
+    z-index: 100;
+    letter-spacing: 0.5px;
+    animation: fadeout 4s ease 3s forwards;
+    pointer-events: none;
+  }
+
+  @keyframes fadeout {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  .nav-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+    font-size: 24px;
+    padding: 16px;
+    user-select: none;
+  }
+
+  .nav-arrow:hover { opacity: 0.8; }
+  #nav-prev { left: 16px; }
+  #nav-next { right: 16px; }
+
+  /* ── CLICK ZONES (invisible) ─────────── */
+  #click-prev, #click-next {
+    position: fixed;
+    top: 0; bottom: 0;
+    width: 50%;
+    z-index: 50;
+    cursor: pointer;
+  }
+  #click-prev { left: 0; }
+  #click-next { right: 0; }
+
+  /* ── MOBILE ─────────────────────────── */
+  @media (max-width: 700px) {
+    .slide { padding: 32px 20px; }
+    .cards { gap: 12px; }
+    .card { min-width: 140px; padding: 18px; }
+    .seg-row { grid-template-columns: 36px 1fr auto; }
+    .seg-use { display: none; }
+    .check-grid { grid-template-columns: 1fr; }
+    .steps { gap: 8px; }
+    .step { min-width: 120px; }
+    #nav-hint { display: none; }
+    .rev-table { font-size: 13px; }
+    .rev-table td { padding: 12px 10px; }
+    .phase-card { min-width: 260px; }
+  }
+
+  /* ── PILLAR CARDS ───────────────────── */
+  .pillar-cards {
+    display: flex;
+    gap: 24px;
+    max-width: 860px;
+    width: 100%;
+    margin-top: 36px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pillar-card {
+    flex: 1;
+    min-width: 200px;
+    max-width: 260px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .pillar-card.visible { opacity: 1; transform: translateY(0); }
+
+  .pillar-card .pillar-icon { font-size: 40px; margin-bottom: 16px; }
+  .pillar-card .pillar-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .pillar-card .pillar-desc {
+    font-size: 14px;
+    color: var(--white-70);
+    line-height: 1.5;
+  }
+
+  /* Background subtle gradient */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(217,166,26,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active" id="slide-1">
+    <div class="gold-line gold-line-top"></div>
+    <div class="gold-line gold-line-bottom"></div>
+    <div class="label">Investor Pitch Deck · 2025</div>
+    <h1 class="hero">The Reward Room</h1>
+    <p class="subtitle" style="margin-top:16px;font-size:clamp(18px,2.5vw,26px);color:var(--white-70);">Your End-to-End Reward Fulfillment Platform</p>
+    <div style="width:80px;height:3px;background:var(--gold);margin:28px auto;border-radius:2px;"></div>
+    <p class="tag">Powered by J&amp;C &nbsp;|&nbsp; rewardroom.com.au</p>
+  </div>
+
+  <!-- SLIDE 2: THE PROBLEM -->
+  <div class="slide" id="slide-2">
+    <div class="label">The Problem</div>
+    <h2 class="title">Running reward promotions is<br><span class="gold">harder than it looks.</span></h2>
+    <div class="pain-list" id="pain-list">
+      <div class="pain-item" data-delay="0">
+        <span class="pi-icon">⛔</span>
+        <span class="pi-text"><strong>Fragmented supplier landscape</strong> — no single source for all reward types, brands, and price points</span>
+      </div>
+      <div class="pain-item" data-delay="100">
+        <span class="pi-icon">⛔</span>
+        <span class="pi-text"><strong>Manual fulfillment nightmares</strong> — teams spend weeks on logistics, tracking, and reconciliation</span>
+      </div>
+      <div class="pain-item" data-delay="200">
+        <span class="pi-icon">⛔</span>
+        <span class="pi-text"><strong>No white-label solution</strong> — generic platforms damage brand perception and reduce campaign ROI</span>
+      </div>
+      <div class="pain-item" data-delay="300">
+        <span class="pi-icon">⛔</span>
+        <span class="pi-text"><strong>Compliance &amp; reporting gaps</strong> — prize pools, T&amp;Cs, and tax obligations are complex and often mishandled</span>
+      </div>
+      <div class="pain-item" data-delay="400">
+        <span class="pi-icon">⛔</span>
+        <span class="pi-text"><strong>Long lead times</strong> — building internal capability takes 6-12 months; agencies lack the infrastructure</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: THE SOLUTION -->
+  <div class="slide" id="slide-3">
+    <div class="label">The Solution</div>
+    <h2 class="title"><span class="gold">The Reward Room</span></h2>
+    <p class="subtitle">Fully managed. Fully branded. Ready when you are.</p>
+    <div class="pillar-cards">
+      <div class="pillar-card" data-delay="0">
+        <div class="pillar-icon">🚀</div>
+        <div class="pillar-name">Fast</div>
+        <div class="pillar-desc">Launch campaigns in days, not months. Pre-built infrastructure, pre-negotiated supplier contracts, instant activation.</div>
+      </div>
+      <div class="pillar-card" data-delay="150">
+        <div class="pillar-icon">🎨</div>
+        <div class="pillar-name">Branded</div>
+        <div class="pillar-desc">Full white-label capability. Your client's logo, colours, and tone of voice — end-to-end, no compromise.</div>
+      </div>
+      <div class="pillar-card" data-delay="300">
+        <div class="pillar-icon">✅</div>
+        <div class="pillar-name">Managed</div>
+        <div class="pillar-desc">Fulfilment, reporting, compliance, and support handled by J&amp;C. Zero operational burden on the client.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: HOW IT WORKS -->
+  <div class="slide" id="slide-4">
+    <div class="label">Process</div>
+    <h2 class="title">5 Simple Steps</h2>
+    <div class="steps" id="steps-list">
+      <div class="step" data-delay="0">
+        <div class="step-num">1</div>
+        <div class="step-icon">📋</div>
+        <div class="step-text"><strong>Brief &amp; Scope</strong>Client shares campaign objectives, budget, and audience</div>
+      </div>
+      <div class="step" data-delay="100">
+        <div class="step-num">2</div>
+        <div class="step-icon">🎁</div>
+        <div class="step-text"><strong>Reward Design</strong>J&amp;C curates reward catalogue and branded experience</div>
+      </div>
+      <div class="step" data-delay="200">
+        <div class="step-num">3</div>
+        <div class="step-icon">⚙️</div>
+        <div class="step-text"><strong>Platform Setup</strong>White-label portal configured and tested — fast</div>
+      </div>
+      <div class="step" data-delay="300">
+        <div class="step-num">4</div>
+        <div class="step-icon">🚀</div>
+        <div class="step-text"><strong>Launch</strong>Campaign goes live with full tracking and participant portal</div>
+      </div>
+      <div class="step" data-delay="400">
+        <div class="step-num">5</div>
+        <div class="step-icon">📊</div>
+        <div class="step-text"><strong>Report &amp; Retain</strong>Real-time dashboards, post-campaign analysis, renewal</div>
+      </div>
+    </div>
+    <div class="callout">⚡ Fulfilment is automated and immediate — rewards dispatched within minutes of redemption</div>
+  </div>
+
+  <!-- SLIDE 5: TARGET CUSTOMERS -->
+  <div class="slide" id="slide-5">
+    <div class="label">Target Market</div>
+    <h2 class="title">Who Buys <span class="gold">The Reward Room?</span></h2>
+    <div class="seg-table" id="seg-table">
+      <div class="seg-row" data-delay="0">
+        <span class="seg-emoji">🛒</span>
+        <span class="seg-name">FMCG</span>
+        <span class="seg-use">Purchase incentives, loyalty mechanics, on-pack promotions</span>
+        <span class="seg-range">$20K–$100K/campaign</span>
+      </div>
+      <div class="seg-row" data-delay="100">
+        <span class="seg-emoji">🏦</span>
+        <span class="seg-name">Financial Services</span>
+        <span class="seg-use">Card activation rewards, KYC incentives, referral programs</span>
+        <span class="seg-range">$30K–$150K/campaign</span>
+      </div>
+      <div class="seg-row" data-delay="200">
+        <span class="seg-emoji">🏬</span>
+        <span class="seg-name">Retail</span>
+        <span class="seg-use">Staff recognition, customer retention, seasonal promotions</span>
+        <span class="seg-range">$15K–$80K/campaign</span>
+      </div>
+      <div class="seg-row" data-delay="300">
+        <span class="seg-emoji">📱</span>
+        <span class="seg-name">Telco</span>
+        <span class="seg-use">New customer acquisition, contract renewal, churn reduction</span>
+        <span class="seg-range">$40K–$200K/campaign</span>
+      </div>
+      <div class="seg-row" data-delay="400">
+        <span class="seg-emoji">🏆</span>
+        <span class="seg-name">Sales Incentives</span>
+        <span class="seg-use">Channel partner programs, dealer incentives, B2B rewards</span>
+        <span class="seg-range">$25K–$120K/campaign</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: MARKET OPPORTUNITY -->
+  <div class="slide" id="slide-6">
+    <div class="label">Market Opportunity</div>
+    <h2 class="title">A <span class="gold">Billion-Dollar</span> Market</h2>
+    <div class="stats-row">
+      <div class="stat-box" data-delay="0" data-target="1.2" data-suffix="B" data-prefix="$" data-label="AU Loyalty &amp; Rewards Market 2025">
+        <div class="stat-num" id="counter-1">$0</div>
+        <div class="stat-label">AU Loyalty &amp; Rewards Market 2025</div>
+      </div>
+      <div class="stat-box" data-delay="150" data-target="13" data-suffix="%" data-label="Annual Market Growth (CAGR)">
+        <div class="stat-num" id="counter-2">0%</div>
+        <div class="stat-label">Annual Market Growth (CAGR)</div>
+      </div>
+      <div class="stat-box" data-delay="300" data-target="1.96" data-suffix="B" data-prefix="$" data-label="Projected Market Size 2029">
+        <div class="stat-num" id="counter-3">$0</div>
+        <div class="stat-label">Projected Market Size 2029</div>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top:28px;max-width:720px;">The mid-market segment — brands spending $20K–$200K per campaign — is <strong style="color:var(--white);">underserved and growing fastest.</strong> J&amp;C is perfectly positioned to capture this with a managed, end-to-end solution.</p>
+  </div>
+
+  <!-- SLIDE 7: REVENUE PROJECTIONS -->
+  <div class="slide" id="slide-7">
+    <div class="label">Financials</div>
+    <h2 class="title">Revenue <span class="gold">Projections</span></h2>
+    <table class="rev-table" id="rev-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>GMV (Campaign Value)</th>
+          <th>J&amp;C Commission (10%)</th>
+          <th>Campaigns</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Year 1</td>
+          <td>$280,000</td>
+          <td>$28,000</td>
+          <td>4–6 campaigns</td>
+        </tr>
+        <tr>
+          <td>Year 2</td>
+          <td>$840,000</td>
+          <td>$84,000</td>
+          <td>12–16 campaigns</td>
+        </tr>
+        <tr class="highlight">
+          <td>⭐ Year 3</td>
+          <td>$1,750,000</td>
+          <td>$175,000</td>
+          <td>25–30 campaigns</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="big-callout">Year 3 J&amp;C Reward Room Revenue: $2M+</div>
+  </div>
+
+  <!-- SLIDE 8: PRICING -->
+  <div class="slide" id="slide-8">
+    <div class="label">Pricing Model</div>
+    <h2 class="title">How We <span class="gold">Make Money</span></h2>
+    <div class="price-list" id="price-list">
+      <div class="price-row" data-delay="0">
+        <span class="price-icon">🔧</span>
+        <span class="price-name">Campaign Setup Fee<span class="price-detail" style="display:block;margin-top:2px;">Per campaign, covers scoping, design &amp; configuration</span></span>
+        <span class="price-value">$2,500–$8,000</span>
+      </div>
+      <div class="price-row" data-delay="100">
+        <span class="price-icon">💻</span>
+        <span class="price-name">Platform License Fee<span class="price-detail" style="display:block;margin-top:2px;">Monthly white-label platform access per active campaign</span></span>
+        <span class="price-value">$500–$2,000/mo</span>
+      </div>
+      <div class="price-row" data-delay="200">
+        <span class="price-icon">📦</span>
+        <span class="price-name">Fulfillment Margin<span class="price-detail" style="display:block;margin-top:2px;">Margin on reward sourcing and delivery (supplier rates)</span></span>
+        <span class="price-value">8–15% on GMV</span>
+      </div>
+      <div class="price-row" data-delay="300">
+        <span class="price-icon">📊</span>
+        <span class="price-name">Reporting &amp; Analytics<span class="price-detail" style="display:block;margin-top:2px;">Real-time dashboards, post-campaign analysis</span></span>
+        <span class="price-value">$500–$1,500</span>
+      </div>
+      <div class="price-row" data-delay="400">
+        <span class="price-icon">🤝</span>
+        <span class="price-name">Annual Retainer<span class="price-detail" style="display:block;margin-top:2px;">Dedicated account management for high-volume clients</span></span>
+        <span class="price-value">$12K–$36K/yr</span>
+      </div>
+    </div>
+    <div class="price-stats">
+      <div class="price-stat">💰 Avg Campaign Value: $15K–$80K</div>
+      <div class="price-stat">🔁 Avg Client LTV: $45K–$240K/yr</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: GO-TO-MARKET -->
+  <div class="slide" id="slide-9">
+    <div class="label">Go-To-Market</div>
+    <h2 class="title">Phased <span class="gold">Growth Strategy</span></h2>
+    <div class="phase-cards">
+      <div class="phase-card" data-delay="0">
+        <div class="phase-badge">Phase 1</div>
+        <div class="phase-title">Foundation</div>
+        <div class="phase-period">Month 1–2</div>
+        <ul class="phase-bullets">
+          <li>Launch rewardroom.com.au</li>
+          <li>Activate 3–5 anchor clients</li>
+          <li>Finalise supplier agreements</li>
+          <li>Deploy white-label platform</li>
+          <li>Build case studies &amp; collateral</li>
+        </ul>
+      </div>
+      <div class="phase-card" data-delay="150">
+        <div class="phase-badge">Phase 2</div>
+        <div class="phase-title">Traction</div>
+        <div class="phase-period">Month 2–4</div>
+        <ul class="phase-bullets">
+          <li>Outbound to FMCG &amp; FS verticals</li>
+          <li>Agency partnership program</li>
+          <li>PR &amp; industry presence</li>
+          <li>First 10 campaigns live</li>
+          <li>Referral &amp; repeat pipeline</li>
+        </ul>
+      </div>
+      <div class="phase-card" data-delay="300">
+        <div class="phase-badge">Phase 3</div>
+        <div class="phase-title">Scale</div>
+        <div class="phase-period">Month 4–12</div>
+        <ul class="phase-bullets">
+          <li>25+ active campaigns</li>
+          <li>National agency network</li>
+          <li>Retainer client base (12+)</li>
+          <li>API integrations &amp; self-serve</li>
+          <li>Revenue run-rate: $1M+ GMV</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: WHY J&C -->
+  <div class="slide" id="slide-10">
+    <div class="label">Competitive Advantage</div>
+    <h2 class="title">Why <span class="gold">J&amp;C?</span></h2>
+    <div class="check-grid" id="check-grid">
+      <div class="check-item" data-delay="0">
+        <div class="check-icon">✓</div>
+        <div class="check-text"><strong>25+ Years in Market</strong>Deep domain expertise in promotions, loyalty, and reward fulfilment</div>
+      </div>
+      <div class="check-item" data-delay="80">
+        <div class="check-icon">✓</div>
+        <div class="check-text"><strong>Established Supplier Network</strong>Pre-negotiated rates across gift cards, travel, merchandise, and experiences</div>
+      </div>
+      <div class="check-item" data-delay="160">
+        <div class="check-icon">✓</div>
+        <div class="check-text"><strong>Live Platform, Zero Build Risk</strong>Technology is already built and tested — no development lead time for clients</div>
+      </div>
+      <div class="check-item" data-delay="240">
+        <div class="check-icon">✓</div>
+        <div class="check-text"><strong>Fully Managed Service</strong>Clients get outcomes, not admin. J&amp;C owns every step of delivery</div>
+      </div>
+      <div class="check-item" data-delay="320">
+        <div class="check-icon">✓</div>
+        <div class="check-text"><strong>No Tech Build for Clients</strong>White-label portal deployed in days — clients are live before a competitor can quote</div>
+      </div>
+      <div class="check-item" data-delay="400">
+        <div class="check-icon">✓</div>
+        <div class="check-text"><strong>Trusted Brand Credibility</strong>J&amp;C track record removes risk perception — established, reputable, reliable</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: CTA -->
+  <div class="slide" id="slide-11">
+    <div class="gold-line gold-line-top"></div>
+    <div class="gold-line gold-line-bottom"></div>
+    <div class="label">Let's Build Together</div>
+    <h2 class="title" style="font-size:clamp(26px,4vw,50px);max-width:720px;">Ready to Power Your Next<br><span class="gold">Reward Campaign?</span></h2>
+    <div class="cta-steps" id="cta-steps">
+      <div class="cta-step" data-delay="0">
+        <div class="cta-step-num">1</div>
+        <p><strong>Get in Touch</strong>Send us your brief or book a 30-min discovery call</p>
+      </div>
+      <div class="cta-step" data-delay="120">
+        <div class="cta-step-num">2</div>
+        <p><strong>Campaign Scoped</strong>We design your reward solution and provide a fixed-price quote</p>
+      </div>
+      <div class="cta-step" data-delay="240">
+        <div class="cta-step-num">3</div>
+        <p><strong>Launch in Days</strong>Platform configured, rewards loaded, campaign live — fast</p>
+      </div>
+    </div>
+    <a class="cta-btn" href="mailto:info@jandc.com.au">Contact Us: info@jandc.com.au</a>
+    <div class="cta-links">
+      <a href="https://rewardroom.com.au" target="_blank">🌐 rewardroom.com.au</a>
+      <a href="https://jandc.com.au" target="_blank">🌐 jandc.com.au</a>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<div id="nav-counter">1 / 11</div>
+<div id="nav-hint">← → Arrow keys or click to navigate</div>
+<div class="nav-arrow" id="nav-prev">◀</div>
+<div class="nav-arrow" id="nav-next">▶</div>
+<div id="click-prev" aria-hidden="true"></div>
+<div id="click-next" aria-hidden="true"></div>
+
+<script>
+(function() {
+  const TOTAL = 11;
+  let current = 1;
+  let animating = false;
+
+  function getSlide(n) { return document.getElementById('slide-' + n); }
+
+  function animateSlideIn(slide) {
+    // Cards / pain items / steps etc.
+    const animated = slide.querySelectorAll('[data-delay]');
+    animated.forEach(el => {
+      el.classList.remove('visible');
+      const delay = parseInt(el.getAttribute('data-delay') || '0');
+      setTimeout(() => el.classList.add('visible'), 120 + delay);
+    });
+
+    // Number counters
+    const statBoxes = slide.querySelectorAll('[data-target]');
+    statBoxes.forEach((box, i) => {
+      const countEl = box.querySelector('.stat-num');
+      if (!countEl) return;
+      const target = parseFloat(box.getAttribute('data-target'));
+      const prefix = box.getAttribute('data-prefix') || '';
+      const suffix = box.getAttribute('data-suffix') || '';
+      const delay = parseInt(box.getAttribute('data-delay') || '0');
+      const isDecimal = target % 1 !== 0;
+      const duration = 1400;
+      const startTime = performance.now() + 150 + delay;
+      function tick(now) {
+        if (now < startTime) { requestAnimationFrame(tick); return; }
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const val = target * ease;
+        countEl.textContent = prefix + (isDecimal ? val.toFixed(2) : Math.floor(val)) + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+        else countEl.textContent = prefix + target + suffix;
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function goTo(next) {
+    if (animating || next === current || next < 1 || next > TOTAL) return;
+    animating = true;
+    const from = getSlide(current);
+    const to = getSlide(next);
+    const direction = next > current ? 1 : -1;
+
+    // Exit current
+    from.classList.remove('active');
+    from.classList.add(direction > 0 ? 'exit-left' : '');
+    if (direction < 0) {
+      from.style.transform = 'translateX(60px)';
+      from.style.opacity = '0';
+    }
+
+    // Prepare incoming
+    to.style.transition = 'none';
+    to.style.opacity = '0';
+    to.style.transform = direction > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+    to.classList.remove('exit-left');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        to.style.transition = '';
+        to.style.opacity = '1';
+        to.style.transform = 'translateX(0)';
+        to.classList.add('active');
+        animateSlideIn(to);
+      });
+    });
+
+    setTimeout(() => {
+      from.classList.remove('exit-left');
+      from.style.transform = '';
+      from.style.opacity = '';
+      animating = false;
+    }, 600);
+
+    current = next;
+    document.getElementById('nav-counter').textContent = current + ' / ' + TOTAL;
+    document.getElementById('nav-prev').style.opacity = current === 1 ? '0.1' : '0.3';
+    document.getElementById('nav-next').style.opacity = current === TOTAL ? '0.1' : '0.3';
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  // Click zones
+  document.getElementById('click-next').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('click-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nav-prev').addEventListener('click', e => { e.stopPropagation(); goTo(current - 1); });
+  document.getElementById('nav-next').addEventListener('click', e => { e.stopPropagation(); goTo(current + 1); });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+  }, { passive: true });
+
+  // Init first slide
+  animateSlideIn(getSlide(1));
+  document.getElementById('nav-prev').style.opacity = '0.1';
+})();
+</script>
+</body>
+</html>
