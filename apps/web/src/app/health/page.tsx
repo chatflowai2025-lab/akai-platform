@@ -6,7 +6,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { useAuth } from '@/hooks/useAuth';
 
-const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
+const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface CompetitorSnapshot {

@@ -62,7 +62,7 @@ HP_HTML=$(curl -s --max-time 20 "$BASE_URL" 2>/dev/null || echo "CURL_FAILED")
 HP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$BASE_URL" 2>/dev/null || echo "000")
 
 check "Homepage returns 200" "$([ "$HP_STATUS" = "200" ] && echo pass || echo fail)" "got $HP_STATUS"
-check "Homepage contains 'Your AI Executive Team'" "$(echo "$HP_HTML" | grep -qi "Your AI Executive Team" && echo pass || echo fail)"
+check "Homepage contains AKAI hero headline" "$(echo "$HP_HTML" | grep -qiE 'Your entire business|One prompt|AI Executive Team|Your AI Business Partner' && echo pass || echo fail)"
 check "Homepage contains AKAI branding" "$(echo "$HP_HTML" | grep -qi "AKAI\|getakai" && echo pass || echo fail)"
 
 # ── Journey 2: Login page ─────────────────────────────────────────────────────

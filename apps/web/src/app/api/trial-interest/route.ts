@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { TRIAL_MODE_ACTIVE, isWhitelisted } from '@/lib/beta-config';
+import { TG_BOT_TOKEN, TG_AARON_CHAT_ID, RAILWAY_API_URL, RAILWAY_API_KEY } from '@/lib/server-env';
 
-const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8322387252:AAGIi7OYbwfIit4syQA95XWVZCTlPP96oQc';
-const TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '8320254721';
-const RAILWAY_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
+const TG_TOKEN = TG_BOT_TOKEN;
+const TG_CHAT_ID = TG_AARON_CHAT_ID;
+const RAILWAY_URL = RAILWAY_API_URL;
 
 /* ── Telegram (non-blocking backup) ─────────────────────────────── */
 async function notifyTelegram(text: string) {

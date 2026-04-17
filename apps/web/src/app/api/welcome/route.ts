@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Firestore } from 'firebase-admin/firestore';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { TRIAL_MODE_ACTIVE, TRIAL_DAYS, isTrialUser } from '@/lib/beta-config';
+import { RAILWAY_API_URL, RAILWAY_API_KEY as RAILWAY_KEY } from '@/lib/server-env';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 async function sendEmail(to: string, subject: string, html: string) {
   // Try Railway SMTP relay first (proven working, uses Gmail SMTP)
   try {
-    const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
+    const railwayUrl = RAILWAY_API_URL;
     const res = await fetch(`${railwayUrl}/api/send-welcome`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || '' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_KEY },
       body: JSON.stringify({ to, subject, html }),
     });
     if (res.ok) {
@@ -285,10 +286,9 @@ export async function POST(req: NextRequest) {
         website = userData?.website || userData?.onboarding?.website || userData?.campaignConfig?.website;
         if (website) {
           // Quick audit via Railway
-          const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-          const auditRes = await fetch(`${railwayUrl}/api/website-mockup/audit`, {
+          const auditRes = await fetch(`${RAILWAY_API_URL}/api/website-mockup/audit`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
+            headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_KEY },
             body: JSON.stringify({ url: website }),
             signal: AbortSignal.timeout(8000),
           });

@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkRequestScope, type UserPlan } from '@/lib/safety-gates';
 import { getAdminFirestore } from '@/lib/firebase-admin';
-import { TG_BOT_TOKEN, TG_AARON_CHAT_ID } from '@/lib/server-env';
+import { TG_BOT_TOKEN, TG_AARON_CHAT_ID, RAILWAY_API_URL, RAILWAY_API_KEY, ANTHROPIC_API_KEY } from '@/lib/server-env';
 
-const DISCORD_ALERT_WEBHOOK =
-  process.env.DISCORD_ALERT_WEBHOOK ||
-  'https://discord.com/api/webhooks/1487067273398063244/bcPm17Vawtt7Xq-sri56RRJ2ejIOM5LJj728BX7-6xaQHaOxkmtr8HPs8jDlVP_vBhNm';
+const DISCORD_ALERT_WEBHOOK = process.env.DISCORD_ALERT_WEBHOOK ?? '';
 
 const SYSTEM_PROMPT = `You are AK — the AI co-founder inside AKAI. You're not a chatbot. You're the sharpest operator in the room, and you run businesses 24/7.
 
@@ -547,8 +545,8 @@ async function getMockResponse(message: string, history: ChatMessage[], userCont
   if (msg.includes('how many leads') || msg.includes('lead count') || msg.includes('what\'s my lead count') || msg.includes("what's my lead count") || msg.includes('my pipeline') || (msg.includes('leads') && (msg.includes('how many') || msg.includes('total') || msg.includes('count')))) {
     // Attempt Railway fetch
     try {
-      const leadsRes = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/leads', {
-        headers: { 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
+      const leadsRes = await fetch((RAILWAY_API_URL || process.env.NEXT_PUBLIC_API_URL || '')+'/api/leads', {
+        headers: { 'x-api-key': RAILWAY_API_KEY ?? '' },
         signal: AbortSignal.timeout(4000),
       });
       if (leadsRes.ok) {
@@ -888,7 +886,7 @@ SALES CONVERSATION RULES:
       } catch { /* non-fatal */ }
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
 
     if (apiKey) {
       const client = new Anthropic({ apiKey });

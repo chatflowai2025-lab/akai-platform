@@ -11,7 +11,7 @@
 set -euo pipefail
 
 BASE_BRANCH="${1:-main}"
-ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-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}"
+ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
 if [ -z "$ANTHROPIC_KEY" ]; then
   echo "❌ ANTHROPIC_API_KEY not set — AI review cannot run. Failing."
   exit 1

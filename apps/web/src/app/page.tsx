@@ -255,7 +255,7 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
         setHeroIdx(i => (i + 1) % HERO_HEADLINES.length);
         setFading(false);
       }, 400);
-    }, 5000);
+    }, 4000);
     return () => clearInterval(t);
   }, []);
 

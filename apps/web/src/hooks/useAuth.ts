@@ -48,9 +48,11 @@ async function syncUserProfile(user: User): Promise<UserProfile> {
       const urlParams = new URLSearchParams(window.location.search);
       const refCode = urlParams.get('ref') || localStorage.getItem('akai_ref_code');
       if (refCode) {
-        fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/analytics/referral/track', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? '';
+        const apiKey = process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '';
+        fetch(`${apiUrl}/api/analytics/referral/track`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
+          headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
           body: JSON.stringify({ referralCode: refCode, newUserId: user.uid, newUserEmail: user.email }),
         }).catch(() => {});
         localStorage.removeItem('akai_ref_code');

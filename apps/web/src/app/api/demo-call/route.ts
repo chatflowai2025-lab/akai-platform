@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT } from '@/lib/server-env';
+import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT, RAILWAY_API_URL, RAILWAY_API_KEY } from '@/lib/server-env';
 
 function normaliseUrl(url: string): string {
   if (!url) return '';
@@ -34,9 +34,9 @@ async function notifyTelegram(text: string) {
 
 async function saveLeadToRailway(lead: Record<string, string>) {
   try {
-    await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app')+'/api/leads', {
+    await fetch(RAILWAY_API_URL + '/api/leads', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
       body: JSON.stringify({
         name: lead.name,
         phone: lead.phone,

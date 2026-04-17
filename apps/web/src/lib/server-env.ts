@@ -39,7 +39,7 @@ export const X_ACCESS_TOKEN  = require('X_ACCESS_TOKEN');
 export const X_ACCESS_SECRET = require('X_ACCESS_SECRET');
 
 // ── Railway internal API ──────────────────────────────────────────────────────
-export const RAILWAY_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api-server-production-2a27.up.railway.app';
+export const RAILWAY_API_URL = require('NEXT_PUBLIC_API_URL');
 export const RAILWAY_API_KEY = require('RAILWAY_API_KEY');
 
 // ── Anthropic ─────────────────────────────────────────────────────────────────
