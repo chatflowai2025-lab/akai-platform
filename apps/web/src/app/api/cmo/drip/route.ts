@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getDripMessage } from '@/lib/cmo-campaign';
 import { getAdminFirestore } from '@/lib/firebase-admin';
