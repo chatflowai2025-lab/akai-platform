@@ -1097,6 +1097,34 @@
 <div id="click-next" aria-hidden="true"></div>
 
 <script>
+// ── Token Protection ─────────────────────────────────────────────────────
+(function() {
+  var VALID_KEY = 'rr2026';
+  var params = new URLSearchParams(window.location.search);
+  var keyParam = params.get('key');
+  if (keyParam === VALID_KEY) {
+    localStorage.setItem('rr_access', 'true');
+  }
+  if (localStorage.getItem('rr_access') !== 'true') {
+    document.documentElement.style.background = '#0d1321';
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.innerHTML = '';
+      document.body.style.cssText = 'margin:0;padding:0;background:#0d1321;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;color:#fff;text-align:center;';
+      var lockScreen = document.createElement('div');
+      lockScreen.style.cssText = 'max-width:480px;padding:48px 32px;';
+      lockScreen.innerHTML = '<div style="font-size:2rem;font-weight:700;letter-spacing:0.12em;color:#D9A61A;margin-bottom:8px;">THE REWARD ROOM</div>' +
+        '<div style="width:48px;height:2px;background:#D9A61A;margin:0 auto 32px;"></div>' +
+        '<div style="font-size:1.5rem;margin-bottom:0;">🔒</div>' +
+        '<div style="font-size:1.1rem;font-weight:600;margin:16px 0 12px;">This presentation is private.</div>' +
+        '<div style="font-size:0.95rem;color:rgba(255,255,255,0.6);line-height:1.6;">Contact <a href="mailto:info@jandc.com.au" style="color:#D9A61A;text-decoration:none;">info@jandc.com.au</a> for access.</div>';
+      document.body.appendChild(lockScreen);
+    });
+    // Block the rest of the script from running
+    throw new Error('Access denied');
+  }
+})();
+// ── End Token Protection ──────────────────────────────────────────────────
+
 (function() {
   const TOTAL = 11;
   let current = 1;
