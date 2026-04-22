@@ -955,6 +955,77 @@ function FinalCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
   );
 }
 
+/* ─── Digital Health Report CTA ─── */
+function HealthReportCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
+  return (
+    <section className="relative py-24 px-6 overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div
+          className="absolute rounded-full"
+          style={{
+            width: '600px',
+            height: '600px',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'radial-gradient(ellipse, rgba(212,175,55,0.05) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+      </div>
+      <div className="max-w-4xl mx-auto relative">
+        <div
+          className="rounded-3xl p-10 md:p-14 text-center"
+          style={{
+            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)',
+            border: '1px solid #D4AF37',
+            boxShadow: '0 0 60px rgba(212,175,55,0.08)',
+          }}
+        >
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full px-4 py-1.5 text-sm text-[#D4AF37] mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+            Free · No credit card · Instant results
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+            Get Your Free{' '}
+            <span className="text-[#D4AF37]">Digital Health Report</span>
+          </h2>
+          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            See exactly where your business is losing customers online. AI-audits your website, Google presence, and social in 60 seconds.
+          </p>
+
+          {/* Audit highlights */}
+          <div className="grid sm:grid-cols-3 gap-4 mb-10 text-left">
+            {[
+              { icon: '🌐', title: 'Website Audit', desc: 'Speed, SEO, mobile, trust signals — scored and ranked' },
+              { icon: '📍', title: 'Google Presence', desc: 'How you appear in local search vs your competitors' },
+              { icon: '📱', title: 'Social Footprint', desc: 'Content gaps, engagement rate, missed opportunities' },
+            ].map(item => (
+              <div key={item.title} className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-2xl p-5">
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <h3 className="text-white font-bold text-sm mb-1">{item.title}</h3>
+                <p className="text-gray-500 text-xs leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={onOpenCapture}
+            aria-label="Get your free digital health report"
+            className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-black rounded-xl px-10 py-4 text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-[#D4AF37]/20"
+          >
+            Get My Free Report →
+          </button>
+          <p className="text-gray-600 text-sm mt-4">Sign in to get your personalised report · Takes 60 seconds</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Footer ─── */
 function AKAIFooter() {
   return (
@@ -1053,6 +1124,7 @@ export default function Home() {
       <IntelligenceSection />
       <div id="pricing"><Pricing onOpenCapture={(plan) => openCapture(plan)} /></div>
       <FinalCTA onOpenCapture={() => openCapture()} />
+      <HealthReportCTA onOpenCapture={() => openCapture()} />
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
       <LeadCaptureModal isOpen={captureOpen} onClose={() => { setCaptureOpen(false); setCapturePlan(undefined); }} selectedPlan={capturePlan} />

@@ -54,6 +54,8 @@ async function sendEmail(to: string, subject: string, html: string) {
 
 function buildWelcomeEmail(name: string, email: string, website?: string, auditScore?: number): string {
   const displayName = (name && name.trim().toLowerCase() !== 'ak test' && name.trim().length > 0) ? name.trim() : 'there';
+  const trialEndDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+  const trialEndFormatted = trialEndDate.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -100,10 +102,53 @@ function buildWelcomeEmail(name: string, email: string, website?: string, auditS
       ` : ''}
 
       <!-- Trial callout -->
-      <div style="background:#fffbeb;border-left:4px solid #D4AF37;border-radius:4px;padding:16px 20px;margin:0 0 32px;">
-        <p style="margin:0;font-size:14px;font-weight:700;color:#92400e;">14-day free trial — no credit card required</p>
-        <p style="margin:4px 0 0;font-size:13px;color:#78350f;">Full platform access. Cancel anytime. No setup fees.</p>
+      <div style="background:#fffbeb;border-left:4px solid #D4AF37;border-radius:4px;padding:16px 20px;margin:0 0 24px;">
+        <p style="margin:0;font-size:14px;font-weight:700;color:#92400e;">🎉 3-month free trial — no credit card required</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#78350f;">Full platform access until <strong>${trialEndFormatted}</strong>. Cancel anytime. No setup fees.</p>
       </div>
+
+      <!-- T&Cs notice -->
+      <div style="background:#f8f8f8;border-radius:6px;padding:14px 18px;margin:0 0 28px;border:1px solid #eee;">
+        <p style="margin:0;font-size:12px;color:#888;line-height:1.6;">
+          By using AKAI, you agree to our <a href="https://getakai.ai/terms" style="color:#D4AF37;text-decoration:none;font-weight:600;">Terms of Service</a>. AKAI is an AI-powered tool — you are responsible for reviewing all AI-generated content before it is sent or published.
+        </p>
+      </div>
+
+      <!-- 5 onboarding questions -->
+      <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#D4AF37;margin:0 0 10px;">Help us personalise AKAI for you</p>
+      <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 16px;">Reply to this email with answers to these 5 quick questions — it helps us configure your AI team properly:</p>
+      <table style="width:100%;border-collapse:collapse;margin:0 0 28px;background:#f8f8f8;border-radius:8px;overflow:hidden;">
+        <tr>
+          <td style="padding:14px 18px;border-bottom:1px solid #eee;">
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111;">1. What does your business do?</p>
+            <p style="margin:0;font-size:12px;color:#888;">Tell us your industry, who you serve, and how you make money</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 18px;border-bottom:1px solid #eee;">
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111;">2. What&apos;s your #1 business problem right now?</p>
+            <p style="margin:0;font-size:12px;color:#888;">e.g. &quot;not enough leads&quot;, &quot;leads don&apos;t convert&quot;, &quot;too much manual follow-up&quot;</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 18px;border-bottom:1px solid #eee;">
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111;">3. Which AKAI module do you want to use first?</p>
+            <p style="margin:0;font-size:12px;color:#888;">Sales, Email Guard, Voice (Sophie), Ads, Social, Recruiter, or just &quot;not sure — surprise me&quot;</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 18px;border-bottom:1px solid #eee;">
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111;">4. What&apos;s your business email inbox?</p>
+            <p style="margin:0;font-size:12px;color:#888;">Gmail or Outlook? This lets us connect Email Guard so AKAI can monitor your inbound leads</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:14px 18px;">
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#111;">5. What&apos;s your mobile number?</p>
+            <p style="margin:0;font-size:12px;color:#888;">So Sophie can call you for a quick 2-minute onboarding call — or so Aaron can reach you directly</p>
+          </td>
+        </tr>
+      </table>
 
       <!-- What's working now -->
       <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#D4AF37;margin:0 0 12px;">What to focus on first</p>
