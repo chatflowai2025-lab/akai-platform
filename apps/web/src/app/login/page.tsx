@@ -146,6 +146,9 @@ function LoginContent() {
       return unsub;
     };
     tryAuth();
+    // Safety net: if loading is ever stuck true, reset it after 5s
+    const safetyTimer = setTimeout(() => setLoading(false), 5000);
+    return () => clearTimeout(safetyTimer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
