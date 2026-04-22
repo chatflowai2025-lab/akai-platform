@@ -88,6 +88,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevMessagesLengthRef = useRef<number>(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasLoadedFromFirestoreRef = useRef<boolean>(false);
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
@@ -130,6 +131,9 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   // Load chat history from Firestore on mount; inject welcome message on first login
   useEffect(() => {
     if (!user) return;
+    // Only load from Firestore once per component mount — sessionStorage handles subsequent navigations
+    if (hasLoadedFromFirestoreRef.current) return;
+    hasLoadedFromFirestoreRef.current = true;
     const db = getFirebaseDb();
     if (!db) return;
     const chatRef = doc(db, 'users', user.uid, 'chat', 'history');
