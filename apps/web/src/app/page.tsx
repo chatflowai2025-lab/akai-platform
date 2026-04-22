@@ -348,6 +348,12 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
           >
             📞 Get a Demo Call
           </button>
+          <button
+            onClick={() => { gtag('cta_clicked', { button: 'Free Health Report', page: 'homepage' }); onOpenCapture(); }}
+            className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/60 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
+          >
+            📊 Free Health Report
+          </button>
         </div>
         <p className="text-xs text-gray-500">Trusted by Australian SMBs · No credit card required</p>
       </div>
