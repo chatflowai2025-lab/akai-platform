@@ -37,6 +37,7 @@ const SUGGESTED_PROMPTS = [
 ];
 
 const CHAT_HISTORY_KEY = 'akai_chat_history';
+const CHAT_MESSAGES_SESSION_KEY = 'akai_chat_messages';
 
 function getLocalChatHistory(): string[] {
   try {
@@ -54,12 +55,27 @@ function addLocalChatHistory(msg: string): string[] {
   } catch { return []; }
 }
 
+// Session-scoped chat message cache — survives Next.js route changes without Firestore roundtrip
+function getSessionMessages(): ChatMessage[] | null {
+  try {
+    const raw = sessionStorage.getItem(CHAT_MESSAGES_SESSION_KEY);
+    return raw ? (JSON.parse(raw) as ChatMessage[]) : null;
+  } catch { return null; }
+}
+
+function saveSessionMessages(msgs: ChatMessage[]): void {
+  try {
+    sessionStorage.setItem(CHAT_MESSAGES_SESSION_KEY, JSON.stringify(msgs.slice(-50)));
+  } catch { /* non-fatal */ }
+}
+
 interface ChatState { step: string; data: Record<string, string>; }
 
 // ── Chat panel ────────────────────────────────────────────────────────────────
 function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { externalMessage: string | null; onExternalMessageHandled: () => void }) {
   // ── All hooks must be declared before any effects ──────────────────────────
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL]);
+  // Pre-populate from sessionStorage so chat looks instant on route changes
+  const [messages, setMessages] = useState<ChatMessage[]>(() => getSessionMessages() ?? [INITIAL]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -88,6 +104,13 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
       onExternalMessageHandled();
     }
   }, [externalMessage]); // eslint-disable-line
+
+  // Persist messages to sessionStorage so navigation feels instant
+  useEffect(() => {
+    if (messages.length > 1 || (messages.length === 1 && messages[0]?.id !== '1')) {
+      saveSessionMessages(messages);
+    }
+  }, [messages]);
 
   // Persist chat to Firestore
   useEffect(() => {
@@ -641,6 +664,7 @@ function DashboardLayoutInner({
         {!noChat && (
           <div className="hidden md:flex">
             <InlineChatPanel
+              key="persistent-chat"
               externalMessage={chatQueue}
               onExternalMessageHandled={() => setChatQueue(null)}
             />

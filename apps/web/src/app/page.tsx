@@ -978,9 +978,9 @@ function HealthReportCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
         <div
           className="rounded-3xl p-10 md:p-14 text-center"
           style={{
-            background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)',
+            background: 'linear-gradient(135deg, #141008 0%, #0f0d07 50%, #0d0d0d 100%)',
             border: '1px solid #D4AF37',
-            boxShadow: '0 0 60px rgba(212,175,55,0.08)',
+            boxShadow: '0 0 80px rgba(212,175,55,0.18), 0 0 160px rgba(212,175,55,0.08), inset 0 0 60px rgba(212,175,55,0.04)',
           }}
         >
           {/* Badge */}
@@ -1122,9 +1122,9 @@ export default function Home() {
       <HowItWorksAnimated />
       <HowAKAILearns />
       <IntelligenceSection />
+      <HealthReportCTA onOpenCapture={() => openCapture()} />
       <div id="pricing"><Pricing onOpenCapture={(plan) => openCapture(plan)} /></div>
       <FinalCTA onOpenCapture={() => openCapture()} />
-      <HealthReportCTA onOpenCapture={() => openCapture()} />
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
       <LeadCaptureModal isOpen={captureOpen} onClose={() => { setCaptureOpen(false); setCapturePlan(undefined); }} selectedPlan={capturePlan} />

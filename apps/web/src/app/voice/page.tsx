@@ -22,6 +22,8 @@ const RAILWAY_API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '';
 
 interface VoiceConfig {
   setupComplete: boolean;
+  mode: 'outbound' | 'inbound';
+  numberType: 'own' | 'new';
   script: {
     openingLine: string;
     hook: string;
@@ -55,6 +57,8 @@ interface RecentCall {
 
 const DEFAULT_CONFIG: VoiceConfig = {
   setupComplete: false,
+  mode: 'outbound',
+  numberType: 'new',
   script: {
     openingLine: 'Hi, is that {{name}}? This is Sophie calling from {{businessName}}.',
     hook: '',
@@ -1270,6 +1274,143 @@ interface CampaignStatus {
   recentCalls?: RecentCall[];
 }
 
+// ── Inbound View ─────────────────────────────────────────────────────────────
+
+function InboundView({ config, onSave }: { config: VoiceConfig; onSave: (c: VoiceConfig) => void }) {
+  const [numberType, setNumberType] = useState<'own' | 'new'>(config.numberType ?? 'new');
+  const [ownNumber, setOwnNumber] = useState(config.phoneNumber !== '+61468075948' ? config.phoneNumber : '');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave({
+      ...config,
+      mode: 'inbound',
+      numberType,
+      phoneNumber: numberType === 'own' ? ownNumber : config.phoneNumber,
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  return (
+    <div className="flex-1 space-y-6">
+      {/* Info banner */}
+      <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl px-5 py-4 flex items-start gap-3">
+        <span className="text-2xl">📲</span>
+        <div>
+          <p className="text-sm font-bold text-white">Sophie answers every call 24/7</p>
+          <p className="text-xs text-gray-400 mt-1">Inbound mode routes calls to your number through Sophie. She qualifies leads, answers FAQs, and books meetings — even at 2am.</p>
+        </div>
+      </div>
+
+      {/* Phone number selection */}
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 space-y-4">
+        <p className="text-sm font-bold text-white">Phone Number</p>
+        <p className="text-xs text-gray-500">Choose how callers reach Sophie.</p>
+        <div className="space-y-3">
+          {/* Option 1: New AKAI number */}
+          <button
+            onClick={() => setNumberType('new')}
+            className={`w-full flex items-start gap-4 p-4 rounded-xl border transition-colors text-left ${
+              numberType === 'new'
+                ? 'border-[#D4AF37]/60 bg-[#D4AF37]/5'
+                : 'border-[#2a2a2a] hover:border-[#3a3a3a]'
+            }`}
+          >
+            <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 ${
+              numberType === 'new' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a]'
+            }`} />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-white">Get a new AKAI number</p>
+              <p className="text-xs text-gray-500 mt-0.5">We provision a dedicated number from Twilio — fully managed.</p>
+              <span className="inline-block mt-2 text-xs font-semibold text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-full px-2.5 py-0.5">$5 / month</span>
+            </div>
+          </button>
+
+          {/* Option 2: Port existing number */}
+          <button
+            onClick={() => setNumberType('own')}
+            className={`w-full flex items-start gap-4 p-4 rounded-xl border transition-colors text-left ${
+              numberType === 'own'
+                ? 'border-[#D4AF37]/60 bg-[#D4AF37]/5'
+                : 'border-[#2a2a2a] hover:border-[#3a3a3a]'
+            }`}
+          >
+            <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 ${
+              numberType === 'own' ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#3a3a3a]'
+            }`} />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-white">Use my existing number</p>
+              <p className="text-xs text-gray-500 mt-0.5">Port your current business number via Twilio. Your callers see the same number.</p>
+              {numberType === 'own' && (
+                <input
+                  type="tel"
+                  value={ownNumber}
+                  onChange={e => setOwnNumber(e.target.value)}
+                  placeholder="+61 4xx xxx xxx"
+                  onClick={e => e.stopPropagation()}
+                  className="mt-3 w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                />
+              )}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* What Sophie does inbound */}
+      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+        <p className="text-sm font-bold text-white mb-4">What Sophie does on inbound calls</p>
+        <div className="space-y-3">
+          {[
+            { icon: '🎯', text: 'Qualifies the caller with your custom script' },
+            { icon: '📅', text: 'Books meetings directly into your calendar' },
+            { icon: '📋', text: 'Logs call summary and lead score in your dashboard' },
+            { icon: '💤', text: 'Handles calls 24/7 — even outside business hours' },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <span className="text-lg">{item.icon}</span>
+              <span className="text-sm text-gray-300">{item.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={saving || (numberType === 'own' && !ownNumber.trim())}
+        className="px-6 py-3 bg-[#D4AF37] text-black font-black rounded-xl text-sm hover:opacity-90 disabled:opacity-40 transition"
+      >
+        {saving ? 'Saving…' : saved ? '✅ Saved!' : 'Save Inbound Preferences'}
+      </button>
+    </div>
+  );
+}
+
+// ── Mode Toggle ───────────────────────────────────────────────────────────────
+
+function ModeToggle({ mode, onChange }: { mode: 'outbound' | 'inbound'; onChange: (m: 'outbound' | 'inbound') => void }) {
+  return (
+    <div className="flex items-center gap-1 bg-[#111] border border-[#1f1f1f] rounded-xl p-1 w-fit">
+      {(['outbound', 'inbound'] as const).map(m => (
+        <button
+          key={m}
+          onClick={() => onChange(m)}
+          className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+            mode === m
+              ? 'bg-[#D4AF37] text-black shadow'
+              : 'text-gray-500 hover:text-white'
+          }`}
+        >
+          {m === 'outbound' ? '📞 Outbound Calls' : '📲 Inbound Calls'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ActiveView({ config, setConfig, onEditScript, onEditSchedule, userId }: {
   config: VoiceConfig;
   setConfig: (c: VoiceConfig) => void;
@@ -1422,6 +1563,7 @@ function VoicePageInner() {
   const [config, setConfig] = useState<VoiceConfig>(DEFAULT_CONFIG);
   const [configLoading, setConfigLoading] = useState(true);
   const [editMode, setEditMode] = useState<'none' | 'script' | 'schedule'>('none');
+  const [activeMode, setActiveMode] = useState<'outbound' | 'inbound'>(config.mode ?? 'outbound');
   const [configSaveError, setConfigSaveError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -1496,6 +1638,12 @@ function VoicePageInner() {
 
   const showWizard = !config.setupComplete || editMode !== 'none';
   const userEmail = user.email || '';
+  const mode = (config.mode ?? 'outbound') as 'outbound' | 'inbound';
+
+  const handleModeChange = async (m: 'outbound' | 'inbound') => {
+    await saveConfig({ ...config, mode: m });
+  };
+
   const userName = (userProfile as { name?: string } | null)?.name || user.email?.split('@')[0] || 'User';
 
   return (
@@ -1503,14 +1651,16 @@ function VoicePageInner() {
       <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808]">
         <div>
           <Breadcrumb module="Voice" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-xl">🎙️</span>
             <h1 className="text-xl font-black text-white">Voice</h1>
+            <ModeToggle mode={activeMode} onChange={(m) => { setActiveMode(m); saveConfig({ ...config, mode: m }); }} />
           </div>
-          <p className="text-xs text-gray-600 mt-0.5">Sophie AI — outbound calls, lead qualification, meeting booking</p>
+          <p className="text-xs text-gray-600 mt-0.5">Sophie AI — {activeMode === 'inbound' ? 'inbound call answering, lead qualification' : 'outbound calls, lead qualification, meeting booking'}</p>
         </div>
         <div className="flex items-center gap-3">
-          {config.setupComplete && config.active && (
+          <ModeToggle mode={mode} onChange={handleModeChange} />
+          {config.setupComplete && config.active && mode === 'outbound' && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/10">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs text-green-400 font-semibold">Sophie live</span>
@@ -1534,7 +1684,9 @@ function VoicePageInner() {
         <div className="flex gap-6 h-full">
           <LeftPanel config={config} onToggleActive={handleToggleActive} />
 
-          {showWizard ? (
+          {mode === 'inbound' ? (
+            <InboundView config={config} onSave={saveConfig} />
+          ) : showWizard ? (
             <SetupWizard
               config={config}
               setConfig={(c) => saveConfig(c)}
