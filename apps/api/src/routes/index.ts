@@ -7,6 +7,7 @@ import salesRouter from './modules/sales';
 import recruitRouter from './modules/recruit';
 import webRouter from './modules/web';
 import calendarRouter from './calendar';
+import analyticsRouter from './analytics';
 
 const router: ExpressRouter = Router();
 
@@ -19,6 +20,7 @@ router.use('/modules/sales', salesRouter);
 router.use('/modules/recruit', recruitRouter);
 router.use('/modules/web', webRouter);
 router.use('/calendar', calendarRouter);
+router.use('/analytics', analyticsRouter);
 
 // Temporary OAuth capture — MM re-auth only. Remove after use.
 router.get('/oauth-capture', (req: Request, res: Response): void => {
