@@ -53,6 +53,12 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
                 >
                   💬 Talk to AK
                 </button>
+                <button
+                  onClick={() => onOpenCapture?.()}
+                  className="text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors duration-200"
+                >
+                  Free Report
+                </button>
                 <Button href="/login" size="sm">
                   Get Started →
                 </Button>
@@ -102,6 +108,12 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
                 <a href="/login" className="text-sm text-white/60 hover:text-white transition-colors">Sign In</a>
                 <button onClick={() => { onOpenChat?.(); setMobileMenuOpen(false); }} className="text-left text-sm font-semibold text-white/70 hover:text-[#D4AF37] transition-colors">
                   💬 Talk to AK
+                </button>
+                <button
+                  onClick={() => { onOpenCapture?.(); setMobileMenuOpen(false); }}
+                  className="text-left text-sm font-semibold text-[#D4AF37] hover:opacity-80 transition-colors"
+                >
+                  📊 Free Report
                 </button>
               </>
             )}
