@@ -15,8 +15,10 @@ interface CallOptions {
 export async function triggerSophieCall(opts: CallOptions): Promise<{ callId: string }> {
   const { phone, name, businessName, pitch, teamId } = opts;
 
-  const task = `You are Sophie, an AI sales assistant working on behalf of ${businessName}.
+  const task = `You are Sophie, an AI assistant calling on behalf of ${businessName}.
 You are calling ${name} who has been identified as a potential customer.
+
+IMPORTANT: You must disclose you are an AI at the start of the call. This is required by law.
 
 Your goal: qualify their interest and book a meeting/appointment.
 
@@ -34,7 +36,7 @@ Context: ${pitch || 'Introduce the business and ask if they have a need for the 
     body: JSON.stringify({
       phone_number: phone,
       task,
-      first_sentence: `Hey, is that ${name}?`,
+      first_sentence: `Hi, is that ${name}? This is Sophie, an AI assistant calling on behalf of ${businessName}.`,
       model: 'turbo',
       voice: SOPHIE_VOICE,
       language: 'en-AU',
