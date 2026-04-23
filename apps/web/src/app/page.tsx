@@ -127,7 +127,7 @@ function TrustBar() {
         <span className="text-[#D4AF37]/30 hidden sm:block">·</span>
         <div className="flex items-center gap-2">
           <span className="text-2xl font-black text-[#D4AF37]">500+</span>
-          <span className="text-sm text-gray-500">AI calls made</span>
+          <span className="text-sm text-gray-500">businesses automated</span>
         </div>
         <span className="text-[#D4AF37]/30 hidden sm:block">·</span>
         <div className="flex items-center gap-2">
@@ -343,19 +343,19 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
             Start Free Trial →
           </button>
           <button
-            onClick={() => { gtag('cta_clicked', { button: 'Get a Demo Call', page: 'homepage' }); _onOpenDemo(); }}
-            className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
-          >
-            📞 Get a Demo Call
-          </button>
-          <button
             onClick={() => { gtag('cta_clicked', { button: 'Free Health Report', page: 'homepage' }); onOpenCapture(); }}
             className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/60 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
           >
             📊 Free Health Report
           </button>
+          <button
+            onClick={() => { gtag('cta_clicked', { button: 'Get a Demo Call', page: 'homepage' }); _onOpenDemo(); }}
+            className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#2a2a2a] text-white font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/40 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
+          >
+            📞 Get a Demo Call
+          </button>
         </div>
-        <p className="text-xs text-gray-500">Trusted by Australian SMBs · No credit card required</p>
+        <p className="text-xs text-gray-500">No credit card required • Cancel anytime • Australian made 🇦🇺</p>
       </div>
 
       {/* Dashboard Mockup */}

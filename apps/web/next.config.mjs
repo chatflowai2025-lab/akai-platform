@@ -17,6 +17,20 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   },
+  async redirects() {
+    return [
+      {
+        source: '/recruiter.html',
+        destination: '/recruit',
+        permanent: true,
+      },
+      {
+        source: '/web-audit.html',
+        destination: '/web',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

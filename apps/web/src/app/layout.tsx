@@ -40,18 +40,22 @@ export const metadata: Metadata = {
   verification: {
     google: 'VNpyDRPV_WUxGG6u5z3kJNFGVq0xvXp5QCLcb5hENvI',
   },
-  title: 'AKAI — Your AI Business Partner',
+  title: 'AKAI — AI Business Partner | Automate Sales, Leads & Operations',
   description:
-    'AI-powered executive team for SMBs. Sales, marketing, recruiting and finance — automated, running 24/7.',
+    'AKAI gives Australian SMBs a full AI executive team — sales agent, email guard, voice agent, recruiter, ads manager and more. Automate leads, bookings, and revenue. From $199/mo.',
   keywords: [
-    'AI business',
-    'AI sales',
+    'AI business partner',
+    'AI sales automation',
     'AI recruitment',
     'AI executive team',
     'AKAI',
     'AI agents',
     'business automation',
     'Australian SMB AI',
+    'lead automation',
+    'AI email guard',
+    'AI voice agent',
+    'AI ads manager',
   ],
   metadataBase: new URL(SITE_URL),
   alternates: {
@@ -62,9 +66,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'AKAI — Your AI Business Partner',
+    title: 'AKAI — AI Business Partner | Automate Sales, Leads & Operations',
     description:
-      'AI-powered executive team for SMBs. Sales, marketing, recruiting and finance — automated, running 24/7.',
+      'AKAI gives Australian SMBs a full AI executive team — sales agent, email guard, voice agent, recruiter, ads manager and more. Automate leads, bookings, and revenue. From $199/mo.',
     url: SITE_URL,
     siteName: 'AKAI',
     images: [
@@ -72,16 +76,16 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'AKAI — Your AI Business Partner',
+        alt: 'AKAI — AI Business Partner | Automate Sales, Leads & Operations',
       },
     ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AKAI — Your AI Business Partner',
+    title: 'AKAI — AI Business Partner | Automate Sales, Leads & Operations',
     description:
-      'AI-powered executive team for SMBs. Sales, marketing, recruiting and finance — automated, running 24/7.',
+      'AKAI gives Australian SMBs a full AI executive team — sales agent, email guard, voice agent, recruiter, ads manager and more. Automate leads, bookings, and revenue. From $199/mo.',
     images: [`${SITE_URL}/og-image.png`],
   },
 };
