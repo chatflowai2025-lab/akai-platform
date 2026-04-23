@@ -597,6 +597,13 @@ function SetupWizard({
         <p className="text-gray-500 mt-2 leading-relaxed">
           Sophie is your AI sales agent. She makes outbound calls, qualifies leads, and books meetings — 24/7 in plain Australian English.
         </p>
+        <div className="mt-3 flex items-start gap-2 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+          <span className="text-green-400 text-sm mt-0.5">✅</span>
+          <p className="text-green-400 text-xs leading-relaxed">
+            <strong>Legally compliant:</strong> Sophie discloses she is an AI on every call — as required by Australian Consumer Law and US FCC/TCPA regulations. Your clients are protected.
+          </p>
+        </div>
+        </p>
       </div>
 
       <button
