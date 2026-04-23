@@ -3,7 +3,7 @@ import { verifyToken } from '../../middlewares/auth';
 const router: ExpressRouter = Router();
 
 const BLAND_API_KEY = process.env.BLAND_API_KEY || '';
-const SOPHIE_VOICE = 'd66156cc-560b-4080-a195-32d245ad2d1a';
+const SOPHIE_VOICE = '857ed371-9b28-4006-99da-a28c41c6fa55';
 
 // POST /api/modules/sales/call — trigger Sophie to call a lead
 router.post('/call', verifyToken, async (req, res) => {
