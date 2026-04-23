@@ -50,6 +50,7 @@ const PLATFORMS = [
   { id: 'linkedin', label: 'LinkedIn', icon: '💼', color: 'from-blue-600 to-blue-400' },
   { id: 'facebook', label: 'Facebook', icon: '👥', color: 'from-blue-500 to-indigo-500' },
   { id: 'x', label: 'X (Twitter)', icon: '𝕏', color: 'from-gray-200 to-gray-400' },
+  { id: 'tiktok', label: 'TikTok', icon: '🎵', color: 'from-pink-400 to-cyan-400' },
 ];
 
 const CHAR_LIMITS: Record<string, number> = {
@@ -57,6 +58,7 @@ const CHAR_LIMITS: Record<string, number> = {
   LinkedIn: 3000,
   Facebook: 63206,
   X: 280,
+  TikTok: 2200,
 };
 
 const TONES = ['Professional', 'Casual', 'Funny', 'Inspirational'] as const;
@@ -412,6 +414,89 @@ function FacebookConnectModal({ onClose, uid }: { onClose: () => void; uid: stri
   );
 }
 
+
+// ── TikTok Connect Modal ──────────────────────────────────────────────────────
+
+function TikTokConnectModal({ onClose, uid }: { onClose: () => void; uid: string }) {
+  const [handle, setHandle] = useState('');
+  const [state, setState] = useState<WaitlistState>({ submitted: false, loading: false, error: '' });
+
+  const handleNotify = async () => {
+    if (!handle.trim()) return;
+    setState(s => ({ ...s, loading: true, error: '' }));
+    const cleanHandle = handle.trim().replace(/^@/, '');
+    try {
+      const db = getFirebaseDb();
+      if (db) await setDoc(doc(db, 'users', uid, 'socialWaitlist', 'tiktok'), { handle: cleanHandle, notifiedAt: serverTimestamp() }, { merge: true });
+    } catch { /* non-fatal */ }
+    setState({ submitted: true, loading: false, error: '' });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#111] border border-[#2a2a2a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400 to-cyan-400 flex items-center justify-center text-xl">🎵</div>
+            <div>
+              <h2 className="text-white font-bold text-lg">TikTok — Coming Soon</h2>
+              <p className="text-xs text-gray-500">Join the waitlist</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition text-xl leading-none" aria-label="Close">×</button>
+        </div>
+
+        {state.submitted ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="text-white font-semibold mb-1">You&apos;re on the list!</p>
+            <p className="text-sm text-gray-400">
+              We&apos;ll notify you at <span className="text-[#D4AF37]">@{handle.replace(/^@/, '')}</span> when TikTok Connect launches.
+            </p>
+            <button onClick={onClose} className="mt-5 px-5 py-2.5 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition">Done</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400 mb-2 leading-relaxed">
+              TikTok direct posting is coming soon — AKAI already generates full video scripts optimised for TikTok.
+            </p>
+            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+              Drop your handle and we&apos;ll notify you when TikTok Connect launches.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl px-3 py-2.5">
+                <span className="text-gray-500 text-sm">@</span>
+                <input
+                  type="text"
+                  value={handle}
+                  onChange={e => setHandle(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleNotify(); }}
+                  placeholder="your.tiktok"
+                  className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
+                  autoFocus
+                />
+              </div>
+              {state.error && <p className="text-xs text-red-400">{state.error}</p>}
+              <button
+                onClick={handleNotify}
+                disabled={!handle.trim() || state.loading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-400 to-cyan-400 text-white text-sm font-bold hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {state.loading && <span role="status" aria-label="Loading" className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                Notify me when ready
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Schedule Post Modal ───────────────────────────────────────────────────────
 
 interface SchedulePostModalProps {
@@ -535,7 +620,7 @@ interface XConnectionInfo {
   followersCount: number;
 }
 
-type ConnectingPlatform = 'Instagram' | 'LinkedIn' | 'Facebook' | 'X (Twitter)' | null;
+type ConnectingPlatform = 'Instagram' | 'LinkedIn' | 'Facebook' | 'X (Twitter)' | 'TikTok' | null;
 
 interface SchedulePending {
   platform: string;
@@ -550,6 +635,7 @@ const platformCardStyles: Record<string, { gradient: string; border: string; bad
   LinkedIn: { gradient: 'from-blue-600/10 to-blue-400/10', border: 'border-blue-500/20', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   Facebook: { gradient: 'from-indigo-500/10 to-blue-500/10', border: 'border-indigo-500/20', badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
   X: { gradient: 'from-gray-200/5 to-gray-400/5', border: 'border-gray-400/20', badge: 'bg-gray-400/10 text-gray-200 border-gray-400/20' },
+  TikTok: { gradient: 'from-pink-400/10 to-cyan-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/10 text-pink-300 border-pink-400/20' },
 };
 
 export default function SocialPage() {
@@ -647,7 +733,7 @@ export default function SocialPage() {
   }
 
   const ICON_MAP: Record<string, string> = {
-    Instagram: '📸', LinkedIn: '💼', Facebook: '👥', X: '𝕏',
+    Instagram: '📸', LinkedIn: '💼', Facebook: '👥', X: '𝕏', TikTok: '🎵',
   };
 
   return (
@@ -660,7 +746,7 @@ export default function SocialPage() {
             <span className="text-xl">📱</span>
             <h1 className="text-xl font-black text-white">Social</h1>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">AI-powered content for Instagram, LinkedIn, Facebook & X</p>
+          <p className="text-xs text-gray-500 mt-0.5">AI-powered content for Instagram, LinkedIn, Facebook, X & TikTok</p>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 font-medium">Live</span>
       </header>
@@ -689,7 +775,7 @@ export default function SocialPage() {
         {/* Connect Accounts */}
         <section>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Connect Accounts</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
               {
                 label: 'Instagram' as ConnectingPlatform,
@@ -726,6 +812,15 @@ export default function SocialPage() {
                 text: 'text-gray-200',
                 btnColor: 'bg-white text-black hover:opacity-90',
                 btnLabel: 'Connect X →',
+              },
+              {
+                label: 'TikTok' as ConnectingPlatform,
+                icon: '🎵',
+                gradient: 'from-pink-400/20 to-cyan-400/20',
+                border: 'border-pink-400/20',
+                text: 'text-pink-300',
+                btnColor: 'bg-gradient-to-r from-pink-400 to-cyan-400 text-white hover:opacity-90',
+                btnLabel: 'Connect TikTok →',
               },
             ].map(p => {
               const isXConnected = p.label === 'X (Twitter)' && xConnection;
@@ -784,6 +879,9 @@ export default function SocialPage() {
         )}
         {connectingPlatform === 'Facebook' && (
           <FacebookConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
+        )}
+        {connectingPlatform === 'TikTok' && (
+          <TikTokConnectModal uid={user.uid} onClose={() => setConnectingPlatform(null)} />
         )}
 
         {/* Schedule Post Modal */}
@@ -887,7 +985,7 @@ export default function SocialPage() {
                     🔄 Regenerate all
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
                   {generatedPosts.map(post => {
                     const styles = platformCardStyles[post.platform] ?? {
                       gradient: 'from-gray-500/10 to-gray-400/10',
@@ -905,7 +1003,7 @@ export default function SocialPage() {
                             <span className="text-sm font-bold text-white">{post.platform}</span>
                           </div>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${styles.badge}`}>
-                            {post.platform === 'Instagram' ? '2,200' : post.platform === 'LinkedIn' ? '3,000' : post.platform === 'X' ? '280' : '63,206'} char limit
+                            {post.platform === 'Instagram' ? '2,200' : post.platform === 'LinkedIn' ? '3,000' : post.platform === 'X' ? '280' : post.platform === 'TikTok' ? '2,200' : '63,206'} char limit
                           </span>
                         </div>
 

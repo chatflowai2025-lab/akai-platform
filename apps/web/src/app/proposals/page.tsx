@@ -501,8 +501,9 @@ function ProposalPreview({
         <button
           onClick={onDownloadPdf}
           className="px-3 py-1.5 border border-[#2a2a2a] text-gray-400 rounded-lg text-xs font-semibold hover:text-white hover:border-[#3a3a3a] transition flex items-center gap-1.5"
+          title="Copy proposal as text to clipboard"
         >
-          ⬇️ Download PDF
+          📝 Export as Text
         </button>
       </div>
 
@@ -865,9 +866,18 @@ export default function ProposalsPage() {
     }
   }, [generatedMarkdown]);
 
-  const handleDownloadPdf = useCallback(() => {
-    setToast('PDF download coming soon');
-  }, []);
+  const handleDownloadPdf = useCallback(async () => {
+    if (!generatedMarkdown) {
+      setToast('Generate a proposal first, then export.');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(generatedMarkdown);
+      setToast('Proposal copied as text! Paste into Word, Google Docs, or any editor.');
+    } catch {
+      setToast('Could not copy — use the Copy to clipboard button instead.');
+    }
+  }, [generatedMarkdown]);
 
   const loadSavedProposalContent = (saved: SavedProposal) => {
     setBusinessName(saved.businessName);

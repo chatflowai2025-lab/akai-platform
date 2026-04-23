@@ -394,6 +394,7 @@ function AdSetCard({ adSet, index }: { adSet: AdSet; index: number }) {
 // ── Google Campaign Builder ───────────────────────────────────────────────────
 function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () => void }) {
   const { sendMessage } = useDashboardChat();
+  const { user } = useAuth();
   const [businessName, setBusinessName] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
   const [location, setLocation] = useState('');
@@ -439,6 +440,18 @@ function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () 
   const launchCampaign = async () => {
     if (!campaign) return;
     setLaunching(true);
+    const launchedData: LaunchedCampaign = {
+      id: `google_${Date.now()}`,
+      platform: 'google',
+      campaignName: campaign.campaignName,
+      dailyBudget,
+      goal,
+      businessName,
+      targetAudience,
+      location,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
     try {
       await fetch('/api/ads/create', {
         method: 'POST',
@@ -446,27 +459,24 @@ function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () 
         body: JSON.stringify({ campaign, platform: 'google', dailyBudget, goal, businessName }),
       });
     } catch {
-      // optimistic — saved locally
-    } finally {
-      // Save to localStorage
-      const launched: LaunchedCampaign = {
-        id: `google_${Date.now()}`,
-        platform: 'google',
-        campaignName: campaign.campaignName,
-        dailyBudget,
-        goal,
-        businessName,
-        targetAudience,
-        location,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      };
-      saveLaunchedCampaign(launched);
-      setLaunched(true);
-      setLaunching(false);
-      setShowModal(true);
-      onCampaignLaunched();
+      // optimistic
     }
+    saveLaunchedCampaign(launchedData);
+    try {
+      const { getFirebaseDb } = await import('@/lib/firebase');
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const db = getFirebaseDb();
+      if (db && user) {
+        await addDoc(collection(db, 'users', user.uid, 'adCampaigns'), {
+          ...launchedData,
+          createdAt: serverTimestamp(),
+        });
+      }
+    } catch { /* non-fatal */ }
+    setLaunched(true);
+    setLaunching(false);
+    setShowModal(true);
+    onCampaignLaunched();
   };
 
   const copyCampaign = async () => {
@@ -506,6 +516,7 @@ function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () 
           <div>
             <h2 className="text-white font-bold text-base">Google Ads Campaign Builder</h2>
             <p className="text-xs text-gray-500">AI-generated Google Ads campaigns — ready to launch</p>
+            <p className="text-xs text-amber-500/70 mt-0.5">Campaigns are AI-generated and ready. Google Ads connection coming soon.</p>
           </div>
         </div>
 
@@ -690,6 +701,7 @@ function GoogleCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () 
 // ── Meta Campaign Builder ─────────────────────────────────────────────────────
 function MetaCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () => void }) {
   const { sendMessage } = useDashboardChat();
+  const { user } = useAuth();
   const [businessName, setBusinessName] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
   const [location, setLocation] = useState('');
@@ -735,6 +747,18 @@ function MetaCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () =>
   const launchCampaign = async () => {
     if (!campaign) return;
     setLaunching(true);
+    const launchedData: LaunchedCampaign = {
+      id: `meta_${Date.now()}`,
+      platform: 'meta',
+      campaignName: campaign.campaignName,
+      dailyBudget,
+      goal,
+      businessName,
+      targetAudience,
+      location,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
     try {
       await fetch('/api/ads/create', {
         method: 'POST',
@@ -743,25 +767,23 @@ function MetaCampaignBuilder({ onCampaignLaunched }: { onCampaignLaunched: () =>
       });
     } catch {
       // optimistic
-    } finally {
-      const launched: LaunchedCampaign = {
-        id: `meta_${Date.now()}`,
-        platform: 'meta',
-        campaignName: campaign.campaignName,
-        dailyBudget,
-        goal,
-        businessName,
-        targetAudience,
-        location,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      };
-      saveLaunchedCampaign(launched);
-      setLaunched(true);
-      setLaunching(false);
-      setShowModal(true);
-      onCampaignLaunched();
     }
+    saveLaunchedCampaign(launchedData);
+    try {
+      const { getFirebaseDb } = await import('@/lib/firebase');
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const db = getFirebaseDb();
+      if (db && user) {
+        await addDoc(collection(db, 'users', user.uid, 'adCampaigns'), {
+          ...launchedData,
+          createdAt: serverTimestamp(),
+        });
+      }
+    } catch { /* non-fatal */ }
+    setLaunched(true);
+    setLaunching(false);
+    setShowModal(true);
+    onCampaignLaunched();
   };
 
   const copyCampaign = async () => {

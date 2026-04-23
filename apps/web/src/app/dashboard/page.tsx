@@ -360,6 +360,78 @@ function NeedsYouColumn({ items, loading }: { items: NeedsYouItem[]; loading: bo
   );
 }
 
+// ── Setup Health Card ───────────────────────────────────────────────────────
+function SetupHealthCard() {
+  const router = useRouter();
+  const { userProfile } = useAuth();
+  const profile = userProfile as Record<string, unknown> | null;
+
+  const gmailConnected = !!(profile?.gmail as Record<string, unknown> | undefined)?.connected;
+  const calendarConnected = !!(profile?.googleCalendarConnected);
+  const microsoftConnected =
+    !!(profile?.inboxConnection as Record<string, unknown> | undefined)?.connected ||
+    !!(profile?.microsoftCalendarConnected);
+  const businessSet =
+    !!(profile?.businessName as string | undefined)?.trim() ||
+    !!(profile?.onboarding as Record<string, unknown> | undefined)?.businessName;
+
+  const services = [
+    { name: 'Gmail', connected: gmailConnected, href: '/email-guard', icon: '✉️' },
+    { name: 'Calendar', connected: calendarConnected, href: '/calendar', icon: '📅' },
+    { name: 'Microsoft', connected: microsoftConnected, href: '/settings', icon: '🪟' },
+  ];
+
+  const connectedCount = services.filter(s => s.connected).length;
+  const score = Math.round((connectedCount / 3) * 70 + (businessSet ? 30 : 0));
+  const scoreColor = score >= 70 ? '#4ade80' : score >= 50 ? '#D4AF37' : '#f87171';
+  const incompleteServices = services.filter(s => !s.connected);
+
+  return (
+    <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-black text-white">🏥 Setup Health</h2>
+        <div className="flex items-center gap-1">
+          <span className="text-xl font-black" style={{ color: scoreColor }}>{score}</span>
+          <span className="text-xs text-gray-600">/100</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {services.map(s => (
+          <button
+            key={s.name}
+            onClick={() => !s.connected && router.push(s.href)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition ${
+              s.connected
+                ? 'bg-green-500/5 border-green-500/20 text-green-400 cursor-default'
+                : 'bg-red-500/5 border-red-500/20 text-red-400 hover:bg-red-500/10'
+            }`}
+          >
+            <span>{s.icon}</span>
+            <span className="font-medium">{s.name}</span>
+            <span className="ml-auto">{s.connected ? '✅' : '❌'}</span>
+          </button>
+        ))}
+      </div>
+      {score < 50 && incompleteServices.length > 0 && (
+        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-3">
+          <p className="text-xs font-semibold text-yellow-400 mb-2">⚡ Complete your setup to unlock full AKAI power</p>
+          <div className="flex gap-2 flex-wrap">
+            {incompleteServices.slice(0, 2).map(s => (
+              <button
+                key={s.name}
+                onClick={() => router.push(s.href)}
+                className="text-xs px-3 py-1 rounded-lg border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10 transition"
+              >
+                Connect {s.name} →
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Setup Checklist (post-onboarding) ────────────────────────────────────────
 function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void }) {
   const router = useRouter();
@@ -992,6 +1064,9 @@ export default function DashboardPage() {
               </button>
             </div>
           </section>
+
+          {/* ── Setup Health Card ────────────────────────────────────────── */}
+          <SetupHealthCard />
 
           {/* ── 3-column command centre ──────────────────────────────────── */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">

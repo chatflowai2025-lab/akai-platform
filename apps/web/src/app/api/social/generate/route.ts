@@ -30,6 +30,7 @@ const TONE_GUIDES: Record<string, string> = {
 
 function getMockPosts(brief: string, tone = 'Professional'): PlatformPost[] {
   const toneNote = tone === 'Funny' ? '😂 ' : tone === 'Inspirational' ? '💡 ' : tone === 'Casual' ? '👋 ' : '';
+  void toneNote;
 
   const x =
     tone === 'Funny'
@@ -74,6 +75,56 @@ function getMockPosts(brief: string, tone = 'Professional'): PlatformPost[] {
     Inspirational: '#motivation #entrepreneurship #mindset #growth #success',
   };
 
+  const tiktok =
+    tone === 'Funny'
+      ? `🎵 HOOK (0-3s): "POV: You finally tried ${brief} and now you can't go back"
+
+SCRIPT:
+• [3-8s] Show the before — the old way, the struggle
+• [8-20s] The moment everything changed (use text overlay)
+• [20-35s] Results — make it visual, make it real
+• [35-45s] "Tell me you've done this without telling me" moment
+
+CALL TO ACTION: Drop a 🔥 if this hits. Part 2 coming if this blows up 👇
+
+CAPTION: okay but why did no one tell me about ${brief} sooner 😭`
+      : tone === 'Inspirational'
+      ? `🎵 HOOK (0-3s): "The thing nobody tells you about ${brief}..."
+
+SCRIPT:
+• [3-8s] Set the scene — make them feel the struggle
+• [8-20s] The turning point — one decision changed everything
+• [20-40s] The transformation — specific, visual, emotional
+• [40-55s] The lesson wrapped in a story
+
+CALL TO ACTION: Save this for when you need it. Share with someone who needs to hear this today 💛
+
+CAPTION: This is for everyone quietly doing the work. ${brief} — the game changer nobody talks about.`
+      : tone === 'Casual'
+      ? `🎵 HOOK (0-3s): "Wait, does ${brief} actually work? I tested it so you don't have to"
+
+SCRIPT:
+• [3-10s] Set up the experiment — be relatable, be real
+• [10-25s] The process — quick cuts, keep it moving
+• [25-40s] The results — no filter, honest reaction
+• [40-55s] Would I do it again? (spoiler: yes)
+
+CALL TO ACTION: Comment your experience below 👇 obsessed with this community
+
+CAPTION: tested ${brief} for 30 days. here's what actually happened (not sponsored, just obsessed)`
+      : `🎵 HOOK (0-3s): "Here's the ${brief} strategy that's changing the game in 2024"
+
+SCRIPT:
+• [3-8s] The problem most people ignore (stat or bold claim)
+• [8-20s] Step 1 — the insight that shifts everything
+• [20-35s] Step 2 — the practical move (text overlays + visuals)
+• [35-50s] Step 3 — the compound effect
+• [50-60s] Results you can expect
+
+CALL TO ACTION: Follow for more — new strategy every week. Save this for your team meeting.
+
+CAPTION: The ${brief} playbook that actually works. Bookmark this.`;
+
   return [
     {
       platform: 'Instagram',
@@ -103,6 +154,13 @@ function getMockPosts(brief: string, tone = 'Professional'): PlatformPost[] {
       hashtags: '',
       characterCount: x.length,
     },
+    {
+      platform: 'TikTok',
+      icon: '🎵',
+      content: tiktok,
+      hashtags: '#fyp #foryou #foryoupage #viral #business',
+      characterCount: tiktok.length,
+    },
   ];
 }
 
@@ -131,7 +189,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<GenerateRespo
   try {
     const client = new Anthropic({ apiKey });
 
-    const systemPrompt = `You are a world-class social media strategist. Generate platform-optimised posts for Instagram, LinkedIn, Facebook, and X (Twitter).
+    const systemPrompt = `You are a world-class social media strategist. Generate platform-optimised posts for Instagram, LinkedIn, Facebook, X (Twitter), and TikTok.
 
 TONE: ${tone} — ${toneGuide}
 
@@ -152,10 +210,14 @@ Return ONLY a valid JSON object in this exact format:
   "x": {
     "content": "the tweet (MUST be under 280 characters total including any spaces — punchy, no hashtags needed, hook in first 5 words, conversational or bold)",
     "hashtags": ""
+  },
+  "tiktok": {
+    "content": "A short-form video script (15-60 seconds). Format:\n🎵 HOOK (0-3s): [attention-grabbing opening line that stops the scroll — bold claim, question, or POV]\n\nSCRIPT:\n• [0-3s] Hook action/visual direction\n• [3-15s] Setup or problem\n• [15-35s] Core content — punchy, fast-paced, trend-aware\n• [35-55s] Payoff or reveal\n\nCALL TO ACTION: [specific CTA — comment X, save this, follow for more, duet this]\n\nCAPTION: [short punchy caption for the video, lowercase, relatable]",
+    "hashtags": "#fyp #foryou #foryoupage #viral (plus 3-4 topic-specific tags)"
   }
 }
 
-Each post must be uniquely crafted for that platform's culture. Instagram is visual and punchy. LinkedIn is professional and insightful. Facebook is community and conversation. X is ultra-short, bold, and punchy — like a hot take or witty observation. Apply the ${tone} tone consistently. No extra text outside the JSON.`;
+Each post must be uniquely crafted for that platform's culture. Instagram is visual and punchy. LinkedIn is professional and insightful. Facebook is community and conversation. X is ultra-short, bold, and punchy. TikTok is creator-style video scripts — the hook MUST grab attention in the first 3 seconds, content should be trend-aware and energetic, always end with a strong CTA. Apply the ${tone} tone consistently. No extra text outside the JSON.`;
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
@@ -172,6 +234,7 @@ Each post must be uniquely crafted for that platform's culture. Instagram is vis
       linkedin: { content: string; hashtags: string };
       facebook: { content: string; hashtags: string };
       x?: { content: string; hashtags: string };
+      tiktok?: { content: string; hashtags: string };
     };
 
     try {
@@ -210,6 +273,13 @@ Each post must be uniquely crafted for that platform's culture. Instagram is vis
         content: parsed.x?.content ?? '',
         hashtags: '',
         characterCount: (parsed.x?.content ?? '').length,
+      },
+      {
+        platform: 'TikTok',
+        icon: '🎵',
+        content: parsed.tiktok?.content ?? '',
+        hashtags: parsed.tiktok?.hashtags ?? '#fyp #foryou #foryoupage #viral',
+        characterCount: (parsed.tiktok?.content ?? '').length,
       },
     ];
 
