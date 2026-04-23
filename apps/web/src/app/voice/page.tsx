@@ -603,7 +603,6 @@ function SetupWizard({
             <strong>Legally compliant:</strong> Sophie discloses she is an AI on every call — as required by Australian Consumer Law and US FCC/TCPA regulations. Your clients are protected.
           </p>
         </div>
-        </p>
       </div>
 
       <button
