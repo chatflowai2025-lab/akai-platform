@@ -618,11 +618,9 @@ export default function DashboardPage() {
           data?.onboardingComplete === true ||
           !!data?.businessName ||
           !!data?.onboarding?.businessName ||
-          !!data?.campaignConfig?.businessName ||
-          !!data?.gmail?.connected ||
-          !!data?.googleCalendarConnected ||
-          !!data?.inboxConnection?.provider || // MS Outlook connected = onboarded
-          !!data?.microsoftCalendarConnected;
+          !!data?.campaignConfig?.businessName;
+          // Note: gmail/calendar/MS connections are integrations, NOT onboarding signals
+          // New users must always complete onboarding regardless of OAuth provider
         if (!onboardingComplete) {
           router.replace('/onboard');
           return;
