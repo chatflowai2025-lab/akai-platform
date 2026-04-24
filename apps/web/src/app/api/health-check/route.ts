@@ -361,15 +361,12 @@ function buildUserEmail(name: string, website: string, businessType: string, rec
       <!-- Body -->
       <div style="background:#ffffff;padding:32px;">
         <h1 style="color:#1a1a1a;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;">Here's your free digital health report 👋</h1>
-        <p style="color:#6b7280;font-size:14px;margin:0 0 2px;">We audited <strong style="color:#1a1a1a;">${website}</strong>${bType ? ` — a ${bType}` : ''} and generated personalised recommendations.</p>
-        <p style="color:#9ca3af;font-size:12px;margin:0;">Ready in under 15 minutes.</p>
+        <p style="color:#6b7280;font-size:14px;margin:0 0 2px;"><strong style="color:#1a1a1a;">${website}</strong></p>
 
         ${scoreSection}
         ${scoreBreakdown}
         ${workingSection}
         ${gapsSection}
-        ${quickWinsSection}
-
         <p style="color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 12px;">Your ${recs.length} Recommendations</p>
 
         ${recsHtml}
