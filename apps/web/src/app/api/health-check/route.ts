@@ -205,7 +205,7 @@ function getVerticalRecs(businessType: string, website: string, auditData: Audit
 
 interface AuditData {
   headline?: string;
-  scores?: { overall?: number; seo?: number; cta?: number; mobile?: number; trust?: number };
+  scores?: { overall?: number; seo?: number; cta?: number; mobile?: number; trust?: number; speed?: number };
   criticalGaps?: string[];
   quickWins?: Array<{ action: string; impact: string; akaiModule?: string }>;
   whatsWorking?: string[];
@@ -215,77 +215,181 @@ interface AuditData {
 function buildUserEmail(name: string, website: string, businessType: string, recs: Recommendation[], auditData: AuditData | null): string {
   const displayName = name || 'there';
   const bType = businessType || 'your business';
-  const overallScore = auditData?.scores?.overall;
+  const scores = auditData?.scores;
+  const overallScore = scores?.overall;
   const headline = auditData?.headline || `Here's your digital health check for ${website}`;
 
+  // Score badge colours
+  const scoreColor = overallScore != null
+    ? (overallScore >= 7 ? '#16a34a' : overallScore >= 5 ? '#b45309' : '#dc2626')
+    : '#b45309';
+  const scoreBg = overallScore != null
+    ? (overallScore >= 7 ? '#f0fdf4' : overallScore >= 5 ? '#fffbeb' : '#fef2f2')
+    : '#fffbeb';
+  const scoreBorder = overallScore != null
+    ? (overallScore >= 7 ? '#86efac' : overallScore >= 5 ? '#fcd34d' : '#fca5a5')
+    : '#fcd34d';
+  const scoreLabel = overallScore != null
+    ? (overallScore >= 7 ? '✅ Strong' : overallScore >= 5 ? '⚠️ Needs Work' : '🔴 Critical Issues')
+    : '';
+
+  // Overall score section
   const scoreSection = overallScore != null ? `
-    <div style="background:#111;border:1px solid #2a2a2a;border-radius:12px;padding:20px 24px;margin:24px 0;text-align:center;">
-      <p style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Overall Website Score</p>
-      <p style="color:${overallScore >= 7 ? '#22c55e' : overallScore >= 5 ? '#D4AF37' : '#ef4444'};font-size:48px;font-weight:900;margin:0;">${overallScore}<span style="font-size:24px;color:#555;">/10</span></p>
-      <p style="color:#666;font-size:13px;margin:8px 0 0;">${headline}</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0;">
+      <tr>
+        <td align="center">
+          <table cellpadding="0" cellspacing="0" style="background:${scoreBg};border:2px solid ${scoreBorder};border-radius:12px;padding:24px 40px;text-align:center;">
+            <tr><td style="color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding-bottom:8px;">Overall Website Score</td></tr>
+            <tr><td style="color:${scoreColor};font-size:52px;font-weight:900;line-height:1;">${overallScore}<span style="font-size:24px;color:#9ca3af;">/10</span></td></tr>
+            <tr><td style="padding-top:10px;"><span style="background:${scoreColor};color:#ffffff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:999px;">${scoreLabel}</span></td></tr>
+            <tr><td style="color:#6b7280;font-size:13px;padding-top:12px;max-width:360px;line-height:1.4;">${headline}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>` : '';
+
+  // Score breakdown bars (table-based for Outlook compat)
+  const scoreBreakdown = (() => {
+    if (!scores) return '';
+    const metrics: Array<{ label: string; value: number | undefined }> = [
+      { label: 'SEO',    value: scores.seo    },
+      { label: 'Mobile', value: scores.mobile  },
+      { label: 'CTA',    value: scores.cta    },
+      { label: 'Trust',  value: scores.trust  },
+      { label: 'Speed',  value: scores.speed  },
+    ].filter(m => m.value != null);
+    if (!metrics.length) return '';
+
+    const rows = metrics.map(m => {
+      const pct = Math.round((m.value! / 10) * 100);
+      const barColor = pct >= 70 ? '#16a34a' : pct >= 50 ? '#D4AF37' : '#dc2626';
+      const emptyPct = 100 - pct;
+      return `
+        <tr>
+          <td style="padding:6px 12px 6px 0;color:#374151;font-size:12px;font-weight:700;white-space:nowrap;width:56px;">${m.label}</td>
+          <td style="padding:6px 8px 6px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td width="${pct}%" style="background:${barColor};height:8px;border-radius:4px 0 0 4px;"></td>
+                ${emptyPct > 0 ? `<td width="${emptyPct}%" style="background:#e5e7eb;height:8px;border-radius:0 4px 4px 0;"></td>` : ''}
+              </tr>
+            </table>
+          </td>
+          <td style="padding:6px 0;color:${barColor};font-size:12px;font-weight:900;white-space:nowrap;width:36px;">${pct}%</td>
+        </tr>`;
+    }).join('');
+
+    return `
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
+        <p style="color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 14px;">Score Breakdown</p>
+        <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+      </div>`;
+  })();
+
+  // What's Working (green tinted)
+  const workingSection = auditData?.whatsWorking?.length ? `
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin:0 0 16px;">
+      <p style="color:#16a34a;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 10px;">✅ What's Already Working</p>
+      ${auditData.whatsWorking.map(w => `<p style="color:#374151;font-size:13px;margin:4px 0;line-height:1.5;">• ${w}</p>`).join('')}
     </div>` : '';
 
+  // Critical Gaps (red tinted)
+  const gapsSection = auditData?.criticalGaps?.length ? `
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
+      <p style="color:#dc2626;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 10px;">🔴 Critical Gaps</p>
+      ${auditData.criticalGaps.map(g => `<p style="color:#374151;font-size:13px;margin:4px 0;line-height:1.5;">• ${g}</p>`).join('')}
+    </div>` : '';
+
+  // Quick Wins (gold left-border cards)
+  const quickWinsSection = auditData?.quickWins?.length ? `
+    <p style="color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 10px;">⚡ Quick Wins</p>
+    ${auditData.quickWins.map((w, i) => `
+      <div style="background:#fffbeb;border-left:4px solid #D4AF37;border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 8px;">
+        <p style="color:#1a1a1a;font-size:13px;font-weight:700;margin:0 0 3px;">${i + 1}. ${w.action}</p>
+        <p style="color:#6b7280;font-size:12px;margin:0;">💡 ${w.impact}</p>
+      </div>`).join('')}
+    <div style="height:16px;"></div>` : '';
+
+  // Recommendations
   const recsHtml = recs.map((r, i) => `
-    <div style="background:#111;border:1px solid #1f1f1f;border-radius:10px;padding:18px 20px;margin:12px 0;">
-      <div style="display:flex;align-items:flex-start;gap:12px;">
-        <span style="font-size:20px;flex-shrink:0;">${r.icon}</span>
-        <div>
-          <p style="color:#D4AF37;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 6px;">${i + 1}. ${r.category}</p>
-          <p style="color:#999;font-size:13px;margin:0 0 8px;line-height:1.5;"><strong style="color:#fff;">Finding:</strong> ${r.finding}</p>
-          <p style="color:#ccc;font-size:13px;margin:0 0 8px;line-height:1.5;"><strong style="color:#fff;">Fix:</strong> ${r.fix}</p>
-          <p style="color:#888;font-size:12px;margin:0;line-height:1.4;">💡 <em>${r.impact}</em></p>
-          ${r.akaiModule ? `<p style="margin:8px 0 0;"><span style="background:#D4AF37;color:#000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;">⚡ AKAI: ${r.akaiModule}</span></p>` : ''}
-        </div>
-      </div>
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-left:3px solid #D4AF37;border-radius:0 8px 8px 0;padding:16px 18px;margin:0 0 10px;">
+      <p style="color:#b45309;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 6px;">${r.icon} ${i + 1}. ${r.category}</p>
+      <p style="color:#374151;font-size:13px;margin:0 0 6px;line-height:1.5;"><strong style="color:#1a1a1a;">Finding:</strong> ${r.finding}</p>
+      <p style="color:#374151;font-size:13px;margin:0 0 6px;line-height:1.5;"><strong style="color:#1a1a1a;">Fix:</strong> ${r.fix}</p>
+      <p style="color:#6b7280;font-size:12px;margin:0;line-height:1.4;">💡 <em>${r.impact}</em></p>
+      ${r.akaiModule ? `<p style="margin:8px 0 0;"><span style="background:#D4AF37;color:#000;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;">⚡ AKAI: ${r.akaiModule}</span></p>` : ''}
     </div>`).join('');
 
-  const workingSection = auditData?.whatsWorking?.length ? `
-    <div style="background:#0a1a0a;border:1px solid #1a3a1a;border-radius:10px;padding:16px 20px;margin:24px 0;">
-      <p style="color:#22c55e;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 10px;">✅ What's Already Working</p>
-      ${auditData.whatsWorking.map(w => `<p style="color:#aaa;font-size:13px;margin:4px 0;">• ${w}</p>`).join('')}
-    </div>` : '';
-
   return `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:620px;margin:0 auto;background:#0a0a0a;color:#fff;padding:40px 32px;border-radius:16px;">
-      <div style="margin-bottom:32px;">
-        <p style="color:#D4AF37;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">AKAI Digital Health Check</p>
-        <h1 style="color:#fff;font-size:26px;font-weight:900;margin:0 0 8px;line-height:1.2;">Hi ${displayName}, here's your report 👋</h1>
-        <p style="color:#888;font-size:14px;margin:0;">We audited <strong style="color:#ccc;">${website}</strong> — a ${bType} — and generated personalised recommendations. Your report was ready in under 15 minutes.</p>
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:620px;margin:0 auto;background:#f3f4f6;">
+
+      <!-- Header -->
+      <div style="background:#1a1a1a;padding:20px 32px;border-radius:12px 12px 0 0;">
+        <p style="margin:0;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;">AK<span style="color:#D4AF37;">AI</span></p>
+        <p style="margin:4px 0 0;color:#9ca3af;font-size:12px;">Digital Health Check Report</p>
       </div>
 
-      ${scoreSection}
-      ${workingSection}
+      <!-- Body -->
+      <div style="background:#ffffff;padding:32px;">
+        <h1 style="color:#1a1a1a;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;">Hi ${displayName}, here's your report 👋</h1>
+        <p style="color:#6b7280;font-size:14px;margin:0 0 2px;">We audited <strong style="color:#1a1a1a;">${website}</strong> — a ${bType} — and generated personalised recommendations.</p>
+        <p style="color:#9ca3af;font-size:12px;margin:0;">Your report was ready in under 15 minutes.</p>
 
-      <p style="color:#D4AF37;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:24px 0 8px;">Your ${recs.length} Recommendations</p>
+        ${scoreSection}
+        ${scoreBreakdown}
+        ${workingSection}
+        ${gapsSection}
+        ${quickWinsSection}
 
-      ${recsHtml}
+        <p style="color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 12px;">Your ${recs.length} Recommendations</p>
 
-      <div style="background:#111;border:1px solid #D4AF37;border-radius:12px;padding:24px;margin:32px 0;text-align:center;">
-        <p style="color:#D4AF37;font-size:14px;font-weight:700;margin:0 0 8px;">Ready to fix these?</p>
-        <p style="color:#888;font-size:13px;margin:0 0 16px;">AKAI can automate most of these wins — chat, bookings, follow-up calls, and more.</p>
-        <a href="https://getakai.ai" style="display:inline-block;background:#D4AF37;color:#000;font-weight:900;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">See AKAI in action →</a>
+        ${recsHtml}
+
+        <!-- CTA -->
+        <div style="background:#fffbeb;border:2px solid #D4AF37;border-radius:12px;padding:24px;margin:28px 0;text-align:center;">
+          <p style="color:#1a1a1a;font-size:15px;font-weight:700;margin:0 0 6px;">Ready to fix these?</p>
+          <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">AKAI can automate most of these wins — chat, bookings, follow-up calls, and more.</p>
+          <a href="https://getakai.ai" style="display:inline-block;background:#D4AF37;color:#000000;font-weight:900;font-size:14px;padding:14px 32px;border-radius:10px;text-decoration:none;">Start Free Trial — Fix It Now →</a>
+        </div>
       </div>
 
-      <hr style="border:none;border-top:1px solid #1f1f1f;margin:32px 0;" />
-      <p style="color:#444;font-size:11px;text-align:center;margin:0;">AKAI · AI-Powered Business Automation · <a href="https://getakai.ai" style="color:#666;">getakai.ai</a></p>
+      <!-- Footer -->
+      <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:16px 32px;border-radius:0 0 12px 12px;text-align:center;">
+        <p style="color:#9ca3af;font-size:11px;margin:0;">AKAI · AI-Powered Business Automation · <a href="https://getakai.ai" style="color:#6b7280;text-decoration:none;">getakai.ai</a></p>
+      </div>
+
     </div>`;
 }
 
 function buildAaronEmail(name: string, email: string, phone: string, website: string, businessType: string, auditList: string, auditData: AuditData | null): string {
   const score = auditData?.scores?.overall;
+  const scoreColor = score != null ? (score >= 7 ? '#16a34a' : score >= 5 ? '#b45309' : '#dc2626') : '#374151';
   return `
-    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#111;color:#fff;border-radius:8px;">
-      <h2 style="color:#D4AF37;margin:0 0 16px;">🔥 New Health Check Lead</h2>
-      <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-        <tr><td style="padding:6px;color:#aaa;width:140px;">Name</td><td style="padding:6px;color:#fff;">${name || '—'}</td></tr>
-        <tr><td style="padding:6px;color:#aaa;">Email</td><td style="padding:6px;"><a href="mailto:${email}" style="color:#D4AF37;">${email}</a></td></tr>
-        <tr><td style="padding:6px;color:#aaa;">Website</td><td style="padding:6px;"><a href="${website}" style="color:#D4AF37;">${website}</a></td></tr>
-        <tr><td style="padding:6px;color:#aaa;">Phone</td><td style="padding:6px;color:#fff;">${phone || '—'}</td></tr>
-        <tr><td style="padding:6px;color:#aaa;">Business type</td><td style="padding:6px;color:#fff;">${businessType || '—'}</td></tr>
-        <tr><td style="padding:6px;color:#aaa;">Audits</td><td style="padding:6px;color:#fff;">${auditList}</td></tr>
-        ${score != null ? `<tr><td style="padding:6px;color:#aaa;">Score</td><td style="padding:6px;color:${score >= 7 ? '#22c55e' : score >= 5 ? '#D4AF37' : '#ef4444'};font-weight:bold;">${score}/10</td></tr>` : ''}
-      </table>
-      ${auditData?.criticalGaps?.length ? `<p style="color:#aaa;margin:16px 0 4px;font-size:12px;text-transform:uppercase;">Critical Gaps</p><ul style="color:#ef4444;font-size:13px;">${auditData.criticalGaps.map(g => `<li>${g}</li>`).join('')}</ul>` : ''}
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;background:#f3f4f6;">
+      <div style="background:#1a1a1a;padding:16px 24px;border-radius:12px 12px 0 0;">
+        <p style="margin:0;font-size:18px;font-weight:900;color:#ffffff;">AK<span style="color:#D4AF37;">AI</span></p>
+        <p style="margin:2px 0 0;color:#9ca3af;font-size:11px;">New Health Check Lead</p>
+      </div>
+      <div style="background:#ffffff;padding:24px;">
+        <h2 style="color:#1a1a1a;font-size:20px;font-weight:900;margin:0 0 16px;">🔥 New Health Check Lead</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;width:140px;">Name</td><td style="padding:8px 0;color:#1a1a1a;font-size:13px;font-weight:600;">${name || '—'}</td></tr>
+          <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;">Email</td><td style="padding:8px 0;"><a href="mailto:${email}" style="color:#D4AF37;font-size:13px;text-decoration:none;font-weight:600;">${email}</a></td></tr>
+          <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;">Website</td><td style="padding:8px 0;"><a href="${website}" style="color:#D4AF37;font-size:13px;text-decoration:none;">${website}</a></td></tr>
+          <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;">Phone</td><td style="padding:8px 0;color:#1a1a1a;font-size:13px;">${phone || '—'}</td></tr>
+          <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;">Business type</td><td style="padding:8px 0;color:#1a1a1a;font-size:13px;">${businessType || '—'}</td></tr>
+          <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;">Audits</td><td style="padding:8px 0;color:#1a1a1a;font-size:13px;">${auditList}</td></tr>
+          ${score != null ? `<tr><td style="padding:8px 12px 8px 0;color:#6b7280;font-size:13px;">Score</td><td style="padding:8px 0;color:${scoreColor};font-size:14px;font-weight:900;">${score}/10</td></tr>` : ''}
+        </table>
+        ${auditData?.criticalGaps?.length ? `
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-top:16px;">
+          <p style="color:#dc2626;font-size:11px;font-weight:700;text-transform:uppercase;margin:0 0 8px;">Critical Gaps</p>
+          ${auditData.criticalGaps.map(g => `<p style="color:#374151;font-size:13px;margin:3px 0;">• ${g}</p>`).join('')}
+        </div>` : ''}
+      </div>
+      <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:12px 24px;border-radius:0 0 12px 12px;text-align:center;">
+        <p style="color:#9ca3af;font-size:11px;margin:0;">AKAI · <a href="https://getakai.ai" style="color:#6b7280;text-decoration:none;">getakai.ai</a></p>
+      </div>
     </div>`;
 }
 
@@ -326,6 +430,7 @@ export async function POST(req: NextRequest) {
             cta: raw.scores?.cta,
             mobile: raw.scores?.mobile,
             trust: raw.scores?.trust,
+            speed: raw.scores?.speed,
           },
           criticalGaps: raw.criticalGaps ?? [],
           quickWins: raw.quickWins ?? [],
