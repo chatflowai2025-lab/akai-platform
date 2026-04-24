@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 
 
-export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: () => void; onOpenChat?: () => void }) {
+export default function Navbar({ onOpenCapture, onOpenHealthReport, onOpenChat }: { onOpenCapture?: () => void; onOpenHealthReport?: () => void; onOpenChat?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
@@ -54,7 +54,7 @@ export default function Navbar({ onOpenCapture, onOpenChat }: { onOpenCapture?: 
                   💬 Talk to AK
                 </button>
                 <button
-                  onClick={() => onOpenCapture?.()}
+                  onClick={() => (onOpenHealthReport ?? onOpenCapture)?.()} 
                   className="text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors duration-200"
                 >
                   Free Report

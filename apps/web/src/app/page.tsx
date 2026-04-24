@@ -10,6 +10,7 @@ import { gtag, initScrollDepthTracking } from '@/hooks/useGA4Track';
 const Modules = dynamic(() => import('@/components/landing/Modules'), { ssr: false });
 const Pricing = dynamic(() => import('@/components/landing/Pricing'), { ssr: false });
 const LeadCaptureModal = dynamic(() => import('@/components/LeadCaptureModal'), { ssr: false });
+const HealthReportModal = dynamic(() => import('@/components/HealthReportModal'), { ssr: false });
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
@@ -244,7 +245,7 @@ const HERO_HEADLINES = [
   },
 ];
 
-function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture: () => void; onOpenDemo: () => void }) {
+function HeroSection({ onOpenCapture, onOpenHealthReport, onOpenDemo: _onOpenDemo }: { onOpenCapture: () => void; onOpenHealthReport: () => void; onOpenDemo: () => void }) {
   const [heroIdx, setHeroIdx] = useState(0);
   const [fading, setFading] = useState(false);
 
@@ -343,7 +344,7 @@ function HeroSection({ onOpenCapture, onOpenDemo: _onOpenDemo }: { onOpenCapture
             Start Free Trial →
           </button>
           <button
-            onClick={() => { gtag('cta_clicked', { button: 'Free Health Report', page: 'homepage' }); onOpenCapture(); }}
+            onClick={() => { gtag('cta_clicked', { button: 'Free Health Report', page: 'homepage' }); onOpenHealthReport(); }}
             className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/60 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"
           >
             📊 Free Health Report
@@ -962,7 +963,7 @@ function FinalCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
 }
 
 /* ─── Digital Health Report CTA ─── */
-function HealthReportCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
+function HealthReportCTA({ onOpenCapture: _onOpenCapture, onOpenHealthReport }: { onOpenCapture: () => void; onOpenHealthReport: () => void }) {
   return (
     <section className="relative py-24 px-6 overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent" />
@@ -1019,7 +1020,7 @@ function HealthReportCTA({ onOpenCapture }: { onOpenCapture: () => void }) {
           </div>
 
           <button
-            onClick={onOpenCapture}
+            onClick={onOpenHealthReport}
             aria-label="Get your free digital health report"
             className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-black rounded-xl px-10 py-4 text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-[#D4AF37]/20"
           >
@@ -1087,11 +1088,17 @@ export default function Home() {
   const [capturePlan, setCapturePlan] = useState<string | undefined>(undefined);
   const [demoOpen, setDemoOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [healthReportOpen, setHealthReportOpen] = useState(false);
 
   const openCapture = (plan?: string) => {
     setCapturePlan(plan);
     setCaptureOpen(true);
     gtag('cta_clicked', { button: 'Start Free Trial', plan: plan ?? 'default', page: 'homepage' });
+  };
+
+  const openHealthReport = () => {
+    setHealthReportOpen(true);
+    gtag('cta_clicked', { button: 'Free Health Report', page: 'homepage' });
   };
 
   // ── GA4: page view + scroll depth ─────────────────────────────────────
@@ -1119,8 +1126,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#080808] text-white overflow-x-hidden">
-      <Navbar onOpenCapture={() => openCapture()} onOpenChat={() => setChatOpen(true)} />
-      <HeroSection onOpenCapture={() => openCapture()} onOpenDemo={handleOpenDemo} />
+      <Navbar onOpenCapture={() => openCapture()} onOpenHealthReport={openHealthReport} onOpenChat={() => setChatOpen(true)} />
+      <HeroSection onOpenCapture={() => openCapture()} onOpenHealthReport={openHealthReport} onOpenDemo={handleOpenDemo} />
       <TrustBar />
       <HowItWorksSection />
       <div id="modules"><Modules /></div>
@@ -1128,12 +1135,13 @@ export default function Home() {
       <HowItWorksAnimated />
       <HowAKAILearns />
       <IntelligenceSection />
-      <HealthReportCTA onOpenCapture={() => openCapture()} />
+      <HealthReportCTA onOpenCapture={() => openCapture()} onOpenHealthReport={openHealthReport} />
       <div id="pricing"><Pricing onOpenCapture={(plan) => openCapture(plan)} /></div>
       <FinalCTA onOpenCapture={() => openCapture()} />
       <AKAIFooter />
       <HomepageChat defaultOpen={chatOpen} onOpenChange={setChatOpen} />
       <LeadCaptureModal isOpen={captureOpen} onClose={() => { setCaptureOpen(false); setCapturePlan(undefined); }} selectedPlan={capturePlan} />
+      <HealthReportModal isOpen={healthReportOpen} onClose={() => setHealthReportOpen(false)} onOpenCapture={() => { setHealthReportOpen(false); openCapture(); }} />
       {demoOpen && <DemoModal onClose={() => setDemoOpen(false)} />}
     </main>
   );

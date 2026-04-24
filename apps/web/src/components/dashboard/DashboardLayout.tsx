@@ -93,6 +93,14 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const pathname = usePathname();
   const { user } = useAuth();
 
+  // Mount guard: confirm key="persistent-chat" is working (should log once per session, not per navigation)
+  useEffect(() => {
+    console.log('[InlineChatPanel] mounted — key=persistent-chat. If this logs on every navigation, the key is not working.');
+    return () => {
+      console.log('[InlineChatPanel] unmounted');
+    };
+  }, []);
+
   // Load local chat history (client-side only)
   useEffect(() => {
     setRecentHistory(getLocalChatHistory());
