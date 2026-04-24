@@ -360,9 +360,9 @@ function buildUserEmail(name: string, website: string, businessType: string, rec
 
       <!-- Body -->
       <div style="background:#ffffff;padding:32px;">
-        <h1 style="color:#1a1a1a;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;">Hi ${displayName}, here's your report 👋</h1>
-        <p style="color:#6b7280;font-size:14px;margin:0 0 2px;">We audited <strong style="color:#1a1a1a;">${website}</strong> — a ${bType} — and generated personalised recommendations.</p>
-        <p style="color:#9ca3af;font-size:12px;margin:0;">Your report was ready in under 15 minutes.</p>
+        <h1 style="color:#1a1a1a;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;">Here's your free digital health report 👋</h1>
+        <p style="color:#6b7280;font-size:14px;margin:0 0 2px;">We audited <strong style="color:#1a1a1a;">${website}</strong>${bType ? ` — a ${bType}` : ''} and generated personalised recommendations.</p>
+        <p style="color:#9ca3af;font-size:12px;margin:0;">Ready in under 15 minutes.</p>
 
         ${scoreSection}
         ${scoreBreakdown}
@@ -472,8 +472,21 @@ export async function POST(req: NextRequest) {
       console.warn('[health-check] Audit fetch failed, continuing without it:', err);
     }
 
-    // 2. Build vertical-aware recommendations
-    const recs = getVerticalRecs(businessType || '', website, auditData);
+    // 2. Build recommendations — prefer actual audit quick wins over generic vertical recs
+    let recs = getVerticalRecs(businessType || '', website, auditData);
+    // If we have real audit data with quick wins, use those as the primary recommendations
+    if (auditData?.quickWins && auditData.quickWins.length > 0) {
+      const auditRecs = auditData.quickWins.slice(0, 5).map(w => ({
+        category: w.akaiModule || 'Quick Win',
+        icon: '⚡',
+        finding: w.action,
+        fix: `Implement this to improve your ${w.impact.toLowerCase()} impact.`,
+        impact: `${w.impact} impact — recommended by AKAI AI audit`,
+        akaiModule: w.akaiModule,
+      }));
+      // Merge: audit recs first, then fill with vertical recs not already covered
+      recs = [...auditRecs, ...recs.slice(0, 3)].slice(0, 8);
+    }
 
     // 3. Notify Telegram (always — even if email fails)
     try {
