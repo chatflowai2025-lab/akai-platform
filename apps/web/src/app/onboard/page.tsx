@@ -14,11 +14,11 @@ import { getFirebaseDb } from '@/lib/firebase';
 // Onboarding types (local — more specific than shared OnboardingState)
 // ---------------------------------------------------------------------------
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'calendar' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'terms' | 'calendar' | 'complete';
 
 // Step order for progress bar (excluding 'complete')
-const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'goal', 'location', 'contact', 'notifications'];
-const STEP_LABELS = ['Industry', 'Business', 'Goal', 'Location', 'Contact', 'Notify'];
+const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'goal', 'location', 'contact', 'notifications', 'terms'];
+const STEP_LABELS = ['Industry', 'Business', 'Goal', 'Location', 'Contact', 'Notify', 'Terms'];
 
 function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
   const currentIndex = STEP_ORDER.indexOf(currentStep);
@@ -71,6 +71,8 @@ interface OnboardData {
   notifWhatsapp?: boolean;
   notifWhatsappNumber?: string;
   calendarProvider?: 'google' | 'outlook' | null;
+  termsAccepted?: boolean;
+  termsAcceptedAt?: string;
 }
 
 interface OnboardState {
@@ -86,6 +88,7 @@ const STEP_HINTS: Partial<Record<OnboardStep, string>> = {
   location: "We target leads in your area first",
   contact: "We'll send you lead alerts and important updates here",
   notifications: "Choose how you want to hear from AKAI — we'll never spam you",
+  terms: 'Review and accept our Terms of Service to activate your free trial',
   calendar: "Connect once and Sophie will book meetings automatically",
 };
 
@@ -163,6 +166,8 @@ export default function OnboardPage() {
                 whatsappNumber: notifWhatsappNumber || '',
               },
               calendarConfig: { provider: calendarProvider || null, connected: false },
+              termsAccepted: true,
+              termsAcceptedAt: finalState.data.termsAcceptedAt || new Date().toISOString(),
               onboardingComplete: true,
               businessName: businessName || '',
               displayName: businessName || '',
@@ -280,6 +285,66 @@ export default function OnboardPage() {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Terms step — native UI (not AI chat)
+  if (state.step === 'terms') {
+    const [termsChecked, setTermsChecked] = [
+      state.data.termsAccepted || false,
+      (v: boolean) => setState(s => ({ ...s, data: { ...s.data, termsAccepted: v } })),
+    ];
+    const acceptTerms = async () => {
+      if (!termsChecked) return;
+      const acceptedAt = new Date().toISOString();
+      setState(s => ({ ...s, data: { ...s.data, termsAccepted: true, termsAcceptedAt: acceptedAt }, step: 'complete' }));
+      await handleComplete({ ...state, data: { ...state.data, termsAccepted: true, termsAcceptedAt: acceptedAt }, step: 'complete' });
+    };
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+        <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f]">
+          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">AK</div>
+          <span className="font-semibold text-white">AKAI Setup</span>
+        </header>
+        <ProgressBar currentStep="terms" />
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-md">
+            <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <div className="w-14 h-14 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📋</span>
+                </div>
+                <h2 className="text-xl font-black text-white mb-2">Almost there!</h2>
+                <p className="text-gray-400 text-sm">Review and accept our Terms of Service to activate your free trial.</p>
+              </div>
+              <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4 mb-6 max-h-48 overflow-y-auto">
+                <p className="text-gray-400 text-xs leading-relaxed">
+                  By using AKAI you agree to our <a href="https://getakai.ai/terms" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] underline">Terms of Service</a> (effective 22 April 2026).
+                  Key points: AKAI provides AI-powered business automation. You retain ownership of your data. 
+                  Sophie (AI voice) calls comply with AU ACL and US FCC/TCPA. 
+                  Your 3-month free trial auto-converts to a paid plan unless cancelled. 
+                  We never sell your data. Full terms at getakai.ai/terms.
+                </p>
+              </div>
+              <label className="flex items-start gap-3 cursor-pointer mb-6" onClick={() => setTermsChecked(!termsChecked)}>
+                <div className={`w-5 h-5 rounded border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${termsChecked ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-[#3a3a3a] bg-transparent'}`}>
+                  {termsChecked && <span className="text-black text-xs font-bold">✓</span>}
+                </div>
+                <span className="text-sm text-gray-300">
+                  I have read and agree to the <a href="https://getakai.ai/terms" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] underline">Terms of Service</a>
+                </span>
+              </label>
+              <button
+                onClick={acceptTerms}
+                disabled={!termsChecked || completing}
+                className={`w-full py-4 rounded-xl font-black text-sm transition-all ${termsChecked && !completing ? 'bg-[#D4AF37] text-black hover:opacity-90' : 'bg-[#2a2a2a] text-gray-600 cursor-not-allowed'}`}
+              >
+                {completing ? 'Setting up your account...' : 'Activate Free Trial →'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

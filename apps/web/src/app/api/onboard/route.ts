@@ -21,7 +21,7 @@ interface OnboardData {
   calendarProvider?: 'google' | 'outlook' | null;
 }
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'calendar' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'terms' | 'calendar' | 'complete';
 
 interface OnboardState {
   step: OnboardStep;
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
         // skip / null = no calendar
 
         const newState: OnboardState = {
-          step: 'complete',
+          step: 'terms',
           data: { ...state.data, calendarProvider },
         };
 
@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
           `You're all set! 🎉\n\nHere's what I've configured for **${businessName}**:\n\n✅ Sales module — activated\n✅ AI lead qualification — on\n✅ Auto follow-up — ready\n✅ Notifications — ${channels.join(', ')}\n${calLine}\n\nYour dashboard is ready. Let's go close some deals.`,
           newState,
           {
-            action: 'complete',
+            action: 'next',
             buttons: [{ label: 'Start My Free Trial →', primary: true }],
           }
         );
