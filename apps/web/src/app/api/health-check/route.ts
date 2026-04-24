@@ -6,7 +6,21 @@ import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT, RAILWAY_API_URL 
 
 
 async function sendEmail(to: string, subject: string, html: string, resendKey: string) {
-  // Primary: Railway SMTP relay (Gmail — proven deliverable)
+  // Primary: Resend API (reliable, no external service dependency)
+  if (resendKey) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: 'AKAI <onboarding@resend.dev>', to, subject, html }),
+      });
+      if (res.ok) return;
+      console.warn('[health-check] Resend failed:', res.status);
+    } catch (e) {
+      console.warn('[health-check] Resend error:', e);
+    }
+  }
+  // Fallback: Railway SMTP relay
   try {
     const res = await fetch(`${RAILWAY_API}/api/send-welcome`, {
       method: 'POST',
@@ -18,14 +32,7 @@ async function sendEmail(to: string, subject: string, html: string, resendKey: s
   } catch (e) {
     console.warn('[health-check] Railway SMTP error:', e);
   }
-  // Fallback: Resend
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: 'AKAI <onboarding@resend.dev>', to, subject, html }),
-  });
-  if (!res.ok) throw new Error(`Resend error: ${await res.text()}`);
-  return res.json();
+  throw new Error('All email methods failed');
 }
 
 // ── Vertical-aware recommendations ──────────────────────────────────────────
