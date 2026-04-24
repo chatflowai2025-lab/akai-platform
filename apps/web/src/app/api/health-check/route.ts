@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30; // Extend Vercel function timeout to 30s for audit
 
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -446,7 +447,7 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_API_KEY}` },
         body: JSON.stringify({ url: website, businessName: businessType || name || 'Business' }),
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(25000),
       });
       if (auditRes.ok) {
         const raw = await auditRes.json();
