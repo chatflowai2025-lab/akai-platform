@@ -86,7 +86,8 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   const [memoryTurns, setMemoryTurns] = useState<Array<{ userMessage: string; akResponse: string; timestamp: string; date: string }>>([]);
   const [memoryLoading, setMemoryLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const prevMessagesLengthRef = useRef<number>(1);
+  const prevMessagesLengthRef = useRef<number>(0);
+  const hasInitialScrolledRef = useRef<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedFromFirestoreRef = useRef<boolean>(false);
   const router = useRouter();
@@ -197,11 +198,19 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   }, [user]);
 
   useEffect(() => {
-    // Only scroll when a new message is genuinely added (not on module navigation or initial load)
-    if (messages.length > prevMessagesLengthRef.current) {
+    // Only scroll when a new message is genuinely added by user/assistant interaction
+    // Skip: initial load from Firestore (hasInitialScrolledRef not yet set)
+    // Skip: navigation re-renders (prevMessagesLengthRef tracks last known count)
+    const prev = prevMessagesLengthRef.current;
+    const curr = messages.length;
+    if (!hasInitialScrolledRef.current) {
+      // First population — mark as initialised, don't scroll
+      hasInitialScrolledRef.current = true;
+    } else if (curr > prev) {
+      // Genuine new message added after initial load
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-    prevMessagesLengthRef.current = messages.length;
+    prevMessagesLengthRef.current = curr;
   }, [messages]);
 
   // Poll for email enquiry notifications and inject into chat

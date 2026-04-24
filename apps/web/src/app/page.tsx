@@ -136,12 +136,7 @@ function TrustBar() {
           <span className="text-sm text-gray-500">uptime</span>
         </div>
         <span className="text-[#D4AF37]/30 hidden sm:block">·</span>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-600 uppercase tracking-wider">Powered by</span>
-          <span className="text-sm font-bold text-white/60 border border-white/10 rounded px-2 py-0.5">Claude AI</span>
-          <span className="text-sm font-bold text-white/60 border border-white/10 rounded px-2 py-0.5">Firebase</span>
-          <span className="text-sm font-bold text-white/60 border border-white/10 rounded px-2 py-0.5">Stripe</span>
-        </div>
+
       </div>
     </div>
   );
