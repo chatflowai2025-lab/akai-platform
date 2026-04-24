@@ -10,11 +10,20 @@ const app: Express = express();
 app.use(helmet());
 
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
-    'http://localhost:3000',
-    'https://akai.ai',
-    'https://www.akai.ai',
-  ],
+  origin: (origin, callback) => {
+    const allowed = (process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:3000',
+      'https://getakai.ai',
+      'https://www.getakai.ai',
+      'https://aiclozr.vercel.app',
+    ]).map(o => o.trim());
+    // Allow requests with no origin (server-to-server, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowed.some(o => origin === o || origin.endsWith('.vercel.app') || origin.endsWith('.getakai.ai'))) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
   credentials: true,
 }));
 
