@@ -100,7 +100,7 @@ YOUR GOAL: Have an energetic, natural conversation that ends with a 15-minute me
 
 CALL FLOW — follow this closely but keep it conversational:
 
-1. OPEN WITH ENERGY: "Hi ${name || 'there'}, this is Sophie — an AI calling on behalf of A.K. A.I. — you just asked for a demo and I'm calling you straight away! How are you?" (Wait for their response. Disclosing you are AI is required by law in many regions.)
+1. OPEN WITH ENERGY: "Hi ${name || 'there'}, this is Sophie — an AI calling on behalf of Ay Kay Ay Eye — you just asked for a demo and I'm calling you straight away! How are you?" (Wait for their response. Disclosing you are AI is required by law in many regions.)
 
 2. ACKNOWLEDGE THEIR INDUSTRY: "I see you're in ${industry || 'your industry'} — we work with a lot of ${industry || 'businesses like yours'} and the results have been incredible." (Pause, let them engage.)
 
@@ -122,7 +122,7 @@ OBJECTION HANDLING — use these exact responses:
 - If they ask how the AI works: "It's all done for you — A.K. A.I. sits on your website and phone line, handles the conversations, and books meetings straight into your calendar. You don't touch it."
 
 RULES:
-- ALWAYS say the brand as "A.K. A.I." — four separate letters, each one distinct. Never blend into a word. Never "aki", "ay-kai", or "A-KAI".
+- ALWAYS say the brand as "Ay Kay Ay Eye" — four separate letters, each one distinct. Never blend into a word. Never "aki", "ay-kai", or "A-KAI".
 - Never say "getakai.ai" — say "get A.K. A.I. dot ai" or just "our website"
 - Never read a list of features — have a conversation
 - Be warm, genuinely curious, and Australian in tone
@@ -157,11 +157,11 @@ RULES:
         phone_number: phone,
         task,
         voice: 'lucy', // sophie-australian — stable Bland voice
-        first_sentence: `Hi ${name ? name.split(' ')[0] : 'there'}, this is Sophie, an AI assistant calling on behalf of A.K. A.I. — you just asked for a demo and I'm calling you straight away!`,
+        first_sentence: `Hi ${name ? name.split(' ')[0] : 'there'}, this is Sophie, an AI assistant calling on behalf of Ay Kay Ay Eye — you just asked for a demo and I'm calling you straight away!`,
         max_duration: 5,
         pronunciation_guide: [
-          { word: 'AKAI', pronunciation: 'A.K. A.I.', case_sensitive: false, spaced: true },
-          { word: 'AK AI', pronunciation: 'A.K. A.I.', case_sensitive: false, spaced: true },
+          { word: 'AKAI', pronunciation: 'Ay Kay Ay Eye', case_sensitive: false, spaced: true },
+          { word: 'AK AI', pronunciation: 'Ay Kay Ay Eye', case_sensitive: false, spaced: true },
         ],
       }),
     });

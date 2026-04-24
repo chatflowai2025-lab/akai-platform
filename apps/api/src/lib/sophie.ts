@@ -1,4 +1,4 @@
-// Sophie — Bland.ai voice calling integration for AKAI Sales
+// Sophie — Bland.ai voice calling integration for Ay Kay Ay Eye Sales
 
 const BLAND_API_KEY = process.env.BLAND_API_KEY || '';
 const BLAND_BASE = 'https://api.bland.ai/v1';
