@@ -10,6 +10,7 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   getRedirectResult,
   onAuthStateChanged,
 } from 'firebase/auth';
@@ -94,6 +95,12 @@ function LoginContent() {
       if (!auth) throw new Error('Auth not available');
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
+      // Use redirect on mobile (popups blocked by iOS/Android browsers)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || '';
       if (BETA_MODE && !isWhitelisted(userEmail)) {
@@ -203,7 +210,13 @@ function LoginContent() {
       provider.setCustomParameters({ prompt: 'select_account', tenant: msTenant });
       provider.addScope('email');
       provider.addScope('profile');
-      // Use popup — avoids redirect loop issues with Next.js app router
+      // Use redirect on mobile (popups blocked by iOS/Android browsers)
+      // Use popup on desktop
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        return; // page will redirect — no further code runs
+      }
       const result = await signInWithPopup(auth, provider);
       const userEmail = result.user?.email || '';
       if (!userEmail) {
