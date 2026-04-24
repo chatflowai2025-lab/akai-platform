@@ -5,20 +5,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT, RAILWAY_API_URL as RAILWAY_API, RAILWAY_API_KEY } from '@/lib/server-env';
 
 
-async function sendEmail(to: string, subject: string, html: string, resendKey: string) {
-  // Primary: Resend API (reliable, no external service dependency)
-  if (resendKey) {
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: 'AKAI <onboarding@resend.dev>', to, subject, html }),
-      });
-      if (res.ok) return;
-      console.warn('[health-check] Resend failed:', res.status);
-    } catch (e) {
-      console.warn('[health-check] Resend error:', e);
-    }
+async function sendEmail(to: string, subject: string, html: string, _resendKey: string) {
+  const GMAIL_USER = 'chatflowai2025@gmail.com';
+  const GMAIL_PASS = 'onqy rtja tlpx zfyd'; // Gmail app password
+
+  // Primary: Gmail SMTP via nodemailer (proven working)
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: GMAIL_USER, pass: GMAIL_PASS },
+    });
+    await transporter.sendMail({
+      from: `"AKAI" <${GMAIL_USER}>`,
+      to,
+      subject,
+      html,
+      text: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+    });
+    console.info(`[health-check] Email sent via Gmail SMTP to ${to}`);
+    return;
+  } catch (e: unknown) {
+    console.warn('[health-check] Gmail SMTP failed:', e instanceof Error ? e.message : e);
   }
   // Fallback: Railway SMTP relay
   try {
@@ -27,10 +36,10 @@ async function sendEmail(to: string, subject: string, html: string, resendKey: s
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_API_KEY}` },
       body: JSON.stringify({ to, subject, html }),
     });
-    if (res.ok) return;
-    console.warn('[health-check] Railway SMTP failed:', await res.text());
+    if (res.ok) { console.info('[health-check] Email sent via Railway relay'); return; }
+    console.warn('[health-check] Railway relay failed:', res.status);
   } catch (e) {
-    console.warn('[health-check] Railway SMTP error:', e);
+    console.warn('[health-check] Railway relay error:', e);
   }
   throw new Error('All email methods failed');
 }
