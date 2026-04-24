@@ -31,7 +31,7 @@ async function sendEmail(to: string, subject: string, html: string, _resendKey: 
     const message = [
       `To: ${to}`,
       `From: "AKAI" <${from}>`,
-      `Subject: ${subject}`,
+      `Subject: =?utf-8?b?${Buffer.from(subject).toString('base64')}?=`,
       'MIME-Version: 1.0',
       'Content-Type: text/html; charset=utf-8',
       '',
@@ -465,6 +465,7 @@ export async function POST(req: NextRequest) {
           whatsWorking: raw.whatsWorking ?? [],
           opportunityScore: raw.opportunityScore,
         };
+        console.info('[health-check] auditData received:', JSON.stringify({ headline: auditData.headline, scores: auditData.scores, criticalGapsCount: auditData.criticalGaps?.length, quickWinsCount: auditData.quickWins?.length, whatsWorkingCount: auditData.whatsWorking?.length }));
       }
     } catch (err) {
       console.warn('[health-check] Audit fetch failed, continuing without it:', err);

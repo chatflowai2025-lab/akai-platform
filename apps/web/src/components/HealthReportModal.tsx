@@ -46,6 +46,8 @@ export default function HealthReportModal({ isOpen, onClose, onOpenCapture }: Pr
   const [step, setStep] = useState<Step>('form');
   const [url, setUrl] = useState('');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [businessType, setBusinessType] = useState('');
   const [error, setError] = useState('');
   const [result, setResult] = useState<AuditResult | null>(null);
   const [loadingDot, setLoadingDot] = useState(0);
@@ -72,6 +74,8 @@ export default function HealthReportModal({ isOpen, onClose, onOpenCapture }: Pr
         setStep('form');
         setUrl('');
         setEmail('');
+        setName('');
+        setBusinessType('');
         setError('');
         setResult(null);
       }, 300);
@@ -110,7 +114,7 @@ export default function HealthReportModal({ isOpen, onClose, onOpenCapture }: Pr
       fetch('/api/health-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmedEmail, website: trimmedUrl, name: '', phone: '', businessType: '', audits: ['Website'] }),
+        body: JSON.stringify({ email: trimmedEmail, website: trimmedUrl, name: name.trim(), phone: '', businessType: businessType.trim(), audits: ['Website'] }),
       }).catch(() => {});
     } catch {
       // Still show a graceful fallback result
@@ -215,6 +219,32 @@ export default function HealthReportModal({ isOpen, onClose, onOpenCapture }: Pr
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@yourcompany.com"
+                    className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="hr-name" className="block text-xs font-semibold text-gray-400 mb-1.5">
+                    Your name <span className="text-gray-600">(optional)</span>
+                  </label>
+                  <input
+                    id="hr-name"
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="e.g. Sarah"
+                    className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="hr-business-type" className="block text-xs font-semibold text-gray-400 mb-1.5">
+                    Business type <span className="text-gray-600">(optional)</span>
+                  </label>
+                  <input
+                    id="hr-business-type"
+                    type="text"
+                    value={businessType}
+                    onChange={e => setBusinessType(e.target.value)}
+                    placeholder="e.g. Plumber, Dentist, Café"
                     className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
                   />
                 </div>
