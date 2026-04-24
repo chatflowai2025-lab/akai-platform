@@ -5,42 +5,61 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TG_BOT_TOKEN as TG_TOKEN, TG_AARON_CHAT_ID as TG_CHAT, RAILWAY_API_URL as RAILWAY_API, RAILWAY_API_KEY } from '@/lib/server-env';
 
 
-async function sendEmail(to: string, subject: string, html: string, _resendKey: string) {
-  const GMAIL_USER = 'chatflowai2025@gmail.com';
-  const GMAIL_PASS = 'onqy rtja tlpx zfyd'; // Gmail app password
+async function getGmailToken(): Promise<string> {
+  // Exchange refresh token for access token
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.GMAIL_OAUTH_CLIENT_ID || '',
+      client_secret: process.env.GMAIL_OAUTH_CLIENT_SECRET || '',
+      refresh_token: process.env.GMAIL_OAUTH_REFRESH_TOKEN || '',
+      grant_type: 'refresh_token',
+    }).toString(),
+  });
+  const data: { access_token?: string } = await res.json();
+  if (!data.access_token) throw new Error('Failed to get Gmail token');
+  return data.access_token;
+}
 
-  // Primary: Gmail SMTP via nodemailer dynamic import
+async function sendEmail(to: string, subject: string, html: string, _resendKey: string) {
+  // Primary: Gmail API via OAuth (proven working, no packages needed)
   try {
-    // @ts-ignore — nodemailer installed in package.json, types resolved at build
-    const { default: nodemailer } = await import('nodemailer');
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: GMAIL_USER, pass: GMAIL_PASS },
-    });
-    await transporter.sendMail({
-      from: `"AKAI" <${GMAIL_USER}>`,
-      to,
-      subject,
+    const token = await getGmailToken();
+    const from = 'chatflowai2025@gmail.com';
+    // Build RFC 2822 message
+    const message = [
+      `To: ${to}`,
+      `From: "AKAI" <${from}>`,
+      `Subject: ${subject}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset=utf-8',
+      '',
       html,
-      text: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+    ].join('\r\n');
+    const raw = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raw }),
+      signal: AbortSignal.timeout(15000),
     });
-    console.info(`[health-check] Email sent via Gmail SMTP to ${to}`);
-    return;
+    if (res.ok) { console.info(`[health-check] Email sent via Gmail API to ${to}`); return; }
+    const err = await res.text();
+    console.warn('[health-check] Gmail API failed:', res.status, err);
   } catch (e: unknown) {
-    console.warn('[health-check] Gmail SMTP failed:', e instanceof Error ? e.message : e);
+    console.warn('[health-check] Gmail API error:', e instanceof Error ? e.message : e);
   }
-  // Fallback: Railway SMTP relay
+  // Fallback: Railway relay
   try {
     const res = await fetch(`${RAILWAY_API}/api/send-welcome`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_API_KEY}` },
       body: JSON.stringify({ to, subject, html }),
+      signal: AbortSignal.timeout(10000),
     });
     if (res.ok) { console.info('[health-check] Email sent via Railway relay'); return; }
-    console.warn('[health-check] Railway relay failed:', res.status);
-  } catch (e) {
-    console.warn('[health-check] Railway relay error:', e);
-  }
+  } catch { /* ignore */ }
   throw new Error('All email methods failed');
 }
 
