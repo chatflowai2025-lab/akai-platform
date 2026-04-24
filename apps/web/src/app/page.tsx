@@ -1091,9 +1091,8 @@ export default function Home() {
   const [healthReportOpen, setHealthReportOpen] = useState(false);
 
   const openCapture = (plan?: string) => {
-    setCapturePlan(plan);
-    setCaptureOpen(true);
     gtag('cta_clicked', { button: 'Start Free Trial', plan: plan ?? 'default', page: 'homepage' });
+    window.location.href = '/login?tab=signup';
   };
 
   const openHealthReport = () => {
