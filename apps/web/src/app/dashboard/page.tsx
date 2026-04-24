@@ -614,14 +614,23 @@ export default function DashboardPage() {
           null;
         setBusinessName(bName);
 
-        const onboardingComplete =
-          data?.onboardingComplete === true ||
-          !!data?.businessName ||
-          !!data?.onboarding?.businessName ||
-          !!data?.campaignConfig?.businessName;
-          // Note: gmail/calendar/MS connections are integrations, NOT onboarding signals
-          // New users must always complete onboarding regardless of OAuth provider
+        // Strict check: must have EXPLICITLY completed onboarding (onboardingComplete===true)
+        // OR have a businessName set via the onboarding flow
+        // Partial docs (e.g. created by OAuth but onboarding not done) → send to /onboard
+        const hasBusinessName = !!(
+          data?.onboarding?.businessName ||
+          data?.businessName ||
+          data?.campaignConfig?.businessName
+        );
+        const onboardingComplete = data?.onboardingComplete === true || hasBusinessName;
+        console.log('[dashboard] onboarding check:', {
+          onboardingCompleteFlag: data?.onboardingComplete,
+          hasBusinessName,
+          onboardingComplete,
+          dataKeys: Object.keys(data || {}),
+        });
         if (!onboardingComplete) {
+          console.log('[dashboard] → redirecting to /onboard');
           router.replace('/onboard');
           return;
         }
