@@ -10,7 +10,7 @@ async function sendEmail(to: string, subject: string, html: string, resendKey: s
   try {
     const res = await fetch(`${RAILWAY_API}/api/send-welcome`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_API_KEY}` },
       body: JSON.stringify({ to, subject, html }),
     });
     if (res.ok) return;
@@ -305,7 +305,7 @@ export async function POST(req: NextRequest) {
     try {
       const auditRes = await fetch(`${RAILWAY_API}/api/website-mockup/audit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': RAILWAY_API_KEY },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_API_KEY}` },
         body: JSON.stringify({ url: website, businessName: businessType || name || 'Business' }),
         signal: AbortSignal.timeout(12000),
       });
