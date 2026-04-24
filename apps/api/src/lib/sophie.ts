@@ -40,7 +40,7 @@ Context: ${pitch || 'Introduce the business and ask if they have a need for the 
       model: 'turbo',
       voice: SOPHIE_VOICE,
       language: 'en-AU',
-      wait_for_greeting: true,
+      wait_for_greeting: false,
       local_dialing: false,
       ignore_dnc: false,
       interruption_threshold: 100,
