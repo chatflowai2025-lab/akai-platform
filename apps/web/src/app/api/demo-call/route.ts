@@ -156,7 +156,7 @@ RULES:
       body: JSON.stringify({
         phone_number: phone,
         task,
-        voice: '857ed371-9b28-4006-99da-a28c41c6fa55', // sophie-australian — stable Bland voice
+        voice: 'amelia', // sophie-australian — stable Bland voice
         first_sentence: `Hi ${name ? name.split(' ')[0] : 'there'}, this is Sophie, an AI assistant calling on behalf of A.K. A.I. — you just asked for a demo and I'm calling you straight away!`,
         max_duration: 5,
         pronunciation_guide: [

@@ -2,7 +2,7 @@
 
 const BLAND_API_KEY = process.env.BLAND_API_KEY || '';
 const BLAND_BASE = 'https://api.bland.ai/v1';
-export const SOPHIE_VOICE = '857ed371-9b28-4006-99da-a28c41c6fa55';
+export const SOPHIE_VOICE = 'amelia';
 
 interface CallOptions {
   phone: string;
