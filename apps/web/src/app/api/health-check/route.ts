@@ -9,10 +9,10 @@ async function sendEmail(to: string, subject: string, html: string, _resendKey: 
   const GMAIL_USER = 'chatflowai2025@gmail.com';
   const GMAIL_PASS = 'onqy rtja tlpx zfyd'; // Gmail app password
 
-  // Primary: Gmail SMTP via nodemailer (proven working)
+  // Primary: Gmail SMTP via nodemailer dynamic import
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const nodemailer = require('nodemailer');
+    // @ts-ignore — nodemailer installed in package.json, types resolved at build
+    const { default: nodemailer } = await import('nodemailer');
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: { user: GMAIL_USER, pass: GMAIL_PASS },
