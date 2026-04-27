@@ -82,19 +82,15 @@ export async function POST(req: NextRequest) {
       }
 
       case 'website': {
-        const website = trimmed.toLowerCase() === 'no' || trimmed === '' ? null : trimmed;
-        const websiteVal = website ? (website.startsWith('http') ? website : `https://${website}`) : '';
+        const noWebsite = ['no', 'not yet', 'nope', 'none', 'n/a', 'na', 'skip', 'later', 'not now', "don't have", 'dont have'].some(s => trimmed.toLowerCase().includes(s));
+        const websiteVal = noWebsite || trimmed === '' ? '' : (trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
         const newState: OnboardState = {
           step: 'goal',
           data: { ...state.data, website: websiteVal },
         };
         const reply = websiteVal
-          ? `Got it — we'll audit ${websiteVal} and include it in your setup report.
-
-What's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`
-          : `No worries — we can help with that later.
-
-What's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`;
+          ? `Perfect — we'll include a site health check in your setup.\n\nWhat's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`
+          : `No problem — you can add it any time from your dashboard settings.\n\nWhat's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`;
         return buildResponse(reply, newState);
       }
 
