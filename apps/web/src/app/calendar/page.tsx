@@ -470,16 +470,48 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     setConnectError(null);
     track('calendar_connect_clicked', { provider: 'outlook' });
     try {
-      const r = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/calendar/ms-auth-url?userId=${userId}`,
-        { headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '' } }
-      );
-      if (!r.ok) throw new Error(`Server error ${r.status}`);
-      const { authUrl } = await r.json() as { authUrl: string };
+      // RCA: same MS auth-url Railway dependency issue as Email Guard.
+      // Fix: try Railway; fall back to client-side generation with NEXT_PUBLIC_ vars.
+      const msClientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
+      const msTenant = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
+      let authUrl: string | null = null;
+      const railwayBase = process.env.NEXT_PUBLIC_API_URL ?? '';
+      if (railwayBase) {
+        try {
+          const r = await fetch(
+            `${railwayBase}/api/calendar/ms-auth-url?userId=${userId}`,
+            { headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '' } }
+          );
+          if (r.ok) {
+            const d = await r.json() as { authUrl?: string };
+            if (d.authUrl) authUrl = d.authUrl;
+          }
+        } catch {
+          // Railway unreachable — fall through
+        }
+      }
+      if (!authUrl) {
+        const redirectUri = `${typeof window !== 'undefined' ? window.location.origin : 'https://getakai.ai'}/calendar/ms-callback`;
+        const scopes = [
+          'https://graph.microsoft.com/Calendars.ReadWrite',
+          'offline_access',
+          'email',
+          'profile',
+        ].join(' ');
+        const params = new URLSearchParams({
+          client_id: msClientId,
+          redirect_uri: redirectUri,
+          response_type: 'code',
+          scope: scopes,
+          state: userId,
+          prompt: 'select_account',
+        });
+        authUrl = `https://login.microsoftonline.com/${msTenant}/oauth2/v2.0/authorize?${params.toString()}`;
+      }
       window.location.href = authUrl;
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      setConnectError('Could not reach the Outlook Calendar service. Try again in a moment.');
+      setConnectError('Could not connect to Outlook Calendar — please try again.');
       track('calendar_connect_failed', { provider: 'outlook', error });
       setConnecting(null);
     }
