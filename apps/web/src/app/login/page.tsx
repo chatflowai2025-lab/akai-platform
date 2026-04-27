@@ -132,11 +132,14 @@ function LoginContent() {
       // Only set loading if coming from OAuth redirect (code= in URL)
       const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
 
-      // If arriving via signup link (?tab=signup), sign out existing session
-      // so the user must explicitly choose/create their account
+      // If arriving via signup link (?tab=signup) WITHOUT an OAuth callback,
+      // sign out existing session so the user must sign in with their own account.
+      // But NOT if we're returning from an OAuth redirect (code= or state= in URL).
       const isSignupIntent = typeof window !== 'undefined' && 
         (window.location.search.includes('tab=signup') || window.location.search.includes('signup=true'));
-      if (isSignupIntent) {
+      const isOAuthCallback = typeof window !== 'undefined' &&
+        (window.location.search.includes('code=') || window.location.search.includes('state=') || window.location.hash.includes('access_token'));
+      if (isSignupIntent && !isOAuthCallback) {
         const currentUser = auth.currentUser;
         if (currentUser) {
           await auth.signOut();
@@ -150,12 +153,6 @@ function LoginContent() {
           // Already signed in — check whitelist, then redirect immediately (no Firestore wait)
           const userEmail = user.email || '';
           if (BETA_MODE && !isWhitelisted(userEmail)) {
-            await auth.signOut();
-            setLoading(false);
-            return;
-          }
-          // If signup intent, don't auto-redirect — let them sign in explicitly
-          if (isSignupIntent) {
             await auth.signOut();
             setLoading(false);
             return;
