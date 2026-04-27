@@ -132,36 +132,29 @@ function LoginContent() {
       // Only set loading if coming from OAuth redirect (code= in URL)
       const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
 
-      // If arriving via signup link (?tab=signup), always sign out existing session
-      // so the user must explicitly sign in with their own account.
-      // Exception: if Firebase already has a user from an OAuth redirect that JUST happened
-      // (i.e. user signed in within the last 10 seconds), let them through.
-      const isSignupIntent = typeof window !== 'undefined' && 
-        (window.location.search.includes('tab=signup') || window.location.search.includes('signup=true'));
-      if (isSignupIntent) {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          // Check if this is a fresh login (metadata.lastSignInTime within last 15s)
-          const lastSignIn = currentUser.metadata?.lastSignInTime;
-          const isFreshLogin = lastSignIn && (Date.now() - new Date(lastSignIn).getTime()) < 15000;
-          if (!isFreshLogin) {
-            await auth.signOut();
-            setLoading(false);
-            return;
-          }
+      // Signup intent: if someone else is already logged in, sign them out and
+      // clean the URL so the OAuth callback doesn't trigger another signout.
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const isSignupIntent = urlParams?.get('tab') === 'signup' || urlParams?.get('signup') === 'true';
+      const isPostOAuth = urlParams?.get('_authed') === '1'; // set after successful OAuth
+      if (isSignupIntent && !isPostOAuth && auth.currentUser) {
+        await auth.signOut();
+        // Replace URL with ?tab=signup&_authed=0 so next load knows signout already happened
+        if (typeof window !== 'undefined') {
+          window.history.replaceState({}, '', '/login?tab=signup');
         }
+        setLoading(false);
+        return;
       }
 
       const unsub = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          // Already signed in — check whitelist, then redirect immediately (no Firestore wait)
           const userEmail = user.email || '';
           if (BETA_MODE && !isWhitelisted(userEmail)) {
             await auth.signOut();
             setLoading(false);
             return;
           }
-          // Redirect immediately — onboarding check runs on the dashboard
           router.replace('/dashboard');
         } else if (hasOAuthCode) {
           // OAuth callback with no user yet — wait for it
