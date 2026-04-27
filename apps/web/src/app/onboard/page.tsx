@@ -575,7 +575,7 @@ export default function OnboardPage() {
                   By using AKAI you agree to our <a href="https://getakai.ai/terms" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] underline">Terms of Service</a> (effective 22 April 2026).
                   Key points: AKAI provides AI-powered business automation. You retain ownership of your data. 
                   Sophie (AI voice) calls comply with AU ACL and US FCC/TCPA. 
-                  Your 3-month free trial auto-converts to a paid plan unless cancelled. 
+                  
                   We never sell your data. Full terms at getakai.ai/terms.
                 </p>
               </div>
