@@ -56,15 +56,12 @@ export default function TrialExpiredOverlay({ show }: TrialExpiredOverlayProps) 
         </div>
 
         {/* CTA */}
-        <a
-          href="/settings#upgrade"
-          className="block w-full bg-[#D4AF37] text-black font-black text-sm py-3.5 rounded-xl hover:opacity-90 transition mb-3"
-        >
-          Subscribe from $199/mo — restart instantly →
-        </a>
+        <p className="text-gray-400 text-sm mb-3">
+          Reach out to your account manager to continue — your agents restart instantly.
+        </p>
 
         <p className="text-gray-600 text-xs">
-          No setup. No waiting. Your agents restart the moment payment confirms.
+          No setup. No waiting. Your agents restart the moment your account is reactivated.
         </p>
       </div>
     </div>

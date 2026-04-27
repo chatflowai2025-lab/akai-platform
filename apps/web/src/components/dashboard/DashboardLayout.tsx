@@ -165,9 +165,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
           !!userData?.onboarding?.businessName;
         if (isOnboarded) {
           const firstName =
-            userData?.onboarding?.businessName ||
-            userData?.businessName ||
-            user.displayName ||
+            (user.displayName ? user.displayName.split(' ')[0] : null) ||
             user.email?.split('@')[0] ||
             'there';
           const welcomeMsg: ChatMessage = {
