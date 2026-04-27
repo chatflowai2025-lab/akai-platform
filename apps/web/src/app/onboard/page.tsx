@@ -99,7 +99,39 @@ const STEP_HINTS: Partial<Record<OnboardStep, string>> = {
   calendar: "Connect once and Sophie will book meetings automatically",
 };
 
-const INITIAL_MESSAGE: ChatMessage = {
+function getInitialMessage(): ChatMessage {
+  try {
+    const signupRaw = typeof window !== 'undefined' ? sessionStorage.getItem('akai_signup_details') : null;
+    if (signupRaw) {
+      const signup = JSON.parse(signupRaw) as { name?: string; businessName?: string; industry?: string; location?: string };
+      const name = signup.name ? `, ${signup.name}` : '';
+      if (signup.industry && signup.businessName && signup.location) {
+        return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
+          content: `Hi${name}! I'm AK — your AI business partner. I can see you're in ${signup.industry}, running ${signup.businessName} in ${signup.location}. Looking good.
+
+Just a few more questions and you're ready to go. Do you have a website?` };
+      }
+      if (signup.industry && signup.businessName) {
+        return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
+          content: `Hi${name}! I'm AK — your AI business partner. You're in ${signup.industry}, running ${signup.businessName}.
+
+Do you have a website? (Drop the URL or type "no")` };
+      }
+      if (signup.industry) {
+        return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
+          content: `Hi${name}! I'm AK — your AI business partner. I see you're in ${signup.industry}.
+
+What's your business name?` };
+      }
+    }
+  } catch { /* ignore */ }
+  return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
+    content: "Hi, I'm AK — your AI business partner. I'm here to build, run, and grow your business while you focus on closing deals.\n\nLet's get you set up in 2 minutes.\n\nFirst — what industry are you in?" };
+}
+
+const INITIAL_MESSAGE: ChatMessage = getInitialMessage();
+
+const _INITIAL_MESSAGE_UNUSED: ChatMessage = {
   id: '1',
   role: 'assistant',
   content: "Hi, I'm AK — your AI business partner. I'm here to build, run, and grow your business while you focus on closing deals.\n\nLet's get you set up in 2 minutes.\n\nFirst — what industry are you in?",
@@ -121,9 +153,25 @@ export default function OnboardPage() {
   const [input, setInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [completing, setCompleting] = useState(false);
-  const [state, setState] = useState<OnboardState>({
-    step: 'industry',
-    data: {},
+  const [state, setState] = useState<OnboardState>(() => {
+    // Pre-populate from signup page data if available
+    try {
+      const signupRaw = typeof window !== 'undefined' ? sessionStorage.getItem('akai_signup_details') : null;
+      if (signupRaw) {
+        const signup = JSON.parse(signupRaw) as { name?: string; businessName?: string; industry?: string; location?: string };
+        const data: OnboardData = {};
+        if (signup.industry) data.industry = signup.industry;
+        if (signup.businessName) data.businessName = signup.businessName;
+        if (signup.location) data.location = signup.location;
+        // Determine furthest step already completed
+        let step: OnboardStep = 'industry';
+        if (signup.industry) step = 'business_name';
+        if (signup.industry && signup.businessName) step = 'website';
+        if (signup.industry && signup.businessName && signup.location) step = 'goal';
+        return { step, data };
+      }
+    } catch { /* ignore */ }
+    return { step: 'industry', data: {} };
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
