@@ -597,9 +597,27 @@ export default function DashboardPage() {
         const ref = doc(db, 'users', user.uid);
         const snap = await getDoc(ref);
         if (!snap.exists()) {
+          // Read signup details from sessionStorage — captures name/business/industry/location
+          let signupDetails: { name?: string; businessName?: string; industry?: string; location?: string } = {};
+          try {
+            const raw = typeof window !== 'undefined' ? sessionStorage.getItem('akai_signup_details') : null;
+            if (raw) signupDetails = JSON.parse(raw);
+          } catch { /* ignore */ }
           await setDoc(ref, {
             email: user.email,
-            displayName: user.displayName,
+            displayName: signupDetails.name || user.displayName,
+            firstName: signupDetails.name || user.displayName?.split(' ')[0] || '',
+            businessName: signupDetails.businessName || '',
+            onboarding: {
+              businessName: signupDetails.businessName || '',
+              industry: signupDetails.industry || '',
+              location: signupDetails.location || '',
+            },
+            campaignConfig: {
+              businessName: signupDetails.businessName || '',
+              industry: signupDetails.industry || '',
+              location: signupDetails.location || '',
+            },
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),
             onboardingComplete: false,
