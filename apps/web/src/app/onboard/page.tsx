@@ -127,17 +127,19 @@ export default function OnboardPage() {
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Restore onboarding state after OAuth redirect (sessionStorage)
+  // Restore onboarding state after OAuth redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const stepParam = params.get('step');
     const connectedParam = params.get('connected');
     if (stepParam && connectedParam) {
-      const savedRaw = sessionStorage.getItem('akai_onboard_state');
+      // Try URL-encoded state first, then localStorage fallback
+      const urlState = params.get('onboardState');
+      const savedRaw = urlState ? decodeURIComponent(urlState) : localStorage.getItem('akai_onboard_state');
       if (savedRaw) {
         try {
           const parsed = JSON.parse(savedRaw) as OnboardState;
-          sessionStorage.removeItem('akai_onboard_state');
+          localStorage.removeItem('akai_onboard_state');
           let newState: OnboardState;
           if (connectedParam === 'gmail') {
             newState = { ...parsed, step: 'connect_calendar', data: { ...parsed.data, emailProvider: 'google', emailConnected: 'google' } };
@@ -187,8 +189,15 @@ export default function OnboardPage() {
   };
 
   const saveStateAndRedirect = (url: string) => {
-    sessionStorage.setItem('akai_onboard_state', JSON.stringify(state));
-    window.location.href = url;
+    // Encode full onboarding state into the return URL so it survives cross-origin OAuth redirects
+    // sessionStorage is lost on cross-origin navigation — URL state param is reliable
+    const stateEncoded = encodeURIComponent(JSON.stringify(state));
+    const urlWithState = url.includes('?')
+      ? url + '&onboardState=' + stateEncoded
+      : url + '?onboardState=' + stateEncoded;
+    // Also save to localStorage as backup (same origin, persists across navigations)
+    try { localStorage.setItem('akai_onboard_state', JSON.stringify(state)); } catch { /* ignore */ }
+    window.location.href = urlWithState;
   };
 
   const handleGoogleEmail = () => {
