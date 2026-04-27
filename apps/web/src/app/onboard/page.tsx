@@ -14,7 +14,7 @@ import { getFirebaseDb } from '@/lib/firebase';
 // Onboarding types (local — more specific than shared OnboardingState)
 // ---------------------------------------------------------------------------
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'connect_email' | 'connect_calendar' | 'terms' | 'calendar' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'website' | 'goal' | 'location' | 'contact' | 'notifications' | 'connect_email' | 'connect_calendar' | 'terms' | 'calendar' | 'complete';
 
 // Step order for progress bar (excluding 'complete')
 const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'website', 'goal', 'location', 'contact', 'notifications', 'connect_email', 'connect_calendar', 'terms'];
