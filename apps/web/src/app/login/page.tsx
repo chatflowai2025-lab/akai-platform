@@ -132,19 +132,23 @@ function LoginContent() {
       // Only set loading if coming from OAuth redirect (code= in URL)
       const hasOAuthCode = typeof window !== 'undefined' && window.location.search.includes('code=');
 
-      // If arriving via signup link (?tab=signup) WITHOUT an OAuth callback,
-      // sign out existing session so the user must sign in with their own account.
-      // But NOT if we're returning from an OAuth redirect (code= or state= in URL).
+      // If arriving via signup link (?tab=signup), always sign out existing session
+      // so the user must explicitly sign in with their own account.
+      // Exception: if Firebase already has a user from an OAuth redirect that JUST happened
+      // (i.e. user signed in within the last 10 seconds), let them through.
       const isSignupIntent = typeof window !== 'undefined' && 
         (window.location.search.includes('tab=signup') || window.location.search.includes('signup=true'));
-      const isOAuthCallback = typeof window !== 'undefined' &&
-        (window.location.search.includes('code=') || window.location.search.includes('state=') || window.location.hash.includes('access_token'));
-      if (isSignupIntent && !isOAuthCallback) {
+      if (isSignupIntent) {
         const currentUser = auth.currentUser;
         if (currentUser) {
-          await auth.signOut();
-          setLoading(false);
-          return;
+          // Check if this is a fresh login (metadata.lastSignInTime within last 15s)
+          const lastSignIn = currentUser.metadata?.lastSignInTime;
+          const isFreshLogin = lastSignIn && (Date.now() - new Date(lastSignIn).getTime()) < 15000;
+          if (!isFreshLogin) {
+            await auth.signOut();
+            setLoading(false);
+            return;
+          }
         }
       }
 
