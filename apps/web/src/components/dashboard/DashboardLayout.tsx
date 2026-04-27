@@ -104,7 +104,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
 
   // Load local chat history (client-side only)
   useEffect(() => {
-    setRecentHistory(getLocalChatHistory());
+    setRecentHistory(user ? getLocalChatHistory(user.uid) : []);
   }, []);
 
   // Handle messages injected from page buttons (e.g. quick-action buttons)
@@ -294,7 +294,7 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
     const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
     setMessages(p => [...p, userMsg]);
     // Track in local history
-    setRecentHistory(addLocalChatHistory(text));
+    setRecentHistory(user ? addLocalChatHistory(user.uid, text) : []);
     setLoading(true);
 
     try {

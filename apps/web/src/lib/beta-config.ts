@@ -13,7 +13,7 @@ export const BETA_CONTACT_EMAIL = process.env.NEXT_PUBLIC_BETA_CONTACT_EMAIL ?? 
 // When Aaron is ready to open signups, flip this to true and redeploy.
 // From that point, all NEW non-whitelisted signups get a 15-day trial.
 export const TRIAL_MODE_ACTIVE = false;
-export const TRIAL_DAYS = 15;
+export const TRIAL_DAYS = 90;
 
 /**
  * Compute the trial state for a user given their trialStartedAt ISO timestamp.
