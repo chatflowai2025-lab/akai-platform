@@ -72,7 +72,15 @@ router.get('/oauth-capture', async (req: Request, res: Response): Promise<void> 
 });
 
 // Onboarding complete — fires welcome email + first leads list
+// Public route — called from browser immediately after signup, no auth token yet
 router.post('/onboarding/complete', async (req: Request, res: Response): Promise<void> => {
+  // Accept internal API key OR no key (rate limited by IP via express-rate-limit)
+  const key = req.headers['x-api-key'] as string;
+  const validKey = process.env.API_KEY || 'aiclozr_api_key_2026_prod';
+  const internalKey = process.env.INTERNAL_API_KEY || 'akai_internal_2026';
+  if (key && key !== validKey && key !== internalKey) {
+    res.status(401).json({ error: 'Invalid API key' }); return;
+  }
   const { email, name, businessName, industry, location, website, contact, uid } = req.body;
   console.log(`[onboarding/complete] New signup: ${email} | ${businessName} | ${industry} | ${location}`);
 

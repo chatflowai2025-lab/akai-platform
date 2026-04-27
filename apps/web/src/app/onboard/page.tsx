@@ -139,7 +139,7 @@ const _INITIAL_MESSAGE_UNUSED: ChatMessage = {
 };
 
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
-const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
+const RAILWAY_API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
 const OAUTH_REDIRECT_URI = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
 const GMAIL_CLIENT_ID = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '483958880068-fl9q2ildmfjmhfcat93pkqpcrl79qhb4.apps.googleusercontent.com';
