@@ -44,7 +44,7 @@ function extractNameFromText(text: string): string {
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   // Dynamic import to avoid build issues with pdf-parse
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mod = await import('pdf-parse') as any;
+  const mod = await import(/* webpackIgnore: true */ 'pdf-parse') as any;
   const pdfParse = mod.default ?? mod;
   const data = await pdfParse(buffer);
   return data.text || '';

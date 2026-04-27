@@ -375,7 +375,7 @@ function buildUserEmail(name: string, website: string, businessType: string, rec
         <div style="background:#fffbeb;border:2px solid #D4AF37;border-radius:12px;padding:24px;margin:28px 0;text-align:center;">
           <p style="color:#1a1a1a;font-size:15px;font-weight:700;margin:0 0 6px;">Ready to fix these?</p>
           <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">AKAI can automate most of these wins — chat, bookings, follow-up calls, and more.</p>
-          <a href="https://getakai.ai" style="display:inline-block;background:#D4AF37;color:#000000;font-weight:900;font-size:14px;padding:14px 32px;border-radius:10px;text-decoration:none;">Start Free Trial — Fix It Now →</a>
+          <a href="https://getakai.ai/login?tab=signup" style="display:inline-block;background:#D4AF37;color:#000000;font-weight:900;font-size:14px;padding:14px 32px;border-radius:10px;text-decoration:none;">Start Free Trial — Fix It Now →</a>
         </div>
       </div>
 

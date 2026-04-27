@@ -14,11 +14,11 @@ import { getFirebaseDb } from '@/lib/firebase';
 // Onboarding types (local — more specific than shared OnboardingState)
 // ---------------------------------------------------------------------------
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'terms' | 'calendar' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'connect_email' | 'connect_calendar' | 'terms' | 'calendar' | 'complete';
 
 // Step order for progress bar (excluding 'complete')
-const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'goal', 'location', 'contact', 'notifications', 'terms'];
-const STEP_LABELS = ['Industry', 'Business', 'Goal', 'Location', 'Contact', 'Notify', 'Terms'];
+const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'goal', 'location', 'contact', 'notifications', 'connect_email', 'connect_calendar', 'terms'];
+const STEP_LABELS = ['Industry', 'Business', 'Goal', 'Location', 'Contact', 'Notify', 'Email', 'Calendar', 'Terms'];
 
 function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
   const currentIndex = STEP_ORDER.indexOf(currentStep);
@@ -70,7 +70,10 @@ interface OnboardData {
   notifSmsNumber?: string;
   notifWhatsapp?: boolean;
   notifWhatsappNumber?: string;
+  emailProvider?: 'google' | 'microsoft' | null;
+  emailConnected?: 'google' | 'microsoft' | null;
   calendarProvider?: 'google' | 'outlook' | null;
+  calendarConnected?: 'google' | 'outlook' | null;
   termsAccepted?: boolean;
   termsAcceptedAt?: string;
 }
@@ -88,6 +91,8 @@ const STEP_HINTS: Partial<Record<OnboardStep, string>> = {
   location: "We target leads in your area first",
   contact: "We'll send you lead alerts and important updates here",
   notifications: "Choose how you want to hear from AKAI — we'll never spam you",
+  connect_email: 'So AK can send and receive on your behalf — from YOUR address',
+  connect_calendar: "So clients can book meetings with your real availability — 24/7",
   terms: 'Review and accept our Terms of Service to activate your free trial',
   calendar: "Connect once and Sophie will book meetings automatically",
 };
@@ -102,6 +107,11 @@ const INITIAL_MESSAGE: ChatMessage = {
 const RAILWAY_API = process.env.NEXT_PUBLIC_API_URL || 'https://api-server-production-2a27.up.railway.app';
 const RAILWAY_API_KEY = process.env.RAILWAY_API_KEY || 'aiclozr_api_key_2026_prod';
 
+const OAUTH_REDIRECT_URI = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
+const GMAIL_CLIENT_ID = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '483958880068-fl9q2ildmfjmhfcat93pkqpcrl79qhb4.apps.googleusercontent.com';
+const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
+const MS_TENANT = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
+
 export default function OnboardPage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
@@ -114,6 +124,102 @@ export default function OnboardPage() {
     data: {},
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Restore onboarding state after OAuth redirect (sessionStorage)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const stepParam = params.get('step');
+    const connectedParam = params.get('connected');
+    if (stepParam && connectedParam) {
+      const savedRaw = sessionStorage.getItem('akai_onboard_state');
+      if (savedRaw) {
+        try {
+          const parsed = JSON.parse(savedRaw) as OnboardState;
+          sessionStorage.removeItem('akai_onboard_state');
+          let newState: OnboardState;
+          if (connectedParam === 'gmail') {
+            newState = { ...parsed, step: 'connect_calendar', data: { ...parsed.data, emailProvider: 'google', emailConnected: 'google' } };
+          } else if (connectedParam === 'microsoft_email') {
+            newState = { ...parsed, step: 'connect_calendar', data: { ...parsed.data, emailProvider: 'microsoft', emailConnected: 'microsoft' } };
+          } else if (connectedParam === 'google_calendar') {
+            newState = { ...parsed, step: 'terms', data: { ...parsed.data, calendarProvider: 'google', calendarConnected: 'google' } };
+          } else if (connectedParam === 'microsoft_calendar') {
+            newState = { ...parsed, step: 'terms', data: { ...parsed.data, calendarProvider: 'outlook', calendarConnected: 'outlook' } };
+          } else {
+            newState = { ...parsed, step: stepParam as OnboardStep };
+          }
+          setState(newState);
+          // Clean the URL without triggering a navigation
+          window.history.replaceState({}, '', '/onboard');
+        } catch (e) {
+          console.error('[ONBOARD] Failed to restore session state:', e);
+        }
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // --- OAuth handlers ---
+  const buildGoogleOAuthUrl = (scopes: string, returnTo: string) => {
+    const params = new URLSearchParams({
+      client_id: GMAIL_CLIENT_ID,
+      redirect_uri: OAUTH_REDIRECT_URI,
+      response_type: 'code',
+      scope: scopes,
+      access_type: 'offline',
+      prompt: 'consent',
+      state: returnTo,
+    });
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  };
+
+  const buildMicrosoftOAuthUrl = (scopes: string, returnTo: string) => {
+    const params = new URLSearchParams({
+      client_id: MS_CLIENT_ID,
+      redirect_uri: OAUTH_REDIRECT_URI,
+      response_type: 'code',
+      scope: scopes,
+      state: returnTo,
+    });
+    return `https://login.microsoftonline.com/${MS_TENANT}/oauth2/v2.0/authorize?${params.toString()}`;
+  };
+
+  const saveStateAndRedirect = (url: string) => {
+    sessionStorage.setItem('akai_onboard_state', JSON.stringify(state));
+    window.location.href = url;
+  };
+
+  const handleGoogleEmail = () => {
+    const returnTo = `${window.location.origin}/onboard?step=connect_calendar&connected=gmail`;
+    saveStateAndRedirect(buildGoogleOAuthUrl(
+      'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send',
+      returnTo
+    ));
+  };
+
+  const handleMicrosoftEmail = () => {
+    const returnTo = `${window.location.origin}/onboard?step=connect_calendar&connected=microsoft_email`;
+    saveStateAndRedirect(buildMicrosoftOAuthUrl(
+      'offline_access Mail.ReadWrite Mail.Send',
+      returnTo
+    ));
+  };
+
+  const handleGoogleCalendar = () => {
+    const returnTo = `${window.location.origin}/onboard?step=terms&connected=google_calendar`;
+    saveStateAndRedirect(buildGoogleOAuthUrl(
+      'https://www.googleapis.com/auth/calendar',
+      returnTo
+    ));
+  };
+
+  const handleMicrosoftCalendar = () => {
+    const returnTo = `${window.location.origin}/onboard?step=terms&connected=microsoft_calendar`;
+    saveStateAndRedirect(buildMicrosoftOAuthUrl(
+      'offline_access Calendars.ReadWrite',
+      returnTo
+    ));
+  };
 
   // Auth gate
   useEffect(() => {
@@ -138,7 +244,7 @@ export default function OnboardPage() {
       try {
         const db = getFirebaseDb();
         if (db) {
-          const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber, calendarProvider } = finalState.data;
+          const { notifEmail, notifSms, notifSmsNumber, notifWhatsapp, notifWhatsappNumber, calendarProvider, emailProvider, emailConnected, calendarConnected } = finalState.data;
           await setDoc(
             doc(db, 'users', user.uid),
             {
@@ -150,6 +256,7 @@ export default function OnboardPage() {
                 contact: contact || '',
                 completedAt: new Date().toISOString(),
                 calendarProvider: calendarProvider || null,
+                emailProvider: emailProvider || null,
               },
               campaignConfig: {
                 businessName: businessName || '',
@@ -165,7 +272,10 @@ export default function OnboardPage() {
                 whatsapp: notifWhatsapp || false,
                 whatsappNumber: notifWhatsappNumber || '',
               },
-              calendarConfig: { provider: calendarProvider || null, connected: false },
+              calendarConfig: { provider: calendarProvider || null, connected: !!calendarConnected },
+              ...(emailConnected === 'google' ? { 'gmail.connected': true } : {}),
+              ...(emailConnected === 'microsoft' ? { inboxConnection: { connected: true, provider: 'microsoft' } } : {}),
+              ...(calendarConnected === 'google' ? { googleCalendarConnected: true } : {}),
               termsAccepted: true,
               termsAcceptedAt: finalState.data.termsAcceptedAt || new Date().toISOString(),
               onboardingComplete: true,
@@ -250,11 +360,15 @@ export default function OnboardPage() {
       }
 
       if (data.state) {
-        setState(data.state);
+        // Override 'calendar' AI step → native connect_email UI
+        const resolvedState: OnboardState = data.state.step === 'calendar'
+          ? { ...data.state, step: 'connect_email' }
+          : data.state;
+        setState(resolvedState);
 
         // When step is 'complete', trigger account setup
-        if (data.state.step === 'complete' && data.action === 'complete') {
-          await handleComplete(data.state);
+        if (resolvedState.step === 'complete' && data.action === 'complete') {
+          await handleComplete(resolvedState);
         }
       }
     } catch (err) {
@@ -285,6 +399,131 @@ export default function OnboardPage() {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // connect_email step — native UI (not AI chat)
+  if (state.step === 'connect_email') {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+        <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f]">
+          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">AK</div>
+          <span className="font-semibold text-white">AKAI Setup</span>
+        </header>
+        <ProgressBar currentStep="connect_email" />
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-md">
+            <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <div className="w-14 h-14 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📧</span>
+                </div>
+                <h2 className="text-xl font-black text-white mb-2">Connect your email</h2>
+                <p className="text-gray-400 text-sm">So AK can send and receive on your behalf — from YOUR address</p>
+              </div>
+              <div className="space-y-3 mb-6">
+                <button
+                  onClick={handleGoogleEmail}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-white text-black hover:bg-gray-100 transition flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.8055 10.0415H21V10H12V14H17.6515C16.827 16.3285 14.6115 18 12 18C8.6865 18 6 15.3135 6 12C6 8.6865 8.6865 6 12 6C13.5295 6 14.921 6.577 15.9805 7.5195L18.809 4.691C17.023 3.0265 14.634 2 12 2C6.4775 2 2 6.4775 2 12C2 17.5225 6.4775 22 12 22C17.5225 22 22 17.5225 22 12C22 11.3295 21.931 10.675 21.8055 10.0415Z" fill="#FFC107"/>
+                    <path d="M3.15295 7.3455L6.43845 9.755C7.32745 7.554 9.48045 6 12 6C13.5295 6 14.921 6.577 15.9805 7.5195L18.809 4.691C17.023 3.0265 14.634 2 12 2C8.15895 2 4.82795 4.1685 3.15295 7.3455Z" fill="#FF3D00"/>
+                    <path d="M12 22C14.583 22 16.93 21.0115 18.7045 19.404L15.6095 16.785C14.5718 17.5742 13.3038 18.001 12 18C9.39903 18 7.19053 16.3415 6.35853 14.027L3.09753 16.5395C4.75253 19.778 8.11353 22 12 22Z" fill="#4CAF50"/>
+                    <path d="M21.8055 10.0415H21V10H12V14H17.6515C17.2571 15.1082 16.5467 16.0766 15.608 16.7855L15.6095 16.7845L18.7045 19.4035C18.4855 19.6025 22 17 22 12C22 11.3295 21.931 10.675 21.8055 10.0415Z" fill="#1976D2"/>
+                  </svg>
+                  Connect Google Gmail
+                </button>
+                <button
+                  onClick={handleMicrosoftEmail}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-[#2a2a2a] text-white hover:bg-[#333] border border-[#3a3a3a] transition flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.4 2H2V11.4H11.4V2Z" fill="#F25022"/>
+                    <path d="M22 2H12.6V11.4H22V2Z" fill="#7FBA00"/>
+                    <path d="M11.4 12.6H2V22H11.4V12.6Z" fill="#00A4EF"/>
+                    <path d="M22 12.6H12.6V22H22V12.6Z" fill="#FFB900"/>
+                  </svg>
+                  Connect Microsoft Outlook
+                </button>
+              </div>
+              <div className="text-center">
+                <button
+                  onClick={() => setState(s => ({ ...s, step: 'connect_calendar' }))}
+                  className="text-sm text-gray-500 hover:text-gray-300 transition"
+                >
+                  Skip for now →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // connect_calendar step — native UI (not AI chat)
+  if (state.step === 'connect_calendar') {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+        <header className="flex items-center gap-3 px-6 py-4 border-b border-[#1f1f1f]">
+          <div className="w-8 h-8 rounded-full bg-[#D4AF37] flex items-center justify-center text-black font-bold text-xs">AK</div>
+          <span className="font-semibold text-white">AKAI Setup</span>
+        </header>
+        <ProgressBar currentStep="connect_calendar" />
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-md">
+            <div className="bg-[#111] border border-[#2a2a2a] rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <div className="w-14 h-14 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📅</span>
+                </div>
+                <h2 className="text-xl font-black text-white mb-2">Connect your calendar</h2>
+                <p className="text-gray-400 text-sm">So clients can book meetings with your real availability — 24/7</p>
+                {state.data.emailConnected && (
+                  <p className="mt-2 text-xs text-[#D4AF37]/80">
+                    ✓ Email connected ({state.data.emailConnected === 'google' ? 'Google' : 'Microsoft'})
+                  </p>
+                )}
+              </div>
+              <div className="space-y-3 mb-6">
+                <button
+                  onClick={handleGoogleCalendar}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-white text-black hover:bg-gray-100 transition flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.8055 10.0415H21V10H12V14H17.6515C16.827 16.3285 14.6115 18 12 18C8.6865 18 6 15.3135 6 12C6 8.6865 8.6865 6 12 6C13.5295 6 14.921 6.577 15.9805 7.5195L18.809 4.691C17.023 3.0265 14.634 2 12 2C6.4775 2 2 6.4775 2 12C2 17.5225 6.4775 22 12 22C17.5225 22 22 17.5225 22 12C22 11.3295 21.931 10.675 21.8055 10.0415Z" fill="#FFC107"/>
+                    <path d="M3.15295 7.3455L6.43845 9.755C7.32745 7.554 9.48045 6 12 6C13.5295 6 14.921 6.577 15.9805 7.5195L18.809 4.691C17.023 3.0265 14.634 2 12 2C8.15895 2 4.82795 4.1685 3.15295 7.3455Z" fill="#FF3D00"/>
+                    <path d="M12 22C14.583 22 16.93 21.0115 18.7045 19.404L15.6095 16.785C14.5718 17.5742 13.3038 18.001 12 18C9.39903 18 7.19053 16.3415 6.35853 14.027L3.09753 16.5395C4.75253 19.778 8.11353 22 12 22Z" fill="#4CAF50"/>
+                    <path d="M21.8055 10.0415H21V10H12V14H17.6515C17.2571 15.1082 16.5467 16.0766 15.608 16.7855L15.6095 16.7845L18.7045 19.4035C18.4855 19.6025 22 17 22 12C22 11.3295 21.931 10.675 21.8055 10.0415Z" fill="#1976D2"/>
+                  </svg>
+                  Connect Google Calendar
+                </button>
+                <button
+                  onClick={handleMicrosoftCalendar}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-[#2a2a2a] text-white hover:bg-[#333] border border-[#3a3a3a] transition flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.4 2H2V11.4H11.4V2Z" fill="#F25022"/>
+                    <path d="M22 2H12.6V11.4H22V2Z" fill="#7FBA00"/>
+                    <path d="M11.4 12.6H2V22H11.4V12.6Z" fill="#00A4EF"/>
+                    <path d="M22 12.6H12.6V22H22V12.6Z" fill="#FFB900"/>
+                  </svg>
+                  Connect Outlook Calendar
+                </button>
+              </div>
+              <div className="text-center">
+                <button
+                  onClick={() => setState(s => ({ ...s, step: 'terms' }))}
+                  className="text-sm text-gray-500 hover:text-gray-300 transition"
+                >
+                  Skip for now →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -396,7 +635,13 @@ export default function OnboardPage() {
                 const res = await fetch('/api/onboard', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: label, state, uid: user.uid }) });
                 const data = await res.json() as { message?: string; buttons?: Array<{label: string; primary?: boolean; url?: string}>; state?: typeof state; action?: string };
                 if (data.message) setMessages(prev => [...prev, { id: (Date.now()+1).toString(), role: 'assistant', content: data.message!, timestamp: new Date().toISOString(), buttons: data.buttons, action: data.action }]);
-                if (data.state) { setState(data.state); if (data.state.step === 'complete' && data.action === 'complete') await handleComplete(data.state); }
+                if (data.state) {
+                  const resolvedState: OnboardState = data.state.step === 'calendar'
+                    ? { ...data.state, step: 'connect_email' }
+                    : data.state;
+                  setState(resolvedState);
+                  if (resolvedState.step === 'complete' && data.action === 'complete') await handleComplete(resolvedState);
+                }
               } catch { /* ignore */ } finally { setChatLoading(false); }
             }}
           />
