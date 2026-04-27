@@ -493,8 +493,11 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
       if (!authUrl) {
         const redirectUri = `${typeof window !== 'undefined' ? window.location.origin : 'https://getakai.ai'}/calendar/ms-callback`;
         const scopes = [
-          'https://graph.microsoft.com/Calendars.ReadWrite',
+          'openid',
+          'profile',
+          'email',
           'offline_access',
+          'https://graph.microsoft.com/Calendars.ReadWrite',
           'email',
           'profile',
         ].join(' ');
