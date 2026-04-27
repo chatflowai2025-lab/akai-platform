@@ -141,7 +141,7 @@ function LoginContent() {
         await auth.signOut();
         // Replace URL with ?tab=signup&_authed=0 so next load knows signout already happened
         if (typeof window !== 'undefined') {
-          window.history.replaceState({}, '', '/login?tab=signup');
+          window.history.replaceState({}, '', '/signup');
         }
         setLoading(false);
         return;

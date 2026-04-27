@@ -1087,7 +1087,7 @@ export default function Home() {
 
   const openCapture = (plan?: string) => {
     gtag('cta_clicked', { button: 'Start Free Trial', plan: plan ?? 'default', page: 'homepage' });
-    window.location.href = '/login?tab=signup';
+    window.location.href = '/signup';
   };
 
   const openHealthReport = () => {

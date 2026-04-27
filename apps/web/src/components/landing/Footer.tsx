@@ -29,7 +29,7 @@ export default function Footer() {
             <div className="flex flex-col gap-3">
               <p className="text-white/20 text-xs uppercase tracking-widest font-semibold">Company</p>
               <a href="mailto:hello@getakai.ai" className="text-white/40 hover:text-white transition-colors">Contact Us</a>
-              <a href="/login?tab=signup" className="text-white/40 hover:text-white transition-colors">Get Started</a>
+              <a href="/signup" className="text-white/40 hover:text-white transition-colors">Get Started</a>
               <a href="/login" className="text-white/40 hover:text-white transition-colors">Sign In</a>
               <a href="https://discord.gg/nSPK2hpu6" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">Discord Community</a>
             </div>

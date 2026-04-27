@@ -169,7 +169,7 @@ export default function AITeam() {
             </p>
           </div>
           <a
-            href="/login?tab=signup"
+            href="/signup"
             className="flex-shrink-0 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-black hover:opacity-90 transition whitespace-nowrap"
           >
             Meet your team →
