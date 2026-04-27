@@ -107,20 +107,22 @@ router.post('/onboarding/complete', async (req: Request, res: Response): Promise
       const tokenData = await tokenRes.json() as any;
       if (!tokenData.access_token) throw new Error('No Gmail token');
 
-      // Generate 15 leads using Claude
+      // Generate 15 leads using AI + create Google Sheet
       let leadsHtml = '';
+      let sheetUrl = '';
+      let leads: any[] = [];
       if (ANTHROPIC_KEY && industry && location) {
         const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'claude-haiku-4-5',
-            max_tokens: 3000,
+            max_tokens: 4000,
             messages: [{
               role: 'user',
-              content: `Generate 15 realistic B2B sales leads for a ${industry} business in ${location}, Australia named "${businessName}". These are potential clients or referral partners.
+              content: `Generate 15 realistic B2B sales leads for a ${industry} business in ${location}, Australia named "${businessName}". These are potential clients or referral partners (e.g. property managers, builders, GPs, accountants — whoever would refer work to a ${industry} business).
 
-For each lead return JSON: name, business, type, address, phone, email, website, confidence (✅✅ Verified/✅ Likely/⚠️ Unverified), outreach_email (2-3 sentences).
+For each lead return JSON: name, business, type, suburb, address, phone, mobile (04xx format), email, website, confidence (✅✅ Verified/✅ Likely/⚠️ Unverified), outreach_email (2-3 sentences, single line no newlines).
 
 Return ONLY a valid JSON array, no other text.`
             }]
@@ -129,16 +131,61 @@ Return ONLY a valid JSON array, no other text.`
         const claudeData = await claudeRes.json() as any;
         const text = claudeData.content?.[0]?.text || '[]';
         const start = text.indexOf('['); const end = text.lastIndexOf(']') + 1;
-        const leads = JSON.parse(text.slice(start, end)) as any[];
-        // Normalise leads
-        leadsHtml = leads.slice(0, 15).map((l: any) => `
+        leads = JSON.parse(text.slice(start, end)) as any[];
+        // Normalise leads — enforce schema, strip newlines
+        leads = leads.slice(0, 15).map((l: any) => {
+          const required = ['name','business','type','suburb','address','phone','mobile','email','website','confidence','outreach_email'];
+          required.forEach(f => { if (!l[f]) l[f] = ''; });
+          l.outreach_email = l.outreach_email.split('\n').join(' ').split('\r').join(' ').trim();
+          if (typeof l.confidence === 'number') {
+            l.confidence = l.confidence >= 0.9 ? '✅✅ Verified' : l.confidence >= 0.8 ? '✅ Likely' : '⚠️ Unverified';
+          }
+          return l;
+        });
+
+        // Create Google Sheet
+        try {
+          const sheetTitle = `${businessName} — AKAI Leads`;
+          const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ properties: { title: sheetTitle } }),
+          });
+          const sheet = await createRes.json() as any;
+          const sheetId = sheet.spreadsheetId;
+
+          if (sheetId) {
+            // Write data
+            const headers = ['Name','Business','Type','Suburb','Address','Phone','Mobile','Email','Website','Confidence','Outreach Email','Status','Notes'];
+            const rows = [headers, ...leads.map(l => [l.name,l.business,l.type,l.suburb,l.address,l.phone,l.mobile,l.email,l.website,l.confidence,l.outreach_email,'New',''])];
+            await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:M${rows.length}?valueInputOption=RAW`, {
+              method: 'PUT',
+              headers: { 'Authorization': `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ values: rows }),
+            });
+            // Make public
+            await fetch(`https://www.googleapis.com/drive/v3/files/${sheetId}/permissions`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+            });
+            sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
+            console.log(`[onboarding/complete] Sheet created: ${sheetUrl}`);
+          }
+        } catch (sheetErr: any) {
+          console.warn('[onboarding/complete] Sheet creation failed:', sheetErr.message);
+        }
+
+        // Build leads HTML
+        leadsHtml = leads.map((l: any) => `
           <div style="background:#f9fafb;border-left:4px solid #D4AF37;padding:14px 16px;margin:0 0 10px;border-radius:0 8px 8px 0;">
-            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#1a1a1a;">${l.name || ''} — ${l.business || ''}</p>
-            <p style="margin:0 0 2px;font-size:12px;color:#6b7280;">📍 ${l.address || ''} | 📞 ${l.phone || ''} | ${l.confidence || '⚠️ Unverified'}</p>
-            <p style="margin:0 0 4px;font-size:12px;color:#6b7280;">✉️ ${l.email || ''} | 🌐 ${l.website || ''}</p>
-            <p style="margin:6px 0 0;font-size:12px;color:#374151;font-style:italic;">"${(l.outreach_email || '').split("\n").join(" ")}"</p>
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#1a1a1a;">${l.name} — ${l.business}</p>
+            <p style="margin:0 0 2px;font-size:12px;color:#6b7280;">📍 ${l.address} | 📞 ${l.phone} | 📱 ${l.mobile} | ${l.confidence}</p>
+            <p style="margin:0 0 4px;font-size:12px;color:#6b7280;">✉️ ${l.email} | 🌐 ${l.website}</p>
+            <p style="margin:6px 0 0;font-size:12px;color:#374151;font-style:italic;">"${l.outreach_email}"</p>
           </div>`).join('');
       }
+      const sheetButton = sheetUrl ? `<div style="text-align:center;margin:0 0 20px;"><a href="${sheetUrl}" style="display:inline-block;background:#1a1a1a;color:#D4AF37;font-weight:900;font-size:13px;padding:12px 28px;border-radius:10px;text-decoration:none;">📊 Open Full Leads Sheet →</a></div>` : '';
 
       const websiteNote = website ? `<p style="color:#6b7280;font-size:13px;">We're running a full audit on <strong>${website}</strong> — results will appear in your dashboard.</p>` : '';
 
