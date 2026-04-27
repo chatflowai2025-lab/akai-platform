@@ -1,8 +1,9 @@
 import { Page, BrowserContext } from '@playwright/test';
 
-const QA_EMAIL = process.env.QA_EMAIL || 'qa@getakai.ai';
-const QA_PASSWORD = process.env.QA_PASSWORD || '';
-const FIREBASE_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY || '';
+const QA_EMAIL = process.env.QA_EMAIL || 'e2etest@getakai.ai';
+const QA_PASSWORD = process.env.QA_PASSWORD || 'E2Etest2026!';
+// Firebase API key is a public value — safe in test code
+const FIREBASE_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY || 'AIzaSyBU2BmzGD2dmp7miIRRZoCwauNW7Rj_KC0';
 const BASE_URL = process.env.BASE_URL || 'https://getakai.ai';
 
 export interface QAAuthTokens {
