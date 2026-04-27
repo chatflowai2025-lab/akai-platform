@@ -385,6 +385,13 @@ function EmailGuardContent({
       setGmailConnected(true);
       setGmailEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
       track('email_guard_connected', { provider: 'gmail' });
+      // Save connected state to Firestore so dashboard checklist updates
+      try {
+        const db = getFirebaseDb();
+        if (db) await setDoc(doc(db, 'users', user.uid), {
+          gmail: { connected: true, email: initialEmailParam ? decodeURIComponent(initialEmailParam) : '' }
+        }, { merge: true });
+      } catch { /* non-fatal */ }
       router.replace('/email-guard');
       safeSend(sendMessage, `My Gmail inbox is now connected. What can you do with it and what should I do first?`);
       triggerFirstPoll();
@@ -394,6 +401,13 @@ function EmailGuardContent({
       setMsConnected(true);
       setMsEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
       track('email_guard_connected', { provider: 'microsoft' });
+      // Save connected state to Firestore so dashboard checklist updates
+      try {
+        const db = getFirebaseDb();
+        if (db) await setDoc(doc(db, 'users', user.uid), {
+          inboxConnection: { connected: true, provider: 'microsoft', email: initialEmailParam ? decodeURIComponent(initialEmailParam) : '' }
+        }, { merge: true });
+      } catch { /* non-fatal */ }
       router.replace('/email-guard');
       safeSend(sendMessage, `My Microsoft inbox is now connected. What can you do with it and what should I do first?`);
       triggerFirstPoll();

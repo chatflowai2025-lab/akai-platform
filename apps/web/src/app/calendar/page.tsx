@@ -491,7 +491,9 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
         }
       }
       if (!authUrl) {
-        const redirectUri = `${typeof window !== 'undefined' ? window.location.origin : 'https://getakai.ai'}/calendar/ms-callback`;
+        // Use Railway oauth-capture — already registered in Azure, redirects back with state param
+        const redirectUri = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
+        const calendarReturnUrl = encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : 'https://getakai.ai'}/calendar?connected=outlook_calendar`);
         const scopes = [
           'openid',
           'profile',
@@ -505,6 +507,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
           client_id: msClientId,
           redirect_uri: redirectUri,
           response_type: 'code',
+          state: calendarReturnUrl,
           scope: scopes,
           state: userId,
           prompt: 'select_account',
