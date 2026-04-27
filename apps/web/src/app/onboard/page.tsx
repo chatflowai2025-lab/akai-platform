@@ -17,8 +17,8 @@ import { getFirebaseDb } from '@/lib/firebase';
 type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'connect_email' | 'connect_calendar' | 'terms' | 'calendar' | 'complete';
 
 // Step order for progress bar (excluding 'complete')
-const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'goal', 'location', 'contact', 'notifications', 'connect_email', 'connect_calendar', 'terms'];
-const STEP_LABELS = ['Industry', 'Business', 'Goal', 'Location', 'Contact', 'Notify', 'Email', 'Calendar', 'Terms'];
+const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'website', 'goal', 'location', 'contact', 'notifications', 'connect_email', 'connect_calendar', 'terms'];
+const STEP_LABELS = ['Industry', 'Business', 'Website', 'Goal', 'Location', 'Contact', 'Notify', 'Email', 'Calendar', 'Terms'];
 
 function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
   const currentIndex = STEP_ORDER.indexOf(currentStep);
@@ -62,6 +62,7 @@ function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
 interface OnboardData {
   industry?: string;
   businessName?: string;
+  website?: string;
   goal?: string;
   location?: string;
   contact?: string;
@@ -91,6 +92,7 @@ const STEP_HINTS: Partial<Record<OnboardStep, string>> = {
   location: "We target leads in your area first",
   contact: "We'll send you lead alerts and important updates here",
   notifications: "Choose how you want to hear from AKAI — we'll never spam you",
+  website: 'We\'ll audit your site and include results in your setup report',
   connect_email: 'So AK can send and receive on your behalf — from YOUR address',
   connect_calendar: "So clients can book meetings with your real availability — 24/7",
   terms: 'Review and accept our Terms of Service to activate your free trial',
@@ -250,6 +252,7 @@ export default function OnboardPage() {
             {
               onboarding: {
                 businessName: businessName || '',
+                website: finalState.data.website || '',
                 industry: industry || '',
                 goal: goal || '',
                 location: location || '',
@@ -260,6 +263,7 @@ export default function OnboardPage() {
               },
               campaignConfig: {
                 businessName: businessName || '',
+                website: finalState.data.website || '',
                 industry: industry || '',
                 location: location || '',
                 targetCustomer: '',

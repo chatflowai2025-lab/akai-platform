@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 interface OnboardData {
   industry?: string;
   businessName?: string;
+  website?: string;
   goal?: string;
   location?: string;
   contact?: string; // email or phone
@@ -21,7 +22,7 @@ interface OnboardData {
   calendarProvider?: 'google' | 'outlook' | null;
 }
 
-type OnboardStep = 'industry' | 'business_name' | 'goal' | 'location' | 'contact' | 'notifications' | 'terms' | 'calendar' | 'complete';
+type OnboardStep = 'industry' | 'business_name' | 'website' | 'goal' | 'location' | 'contact' | 'notifications' | 'terms' | 'calendar' | 'complete';
 
 interface OnboardState {
   step: OnboardStep;
@@ -71,13 +72,30 @@ export async function POST(req: NextRequest) {
 
       case 'business_name': {
         const newState: OnboardState = {
-          step: 'goal',
+          step: 'website',
           data: { ...state.data, businessName: trimmed },
         };
         return buildResponse(
-          `Love it — ${trimmed}. What's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`,
+          `Love it — ${trimmed}. Do you have a website? If yes, drop the URL (we'll run a free audit). If not, just type "no".`,
           newState
         );
+      }
+
+      case 'website': {
+        const website = trimmed.toLowerCase() === 'no' || trimmed === '' ? null : trimmed;
+        const websiteVal = website ? (website.startsWith('http') ? website : `https://${website}`) : '';
+        const newState: OnboardState = {
+          step: 'goal',
+          data: { ...state.data, website: websiteVal },
+        };
+        const reply = websiteVal
+          ? `Got it — we'll audit ${websiteVal} and include it in your setup report.
+
+What's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`
+          : `No worries — we can help with that later.
+
+What's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)`;
+        return buildResponse(reply, newState);
       }
 
       case 'goal': {
