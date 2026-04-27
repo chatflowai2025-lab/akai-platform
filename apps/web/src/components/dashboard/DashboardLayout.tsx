@@ -104,7 +104,8 @@ function InlineChatPanel({ externalMessage, onExternalMessageHandled }: { extern
   // Load local chat history (client-side only)
   useEffect(() => {
     setRecentHistory(user ? getLocalChatHistory(user.uid) : []);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   // Handle messages injected from page buttons (e.g. quick-action buttons)
   useEffect(() => {
