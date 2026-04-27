@@ -390,7 +390,7 @@ function EmailGuardContent({
       triggerFirstPoll();
       return;
     }
-    if (initialConnectedParam === 'microsoft') {
+    if (initialConnectedParam === 'microsoft' || initialConnectedParam === 'microsoft_email') {
       setMsConnected(true);
       setMsEmail(initialEmailParam ? decodeURIComponent(initialEmailParam) : 'connected');
       track('email_guard_connected', { provider: 'microsoft' });
@@ -399,7 +399,7 @@ function EmailGuardContent({
       triggerFirstPoll();
       return;
     }
-    if (initialErrorParam) {
+    if (initialErrorParam && initialErrorParam !== 'null' && initialErrorParam !== 'undefined') {
       setConnectError('Connection failed — please try again.');
       router.replace('/email-guard');
       return;
