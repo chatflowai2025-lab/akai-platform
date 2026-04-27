@@ -509,7 +509,6 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
           response_type: 'code',
           state: calendarReturnUrl,
           scope: scopes,
-          state: userId,
           prompt: 'select_account',
         });
         authUrl = `https://login.microsoftonline.com/${msTenant}/oauth2/v2.0/authorize?${params.toString()}`;
