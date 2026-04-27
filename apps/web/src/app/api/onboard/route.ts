@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
         const hasChoice = wantsEmail || wantsSms || wantsWhatsapp;
 
         const newState: OnboardState = {
-          step: 'calendar',
+          step: 'terms',
           data: {
             ...state.data,
             notifEmail: !hasChoice || wantsEmail,
@@ -147,15 +147,8 @@ export async function POST(req: NextRequest) {
         };
 
         return buildResponse(
-          `Got it! One more thing — would you like to connect your calendar?\n\nAKAI can automatically schedule follow-up calls, meeting reminders, and block time for campaigns.\n\nReply with:\n📅 **google** — Google Calendar\n🗓️ **outlook** — Outlook / Microsoft 365\n⏭️ **skip** — I'll set it up later`,
-          newState,
-          {
-            buttons: [
-              { label: 'Google Calendar' },
-              { label: 'Outlook Calendar' },
-              { label: 'Skip for now' },
-            ],
-          }
+          `Perfect — you\'re almost set up! One last step: review and accept our Terms of Service to activate your free trial.`,
+          newState
         );
       }
 

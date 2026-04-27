@@ -17,8 +17,8 @@ import { getFirebaseDb } from '@/lib/firebase';
 type OnboardStep = 'industry' | 'business_name' | 'website' | 'goal' | 'location' | 'contact' | 'notifications' | 'connect_email' | 'connect_calendar' | 'terms' | 'calendar' | 'complete';
 
 // Step order for progress bar (excluding 'complete')
-const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'website', 'goal', 'location', 'contact', 'notifications', 'connect_email', 'connect_calendar', 'terms'];
-const STEP_LABELS = ['Industry', 'Business', 'Website', 'Goal', 'Location', 'Contact', 'Notify', 'Email', 'Calendar', 'Terms'];
+const STEP_ORDER: OnboardStep[] = ['industry', 'business_name', 'website', 'goal', 'location', 'contact', 'notifications', 'terms'];
+const STEP_LABELS = ['Industry', 'Business', 'Website', 'Goal', 'Location', 'Contact', 'Notify', 'Terms'];
 
 function ProgressBar({ currentStep }: { currentStep: OnboardStep }) {
   const currentIndex = STEP_ORDER.indexOf(currentStep);
