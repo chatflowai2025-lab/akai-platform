@@ -18,6 +18,58 @@ function safeSend(sendMessage: (t: string) => void, text: string) {
 const RAILWAY = process.env.NEXT_PUBLIC_API_URL ?? '';
 const API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '';
 
+// RCA: Railway /api/email/microsoft/auth-url was returning no authUrl when
+// MICROSOFT_CLIENT_ID env var wasn't set on Railway side.
+// Fix: generate the OAuth URL client-side using NEXT_PUBLIC_ vars (public values,
+// safe to expose in browser). Falls back to hardcoded defaults matching Azure app registration.
+const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
+const MS_TENANT = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
+const EMAIL_GUARD_REDIRECT_URI = typeof window !== 'undefined'
+  ? `${window.location.origin}/email-guard`
+  : 'https://getakai.ai/email-guard';
+
+function buildGmailAuthUrl(userId: string): string {
+  const GMAIL_CLIENT_ID = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '483958880068-fl9q2ildmfjmhfcat93pkqpcrl79qhb4.apps.googleusercontent.com';
+  const redirectUri = typeof window !== 'undefined'
+    ? `${window.location.origin}/email-guard`
+    : 'https://getakai.ai/email-guard';
+  const scopes = [
+    'https://www.googleapis.com/auth/gmail.modify',
+    'https://www.googleapis.com/auth/gmail.send',
+    'email',
+    'profile',
+  ].join(' ');
+  const params = new URLSearchParams({
+    client_id: GMAIL_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: scopes,
+    access_type: 'offline',
+    prompt: 'consent',
+    state: userId,
+  });
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+function buildMsEmailAuthUrl(userId: string): string {
+  const scopes = [
+    'https://graph.microsoft.com/Mail.Read',
+    'https://graph.microsoft.com/Mail.Send',
+    'offline_access',
+    'email',
+    'profile',
+  ].join(' ');
+  const params = new URLSearchParams({
+    client_id: MS_CLIENT_ID,
+    redirect_uri: EMAIL_GUARD_REDIRECT_URI,
+    response_type: 'code',
+    scope: scopes,
+    state: userId,
+    prompt: 'select_account',
+  });
+  return `https://login.microsoftonline.com/${MS_TENANT}/oauth2/v2.0/authorize?${params.toString()}`;
+}
+
 interface Enquiry {
   id: string;
   from: string;
@@ -462,18 +514,28 @@ function EmailGuardContent({
     setConnectError(null);
     track('email_guard_connect_clicked', { provider: 'microsoft' });
     try {
-      const res = await fetch(`${RAILWAY}/api/email/microsoft/auth-url?userId=${user.uid}`, {
-        headers: { 'x-api-key': API_KEY },
-      });
-      const data = await res.json();
-      if (data.authUrl) {
-        window.location.href = data.authUrl;
-      } else {
-        setConnectError('Could not generate login URL.');
-        setConnecting(false);
+      // RCA: Railway auth-url endpoint returned no authUrl when MS env vars weren't configured.
+      // Fix: try Railway first; on any failure fall back to client-side URL generation
+      // using NEXT_PUBLIC_MICROSOFT_CLIENT_ID (safe public value).
+      let authUrl: string | null = null;
+      if (RAILWAY) {
+        try {
+          const res = await fetch(`${RAILWAY}/api/email/microsoft/auth-url?userId=${user.uid}`, {
+            headers: { 'x-api-key': API_KEY },
+          });
+          const data = await res.json() as { authUrl?: string };
+          if (data.authUrl) authUrl = data.authUrl;
+        } catch {
+          // Railway unreachable — fall through to client-side generation
+        }
       }
+      // Client-side fallback: generate URL directly (MS client_id is a public value)
+      if (!authUrl) {
+        authUrl = buildMsEmailAuthUrl(user.uid);
+      }
+      window.location.href = authUrl;
     } catch {
-      setConnectError('Connection failed.');
+      setConnectError('Connection failed — please try again.');
       setConnecting(false);
     }
   };
@@ -483,18 +545,13 @@ function EmailGuardContent({
     setConnectError(null);
     track('email_guard_connect_clicked', { provider: 'gmail' });
     try {
-      const res = await fetch(`${RAILWAY}/api/email/gmail/auth-url?userId=${user.uid}`, {
-        headers: { 'x-api-key': API_KEY },
-      });
-      const data = await res.json();
-      if (data.authUrl) {
-        window.location.href = data.authUrl;
-      } else {
-        setConnectError('Could not generate login URL.');
-        setConnecting(false);
-      }
+      // Generate Gmail OAuth URL client-side — Railway endpoint not required
+      // RCA: Railway /api/email/gmail/auth-url didn't exist → "Could not generate login URL"
+      // Fix: client-side generation using NEXT_PUBLIC_ vars (safe public values)
+      const authUrl = buildGmailAuthUrl(user.uid);
+      window.location.href = authUrl;
     } catch {
-      setConnectError('Connection failed.');
+      setConnectError('Connection failed — please try again.');
       setConnecting(false);
     }
   };
