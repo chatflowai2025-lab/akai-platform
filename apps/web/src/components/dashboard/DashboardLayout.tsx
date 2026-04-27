@@ -36,21 +36,20 @@ const SUGGESTED_PROMPTS = [
   '🤖 How does AK work?',
 ];
 
-const CHAT_HISTORY_KEY = 'akai_chat_history';
 const CHAT_MESSAGES_SESSION_KEY = 'akai_chat_messages';
 
-function getLocalChatHistory(): string[] {
+function getLocalChatHistory(uid: string): string[] {
   try {
-    const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+    const raw = localStorage.getItem(`akai_chat_history_${uid}`);
     return raw ? (JSON.parse(raw) as string[]) : [];
   } catch { return []; }
 }
 
-function addLocalChatHistory(msg: string): string[] {
+function addLocalChatHistory(uid: string, msg: string): string[] {
   try {
-    const prev = getLocalChatHistory();
+    const prev = getLocalChatHistory(uid);
     const updated = [msg, ...prev.filter(m => m !== msg)].slice(0, 5);
-    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(updated));
+    localStorage.setItem(`akai_chat_history_${uid}`, JSON.stringify(updated));
     return updated;
   } catch { return []; }
 }
