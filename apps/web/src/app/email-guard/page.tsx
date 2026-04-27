@@ -24,21 +24,23 @@ const API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '';
 // safe to expose in browser). Falls back to hardcoded defaults matching Azure app registration.
 const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
 const MS_TENANT = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
-const EMAIL_GUARD_REDIRECT_URI = typeof window !== 'undefined'
+// Use Railway oauth-capture as redirect — already registered in Azure + Google Cloud Console
+// It reads the 'state' param and redirects back to the returnTo URL
+const EMAIL_GUARD_REDIRECT_URI = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
+const EMAIL_GUARD_RETURN_URL = typeof window !== 'undefined'
   ? `${window.location.origin}/email-guard`
   : 'https://getakai.ai/email-guard';
 
 function buildGmailAuthUrl(userId: string): string {
   const GMAIL_CLIENT_ID = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '483958880068-fl9q2ildmfjmhfcat93pkqpcrl79qhb4.apps.googleusercontent.com';
-  const redirectUri = typeof window !== 'undefined'
-    ? `${window.location.origin}/email-guard`
-    : 'https://getakai.ai/email-guard';
+  const redirectUri = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
   const scopes = [
     'https://www.googleapis.com/auth/gmail.modify',
     'https://www.googleapis.com/auth/gmail.send',
     'email',
     'profile',
   ].join(' ');
+  const returnTo = encodeURIComponent(`${EMAIL_GUARD_RETURN_URL}?connected=gmail&userId=${userId}`);
   const params = new URLSearchParams({
     client_id: GMAIL_CLIENT_ID,
     redirect_uri: redirectUri,
@@ -46,7 +48,7 @@ function buildGmailAuthUrl(userId: string): string {
     scope: scopes,
     access_type: 'offline',
     prompt: 'consent',
-    state: userId,
+    state: returnTo,
   });
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
@@ -60,12 +62,13 @@ function buildMsEmailAuthUrl(userId: string): string {
     'https://graph.microsoft.com/Mail.Read',
     'https://graph.microsoft.com/Mail.Send',
   ].join(' ');
+  const returnTo = encodeURIComponent(`${EMAIL_GUARD_RETURN_URL}?connected=microsoft_email&userId=${userId}`);
   const params = new URLSearchParams({
     client_id: MS_CLIENT_ID,
     redirect_uri: EMAIL_GUARD_REDIRECT_URI,
     response_type: 'code',
     scope: scopes,
-    state: userId,
+    state: returnTo,
     prompt: 'select_account',
   });
   return `https://login.microsoftonline.com/${MS_TENANT}/oauth2/v2.0/authorize?${params.toString()}`;
