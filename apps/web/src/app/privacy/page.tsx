@@ -80,7 +80,7 @@ export default function PrivacyPage() {
                 <a href="https://www.bland.ai/privacy" className="text-[#D4AF37] hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
               </li>
               <li>
-                <strong className="text-white">Anthropic</strong> — AI language model (Claude) for generating email content and responses.{' '}
+                <strong className="text-white">AKAI AI Engine</strong> — proprietary AI for generating email content and responses.{' '}
                 <a href="https://www.anthropic.com/privacy" className="text-[#D4AF37] hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
               </li>
               <li>
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
               <li>In compliance with the Australian Spam Act 2003 — every automated email includes a functioning unsubscribe mechanism</li>
               <li>Via Bland.ai for voice calls, in compliance with the Do Not Call Register Act 2006</li>
             </ul>
-            <p className="mt-3">AKAI uses AI (Anthropic Claude) to generate email content. AI-generated content is used to draft messages on your behalf. You are responsible for reviewing content where possible and for authorising auto-send mode.</p>
+            <p className="mt-3">AKAI uses AI to generate email content. AI-generated content is used to draft messages on your behalf. You are responsible for reviewing content where possible and for authorising auto-send mode.</p>
           </section>
 
           <section>
