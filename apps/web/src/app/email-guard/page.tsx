@@ -53,11 +53,12 @@ function buildGmailAuthUrl(userId: string): string {
 
 function buildMsEmailAuthUrl(userId: string): string {
   const scopes = [
+    'openid',
+    'profile',
+    'email',
+    'offline_access',
     'https://graph.microsoft.com/Mail.Read',
     'https://graph.microsoft.com/Mail.Send',
-    'offline_access',
-    'email',
-    'profile',
   ].join(' ');
   const params = new URLSearchParams({
     client_id: MS_CLIENT_ID,
