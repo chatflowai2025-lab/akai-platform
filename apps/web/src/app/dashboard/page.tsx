@@ -547,6 +547,7 @@ export default function DashboardPage() {
   });
 
   const [businessName, setBusinessName] = useState<string | null>(null);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
 
   const [insightsData, setInsightsData] = useState<InsightsData>({
@@ -634,11 +635,13 @@ export default function DashboardPage() {
           router.replace('/onboard');
           return;
         }
+        setOnboardingChecked(true);
 
         // Show setup checklist if onboarded but not dismissed
         if (data?.onboardingComplete === true && !data?.setupChecklistDismissed) {
           setShowChecklist(true);
         }
+        setOnboardingChecked(true);
       } catch {
         // Non-fatal
       }
@@ -961,8 +964,10 @@ export default function DashboardPage() {
   }
 
   const userEmail = user.email ?? 'there';
-  const resolvedBusinessName = businessName || user.displayName;
-  const displayName = resolvedBusinessName || userEmail.split('@')[0];
+  const resolvedBusinessName = businessName;
+  // Greeting uses first name (from displayName) not business name
+  const firstName = user.displayName?.split(' ')[0] || userEmail.split('@')[0];
+  const displayName = firstName;
 
   // "Needs You" checklist items
   const needsYouItems: NeedsYouItem[] = [];

@@ -13,16 +13,20 @@ import { getFirebaseAuth } from '@/lib/firebase';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // start true — prevents flash while signing out
   const [error, setError] = useState('');
 
   // On mount: always sign out whoever is logged in.
   // This page is only ever reached from an invite link — fresh start required.
   useEffect(() => {
     const auth = getFirebaseAuth();
-    if (auth?.currentUser) {
-      signOut(auth).catch(() => {});
-    }
+    const doSignout = async () => {
+      if (auth?.currentUser) {
+        await signOut(auth).catch(() => {});
+      }
+      setLoading(false);
+    };
+    doSignout();
   }, []);
 
   const handleGoogle = async () => {
@@ -73,6 +77,14 @@ export default function SignupPage() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">

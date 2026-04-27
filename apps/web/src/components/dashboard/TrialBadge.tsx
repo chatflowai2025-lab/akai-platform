@@ -25,14 +25,8 @@ export default function TrialBadge({ user }: TrialBadgeProps) {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10">
         <span className="text-xs text-[#D4AF37] font-semibold whitespace-nowrap">
-          🔥 Trial — {trial.daysLeft} day{trial.daysLeft !== 1 ? 's' : ''} left
+          Free trial — {trial.daysLeft} days remaining
         </span>
-        <a
-          href="/settings#upgrade"
-          className="text-xs bg-[#D4AF37] text-black font-bold px-2.5 py-0.5 rounded-full hover:opacity-90 transition whitespace-nowrap"
-        >
-          Upgrade →
-        </a>
       </div>
     );
   }
@@ -48,12 +42,7 @@ export default function TrialBadge({ user }: TrialBadgeProps) {
         <span className="text-xs text-amber-300 font-bold whitespace-nowrap">
           {trial.daysLeft}d left
         </span>
-        <a
-          href="/settings#upgrade"
-          className="text-xs bg-amber-400 text-black font-bold px-2.5 py-0.5 rounded-full hover:opacity-90 transition whitespace-nowrap"
-        >
-          Subscribe →
-        </a>
+
       </div>
     );
   }
@@ -62,12 +51,7 @@ export default function TrialBadge({ user }: TrialBadgeProps) {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-500/30 bg-red-500/10">
       <span className="text-xs text-red-400 font-semibold">⚠️ Trial ended</span>
-      <a
-        href="/settings#upgrade"
-        className="text-xs bg-[#D4AF37] text-black font-bold px-2.5 py-0.5 rounded-full hover:opacity-90 transition whitespace-nowrap"
-      >
-        Subscribe →
-      </a>
+
     </div>
   );
 }
