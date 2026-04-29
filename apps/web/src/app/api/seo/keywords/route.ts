@@ -2,21 +2,27 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getAdminFirestore } from '@/lib/firebase-admin';
-import { getApps } from 'firebase-admin/app';
 
 export const runtime = 'nodejs';
 
-function getAdminAuth() {
-  try {
-    const apps = getApps();
-    const adminApp = apps.find(a => a.name === 'admin');
-    if (!adminApp) return null;
-    return getAuth(adminApp);
-  } catch {
-    return null;
+function getAdminApp(): App | null {
+  const existing = getApps().find(a => a.name === 'admin');
+  if (existing) return existing;
+
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (projectId && clientEmail && privateKey) {
+    return initializeApp(
+      { credential: cert({ projectId, clientEmail, privateKey }), projectId },
+      'admin'
+    );
   }
+  return null;
 }
 
 async function verifyToken(req: NextRequest): Promise<string | null> {
@@ -24,11 +30,15 @@ async function verifyToken(req: NextRequest): Promise<string | null> {
   if (!auth?.startsWith('Bearer ')) return null;
   const token = auth.slice(7);
   try {
-    const adminAuth = getAdminAuth();
-    if (!adminAuth) return null;
-    const decoded = await adminAuth.verifyIdToken(token);
+    const app = getAdminApp();
+    if (!app) {
+      console.error('[SEO keywords] Firebase Admin not configured');
+      return null;
+    }
+    const decoded = await getAuth(app).verifyIdToken(token);
     return decoded.uid;
-  } catch {
+  } catch (err) {
+    console.error('[SEO keywords] Token verification failed:', err);
     return null;
   }
 }
