@@ -903,13 +903,23 @@ function CalendarContent({ user }: { user: { uid: string } }) {
                   const endpoint = calProvider === 'outlook'
                     ? `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/email/microsoft/disconnect`
                     : `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/calendar/disconnect`;
-                  await fetch(endpoint, {
+                  // Clear from Firestore first (source of truth)
+                  try {
+                    const db = getFirebaseDb();
+                    if (db) await setDoc(doc(db, 'users', user.uid), {
+                      googleCalendarConnected: false,
+                      microsoftCalendarConnected: false,
+                      calendarConfig: { provider: null, connected: false },
+                    }, { merge: true });
+                  } catch { /* non-fatal */ }
+                  setCalConnected(false);
+                  setCalProvider(null);
+                  // Also try Railway (non-blocking)
+                  fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '' },
                     body: JSON.stringify({ userId: user.uid }),
                   }).catch(() => {});
-                  setCalConnected(false);
-                  setCalProvider(null);
                 }}
                 className="text-xs text-gray-600 hover:text-red-400 transition px-2 py-1.5 rounded-lg border border-[#1f1f1f] hover:border-red-500/30"
               >
