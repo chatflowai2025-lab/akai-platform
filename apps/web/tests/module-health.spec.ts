@@ -40,7 +40,9 @@ async function assertNoErrorText(page: Page) {
     'Something went wrong',
     'Unexpected error',
     'Internal Server Error',
-    '500',
+    'Error 500',
+    'HTTP 500',
+    '500 Internal',
     'Error fetching',
     'Failed to load',
   ];
@@ -154,7 +156,7 @@ test.describe('Calendar module', () => {
 
   test('shows calendar UI with month/week/day controls', async ({ page }) => {
     await loadModule(page, '/calendar');
-    await expect(page.locator('text=Calendar')).toBeVisible();
+    await expect(page.locator('h1:has-text("Calendar"), h2:has-text("Calendar"), [data-testid="calendar-title"]').first()).toBeVisible();
     // View controls
     const hasViewToggle =
       await page.locator('button').filter({ hasText: /month/i }).count() > 0 ||

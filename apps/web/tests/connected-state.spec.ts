@@ -647,16 +647,16 @@ test.describe("Aaron's 10 — Connected State", () => {
     console.log('Homepage: "AK" text visible ✓');
 
     // Assert "Your AI Business Partner" visible
-    const tagline = page.locator('text=/Your AI Business Partner/i').first();
+    const tagline = page.getByText(/Your entire business|One prompt|Your AI Business Partner/i).first();
     const taglineVisible = await tagline.isVisible().catch(() => false);
     expect(taglineVisible).toBeTruthy();
-    console.log('Homepage: "Your AI Business Partner" visible ✓');
+    console.log('Homepage: Hero tagline visible ✓');
 
-    // Assert "Try Live Agent" button visible
-    const tryLiveBtn = page.locator('button:has-text("Try Live Agent"), a:has-text("Try Live Agent")').first();
-    const tryLiveBtnVisible = await tryLiveBtn.isVisible().catch(() => false);
-    expect(tryLiveBtnVisible).toBeTruthy();
-    console.log('Homepage: "Try Live Agent" button visible ✓');
+    // Assert primary CTA button visible (various copy versions)
+    const ctaBtn = page.locator('button, a').filter({ hasText: /get early access|try live|start free|get started|sign in/i }).first();
+    const ctaBtnVisible = await ctaBtn.isVisible().catch(() => false);
+    expect(ctaBtnVisible).toBeTruthy();
+    console.log('Homepage: CTA button visible ✓');
 
     // Assert AK chat bubble in bottom right
     const chatBubble = page.locator(

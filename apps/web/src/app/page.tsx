@@ -240,7 +240,7 @@ const HERO_HEADLINES = [
   },
 ];
 
-function HeroSection({ onOpenCapture, onOpenHealthReport, onOpenDemo: _onOpenDemo }: { onOpenCapture: () => void; onOpenHealthReport: () => void; onOpenDemo: () => void }) {
+function HeroSection({ onOpenCapture: _onOpenCapture, onOpenHealthReport, onOpenDemo: _onOpenDemo }: { onOpenCapture: () => void; onOpenHealthReport: () => void; onOpenDemo: () => void }) {
   const [heroIdx, setHeroIdx] = useState(0);
   const [fading, setFading] = useState(false);
 
@@ -331,13 +331,14 @@ function HeroSection({ onOpenCapture, onOpenHealthReport, onOpenDemo: _onOpenDem
       {/* CTAs */}
       <div className="fade-up fade-up-4 flex flex-col items-center gap-4 mb-6 w-full max-w-sm sm:max-w-none">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
-          <button
-            onClick={onOpenCapture}
-            aria-label="Start free trial"
+          <a
+            href="/login"
+            onClick={() => gtag('cta_clicked', { button: 'Get Started', page: 'homepage' })}
+            aria-label="Get Started"
             className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-bold rounded-xl px-8 py-4 text-base hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[#D4AF37]/25 w-full sm:min-w-[200px] sm:w-auto"
           >
-            Start Free Trial →
-          </button>
+            Get Started →
+          </a>
           <button
             onClick={() => { gtag('cta_clicked', { button: 'Free Health Report', page: 'homepage' }); onOpenHealthReport(); }}
             className="inline-flex items-center justify-center gap-2 bg-transparent border border-[#D4AF37]/30 text-[#D4AF37] font-semibold rounded-xl px-8 py-4 text-base hover:border-[#D4AF37]/60 hover:bg-[#D4AF37]/5 transition-all w-full sm:min-w-[200px] sm:w-auto"

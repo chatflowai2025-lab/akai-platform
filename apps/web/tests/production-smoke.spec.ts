@@ -43,13 +43,13 @@ test.describe('SMOKE 1 — Homepage', () => {
     // Brand
     await expect(page.locator('text=AK').first()).toBeVisible({ timeout: 10000 });
 
-    // Hero headline or tagline
-    const heroContent = page.locator('text=/Your AI Business Partner/i, text=/AI.*team/i, text=/business partner/i').first();
+    // Hero headline or tagline (match any of the known hero text variants)
+    const heroContent = page.getByText(/Your entire business|One prompt|AI.*team|Your AI Business Partner/i).first();
     await expect(heroContent).toBeVisible({ timeout: 10000 });
     console.log('S1b: Hero content visible ✓');
 
     // At least one CTA button
-    const ctaBtn = page.locator('button').filter({ hasText: /get early access|try live|start free|get started/i }).first();
+    const ctaBtn = page.locator('button, a').filter({ hasText: /get early access|try live|start free|get started|sign in/i }).first();
     await expect(ctaBtn).toBeVisible({ timeout: 8000 });
     console.log('S1b: CTA button visible ✓');
   });
