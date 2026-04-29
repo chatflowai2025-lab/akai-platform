@@ -450,16 +450,29 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     setConnectError(null);
     track('calendar_connect_clicked', { provider: 'google' });
     try {
-      const r = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/calendar/oauth-url?userId=${userId}`,
-        { headers: { 'x-api-key': process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '' } }
-      );
-      if (!r.ok) throw new Error(`Server error ${r.status}`);
-      const { url } = await r.json();
-      window.location.href = url;
+      // Build Google Calendar OAuth URL client-side — Railway endpoint not reliable
+      // RCA: /api/calendar/oauth-url didn't exist on Railway
+      const GMAIL_CLIENT_ID = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '483958880068-fl9q2ildmfjmhfcat93pkqpcrl79qhb4.apps.googleusercontent.com';
+      const redirectUri = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
+      const returnTo = encodeURIComponent(`${window.location.origin}/calendar?connected=google_calendar&userId=${userId}`);
+      const scopes = [
+        'https://www.googleapis.com/auth/calendar',
+        'email',
+        'profile',
+      ].join(' ');
+      const params = new URLSearchParams({
+        client_id: GMAIL_CLIENT_ID,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: scopes,
+        access_type: 'offline',
+        prompt: 'consent',
+        state: returnTo,
+      });
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      setConnectError('Could not reach the Google Calendar service. Try again in a moment.');
+      setConnectError('Could not start Google Calendar connection. Try again.');
       track('calendar_connect_failed', { provider: 'google', error });
       setConnecting(null);
     }
@@ -656,16 +669,38 @@ function CalendarContent({ user }: { user: { uid: string } }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get('connected') === 'google') {
+    const connected = params.get('connected');
+    
+    if (connected === 'google' || connected === 'google_calendar') {
       setCalConnected(true);
       setCalProvider('google');
       track('calendar_connected', { provider: 'google' });
+      // Save to Firestore so dashboard checklist updates
+      (async () => { try {
+        const { getFirebaseDb } = await import('@/lib/firebase');
+        const { doc, setDoc } = await import('firebase/firestore');
+        const db = getFirebaseDb();
+        if (db) await setDoc(doc(db, 'users', user.uid), {
+          googleCalendarConnected: true,
+          calendarConfig: { provider: 'google', connected: true }
+        }, { merge: true });
+      } catch { /* non-fatal */ } })();
       history.pushState({}, '', window.location.pathname);
     }
-    if (params.get('connected') === 'outlook') {
+    if (connected === 'outlook' || connected === 'outlook_calendar') {
       setCalConnected(true);
       setCalProvider('outlook');
       track('calendar_connected', { provider: 'outlook' });
+      // Save to Firestore so dashboard checklist updates
+      (async () => { try {
+        const { getFirebaseDb } = await import('@/lib/firebase');
+        const { doc, setDoc } = await import('firebase/firestore');
+        const db = getFirebaseDb();
+        if (db) await setDoc(doc(db, 'users', user.uid), {
+          microsoftCalendarConnected: true,
+          calendarConfig: { provider: 'outlook', connected: true }
+        }, { merge: true });
+      } catch { /* non-fatal */ } })();
       history.pushState({}, '', window.location.pathname);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

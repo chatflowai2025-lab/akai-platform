@@ -457,7 +457,7 @@ function SetupChecklist({ uid, onDismiss }: { uid: string; onDismiss: () => void
   const { userProfile } = useAuth();
   const profile = userProfile as Record<string, unknown> | null;
   const emailConnected = !!(profile?.gmail as Record<string,unknown> | undefined)?.connected || !!(profile?.inboxConnection as Record<string,unknown> | undefined)?.connected;
-  const calendarConnected = !!(profile?.googleCalendarConnected) || !!(profile?.inboxConnection as Record<string,unknown> | undefined)?.connected;
+  const calendarConnected = !!(profile?.googleCalendarConnected) || !!(profile?.microsoftCalendarConnected) || !!(profile?.calendarConfig as Record<string,unknown> | undefined)?.connected;
   const businessSet = !!(profile?.businessName as string | undefined)?.trim();
 
   const items = [
