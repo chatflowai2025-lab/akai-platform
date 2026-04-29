@@ -688,7 +688,7 @@ function WebAuditInline({
     <div className="space-y-4">
       <div className="flex gap-3">
         <input
-          type="url"
+          type="text"
           autoComplete="url"
           value={website}
           onChange={e => setWebsite(e.target.value)}
