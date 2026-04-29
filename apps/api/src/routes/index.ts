@@ -230,4 +230,176 @@ Return ONLY a valid JSON array, no other text.`
   })();
 });
 
+// Lead generation from lead profile — "Gold Standard"
+router.post('/leads/generate', async (req: Request, res: Response): Promise<void> => {
+  const key = req.headers['x-api-key'] as string;
+  const validKey = process.env.API_KEY || 'aiclozr_api_key_2026_prod';
+  const internalKey = process.env.INTERNAL_API_KEY || 'akai_internal_2026';
+  if (!key || (key !== validKey && key !== internalKey)) {
+    res.status(401).json({ error: 'Invalid API key' }); return;
+  }
+
+  const { userId, profile } = req.body;
+  if (!userId || !profile) {
+    res.status(400).json({ error: 'userId and profile required' }); return;
+  }
+
+  console.log(`[leads/generate] Generating leads for ${userId} | ${profile.vertical} | ${profile.location}`);
+
+  try {
+    const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
+    if (!ANTHROPIC_KEY) {
+      res.status(500).json({ error: 'Anthropic API key not configured' }); return;
+    }
+
+    // Map profile values to human-readable labels
+    const verticalLabels: Record<string, string> = {
+      luxury_kitchens: 'Luxury Kitchens & Interiors',
+      real_estate: 'Real Estate & Property',
+      legal: 'Legal Services',
+      accounting: 'Accounting & Finance',
+      recruitment: 'Recruitment & HR',
+      construction: 'Construction & Trades',
+      marine: 'Marine & Yachts',
+      landscaping: 'Landscaping & Outdoor',
+      medical: 'Medical & Healthcare',
+      fitness: 'Fitness & Wellness',
+      hospitality: 'Hospitality & Events',
+      ecommerce: 'E-commerce & Retail',
+      saas: 'SaaS & Technology',
+    };
+
+    const locationLabels: Record<string, string> = {
+      sydney: 'Sydney, Australia',
+      melbourne: 'Melbourne, Australia',
+      brisbane: 'Brisbane, Australia',
+      perth: 'Perth, Australia',
+      australia_wide: 'Australia',
+      new_york: 'New York, USA',
+      los_angeles: 'Los Angeles, USA',
+      usa_wide: 'USA',
+      london: 'London, UK',
+      uk_wide: 'UK',
+    };
+
+    const companySizeLabels: Record<string, string> = {
+      sole_trader: 'sole traders/freelancers',
+      micro: 'micro businesses (1-5 employees)',
+      small: 'small businesses (6-20 employees)',
+      medium: 'medium businesses (21-100 employees)',
+      large: 'large enterprises (100+ employees)',
+    };
+
+    const decisionMakerLabels: Record<string, string> = {
+      owner: 'Owner/Founder',
+      ceo: 'CEO/Managing Director',
+      marketing: 'Marketing Director/CMO',
+      sales: 'Sales Director/VP Sales',
+      operations: 'Operations Manager/COO',
+      finance: 'CFO/Finance Director',
+      hr: 'HR Director',
+      it: 'IT Director/CTO',
+      procurement: 'Procurement/Purchasing Manager',
+    };
+
+    const vertical = verticalLabels[profile.vertical] || profile.verticalCustom || profile.vertical;
+    const location = locationLabels[profile.location] || profile.locationCustom || profile.location;
+    const sizes = (profile.companySize || []).map((s: string) => companySizeLabels[s] || s).join(', ');
+    const dms = (profile.decisionMakers || []).map((d: string) => decisionMakerLabels[d] || d).join(', ');
+    const exclusions = profile.exclusions ? `\n\nEXCLUDE: ${profile.exclusions}` : '';
+
+    const prompt = `Generate 15 realistic B2B sales leads matching this Gold Standard profile:
+
+- Industry: ${vertical}
+- Location: ${location}
+- Company Size: ${sizes}
+- Decision Makers: ${dms}${exclusions}
+
+These should be businesses that would be ideal prospects for selling to. Focus on contacts matching the decision maker titles specified.
+
+For each lead return JSON with these fields:
+- name: Full name of the decision maker
+- business: Company/business name
+- title: Their job title
+- type: Business type/category
+- suburb: Suburb/district
+- address: Full address
+- phone: Business phone
+- mobile: Mobile (04xx format for AU)
+- email: Business email
+- website: Company website
+- confidence: one of "✅✅ Verified", "✅ Likely", "⚠️ Unverified"
+- outreach_email: A personalized 2-3 sentence outreach email opener (single line, no newlines)
+
+Return ONLY a valid JSON array, no other text.`;
+
+    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 
+        'x-api-key': ANTHROPIC_KEY, 
+        'anthropic-version': '2023-06-01', 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 6000,
+        messages: [{ role: 'user', content: prompt }]
+      }),
+    });
+
+    const claudeData = await claudeRes.json() as any;
+    const text = claudeData.content?.[0]?.text || '[]';
+    const start = text.indexOf('[');
+    const end = text.lastIndexOf(']') + 1;
+    let leads = JSON.parse(text.slice(start, end)) as any[];
+
+    // Normalize leads
+    leads = leads.slice(0, 15).map((l: any, idx: number) => {
+      const required = ['name','business','title','type','suburb','address','phone','mobile','email','website','confidence','outreach_email'];
+      required.forEach(f => { if (!l[f]) l[f] = ''; });
+      l.outreach_email = (l.outreach_email || '').split('\n').join(' ').split('\r').join(' ').trim();
+      l.id = `gen-${Date.now()}-${idx}`;
+      l.status = 'new';
+      l.created_at = new Date().toISOString();
+      l.source = 'gold_standard';
+      l.userId = userId;
+      return l;
+    });
+
+    console.log(`[leads/generate] Generated ${leads.length} leads for ${userId}`);
+    res.json({ ok: true, leads, count: leads.length });
+
+  } catch (err: any) {
+    console.error('[leads/generate] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/leads — fetch leads for user
+router.get('/leads', async (req: Request, res: Response): Promise<void> => {
+  const key = req.headers['x-api-key'] as string;
+  const validKey = process.env.API_KEY || 'aiclozr_api_key_2026_prod';
+  const internalKey = process.env.INTERNAL_API_KEY || 'akai_internal_2026';
+  if (!key || (key !== validKey && key !== internalKey)) {
+    res.status(401).json({ error: 'Invalid API key' }); return;
+  }
+  // For now return empty — leads stored in Firestore client-side or Sheet
+  res.json({ leads: [] });
+});
+
+// PATCH /api/leads/:leadId — update lead status
+router.patch('/leads/:leadId', async (req: Request, res: Response): Promise<void> => {
+  const key = req.headers['x-api-key'] as string;
+  const validKey = process.env.API_KEY || 'aiclozr_api_key_2026_prod';
+  const internalKey = process.env.INTERNAL_API_KEY || 'akai_internal_2026';
+  if (!key || (key !== validKey && key !== internalKey)) {
+    res.status(401).json({ error: 'Invalid API key' }); return;
+  }
+  const { leadId } = req.params;
+  const { status, meeting_booked } = req.body;
+  console.log(`[leads/${leadId}] Update: status=${status}, meeting_booked=${meeting_booked}`);
+  // For now just acknowledge — actual persistence via Firestore client-side
+  res.json({ ok: true, leadId, status, meeting_booked });
+});
+
 export default router;

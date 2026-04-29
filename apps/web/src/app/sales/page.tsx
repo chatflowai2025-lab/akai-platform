@@ -9,6 +9,7 @@ import { useDashboardChat } from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { getFirebaseDb } from '@/lib/firebase';
 import { useTrackBehaviour } from '@/hooks/useTrackBehaviour';
+import { LeadProfileWizard, LeadProfileCard, EmptyLeadProfile, type LeadProfile } from '@/components/sales/LeadProfileWizard';
 
 function safeSend(fn: (t: string) => void, text: string) { try { fn(text); } catch { /* chat not ready */ } }
 
@@ -1573,11 +1574,69 @@ export default function SalesPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
 
+  // Lead Profile state
+  const [leadProfile, setLeadProfile] = useState<LeadProfile | null>(null);
+  const [leadProfileLoading, setLeadProfileLoading] = useState(true);
+  const [showWizard, setShowWizard] = useState(false);
+  const [generatingLeads, setGeneratingLeads] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
     }
   }, [user, loading, router]);
+
+  // Fetch lead profile from Firestore
+  useEffect(() => {
+    if (!user) return;
+    const db = getFirebaseDb();
+    if (!db) {
+      setLeadProfileLoading(false);
+      return;
+    }
+    (async () => {
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        const data = snap.data();
+        if (data?.leadProfile) {
+          setLeadProfile(data.leadProfile as LeadProfile);
+        }
+      } catch (err) {
+        console.error('[SalesPage] Failed to load lead profile:', err);
+      } finally {
+        setLeadProfileLoading(false);
+      }
+    })();
+  }, [user]);
+
+  // Handle lead generation based on profile
+  const handleGenerateLeads = useCallback(async () => {
+    if (!leadProfile || !user) return;
+    setGeneratingLeads(true);
+    try {
+      const idToken = await user.getIdToken().catch(() => '');
+      const res = await fetch(`${RAILWAY_API}/api/leads/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': RAILWAY_API_KEY,
+          ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          profile: leadProfile,
+        }),
+      });
+      const data = await res.json();
+      if (data.leads && Array.isArray(data.leads)) {
+        setLeads(prev => [...data.leads, ...prev]);
+      }
+    } catch (err) {
+      console.error('[SalesPage] Lead generation failed:', err);
+    } finally {
+      setGeneratingLeads(false);
+    }
+  }, [leadProfile, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -1659,6 +1718,28 @@ export default function SalesPage() {
       </header>
 
       <div className="flex-1 overflow-y-auto p-8 space-y-8">
+
+        {/* Lead Profile Section - Gold Standard */}
+        <section>
+          <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
+            Lead Profile
+            {leadProfileLoading && (
+              <span role="status" aria-label="Loading" className="ml-2 inline-block w-3 h-3 border border-gray-600 border-t-transparent rounded-full animate-spin align-middle" />
+            )}
+          </h2>
+          {!leadProfileLoading && (
+            leadProfile ? (
+              <LeadProfileCard
+                profile={leadProfile}
+                onEdit={() => setShowWizard(true)}
+                onGenerateLeads={handleGenerateLeads}
+                generating={generatingLeads}
+              />
+            ) : (
+              <EmptyLeadProfile onSetup={() => setShowWizard(true)} />
+            )
+          )}
+        </section>
 
         <LeadUploadSection
           userId={user.uid}
@@ -1761,6 +1842,21 @@ export default function SalesPage() {
         <CTASection />
 
       </div>
+
+      {/* Lead Profile Wizard Modal */}
+      {showWizard && (
+        <LeadProfileWizard
+          userId={user.uid}
+          existingProfile={leadProfile}
+          onComplete={(profile) => {
+            setLeadProfile(profile);
+            setShowWizard(false);
+            // Auto-generate leads after profile creation
+            handleGenerateLeads();
+          }}
+          onCancel={() => setShowWizard(false)}
+        />
+      )}
     </DashboardLayout>
   );
 }
