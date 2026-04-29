@@ -775,7 +775,7 @@ export default function SocialPage() {
         {/* Connect Accounts */}
         <section>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Connect Accounts</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
             {[
               {
                 label: 'Instagram' as ConnectingPlatform,
@@ -784,7 +784,7 @@ export default function SocialPage() {
                 border: 'border-pink-500/20',
                 text: 'text-pink-400',
                 btnColor: 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:opacity-90',
-                btnLabel: 'Connect Instagram →',
+                btnLabel: 'Connect',
               },
               {
                 label: 'LinkedIn' as ConnectingPlatform,
@@ -793,7 +793,7 @@ export default function SocialPage() {
                 border: 'border-blue-500/20',
                 text: 'text-blue-400',
                 btnColor: 'bg-gradient-to-r from-blue-600 to-blue-400 text-white hover:opacity-90',
-                btnLabel: 'Connect LinkedIn →',
+                btnLabel: 'Connect',
               },
               {
                 label: 'Facebook' as ConnectingPlatform,
@@ -802,7 +802,7 @@ export default function SocialPage() {
                 border: 'border-indigo-500/20',
                 text: 'text-indigo-400',
                 btnColor: 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90',
-                btnLabel: 'Connect Facebook →',
+                btnLabel: 'Connect',
               },
               {
                 label: 'X (Twitter)' as ConnectingPlatform,
@@ -811,7 +811,7 @@ export default function SocialPage() {
                 border: 'border-gray-400/20',
                 text: 'text-gray-200',
                 btnColor: 'bg-white text-black hover:opacity-90',
-                btnLabel: 'Connect X →',
+                btnLabel: 'Connect',
               },
               {
                 label: 'TikTok' as ConnectingPlatform,
@@ -820,39 +820,38 @@ export default function SocialPage() {
                 border: 'border-pink-400/20',
                 text: 'text-pink-300',
                 btnColor: 'bg-gradient-to-r from-pink-400 to-cyan-400 text-white hover:opacity-90',
-                btnLabel: 'Connect TikTok →',
+                btnLabel: 'Connect',
               },
             ].map(p => {
               const isXConnected = p.label === 'X (Twitter)' && xConnection;
               return (
                 <div
                   key={p.label}
-                  className={`flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r ${p.gradient} border ${isXConnected ? 'border-green-500/30' : p.border}`}
+                  className={`flex flex-col items-center text-center p-4 rounded-xl bg-gradient-to-b ${p.gradient} border ${isXConnected ? 'border-green-500/30' : p.border}`}
                 >
-                  <span className="text-2xl flex-shrink-0">{p.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-semibold ${p.text} truncate`}>{p.label}</div>
-                    {isXConnected ? (
-                      <span className="inline-block mt-0.5 text-[11px] px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 font-medium">
+                  <span className="text-3xl mb-2">{p.icon}</span>
+                  <div className={`text-sm font-semibold ${p.text} mb-1`}>{p.label}</div>
+                  {isXConnected ? (
+                    <>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 font-medium mb-2">
                         ✅ @{xConnection.username}
                       </span>
-                    ) : (
-                      <span className="inline-block mt-0.5 text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-500 font-medium">
+                      <span className="text-xs text-green-400 font-semibold">
+                        {xConnection.followersCount.toLocaleString()} followers
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-500 font-medium mb-3">
                         Not connected
                       </span>
-                    )}
-                  </div>
-                  {isXConnected ? (
-                    <span className="flex-shrink-0 text-xs text-green-400 font-semibold">
-                      {xConnection.followersCount.toLocaleString()} followers
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setConnectingPlatform(p.label)}
-                      className={`flex-shrink-0 text-xs px-3 py-2 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap ${p.btnColor}`}
-                    >
-                      {p.btnLabel}
-                    </button>
+                      <button
+                        onClick={() => setConnectingPlatform(p.label)}
+                        className={`w-full text-xs px-4 py-2 rounded-lg font-bold transition-all cursor-pointer ${p.btnColor}`}
+                      >
+                        {p.btnLabel}
+                      </button>
+                    </>
                   )}
                 </div>
               );
