@@ -231,21 +231,23 @@ function ConnectionBanner({ platform, icon, description }: { platform: string; i
 
   return (
     <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5">
-      <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-xl bg-[#0d0d0d] border border-[#2a2a2a] flex items-center justify-center text-2xl flex-shrink-0">
-          {icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-white font-bold text-sm">{platform}</h2>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-500/10 border border-gray-500/20 text-gray-500 font-medium">
-              Not connected
-            </span>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-4">
+          <div className="w-11 h-11 rounded-xl bg-[#0d0d0d] border border-[#2a2a2a] flex items-center justify-center text-2xl flex-shrink-0">
+            {icon}
           </div>
-          <p className="text-xs text-gray-500">{description}</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h2 className="text-white font-bold text-sm">{platform}</h2>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-500/10 border border-gray-500/20 text-gray-500 font-medium">
+                Not connected
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
+          </div>
         </div>
         <button
-          className="flex-shrink-0 px-4 py-2 rounded-xl border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-bold hover:bg-[#D4AF37]/10 transition"
+          className="w-full sm:w-auto sm:self-end px-4 py-2 rounded-xl border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-bold hover:bg-[#D4AF37]/10 transition"
           onClick={() => setShowInfo(v => !v)}
         >
           Connect {platform.split(' ')[0]}
@@ -1082,7 +1084,7 @@ export default function AdsPage() {
         ) : (
           <>
             {/* Connection banners */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <ConnectionBanner
                 platform="Google Ads"
                 icon="📊"
