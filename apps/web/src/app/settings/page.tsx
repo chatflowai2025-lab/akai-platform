@@ -629,6 +629,7 @@ export default function SettingsPage() {
           <p className="text-sm text-gray-400">Integration status for all connected services.</p>
           <div className="divide-y divide-[#1f1f1f]">
             {[
+              // Email
               {
                 key: 'microsoft',
                 label: 'Microsoft Outlook',
@@ -645,6 +646,7 @@ export default function SettingsPage() {
                 connectHref: '/email-guard',
                 disconnectHref: '/email-guard',
               },
+              // Calendar
               {
                 key: 'googleCalendar',
                 label: 'Google Calendar',
@@ -653,6 +655,15 @@ export default function SettingsPage() {
                 connectHref: '/calendar',
                 disconnectHref: '/calendar',
               },
+              {
+                key: 'microsoftCalendar',
+                label: 'Microsoft Calendar',
+                icon: '📆',
+                account: connectedAccounts.microsoftCalendar,
+                connectHref: '/calendar',
+                disconnectHref: '/calendar',
+              },
+              // Social
               {
                 key: 'instagram',
                 label: 'Instagram',
@@ -678,14 +689,6 @@ export default function SettingsPage() {
                 disconnectHref: '/social',
               },
               {
-                key: 'microsoftCalendar',
-                label: 'Microsoft Calendar',
-                icon: '📆',
-                account: connectedAccounts.microsoftCalendar,
-                connectHref: '/calendar',
-                disconnectHref: '/calendar',
-              },
-              {
                 key: 'tiktok',
                 label: 'TikTok',
                 icon: '🎵',
@@ -701,6 +704,7 @@ export default function SettingsPage() {
                 connectHref: '/social',
                 disconnectHref: '/social',
               },
+              // Website
               {
                 key: 'wordpress',
                 label: 'WordPress',
