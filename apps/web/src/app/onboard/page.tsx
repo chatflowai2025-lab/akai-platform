@@ -107,15 +107,11 @@ function getInitialMessage(): ChatMessage {
       const name = signup.name ? `, ${signup.name}` : '';
       if (signup.industry && signup.businessName && signup.location) {
         return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
-          content: `Hi${name}! I'm AK — your AI business partner. I can see you're in ${signup.industry}, running ${signup.businessName} in ${signup.location}. Looking good.
-
-Just a few more questions and you're ready to go. Do you have a website?` };
+          content: `Hi${name}! I'm AK — your AI business partner. I can see you're in ${signup.industry}, running ${signup.businessName} in ${signup.location}. Looking good.\n\nWhat's your main goal right now? (e.g. more leads, faster follow-up, book more meetings)` };
       }
       if (signup.industry && signup.businessName) {
         return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
-          content: `Hi${name}! I'm AK — your AI business partner. You're in ${signup.industry}, running ${signup.businessName}.
-
-Do you have a website? (Drop the URL or type "no")` };
+          content: `Hi${name}! I'm AK — your AI business partner. You're in ${signup.industry}, running ${signup.businessName}.\n\nDo you have a website? (Drop the URL or type "no")` };
       }
       if (signup.industry) {
         return { id: '1', role: 'assistant', timestamp: new Date().toISOString(),
