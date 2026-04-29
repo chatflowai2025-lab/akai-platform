@@ -167,7 +167,7 @@ Return ONLY a valid JSON array, no other text.`
             await fetch(`https://www.googleapis.com/drive/v3/files/${sheetId}/permissions`, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+              body: JSON.stringify({ role: 'writer', type: 'anyone' }),
             });
             sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
             console.log(`[onboarding/complete] Sheet created: ${sheetUrl}`);
