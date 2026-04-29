@@ -292,7 +292,17 @@ export default function OnboardPage() {
     if (!user?.uid || completing) return;
     setCompleting(true);
 
-    const { businessName, industry, goal, location, contact } = finalState.data;
+    // Pull from state — fall back to signup details if chat skipped those steps
+    let signupDetails: Record<string,string> = {};
+    try {
+      const raw = typeof window !== 'undefined' ? sessionStorage.getItem('akai_signup_details') : null;
+      if (raw) signupDetails = JSON.parse(raw);
+    } catch { /* ignore */ }
+    const businessName = finalState.data.businessName || signupDetails.businessName || '';
+    const industry = finalState.data.industry || signupDetails.industry || '';
+    const goal = finalState.data.goal || '';
+    const location = finalState.data.location || signupDetails.location || '';
+    const contact = finalState.data.contact || '';
 
     try {
       // Non-fatal: save to Firestore
