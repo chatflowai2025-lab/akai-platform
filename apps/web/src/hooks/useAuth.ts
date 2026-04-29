@@ -64,7 +64,9 @@ async function syncUserProfile(user: User): Promise<UserProfile> {
     // Existing user — update lastLoginAt
     await updateDoc(ref, { lastLoginAt: serverTimestamp() });
     const data = snap.data();
+    // Spread ALL Firestore fields so dashboard can read inboxConnection, gmail, googleCalendarConnected etc.
     return {
+      ...data,
       uid: user.uid,
       email: data.email ?? user.email,
       displayName: data.displayName ?? user.displayName,
