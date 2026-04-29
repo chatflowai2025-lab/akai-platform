@@ -333,6 +333,14 @@ async function incrementAuditUsage(userId: string) {
   } catch { /* non-fatal */ }
 }
 
+// Audit state type - ensures only ONE state is active at a time
+type AuditState = 
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'exhausted'; message: string }
+  | { status: 'error'; message: string }
+  | { status: 'complete'; result: AuditResult };
+
 function AuditPanel({
   url,
   onDisconnect,
@@ -342,9 +350,7 @@ function AuditPanel({
   onDisconnect: () => void;
   userId?: string;
 }) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AuditResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [auditState, setAuditState] = useState<AuditState>({ status: 'idle' });
   const [auditUsage, setAuditUsage] = useState<{ count: number; plan: string; limit: number } | null>(null);
   // Use a ref for the notified flag — avoids re-render → useCallback recreation → useEffect re-fire loop
   const notifiedRef = useRef(false);
@@ -358,14 +364,12 @@ function AuditPanel({
   const runAudit = useCallback(async () => {
     // Don't fire if URL is not yet loaded
     if (!url?.trim()) return;
-    // Check usage limit
+    // Check usage limit - show exhausted state, NOT error (keeps UI clean)
     if (userId && auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit) {
-      setError(`You've used all ${auditUsage.limit} web audits for this month. Upgrade to run more.`);
+      setAuditState({ status: 'exhausted', message: `You've used all ${auditUsage.limit} web audits for this month. Upgrade to run more.` });
       return;
     }
-    setLoading(true);
-    setError(null);
-    setResult(null);
+    setAuditState({ status: 'loading' });
     notifiedRef.current = false;
     try {
       const res = await fetch(`${RAILWAY_API}/api/website-mockup/audit`, {
@@ -397,7 +401,7 @@ function AuditPanel({
         'Minify CSS and JavaScript files',
       ];
       const issues = [...gaps, ...wins].length > 0 ? [...gaps, ...wins] : fallbackIssues;
-      const auditResult = {
+      const auditResult: AuditResult = {
         overallScore: (scores.overall ?? 0) * 10,
         speedScore: ((scores.speed ?? 0) * 10) || (data.speedScore ?? data.speed_score ?? data.performance ?? 72),
         seoScore: ((scores.seo ?? 0) * 10) || (data.seoScore ?? data.seo_score ?? 68),
@@ -410,7 +414,7 @@ function AuditPanel({
         issues,
         opportunityScore: data.opportunityScore,
       };
-      setResult(auditResult);
+      setAuditState({ status: 'complete', result: auditResult });
       // Save to audit history
       appendAuditHistory({
         id: Date.now().toString(),
@@ -448,13 +452,18 @@ function AuditPanel({
         }
       }
     } catch {
-      setError("Couldn't reach the audit service. Check the URL and try again.");
-    } finally {
-      setLoading(false);
+      setAuditState({ status: 'error', message: "Couldn't reach the audit service. Check the URL and try again." });
     }
   }, [url, userId, sendMessage, auditUsage]);
 
   useEffect(() => { runAudit(); }, [runAudit]);
+
+  // Extract current result for rendering (only when status is 'complete')
+  const result = auditState.status === 'complete' ? auditState.result : null;
+  const isLoading = auditState.status === 'loading';
+  const isExhausted = auditState.status === 'exhausted';
+  const isError = auditState.status === 'error';
+  const errorMessage = auditState.status === 'error' ? auditState.message : auditState.status === 'exhausted' ? auditState.message : null;
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -469,10 +478,10 @@ function AuditPanel({
         )}
         <button
           onClick={runAudit}
-          disabled={loading || (!!auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit)}
+          disabled={isLoading || (!!auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit)}
           className="px-4 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-gray-300 rounded-xl text-sm hover:border-[#D4AF37]/30 hover:text-white disabled:opacity-40 transition flex-shrink-0"
         >
-          {loading ? '⏳ Auditing…' : '🔄 Re-audit'}
+          {isLoading ? '⏳ Auditing…' : '🔄 Re-audit'}
         </button>
         <button
           onClick={onDisconnect}
@@ -482,8 +491,8 @@ function AuditPanel({
         </button>
       </div>
 
-      {/* Prominent status banners — shown at the very top, impossible to miss */}
-      {loading && (
+      {/* Single status banner — only ONE state shown at a time */}
+      {isLoading && (
         <div className="flex-shrink-0 px-6 pt-4">
           <style>{`
             @keyframes auditProgress {
@@ -509,13 +518,31 @@ function AuditPanel({
         </div>
       )}
 
-      {error && !loading && (
+      {isExhausted && (
+        <div className="flex-shrink-0 px-6 pt-4">
+          <div className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-4 flex items-start gap-3">
+            <span className="text-lg flex-shrink-0">⚠️</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-yellow-400">Audit limit reached</p>
+              <p className="text-xs text-yellow-300/70 mt-0.5">{errorMessage}</p>
+            </div>
+            <a
+              href="/settings"
+              className="px-3 py-1.5 bg-[#D4AF37] text-black rounded-lg text-xs font-semibold hover:opacity-90 transition flex-shrink-0"
+            >
+              Upgrade
+            </a>
+          </div>
+        </div>
+      )}
+
+      {isError && (
         <div className="flex-shrink-0 px-6 pt-4">
           <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 flex items-start gap-3">
             <span className="text-lg flex-shrink-0">❌</span>
             <div className="flex-1">
               <p className="text-sm font-bold text-red-400">Audit failed</p>
-              <p className="text-xs text-red-300/70 mt-0.5">{error}</p>
+              <p className="text-xs text-red-300/70 mt-0.5">{errorMessage}</p>
             </div>
             <button
               onClick={runAudit}
@@ -527,7 +554,7 @@ function AuditPanel({
         </div>
       )}
 
-      {result && !loading && (
+      {result && (
         <div className="flex-shrink-0 px-6 pt-4">
           <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-center gap-3">
             <span className="text-lg flex-shrink-0">✅</span>
@@ -591,7 +618,8 @@ function AuditPanel({
               </button>
               <button
                 onClick={runAudit}
-                className="px-3 py-1.5 bg-green-500/20 border border-green-500/30 text-green-300 rounded-lg text-xs font-semibold hover:bg-green-500/30 transition"
+                disabled={!!auditUsage && isFinite(auditUsage.limit) && auditUsage.count >= auditUsage.limit}
+                className="px-3 py-1.5 bg-green-500/20 border border-green-500/30 text-green-300 rounded-lg text-xs font-semibold hover:bg-green-500/30 disabled:opacity-40 transition"
               >
                 Re-audit
               </button>
@@ -606,9 +634,9 @@ function AuditPanel({
         </div>
       )}
 
-      {/* Main content */}
+      {/* Main content — only ONE state at a time */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {loading && (
+        {isLoading && (
           <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-sm mx-auto text-center">
             <div role="status" aria-label="Loading" className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
             <div>
@@ -618,9 +646,30 @@ function AuditPanel({
           </div>
         )}
 
-        {error && !loading && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
-            {error}
+        {isExhausted && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-sm mx-auto text-center">
+            <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-3xl">📊</div>
+            <div>
+              <p className="text-lg font-bold text-white">Monthly limit reached</p>
+              <p className="text-sm text-gray-400 mt-2">You&apos;ve used all your web audits for this month.</p>
+              <p className="text-xs text-gray-500 mt-1">Upgrade your plan to run more audits, or wait until next month.</p>
+            </div>
+            <a href="/settings" className="px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl font-bold text-sm hover:opacity-90 transition mt-2">
+              View Plans
+            </a>
+          </div>
+        )}
+
+        {isError && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-sm mx-auto text-center">
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl">🔌</div>
+            <div>
+              <p className="text-lg font-bold text-white">Couldn&apos;t complete audit</p>
+              <p className="text-sm text-gray-400 mt-2">{errorMessage}</p>
+            </div>
+            <button onClick={runAudit} className="px-6 py-2.5 bg-[#D4AF37] text-black rounded-xl font-bold text-sm hover:opacity-90 transition mt-2">
+              Try Again
+            </button>
           </div>
         )}
 
