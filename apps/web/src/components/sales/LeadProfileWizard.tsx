@@ -445,22 +445,28 @@ export function LeadProfileCard({ profile, onEdit, onGenerateLeads, generating }
         </div>
       )}
 
-      <button
-        onClick={onGenerateLeads}
-        disabled={generating}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
-      >
-        {generating ? (
-          <>
-            <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-            Generating leads...
-          </>
-        ) : (
-          <>
-            ✨ Generate New Leads
-          </>
-        )}
-      </button>
+      {/* Prominent Generate Leads CTA */}
+      <div className="relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37]/30 to-[#D4AF37]/10 rounded-2xl blur-md opacity-75" />
+        <button
+          onClick={onGenerateLeads}
+          disabled={generating}
+          className="relative w-full flex items-center justify-center gap-3 px-4 py-4 bg-[#D4AF37] text-black rounded-xl text-base font-black hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-[#D4AF37]/20"
+        >
+          {generating ? (
+            <>
+              <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              Finding your ideal leads...
+            </>
+          ) : (
+            <>
+              <span className="text-xl">✨</span>
+              Generate New Leads
+              <span className="text-lg">→</span>
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -473,18 +479,35 @@ interface EmptyLeadProfileProps {
 
 export function EmptyLeadProfile({ onSetup }: EmptyLeadProfileProps) {
   return (
-    <div className="bg-[#111] border border-dashed border-[#2a2a2a] rounded-2xl p-8 text-center">
-      <p className="text-4xl mb-4">🎯</p>
-      <h3 className="text-white font-bold text-lg mb-2">Set up your Lead Profile</h3>
-      <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto">
-        Tell us who your ideal customers are, and we'll generate targeted leads that match your Gold Standard.
+    <div className="bg-gradient-to-br from-[#D4AF37]/5 to-transparent border-2 border-dashed border-[#D4AF37]/30 rounded-2xl p-8 text-center">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center">
+        <span className="text-4xl">🎯</span>
+      </div>
+      <h3 className="text-white font-black text-xl mb-2">Ready to Generate Leads?</h3>
+      <p className="text-gray-400 text-sm mb-6 max-w-md mx-auto">
+        Tell us your ideal customer in 5 quick steps. We&apos;ll find and deliver targeted leads matching your Gold Standard profile.
       </p>
+      
       <button
         onClick={onSetup}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition-opacity shadow-lg shadow-[#D4AF37]/20"
+        className="group inline-flex items-center gap-3 px-8 py-4 bg-[#D4AF37] text-black rounded-xl text-base font-black hover:scale-105 transition-all duration-200 shadow-lg shadow-[#D4AF37]/30 hover:shadow-[#D4AF37]/50"
       >
-        ✨ Build My Lead Profile
+        <span className="text-xl group-hover:animate-pulse">✨</span>
+        Build Your Lead Profile
+        <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
       </button>
+      
+      <div className="mt-6 flex items-center justify-center gap-6 text-xs text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <span className="text-green-400">✓</span> 5 quick steps
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-green-400">✓</span> AI-powered matching
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-green-400">✓</span> Verified contacts
+        </span>
+      </div>
     </div>
   );
 }

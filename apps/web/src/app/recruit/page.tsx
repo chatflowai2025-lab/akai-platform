@@ -46,12 +46,7 @@ interface PipelineCandidate {
   addedAt: string;
 }
 
-const PIPELINE_MOCK: PipelineCandidate[] = [
-  { id: 'p1', name: 'Sarah Chen', role: 'Senior Software Engineer', score: 88, summary: 'Strong TypeScript & React. 7 yrs exp at Atlassian. Immediate availability.', stage: 'applied', addedAt: '2026-03-25' },
-  { id: 'p2', name: 'James Patel', role: 'Engineering Manager', score: 76, summary: '9 yrs exp, led 15-person teams at REA Group. Excellent leadership signals.', stage: 'screening', addedAt: '2026-03-26' },
-  { id: 'p3', name: 'Emma Williams', role: 'Full Stack Developer', score: 82, summary: 'React + Node.js, shipped 3 production apps at Afterpay. 2-week notice.', stage: 'shortlisted', addedAt: '2026-03-24' },
-  { id: 'p4', name: 'Noah Martinez', role: 'Backend Engineer', score: 35, summary: 'Limited relevant stack experience. Available immediately but gaps are significant.', stage: 'rejected', addedAt: '2026-03-23' },
-];
+// No mock data - start with empty pipeline
 
 // ── Candidate data generators ─────────────────────────────────────────────────
 const CANDIDATE_POOL = [
@@ -136,12 +131,12 @@ function generateScreeningResult(jobTitle: string): ScreeningResult {
 // ── Pipeline Tab ──────────────────────────────────────────────────────────────
 function PipelineTab() {
   const [candidates, setCandidates] = useState<PipelineCandidate[]>(() => {
-    if (typeof window === 'undefined') return PIPELINE_MOCK;
+    if (typeof window === 'undefined') return [];
     try {
       const saved = localStorage.getItem('akai_recruit_pipeline');
-      return saved ? (JSON.parse(saved) as PipelineCandidate[]) : PIPELINE_MOCK;
+      return saved ? (JSON.parse(saved) as PipelineCandidate[]) : [];
     } catch {
-      return PIPELINE_MOCK;
+      return [];
     }
   });
 
@@ -447,7 +442,7 @@ function FindCandidatesTab() {
     };
     try {
       const saved = localStorage.getItem('akai_recruit_pipeline');
-      const existing: PipelineCandidate[] = saved ? JSON.parse(saved) : PIPELINE_MOCK;
+      const existing: PipelineCandidate[] = saved ? JSON.parse(saved) : [];
       const updated = [newEntry, ...existing.filter(c => c.name !== newEntry.name)];
       localStorage.setItem('akai_recruit_pipeline', JSON.stringify(updated));
     } catch { /* non-fatal */ }
@@ -1949,17 +1944,98 @@ function ScreenApplicantsTab() {
 }
 
 // ── Stats Bar ─────────────────────────────────────────────────────────────────
-function StatsBar() {
-  const stats = [
-    { label: 'Roles open', value: '3', icon: '📋' },
-    { label: 'Candidates this week', value: '12', icon: '👥' },
-    { label: 'Avg screen score', value: '74', icon: '🎯' },
-    { label: 'Shortlisted', value: '5', icon: '✅' },
+interface RecruitStats {
+  rolesOpen: number;
+  candidatesThisWeek: number;
+  avgScreenScore: number;
+  shortlisted: number;
+}
+
+function useRecruitStats(userId: string | undefined): { stats: RecruitStats; loading: boolean; isEmpty: boolean } {
+  const [stats, setStats] = useState<RecruitStats>({ rolesOpen: 0, candidatesThisWeek: 0, avgScreenScore: 0, shortlisted: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchStats = async () => {
+      try {
+        // Get jobs from Firestore
+        const db = getFirebaseDb();
+        let rolesOpen = 0;
+        if (db) {
+          const { collection: col, getDocs, query, where } = await import('firebase/firestore');
+          const jobsRef = col(db, `users/${userId}/jobs`);
+          const activeJobsQuery = query(jobsRef, where('status', '==', 'active'));
+          const jobsSnap = await getDocs(activeJobsQuery);
+          rolesOpen = jobsSnap.size;
+        }
+
+        // Get pipeline data from localStorage
+        let pipelineCandidates: PipelineCandidate[] = [];
+        try {
+          const saved = localStorage.getItem('akai_recruit_pipeline');
+          if (saved) pipelineCandidates = JSON.parse(saved);
+        } catch { /* ignore */ }
+
+        // Calculate stats from pipeline
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const candidatesThisWeek = pipelineCandidates.filter(c => {
+          try {
+            return new Date(c.addedAt) >= oneWeekAgo;
+          } catch {
+            return false;
+          }
+        }).length;
+
+        const shortlisted = pipelineCandidates.filter(c => c.stage === 'shortlisted').length;
+        
+        const scoresArr = pipelineCandidates.filter(c => c.score > 0).map(c => c.score);
+        const avgScreenScore = scoresArr.length > 0 
+          ? Math.round(scoresArr.reduce((a, b) => a + b, 0) / scoresArr.length) 
+          : 0;
+
+        setStats({ rolesOpen, candidatesThisWeek, avgScreenScore, shortlisted });
+      } catch (e) {
+        console.error('[recruit] stats fetch error:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchStats();
+  }, [userId]);
+
+  const isEmpty = stats.rolesOpen === 0 && stats.candidatesThisWeek === 0 && stats.shortlisted === 0;
+  return { stats, loading, isEmpty };
+}
+
+function StatsBar({ stats, loading }: { stats: RecruitStats; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="flex items-center gap-0 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6 py-2">
+        <div className="flex items-center gap-2 px-5 py-1.5">
+          <span className="text-xs text-gray-500">Loading stats...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const statItems = [
+    { label: 'Roles open', value: stats.rolesOpen.toString(), icon: '📋' },
+    { label: 'Candidates this week', value: stats.candidatesThisWeek.toString(), icon: '👥' },
+    { label: 'Avg screen score', value: stats.avgScreenScore > 0 ? stats.avgScreenScore.toString() : '—', icon: '🎯' },
+    { label: 'Shortlisted', value: stats.shortlisted.toString(), icon: '✅' },
   ];
+
   return (
     <div className="flex items-center gap-0 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6 py-2 overflow-x-auto">
-      {stats.map((s, i) => (
-        <div key={s.label} className={`flex items-center gap-2 px-5 py-1.5 ${i < stats.length - 1 ? 'border-r border-[#1f1f1f]' : ''}`}>
+      {statItems.map((s, i) => (
+        <div key={s.label} className={`flex items-center gap-2 px-5 py-1.5 ${i < statItems.length - 1 ? 'border-r border-[#1f1f1f]' : ''}`}>
           <span className="text-base">{s.icon}</span>
           <div>
             <p className="text-base font-black text-white leading-none">{s.value}</p>
@@ -1971,11 +2047,36 @@ function StatsBar() {
   );
 }
 
+// ── Empty State ───────────────────────────────────────────────────────────────
+function EmptyState({ onPostJob }: { onPostJob: () => void }) {
+  return (
+    <div className="flex-1 flex items-center justify-center p-8">
+      <div className="text-center max-w-md">
+        <div className="text-6xl mb-6">🎯</div>
+        <h2 className="text-2xl font-black text-white mb-3">No roles posted yet</h2>
+        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+          Post your first job to start screening candidates with AI. Every applicant gets scored and ranked automatically.
+        </p>
+        <button
+          onClick={onPostJob}
+          className="px-8 py-3 bg-[#D4AF37] text-black rounded-xl text-sm font-bold hover:opacity-90 transition inline-flex items-center gap-2"
+        >
+          📋 Post Your First Role
+        </button>
+        <p className="text-xs text-gray-600 mt-4">
+          Or use <span className="text-gray-400">Find Candidates</span> to search for talent first
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function RecruitPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<'find' | 'post' | 'screen' | 'pipeline' | 'generate'>('find');
+  const { stats, loading: statsLoading, isEmpty } = useRecruitStats(user?.uid);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -1986,6 +2087,50 @@ export default function RecruitPage() {
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div role="status" aria-label="Loading" className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  // Show empty state if no recruitment activity
+  if (!statsLoading && isEmpty && activeTab === 'find') {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          <header className="flex items-center justify-between px-8 py-4 border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0">
+            <div>
+              <h1 className="text-xl font-black text-white">Recruit</h1>
+              <p className="text-xs text-gray-500 mt-0.5">AI candidate screening &amp; pipeline management</p>
+            </div>
+            <span className="text-xs px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-medium">Live</span>
+          </header>
+
+          {/* Tabs - always show so user can navigate */}
+          <div className="flex border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6 overflow-x-auto">
+            {[
+              { key: 'find', label: '🔍 Find Candidates' },
+              { key: 'screen', label: '🤖 Screen Applicants' },
+              { key: 'pipeline', label: '📊 Pipeline' },
+              { key: 'generate', label: '✍️ Generate Job Post' },
+              { key: 'post', label: '📋 Post a Job' },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                className={`px-4 py-3 text-sm font-semibold border-b-2 transition mr-2 whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'border-[#D4AF37] text-[#D4AF37]'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Empty state */}
+          <EmptyState onPostJob={() => setActiveTab('post')} />
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -2001,8 +2146,8 @@ export default function RecruitPage() {
           <span className="text-xs px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] font-medium">Live</span>
         </header>
 
-        {/* Stats bar */}
-        <StatsBar />
+        {/* Stats bar - only show when there's data */}
+        {!isEmpty && <StatsBar stats={stats} loading={statsLoading} />}
 
         {/* Tabs */}
         <div className="flex border-b border-[#1f1f1f] bg-[#080808] flex-shrink-0 px-6 overflow-x-auto">

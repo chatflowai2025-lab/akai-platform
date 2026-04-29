@@ -1719,26 +1719,43 @@ export default function SalesPage() {
 
       <div className="flex-1 overflow-y-auto p-8 space-y-8">
 
-        {/* Lead Profile Section - Gold Standard */}
-        <section>
-          <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-4">
-            Lead Profile
-            {leadProfileLoading && (
-              <span role="status" aria-label="Loading" className="ml-2 inline-block w-3 h-3 border border-gray-600 border-t-transparent rounded-full animate-spin align-middle" />
+        {/* Lead Profile Section - HERO / GOLD STANDARD - Most prominent element */}
+        <section className="relative">
+          {/* Gradient glow background */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37]/20 via-[#D4AF37]/10 to-[#D4AF37]/20 rounded-3xl blur-xl opacity-50" />
+          
+          <div className="relative bg-gradient-to-br from-[#0d0d0d] to-[#111] border-2 border-[#D4AF37]/30 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
+                  <span className="text-2xl">🎯</span>
+                </div>
+                <div>
+                  <h2 className="text-white font-black text-lg flex items-center gap-2">
+                    Lead Generation
+                    <span className="text-xs font-normal px-2 py-0.5 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full border border-[#D4AF37]/20">Start Here</span>
+                  </h2>
+                  <p className="text-gray-500 text-sm">Build your ideal customer profile → Generate targeted leads</p>
+                </div>
+              </div>
+              {leadProfileLoading && (
+                <span role="status" aria-label="Loading" className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+              )}
+            </div>
+            
+            {!leadProfileLoading && (
+              leadProfile ? (
+                <LeadProfileCard
+                  profile={leadProfile}
+                  onEdit={() => setShowWizard(true)}
+                  onGenerateLeads={handleGenerateLeads}
+                  generating={generatingLeads}
+                />
+              ) : (
+                <EmptyLeadProfile onSetup={() => setShowWizard(true)} />
+              )
             )}
-          </h2>
-          {!leadProfileLoading && (
-            leadProfile ? (
-              <LeadProfileCard
-                profile={leadProfile}
-                onEdit={() => setShowWizard(true)}
-                onGenerateLeads={handleGenerateLeads}
-                generating={generatingLeads}
-              />
-            ) : (
-              <EmptyLeadProfile onSetup={() => setShowWizard(true)} />
-            )
-          )}
+          </div>
         </section>
 
         <LeadUploadSection
