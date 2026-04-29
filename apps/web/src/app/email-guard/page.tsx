@@ -589,10 +589,7 @@ function EmailGuardContent({
   };
 
   const disconnect = useCallback(async (provider: 'microsoft' | 'gmail') => {
-    // Clear local state immediately
-    if (provider === 'microsoft') { setMsConnected(false); setMsEmail(null); }
-    else { setGmailConnected(false); setGmailEmail(null); }
-    // Clear from Firestore so it doesn't restore on next page load
+    // Clear from Firestore BEFORE clearing local state (source of truth)
     (async () => { try {
       const db = getFirebaseDb();
       if (db) {
@@ -603,6 +600,9 @@ function EmailGuardContent({
         }
       }
     } catch { /* non-fatal */ } })();
+    // Clear local state (UI updates immediately)
+    if (provider === 'microsoft') { setMsConnected(false); setMsEmail(null); }
+    else { setGmailConnected(false); setGmailEmail(null); }
     // Also try Railway (non-blocking)
     fetch(`${RAILWAY}/api/email/${provider}/disconnect`, {
       method: 'POST',

@@ -727,6 +727,13 @@ function CalendarContent({ user }: { user: { uid: string } }) {
             setCalProvider('outlook');
             return;
           }
+          // Fallback: check calendarConfig.connected (written on connect)
+          const calCfg = d?.calendarConfig as Record<string, unknown> | undefined;
+          if (calCfg?.connected) {
+            setCalConnected(true);
+            setCalProvider((calCfg?.provider as string) || 'google');
+            return;
+          }
         }
         // Fallback: check integrations sub-doc
         getDoc(doc(db, 'users', user.uid, 'integrations', 'googleCalendar')).then(snap2 => { // schema-drift-ok: legacy fallback sub-doc — raw path intentional, no schema helper for subcollection doc refs (FIRESTORE_SCHEMA.md)
