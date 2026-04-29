@@ -720,9 +720,9 @@ function CalendarContent({ user }: { user: { uid: string } }) {
             return;
           }
           // Check Microsoft calendar connected (check all possible indicators)
-          if (d?.microsoftCalendarConnected === true || 
-              d?.inboxConnection?.provider === 'microsoft' ||
+          if (d?.microsoftCalendarConnected === true ||
               d?.microsoftCalendarEmail) {
+            // Note: inboxConnection.provider === 'microsoft' means EMAIL is connected, NOT calendar
             setCalConnected(true);
             setCalProvider('outlook');
             return;
