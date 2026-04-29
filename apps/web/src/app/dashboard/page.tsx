@@ -366,23 +366,30 @@ function SetupHealthCard() {
   const { userProfile } = useAuth();
   const profile = userProfile as Record<string, unknown> | null;
 
-  const gmailConnected = !!(profile?.gmail as Record<string, unknown> | undefined)?.connected;
-  const calendarConnected = !!(profile?.googleCalendarConnected);
-  const microsoftConnected =
-    !!(profile?.inboxConnection as Record<string, unknown> | undefined)?.connected ||
-    !!(profile?.microsoftCalendarConnected);
+  // Email: connected if Gmail OR Microsoft inbox is connected
+  const emailConnected =
+    !!(profile?.gmail as Record<string, unknown> | undefined)?.connected ||
+    !!(profile?.inboxConnection as Record<string, unknown> | undefined)?.connected;
+
+  // Calendar: connected if Google Calendar OR Microsoft Calendar is connected
+  const calendarConnected =
+    !!(profile?.googleCalendarConnected) ||
+    !!(profile?.microsoftCalendarConnected) ||
+    !!(profile?.calendarConfig as Record<string, unknown> | undefined)?.connected;
+
   const businessSet =
     !!(profile?.businessName as string | undefined)?.trim() ||
     !!(profile?.onboarding as Record<string, unknown> | undefined)?.businessName;
 
+  // Simple 3-item checklist — one slot for email, one for calendar
   const services = [
-    { name: 'Gmail', connected: gmailConnected, href: '/email-guard', icon: '✉️' },
+    { name: 'Business', connected: businessSet, href: '/settings', icon: '🏢' },
+    { name: 'Email', connected: emailConnected, href: '/email-guard', icon: '✉️' },
     { name: 'Calendar', connected: calendarConnected, href: '/calendar', icon: '📅' },
-    { name: 'Microsoft', connected: microsoftConnected, href: '/settings', icon: '🪟' },
   ];
 
   const connectedCount = services.filter(s => s.connected).length;
-  const score = Math.round((connectedCount / 3) * 70 + (businessSet ? 30 : 0));
+  const score = Math.round((connectedCount / 3) * 100);
   const scoreColor = score >= 70 ? '#4ade80' : score >= 50 ? '#D4AF37' : '#f87171';
   const incompleteServices = services.filter(s => !s.connected);
 
