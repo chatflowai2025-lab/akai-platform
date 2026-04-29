@@ -23,6 +23,9 @@ interface LeadProfileWizardProps {
   onComplete: (profile: LeadProfile) => void;
   onCancel: () => void;
   existingProfile?: LeadProfile | null;
+  /** Pre-fill from user's onboarding data */
+  userIndustry?: string;
+  userLocation?: string;
 }
 
 // ── Options ───────────────────────────────────────────────────────────────
@@ -80,15 +83,64 @@ const DECISION_MAKERS = [
 
 // ── Component ─────────────────────────────────────────────────────────────
 
-export function LeadProfileWizard({ userId, onComplete, onCancel, existingProfile }: LeadProfileWizardProps) {
+// Map common industry strings to our vertical values
+function mapIndustryToVertical(industry?: string): { value: string; custom?: string } {
+  if (!industry) return { value: '' };
+  const lower = industry.toLowerCase();
+  
+  if (lower.includes('kitchen') || lower.includes('interior')) return { value: 'luxury_kitchens' };
+  if (lower.includes('real estate') || lower.includes('property')) return { value: 'real_estate' };
+  if (lower.includes('legal') || lower.includes('law')) return { value: 'legal' };
+  if (lower.includes('account') || lower.includes('finance') || lower.includes('tax')) return { value: 'accounting' };
+  if (lower.includes('recruit') || lower.includes('hr') || lower.includes('staffing')) return { value: 'recruitment' };
+  if (lower.includes('construct') || lower.includes('trade') || lower.includes('building')) return { value: 'construction' };
+  if (lower.includes('marine') || lower.includes('yacht') || lower.includes('boat')) return { value: 'marine' };
+  if (lower.includes('landscap') || lower.includes('garden') || lower.includes('outdoor')) return { value: 'landscaping' };
+  if (lower.includes('medical') || lower.includes('health') || lower.includes('doctor') || lower.includes('dental')) return { value: 'medical' };
+  if (lower.includes('fitness') || lower.includes('gym') || lower.includes('wellness')) return { value: 'fitness' };
+  if (lower.includes('hospital') || lower.includes('restaurant') || lower.includes('event') || lower.includes('catering')) return { value: 'hospitality' };
+  if (lower.includes('ecommerce') || lower.includes('retail') || lower.includes('shop')) return { value: 'ecommerce' };
+  if (lower.includes('saas') || lower.includes('software') || lower.includes('tech')) return { value: 'saas' };
+  
+  // No match — use custom
+  return { value: 'other', custom: industry };
+}
+
+// Map common location strings to our location values
+function mapLocationToValue(loc?: string): { value: string; custom?: string } {
+  if (!loc) return { value: '' };
+  const lower = loc.toLowerCase();
+  
+  if (lower.includes('sydney')) return { value: 'sydney' };
+  if (lower.includes('melbourne')) return { value: 'melbourne' };
+  if (lower.includes('brisbane')) return { value: 'brisbane' };
+  if (lower.includes('perth')) return { value: 'perth' };
+  if (lower.includes('australia') && !lower.includes('sydney') && !lower.includes('melbourne')) return { value: 'australia_wide' };
+  if (lower.includes('new york') || lower.includes('nyc')) return { value: 'new_york' };
+  if (lower.includes('los angeles') || lower.includes('la')) return { value: 'los_angeles' };
+  if (lower.includes('usa') || lower.includes('united states')) return { value: 'usa_wide' };
+  if (lower.includes('london')) return { value: 'london' };
+  if (lower.includes('uk') || lower.includes('united kingdom')) return { value: 'uk_wide' };
+  
+  // No match — use custom
+  return { value: 'other', custom: loc };
+}
+
+export function LeadProfileWizard({ userId, onComplete, onCancel, existingProfile, userIndustry, userLocation }: LeadProfileWizardProps) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   
+  // Pre-fill from existing profile OR user's onboarding data
+  const initialVertical = existingProfile?.vertical || mapIndustryToVertical(userIndustry).value;
+  const initialVerticalCustom = existingProfile?.verticalCustom || mapIndustryToVertical(userIndustry).custom || '';
+  const initialLocation = existingProfile?.location || mapLocationToValue(userLocation).value;
+  const initialLocationCustom = existingProfile?.locationCustom || mapLocationToValue(userLocation).custom || '';
+  
   // Form state
-  const [vertical, setVertical] = useState(existingProfile?.vertical || '');
-  const [verticalCustom, setVerticalCustom] = useState(existingProfile?.verticalCustom || '');
-  const [location, setLocation] = useState(existingProfile?.location || '');
-  const [locationCustom, setLocationCustom] = useState(existingProfile?.locationCustom || '');
+  const [vertical, setVertical] = useState(initialVertical);
+  const [verticalCustom, setVerticalCustom] = useState(initialVerticalCustom);
+  const [location, setLocation] = useState(initialLocation);
+  const [locationCustom, setLocationCustom] = useState(initialLocationCustom);
   const [companySize, setCompanySize] = useState<string[]>(existingProfile?.companySize || []);
   const [decisionMakers, setDecisionMakers] = useState<string[]>(existingProfile?.decisionMakers || []);
   const [exclusions, setExclusions] = useState(existingProfile?.exclusions || '');
@@ -105,8 +157,8 @@ export function LeadProfileWizard({ userId, onComplete, onCancel, existingProfil
 
   const canProceed = () => {
     switch (step) {
-      case 1: return vertical !== '' && (vertical !== 'other' || verticalCustom.trim() !== '');
-      case 2: return location !== '' && (location !== 'other' || locationCustom.trim() !== '');
+      case 1: return verticalCustom.trim() !== '' || (vertical !== '' && vertical !== 'other');
+      case 2: return locationCustom.trim() !== '' || (location !== '' && location !== 'other');
       case 3: return companySize.length > 0;
       case 4: return decisionMakers.length > 0;
       case 5: return true; // Exclusions are optional
@@ -165,15 +217,46 @@ export function LeadProfileWizard({ userId, onComplete, onCancel, existingProfil
           <div className="space-y-4">
             <div>
               <h3 className="text-white font-bold text-lg mb-1">What industry are you targeting?</h3>
-              <p className="text-gray-500 text-sm">We'll find leads in this vertical for you.</p>
+              <p className="text-gray-500 text-sm">
+                {userIndustry 
+                  ? <>Based on your profile: <span className="text-[#D4AF37]">{userIndustry}</span>. Change below if needed.</>
+                  : "We'll find leads in this vertical for you."
+                }
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-2">
-              {VERTICALS.map(v => (
+            
+            {/* Custom industry input - always visible */}
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Or type your own industry:</label>
+              <input
+                type="text"
+                value={verticalCustom}
+                onChange={e => {
+                  setVerticalCustom(e.target.value);
+                  if (e.target.value.trim()) setVertical('other');
+                }}
+                placeholder="e.g., Solar Installation, Pet Services, Auto Repair..."
+                className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-x-0 top-0 flex items-center justify-center -mt-1">
+                <span className="bg-[#111] px-3 text-xs text-gray-600">or pick from common industries</span>
+              </div>
+              <div className="border-t border-[#2a2a2a] pt-4 mt-2" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-2">
+              {VERTICALS.filter(v => v.value !== 'other').map(v => (
                 <button
                   key={v.value}
-                  onClick={() => setVertical(v.value)}
+                  onClick={() => {
+                    setVertical(v.value);
+                    setVerticalCustom('');
+                  }}
                   className={`text-left px-4 py-3 rounded-xl border transition-colors ${
-                    vertical === v.value
+                    vertical === v.value && !verticalCustom
                       ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
                       : 'border-[#2a2a2a] text-gray-400 hover:border-[#3a3a3a] hover:text-white'
                   }`}
@@ -182,15 +265,6 @@ export function LeadProfileWizard({ userId, onComplete, onCancel, existingProfil
                 </button>
               ))}
             </div>
-            {vertical === 'other' && (
-              <input
-                type="text"
-                value={verticalCustom}
-                onChange={e => setVerticalCustom(e.target.value)}
-                placeholder="Enter your industry..."
-                className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] transition"
-              />
-            )}
           </div>
         );
 

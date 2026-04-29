@@ -1865,6 +1865,8 @@ export default function SalesPage() {
         <LeadProfileWizard
           userId={user.uid}
           existingProfile={leadProfile}
+          userIndustry={(userProfile as { industry?: string; onboarding?: { industry?: string } } | null)?.industry || (userProfile as { onboarding?: { industry?: string } } | null)?.onboarding?.industry}
+          userLocation={(userProfile as { location?: string; onboarding?: { location?: string } } | null)?.location || (userProfile as { onboarding?: { location?: string } } | null)?.onboarding?.location}
           onComplete={(profile) => {
             setLeadProfile(profile);
             setShowWizard(false);
