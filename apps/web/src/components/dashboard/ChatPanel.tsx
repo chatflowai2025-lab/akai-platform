@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { ChatMessage } from '@/lib/shared-types';
 import ChatBubble from '@/components/ui/ChatBubble';
 
@@ -29,6 +29,12 @@ export default function ChatPanel() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [chatState, setChatState] = useState<ChatState>({ step: 'business_name', data: {} });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
   const send = async () => {
     if (!input.trim() || loading) return;
@@ -180,6 +186,8 @@ export default function ChatPanel() {
             AK is thinking...
           </div>
         )}
+        {/* Scroll anchor - always at bottom */}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-3 border-t border-[#1f1f1f]">
