@@ -589,13 +589,26 @@ function EmailGuardContent({
   };
 
   const disconnect = useCallback(async (provider: 'microsoft' | 'gmail') => {
-    await fetch(`${RAILWAY}/api/email/${provider}/disconnect`, {
+    // Clear local state immediately
+    if (provider === 'microsoft') { setMsConnected(false); setMsEmail(null); }
+    else { setGmailConnected(false); setGmailEmail(null); }
+    // Clear from Firestore so it doesn't restore on next page load
+    (async () => { try {
+      const db = getFirebaseDb();
+      if (db) {
+        if (provider === 'microsoft') {
+          await setDoc(doc(db, 'users', user.uid), { inboxConnection: { connected: false, provider: null, email: null } }, { merge: true });
+        } else {
+          await setDoc(doc(db, 'users', user.uid), { gmail: { connected: false, email: null } }, { merge: true });
+        }
+      }
+    } catch { /* non-fatal */ } })();
+    // Also try Railway (non-blocking)
+    fetch(`${RAILWAY}/api/email/${provider}/disconnect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
       body: JSON.stringify({ userId: user.uid }),
-    });
-    if (provider === 'microsoft') { setMsConnected(false); setMsEmail(null); }
-    else { setGmailConnected(false); setGmailEmail(null); }
+    }).catch(() => {});
   }, [user.uid]);
 
   const pollNow = async () => {
