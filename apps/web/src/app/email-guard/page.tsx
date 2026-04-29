@@ -22,7 +22,7 @@ const API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY ?? '';
 // MICROSOFT_CLIENT_ID env var wasn't set on Railway side.
 // Fix: generate the OAuth URL client-side using NEXT_PUBLIC_ vars (public values,
 // safe to expose in browser). Falls back to hardcoded defaults matching Azure app registration.
-const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '963f871d-b42e-4cef-a021-cc8b4f295efe';
+const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
 const MS_TENANT = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
 // Use Railway oauth-capture as redirect — already registered in Azure + Google Cloud Console
 // It reads the 'state' param and redirects back to the returnTo URL
