@@ -1124,7 +1124,7 @@ export default function Home() {
       <HeroSection onOpenCapture={() => openCapture()} onOpenHealthReport={openHealthReport} onOpenDemo={handleOpenDemo} />
       <TrustBar />
       <HowItWorksSection />
-      <div id="modules"><Modules /></div>
+      <Modules />
       <TestimonialsSection />
       <HowItWorksAnimated />
       <HowAKAILearns />
