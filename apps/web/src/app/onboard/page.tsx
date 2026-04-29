@@ -139,7 +139,7 @@ const RAILWAY_API_KEY = process.env.NEXT_PUBLIC_RAILWAY_API_KEY || 'aiclozr_api_
 
 const OAUTH_REDIRECT_URI = 'https://api-server-production-2a27.up.railway.app/api/oauth-capture';
 const GMAIL_CLIENT_ID = process.env.NEXT_PUBLIC_GMAIL_CLIENT_ID || '483958880068-fl9q2ildmfjmhfcat93pkqpcrl79qhb4.apps.googleusercontent.com';
-const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
+const MS_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '963f871d-b42e-4cef-a021-cc8b4f295efe';
 const MS_TENANT = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
 
 export default function OnboardPage() {

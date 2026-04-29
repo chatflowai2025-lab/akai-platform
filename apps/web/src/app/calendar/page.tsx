@@ -485,7 +485,7 @@ function ConnectCalendarBanner({ userId }: { userId: string; onConnected?: (prov
     try {
       // RCA: same MS auth-url Railway dependency issue as Email Guard.
       // Fix: try Railway; fall back to client-side generation with NEXT_PUBLIC_ vars.
-      const msClientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '58b300c6-82a5-41dd-9da1-7c0a34ef8870';
+      const msClientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '963f871d-b42e-4cef-a021-cc8b4f295efe';
       const msTenant = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID || 'common';
       let authUrl: string | null = null;
       const railwayBase = process.env.NEXT_PUBLIC_API_URL ?? '';
