@@ -430,7 +430,7 @@ function EmailGuardContent({
           code: initialCode,
           state: initialState,
           userId: user.uid,
-          redirectUri: 'https://getakai.ai/email-guard',
+          redirectUri: EMAIL_GUARD_REDIRECT_URI,
         }),
       })
         .then(r => r.json())
