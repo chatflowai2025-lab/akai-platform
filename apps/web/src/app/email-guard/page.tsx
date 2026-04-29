@@ -462,7 +462,7 @@ function EmailGuardContent({
 
   // Check connection status + load enquiries on mount
   useEffect(() => {
-    // Load ctaAction from Firestore
+    // Load connection status + ctaAction from Firestore (source of truth)
     const db = getFirebaseDb();
     if (db) {
       getDoc(doc(db, 'users', user.uid)).then(snap => {
@@ -470,9 +470,23 @@ function EmailGuardContent({
         if (data?.emailSettings?.ctaAction) {
           setCtaAction(data.emailSettings.ctaAction);
         }
+        // Restore Microsoft connection from Firestore
+        const inbox = data?.inboxConnection as Record<string,unknown> | undefined;
+        if (inbox?.connected && inbox?.provider === 'microsoft') {
+          setMsConnected(true);
+          setMsEmail((inbox?.email as string) || 'connected');
+        }
+        // Restore Gmail connection from Firestore
+        const gmail = data?.gmail as Record<string,unknown> | undefined;
+        if (gmail?.connected) {
+          setGmailConnected(true);
+          setGmailEmail((gmail?.email as string) || 'connected');
+          setGmailHasSendScope(true);
+        }
       }).catch(() => {});
     }
 
+    // Also try Railway status as secondary check (may not be available)
     fetch(`${RAILWAY}/api/email/microsoft/status?userId=${user.uid}`, { headers: { 'x-api-key': API_KEY } })
       .then(r => r.json())
       .then(d => { if (d.connected) { setMsConnected(true); setMsEmail(d.email || null); } })
