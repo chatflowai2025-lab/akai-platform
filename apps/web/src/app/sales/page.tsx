@@ -1194,11 +1194,12 @@ function ProspectsSection() {
   }, [senderProfile]);
 
   useEffect(() => {
-    fetch('/api/prospects').then(r => r.json()).then(d => {
+    if (!user?.uid) return;
+    fetch(`/api/prospects?userId=${user.uid}`).then(r => r.json()).then(d => {
       setProspects(d.prospects ?? []);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  }, [user?.uid]);
 
   const updateStatus = async (id: number, status: string) => {
     setUpdating(id);
