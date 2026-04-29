@@ -118,20 +118,26 @@ export default function SettingsPage() {
   }
   const [connectedAccounts, setConnectedAccounts] = useState<{
     microsoft: ConnectedAccount;
+    microsoftCalendar: ConnectedAccount;
     gmail: ConnectedAccount;
     googleCalendar: ConnectedAccount;
     instagram: ConnectedAccount;
+    tiktok: ConnectedAccount;
     linkedin: ConnectedAccount;
     facebook: ConnectedAccount;
     x: ConnectedAccount;
+    wordpress: ConnectedAccount;
   }>({
     microsoft: { connected: false },
+    microsoftCalendar: { connected: false },
     gmail: { connected: false },
     googleCalendar: { connected: false },
     instagram: { connected: false },
+    tiktok: { connected: false },
     linkedin: { connected: false },
     facebook: { connected: false },
     x: { connected: false },
+    wordpress: { connected: false },
   });
 
   // Referral
@@ -233,10 +239,15 @@ export default function SettingsPage() {
             connected: isGoogleCalendarConnected(data),
             identifier: googleCalendarEmail(data) || undefined,
           },
+          microsoftCalendar: {
+            connected: !!(data?.microsoftCalendarConnected) || !!(data?.calendarConfig as Record<string,unknown> | undefined)?.connected && (data?.calendarConfig as Record<string,unknown> | undefined)?.provider === 'outlook',
+          },
           instagram: socialMap['instagram'] ?? { connected: false },
+          tiktok: socialMap['tiktok'] ?? { connected: false },
           linkedin: socialMap['linkedin'] ?? { connected: false },
           facebook: socialMap['facebook'] ?? { connected: false },
           x: socialMap['x'] ?? { connected: false },
+          wordpress: { connected: false }, // Future integration
         });
       } catch (err) {
         console.error('[SETTINGS] load error', err);
@@ -667,12 +678,36 @@ export default function SettingsPage() {
                 disconnectHref: '/social',
               },
               {
+                key: 'microsoftCalendar',
+                label: 'Microsoft Calendar',
+                icon: '📆',
+                account: connectedAccounts.microsoftCalendar,
+                connectHref: '/calendar',
+                disconnectHref: '/calendar',
+              },
+              {
+                key: 'tiktok',
+                label: 'TikTok',
+                icon: '🎵',
+                account: connectedAccounts.tiktok,
+                connectHref: '/social',
+                disconnectHref: '/social',
+              },
+              {
                 key: 'x',
                 label: 'X (Twitter)',
                 icon: '𝕏',
                 account: connectedAccounts.x,
                 connectHref: '/social',
                 disconnectHref: '/social',
+              },
+              {
+                key: 'wordpress',
+                label: 'WordPress',
+                icon: '🌐',
+                account: connectedAccounts.wordpress,
+                connectHref: '/web',
+                disconnectHref: '/web',
               },
             ].map(item => (
               <div key={item.key} className="flex items-center gap-4 py-3">
